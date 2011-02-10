@@ -4,6 +4,7 @@
 from xml.dom.minidom import parse
 import gtk
 import sqlite3
+import time, mx.DateTime
 
 class main_ui():
     def __init__(self):
@@ -50,6 +51,7 @@ class main_ui():
             self.show_error(e.__str__())
             return
 
+        self.deals = deals_proc(self.coats)
             
     def show(self):
         self.window.show_all()
@@ -73,7 +75,26 @@ class xml_parser():
             raise Exception(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
         self.checked=True
         
-
+class deals_proc():
+    def __init__(self, coats):
+        self.connection = sqlite3.connect(":memory:")
+        self.connection.execute("create table deals(id integer primary key, datetime real, security_type text, security_name text, grn_code text, price real, quantity integer, volume real, deal_sign integer, broker_comm real, broker_comm_nds real, stock_comm real, stock_comm_nds real)")
+        # for coat in coats.common_deal:
+        #     self.connection.execute("""insert into deals(
+        #     datetime,
+        #     security_type,
+        #     security_name,
+        #     grn_code,
+        #     price,
+        #     quantity,
+        #     volume,
+        #     deal_sign,
+        #     broker_comm,
+        #     broker_comm_nds,
+        #     stock_comm,
+        #     stock_comm_nds)
+        #     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        #                             (
 
 
 if __name__ == "__main__":
