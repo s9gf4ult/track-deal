@@ -15,6 +15,14 @@ class main_ui():
         self.buffer = a.get_object("buffer")
         self.window.connect("destroy", gtk.main_quit)
         self.choose_file.connect("file-set", self.file_set)
+        self.segfault.connect("clicked", self.segfault_clicked)
+        self.axce1.connect("clicked", self.axce1_clicked)
+
+    def segfault_clicked(self, button):
+        self.buffer.insert(self.buffer.get_end_iter(), "{0}\n".format("segfault"))
+
+    def axce1_clicked(self, button):
+        pass
 
     def show_error(self, text):
         dial = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons = gtk.BUTTONS_OK, flags=gtk.DIALOG_MODAL, parent = self.window)
@@ -51,6 +59,9 @@ class xml_parser():
             if self.report.getElementsByTagName(name).length != 1:
                 raise Exception("there is no {0} in report or more that one found".format(name))
         self.common_deal = self.report.getElementsByTagName("common_deal")[0]
+        self.account_totally = self.report.getElementsByTagName("account_totally_line")[0]
+        self.briefcase = self.report.getElementsByTagName("briefcase_position")[0]
+        
         
 
 
