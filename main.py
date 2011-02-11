@@ -4,7 +4,8 @@
 from xml.dom.minidom import parse
 import gtk
 import sqlite3
-import time, mx.DateTime
+import mx.DateTime
+import re
 
 class main_ui():
     def __init__(self):
@@ -27,7 +28,7 @@ class main_ui():
         return "axcel"
 
     def clicked(self, button, call_me):
-        if hasattr(self, "coats") and self.coats.checked:
+        if hasattr(self, "coats") and self.coats.checked and hasattr(self, "deals") and self.deals.ready:
             self.buffer.set_text(call_me())
         else:
             self.show_error(u'Сначала надо указать валидный файл')
@@ -47,11 +48,12 @@ class main_ui():
 
         try:
             self.coats.check_file()
+            self.deals = deals_proc(self.coats)
+            self.deals.check_balance()
+            self.deals.make_positions()
         except Exception as e:
             self.show_error(e.__str__())
             return
-
-        self.deals = deals_proc(self.coats)
             
     def show(self):
         self.window.show_all()
@@ -77,25 +79,37 @@ class xml_parser():
         
 class deals_proc():
     def __init__(self, coats):
+        self.ready = False
         self.connection = sqlite3.connect(":memory:")
-        self.connection.execute("create table deals(id integer primary key, datetime real, security_type text, security_name text, grn_code text, price real, quantity integer, volume real, deal_sign integer, broker_comm real, broker_comm_nds real, stock_comm real, stock_comm_nds real)")
-        # for coat in coats.common_deal:
-        #     self.connection.execute("""insert into deals(
-        #     datetime,
-        #     security_type,
-        #     security_name,
-        #     grn_code,
-        #     price,
-        #     quantity,
-        #     volume,
-        #     deal_sign,
-        #     broker_comm,
-        #     broker_comm_nds,
-        #     stock_comm,
-        #     stock_comm_nds)
-        #     values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        #                             (
+        self.connection.execute("create table deals(id integer primary key not null, datetime real, security_type text, security_name text, grn_code text, price real, quantity integer, volume real, deal_sign integer, broker_comm real, broker_comm_nds real, stock_comm real, stock_comm_nds real)")
+        for coat in coats.common_deal:
+            x = [mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes['deal_time'].value))).ticks()]
+            x.extend(map(lambda name: coat.attributes[name].value, ('security_type', 'security_name', 'grn_code')))
+            x.extend(map(lambda name: float(coat.attributes[name].value), ('price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds')))
+            self.connection.execute("""insert into deals(
+            datetime,
+            security_type,
+            security_name,
+            grn_code,
+            price,
+            quantity,
+            volume,
+            deal_sign,
+            broker_comm,
+            broker_comm_nds,
+            stock_comm,
+            stock_comm_nds)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",x)
 
+    def check_balance(self):
+        for ticket in map(lambda a: a[0], self.connection.execute("select distinct security_name from deals").fetchall()):
+            buy = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ?", (-1, ticket)).fetchall()[0][0] or 0
+            sell = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ?", (1, ticket)).fetchall()[0][0] or 0
+            if buy != sell:
+                raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
+            
+    def make_positions(self):
+        self.ready = True
 
 if __name__ == "__main__":
     obj = main_ui()
