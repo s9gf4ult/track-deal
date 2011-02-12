@@ -109,6 +109,15 @@ class deals_proc():
                 raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
             
     def make_positions(self):
+        self.connection.execute("""create table positions(
+        id integer primary key not null,
+        open_datetime real,
+        close_datetime real,
+        open_coast 
+
+
+        
+#        for ticket in map(lambda a: a[0], self.connection.execute("select distinct security_name from deals").fetchall())
         self.ready = True
 
 if __name__ == "__main__":
