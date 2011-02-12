@@ -113,7 +113,18 @@ class deals_proc():
         id integer primary key not null,
         open_datetime real,
         close_datetime real,
-        open_coast 
+        open_coast real,
+        close_coast real,
+        count integer,
+        open_volume real,
+        close_volume real,
+        broker_comm real,
+        broker_comm_nds real,
+        stock_comm real,
+        stock_comm_nds real,
+        pl_gross real,
+        pl_net real)""")
+        
 
 
         
