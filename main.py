@@ -146,10 +146,28 @@ class deals_proc():
             # сгурппируем парные сделки с одинаковым количеством бумажек на покупку - продажу
             for (count,) in self.connection.execute("select distinct quantity from deals where position_id is null and security_name = ?", (ticket,)):
                 for (open_sign, close_sign) in [(-1, 1), (1, -1)]:
-                    for (open_id, open_datetime, open_price, open_volume) in self.connection.execute("select id, datetime, price ,volume from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? order by datetime", (ticket, count, open_sign)):
+                    for (open_id, open_datetime, open_price, open_volume, open_broker_comm, open_broker_comm_nds, open_stock_comm, open_stock_comm_nds) in self.connection.execute("select id, datetime, price ,volume, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? order by datetime", (ticket, count, open_sign)):
                         if 0 == self.connection.execute("select count(*) form deal where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ?", (ticket, count, close_sign, open_datetime)).fetchone()[0]:
                             break
-                        for (close_id
+                        (close_id, close_datetime, close_price, close_volume, close_broker_comm, close_broker_comm_nds, close_stock_comm, close_stock_comm_nds) = self.execute("select id, datetime, price, volume, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ? order by datetime").fetchone()
+                        pos_id = self.execute("""insert into positions (
+                        direction, open_datetime, close_datetime,
+                        open_coast, close_coast,
+                        count,
+                        open_volume, close_volume,
+                        broker_comm, broker_comm_nds,
+                        stock_comm, stock_comm_nds,
+                        pl_gross, pl_net""", (open_sign, open_datetime, close_datetime,
+                                              open_price, close_price,
+                                              count,
+                                              open_volume, close_volume,
+                                              open_broker_comm + close_broker_comm, open_broker_comm_nds + close_broker_comm_nds,
+                                              open_stock_comm + close_stock_comm, open_stock_comm_nds + close_stock_comm_nds,
+                                              (open_volume - close_volume) * open_sign,
+                                              ((open_volume - close_volume) * open_sign) - (open_broker_comm + close_broker_comm + open_stock_comm + close_stock_comm))).lastrowid
+                        self.execute("update deals set position_id = ? where id = ? or id = ?", (pos_id, open_id, close_id))
+                        
+                        
                     
                 
                 
