@@ -22,7 +22,11 @@ class main_ui():
         self.axce1.connect("clicked", self.clicked, self._gen_axcel)
 
     def _gen_seg(self):
-        return "segfault\tseg\tsegfaulting in progress"
+        ret = u''
+        for pos in self.deals.connection.execute("select ticket, direction, open_coast, close_coast, pl_gross, pl_net from positions order by close_datetime, open_datetime"):
+            ret += u'{0}\n'.format(reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos))
+        
+        return ret
 
     def _gen_axcel(self):
         return "axcel"
@@ -84,6 +88,7 @@ class deals_proc():
         self.connection.execute("pragma foreign_keys=on")
         self.connection.execute("""create table positions(
         id integer primary key not null,
+        ticket,
         direction integer,
         open_datetime real,
         close_datetime real,
@@ -114,7 +119,7 @@ class deals_proc():
         stock_comm real,
         stock_comm_nds real,
         position_id integer,
-        foreign key (position_id) references positions(id) on delete cascade)""")
+        foreign key (position_id) references positions(id) on delete set null)""")
         for coat in coats.common_deal:
             x = [mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes['deal_time'].value))).ticks()]
             x.extend(map(lambda name: coat.attributes[name].value, ('security_type', 'security_name', 'grn_code')))
@@ -151,15 +156,15 @@ class deals_proc():
                             break
                         (close_id, close_datetime, close_price, close_volume, close_broker_comm, close_broker_comm_nds, close_stock_comm, close_stock_comm_nds) = self.connection.execute("select id, datetime, price, volume, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ? order by datetime",(ticket, count, close_sign, open_datetime)).fetchone()
                         pos_id = self.connection.execute("""insert into positions (
-                        direction, open_datetime, close_datetime,
+                        ticket, direction, open_datetime, close_datetime,
                         open_coast, close_coast,
                         count,
                         open_volume, close_volume,
                         broker_comm, broker_comm_nds,
                         stock_comm, stock_comm_nds,
                         pl_gross, pl_net) values (
-                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                                                         (open_sign, open_datetime, close_datetime,
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                                                         (ticket, open_sign, open_datetime, close_datetime,
                                                           open_price, close_price,
                                                           count,
                                                           open_volume, close_volume,
