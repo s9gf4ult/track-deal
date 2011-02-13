@@ -16,6 +16,7 @@ class main_ui():
         self.segfault = a.get_object("gen_seg")
         self.choose_file = a.get_object("choose_file")
         self.buffer = a.get_object("buffer")
+        self.comma = a.get_object("comma_separator")
         self.window.connect("destroy", gtk.main_quit)
         self.choose_file.connect("file-set", self.file_set)
         self.segfault.connect("clicked", self.clicked, self._gen_seg)
@@ -23,9 +24,10 @@ class main_ui():
 
     def _gen_seg(self):
         ret = u''
-        for pos in self.deals.connection.execute("select ticket, direction, open_coast, close_coast, pl_gross, pl_net from positions order by close_datetime, open_datetime"):
+        for pos in self.deals.connection.execute("select ticket, direction, open_coast, close_coast, count, broker_comm + stock_comm, pl_gross, pl_net from positions order by close_datetime, open_datetime"):
             ret += u'{0}\n'.format(reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos))
-        
+        if self.comma.props.active:
+            ret = ret.replace(".", ",")
         return ret
 
     def _gen_axcel(self):
@@ -178,7 +180,9 @@ class deals_proc():
                     
                 
                 
-
+        (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
+        if 0 != pc:
+            raise Exception(u'Не получилось расписать по позициям {0} сделок'.format(pc))
         
         self.ready = True
 
