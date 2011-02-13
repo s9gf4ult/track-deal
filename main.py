@@ -81,7 +81,40 @@ class deals_proc():
     def __init__(self, coats):
         self.ready = False
         self.connection = sqlite3.connect(":memory:")
-        self.connection.execute("create table deals(id integer primary key not null, datetime real, security_type text, security_name text, grn_code text, price real, quantity integer, volume real, deal_sign integer, broker_comm real, broker_comm_nds real, stock_comm real, stock_comm_nds real)")
+        self.connection.execute("pragma foreign_keys=on")
+        self.connection.execute("""create table positions(
+        id integer primary key not null,
+        direction integer,
+        open_datetime real,
+        close_datetime real,
+        open_coast real,
+        close_coast real,
+        count integer,
+        open_volume real,
+        close_volume real,
+        broker_comm real,
+        broker_comm_nds real,
+        stock_comm real,
+        stock_comm_nds real,
+        pl_gross real,
+        pl_net real)""")
+
+        self.connection.execute("create table deals(
+        id integer primary key not null,
+        datetime real,
+        security_type text,
+        security_name text,
+        grn_code text,
+        price real,
+        quantity integer,
+        volume real,
+        deal_sign integer,
+        broker_comm real,
+        broker_comm_nds real,
+        stock_comm real,
+        stock_comm_nds real,
+        position_id integer,
+        foreign key (position_id) references positions(id) on delete cascade)")
         for coat in coats.common_deal:
             x = [mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes['deal_time'].value))).ticks()]
             x.extend(map(lambda name: coat.attributes[name].value, ('security_type', 'security_name', 'grn_code')))
@@ -102,33 +135,26 @@ class deals_proc():
             values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",x)
 
     def check_balance(self):
-        for ticket in map(lambda a: a[0], self.connection.execute("select distinct security_name from deals").fetchall()):
+        for (ticket,) in self.connection.execute("select distinct security_name from deals"):
             buy = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ?", (-1, ticket)).fetchall()[0][0] or 0
             sell = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ?", (1, ticket)).fetchall()[0][0] or 0
             if buy != sell:
                 raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
             
     def make_positions(self):
-        self.connection.execute("""create table positions(
-        id integer primary key not null,
-        open_datetime real,
-        close_datetime real,
-        open_coast real,
-        close_coast real,
-        count integer,
-        open_volume real,
-        close_volume real,
-        broker_comm real,
-        broker_comm_nds real,
-        stock_comm real,
-        stock_comm_nds real,
-        pl_gross real,
-        pl_net real)""")
-        
-
+        for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null"):
+            # сгурппируем парные сделки с одинаковым количеством бумажек на покупку - продажу
+            for (count,) in self.connection.execute("select distinct quantity from deals where position_id is null and security_name = ?", (ticket,)):
+                for (open_sign, close_sign) in [(-1, 1), (1, -1)]:
+                    for (open_id, open_datetime, open_price, open_volume) in self.connection.execute("select id, datetime, price ,volume from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? order by datetime", (ticket, count, open_sign)):
+                        if 0 == self.connection.execute("select count(*) form deal where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ?", (ticket, count, close_sign, open_datetime)).fetchone()[0]:
+                            break
+                        for (close_id
+                    
+                
+                
 
         
-#        for ticket in map(lambda a: a[0], self.connection.execute("select distinct security_name from deals").fetchall())
         self.ready = True
 
 if __name__ == "__main__":
