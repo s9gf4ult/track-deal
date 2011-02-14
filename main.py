@@ -6,6 +6,7 @@ import gtk
 import sqlite3
 import mx.DateTime
 import re
+import traceback
 
 class main_ui():
     def __init__(self):
@@ -67,7 +68,7 @@ class main_ui():
             self.deals.check_balance()
             self.deals.make_positions()
         except Exception as e:
-            self.show_error(e.__str__())
+            self.show_error(traceback.format_exc())
             return
             
     def show(self):
@@ -160,33 +161,44 @@ class deals_proc():
             sell = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ?", (1, ticket)).fetchall()[0][0] or 0
             if buy != sell:
                 raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
+
+    def make_position(self, first_id, second_id): # FIXME это надо сделать так чтобы можно было закрывать не сбалансированные позиции
+        (ticket, quantity, osign, oprice, ovolume, odatetime, obroker_comm, obroker_comm_nds, ostock_comm, ostock_comm_nds) = self.connection.execute("select security_name, quantity, deal_sign, price, volume, datetime, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where id = ?", (first_id,)).fetchone()
+        (csign, cprice, cvolume, cdatetime, cbroker_comm, cbroker_comm_nds, cstock_comm, cstock_comm_nds) = self.connection.execute("select deal_sign, price, volume, datetime, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where id = ?", (second_id,)).fetchone()
+        if osign != -(csign):
+            raise Exception(u'Попытка создать позицию из сделок в одну сторону')
+        
+        pos_id = self._insert_into("positions",
+                                   ["ticket", "direction", "count",
+                                    "open_volume", "close_volume", "open_coast", "close_coast",
+                                    "open_datetime", "close_datetime", "broker_comm", "broker_comm_nds",
+                                    "stock_comm", "stock_comm_nds", "pl_gross", "pl_net"],
+                                   (ticket, osign, quantity, ovolume, cvolume, oprice, cprice,
+                                    odatetime, cdatetime, obroker_comm + cbroker_comm,
+                                    obroker_comm_nds + cbroker_comm_nds, ostock_comm + cstock_comm,
+                                    ostock_comm_nds + cstock_comm_nds, (ovolume - cvolume) * osign,
+                                    (ovolume - cvolume) * osign - (obroker_comm + cbroker_comm + ostock_comm + cstock_comm))).lastrowid
+        self.connection.execute("update deals set position_id = ? where id = ? or id = ?", (pos_id, first_id, second_id))
+        
+
+        
+        
             
     def make_positions(self):
         for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null"):
-            # сгурппируем парные сделки с одинаковым количеством бумажек на покупку - продажу
-            for (day,) in self.connection.execute("select distinct datetime_day from deals where position_id is null and security_name = ?", (ticket,)):
-                for (count,) in self.connection.execute("select distinct quantity from deals where position_id is null and security_name = ? and datetime_day = ?", (ticket,day)):
-                    for (open_sign, close_sign) in [(-1, 1), (1, -1)]:
-                        for (open_id, open_datetime, open_price, open_volume, open_broker_comm, open_broker_comm_nds, open_stock_comm, open_stock_comm_nds) in self.connection.execute("select id, datetime, price ,volume, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime_day = ? order by datetime", (ticket, count, open_sign, day)):
-                            if 0 == self.connection.execute("select count(*) from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ? and datetime_day = ?", (ticket, count, close_sign, open_datetime, day)).fetchone()[0]:
-                                break
-                            (close_id, close_datetime, close_price, close_volume, close_broker_comm, close_broker_comm_nds, close_stock_comm, close_stock_comm_nds) = self.connection.execute("select id, datetime, price, volume, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ? and datetime_day = ? order by datetime",(ticket, count, close_sign, open_datetime, day)).fetchone()
-                            pos_id = self._insert_into("positions",
-                                                       ["ticket", "direction", "open_datetime", "close_datetime",
-                                                        "open_coast", "close_coast",
-                                                        "count",
-                                                        "open_volume", "close_volume",
-                                                        "broker_comm", "broker_comm_nds",
-                                                        "stock_comm", "stock_comm_nds",
-                                                        "pl_gross", "pl_net"], (ticket, open_sign, open_datetime, close_datetime,
-                                                                                open_price, close_price,
-                                                                                count,
-                                                                                open_volume, close_volume,
-                                                                                open_broker_comm + close_broker_comm, open_broker_comm_nds + close_broker_comm_nds,
-                                                                                open_stock_comm + close_stock_comm, open_stock_comm_nds + close_stock_comm_nds,
-                                                                                (open_volume - close_volume) * open_sign,
-                                                                                ((open_volume - close_volume) * open_sign) - (open_broker_comm + close_broker_comm + open_stock_comm + close_stock_comm))).lastrowid
-                            self.connection.execute("update deals set position_id = ? where id = ? or id = ?", (pos_id, open_id, close_id))
+            # проходим по сделкам запоминая сделки которые уже были и закрывая их если находим подходящую парную сделку
+            opened_deals = []
+            for deal in self.connection.execute("select id, deal_sign, quantity from deals where position_id is null and security_name = ? order by datetime", (ticket,)):
+                oposing_deals = filter(lambda a: a[1] == -(deal[1]) and a[2] == deal[2], opened_deals)
+                if 0 != oposing_deals.__len__():
+                    opened_deals = filter(lambda a: a != oposing_deals[0], opened_deals)
+                    self.make_position(oposing_deals[0][0], deal[0])
+                    continue
+                else:
+                    opened_deals.append(deal)
+                    
+                
+            
                         
                 
         (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
