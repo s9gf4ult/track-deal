@@ -25,12 +25,13 @@ class main_ui():
 
     def _gen_seg(self):
         ret = u''
-        for pos in self.deals.connection.execute("select ticket, direction, open_coast, close_coast, count, broker_comm + stock_comm, pl_gross, pl_net, open_datetime, close_datetime from positions order by close_datetime, open_datetime"):
-            (open_datetime, close_datetime) = pos[-2:]
-            ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[:-2])
-            ret += u'\t{0}\t{1}\n'.format(mx.DateTime.DateTimeFromTicks(open_datetime).Format(), mx.DateTime.DateTimeFromTicks(close_datetime).Format())
-        if self.comma.props.active:
-            ret = ret.replace(".", ",")
+        for pos in self.deals.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions order by close_datetime, open_datetime"):
+            (open_datetime, close_datetime) = map(lambda a: mx.DateTime.DateTimeFromTicks(a).Format("%d.%m.%Y"), pos[-2:])
+            ret += u'{0}\t{1}'.format(pos[0], -1 == pos[1] and 'L' or 'S')
+            v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[2:-2])
+            if self.comma.props.active:
+                v = v.replace('.', ',')
+            ret += u'\t{0}\t\t\t\t\t\t{1}\t{2}\n'.format(v, open_datetime, close_datetime)
         return ret
 
     def _gen_axcel(self):
