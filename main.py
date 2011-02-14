@@ -24,8 +24,10 @@ class main_ui():
 
     def _gen_seg(self):
         ret = u''
-        for pos in self.deals.connection.execute("select ticket, direction, open_coast, close_coast, count, broker_comm + stock_comm, pl_gross, pl_net from positions order by close_datetime, open_datetime"):
-            ret += u'{0}\n'.format(reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos))
+        for pos in self.deals.connection.execute("select ticket, direction, open_coast, close_coast, count, broker_comm + stock_comm, pl_gross, pl_net, open_datetime, close_datetime from positions order by close_datetime, open_datetime"):
+            (open_datetime, close_datetime) = pos[-2:]
+            ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[:-2])
+            ret += u'\t{0}\t{1}\n'.format(mx.DateTime.DateTimeFromTicks(open_datetime).Format("%Y%m%d"), mx.DateTime.DateTimeFromTicks(close_datetime).Format("%Y%m%d"))
         if self.comma.props.active:
             ret = ret.replace(".", ",")
         return ret
