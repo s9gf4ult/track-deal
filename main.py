@@ -137,21 +137,22 @@ class deals_proc():
             x = [date.ticks(), date.Format("%Y%m%d")]
             x.extend(map(lambda name: coat.attributes[name].value, ('security_type', 'security_name', 'grn_code')))
             x.extend(map(lambda name: float(coat.attributes[name].value), ('price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds')))
-            self.connection.execute("""insert into deals(
-            datetime,
-            datetime_day,
-            security_type,
-            security_name,
-            grn_code,
-            price,
-            quantity,
-            volume,
-            deal_sign,
-            broker_comm,
-            broker_comm_nds,
-            stock_comm,
-            stock_comm_nds)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",x)
+            self._insert_into("deals", ["datetime",
+                                        "datetime_day",
+                                        "security_type",
+                                        "security_name",
+                                        "grn_code",
+                                        "price",
+                                        "quantity",
+                                        "volume",
+                                        "deal_sign",
+                                        "broker_comm",
+                                        "broker_comm_nds",
+                                        "stock_comm",
+                                        "stock_comm_nds"], x)
+
+    def _insert_into(self, tablename, fields, values):
+        return self.connection.execute(u'insert into {0}({1}) values ({2})'.format(tablename, reduce(lambda a, b: u'{0}, {1}'.format(a, b), fields), reduce(lambda a, b: u'{0}, {1}'.format(a, b), map(lambda a: '?', fields))), values)
 
     def check_balance(self):
         for (ticket,) in self.connection.execute("select distinct security_name from deals"):
@@ -170,23 +171,21 @@ class deals_proc():
                             if 0 == self.connection.execute("select count(*) from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ? and datetime_day = ?", (ticket, count, close_sign, open_datetime, day)).fetchone()[0]:
                                 break
                             (close_id, close_datetime, close_price, close_volume, close_broker_comm, close_broker_comm_nds, close_stock_comm, close_stock_comm_nds) = self.connection.execute("select id, datetime, price, volume, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where position_id is null and security_name = ? and quantity = ? and deal_sign = ? and datetime > ? and datetime_day = ? order by datetime",(ticket, count, close_sign, open_datetime, day)).fetchone()
-                            pos_id = self.connection.execute("""insert into positions (
-                            ticket, direction, open_datetime, close_datetime,
-                            open_coast, close_coast,
-                            count,
-                            open_volume, close_volume,
-                            broker_comm, broker_comm_nds,
-                            stock_comm, stock_comm_nds,
-                            pl_gross, pl_net) values (
-                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                                                             (ticket, open_sign, open_datetime, close_datetime,
-                                                              open_price, close_price,
-                                                              count,
-                                                              open_volume, close_volume,
-                                                              open_broker_comm + close_broker_comm, open_broker_comm_nds + close_broker_comm_nds,
-                                                              open_stock_comm + close_stock_comm, open_stock_comm_nds + close_stock_comm_nds,
-                                                              (open_volume - close_volume) * open_sign,
-                                                              ((open_volume - close_volume) * open_sign) - (open_broker_comm + close_broker_comm + open_stock_comm + close_stock_comm))).lastrowid
+                            pos_id = self._insert_into("positions",
+                                                       ["ticket", "direction", "open_datetime", "close_datetime",
+                                                        "open_coast", "close_coast",
+                                                        "count",
+                                                        "open_volume", "close_volume",
+                                                        "broker_comm", "broker_comm_nds",
+                                                        "stock_comm", "stock_comm_nds",
+                                                        "pl_gross", "pl_net"], (ticket, open_sign, open_datetime, close_datetime,
+                                                                                open_price, close_price,
+                                                                                count,
+                                                                                open_volume, close_volume,
+                                                                                open_broker_comm + close_broker_comm, open_broker_comm_nds + close_broker_comm_nds,
+                                                                                open_stock_comm + close_stock_comm, open_stock_comm_nds + close_stock_comm_nds,
+                                                                                (open_volume - close_volume) * open_sign,
+                                                                                ((open_volume - close_volume) * open_sign) - (open_broker_comm + close_broker_comm + open_stock_comm + close_stock_comm))).lastrowid
                             self.connection.execute("update deals set position_id = ? where id = ? or id = ?", (pos_id, open_id, close_id))
                         
                 
