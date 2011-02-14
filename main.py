@@ -27,13 +27,20 @@ class main_ui():
         for pos in self.deals.connection.execute("select ticket, direction, open_coast, close_coast, count, broker_comm + stock_comm, pl_gross, pl_net, open_datetime, close_datetime from positions order by close_datetime, open_datetime"):
             (open_datetime, close_datetime) = pos[-2:]
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[:-2])
-            ret += u'\t{0}\t{1}\n'.format(mx.DateTime.DateTimeFromTicks(open_datetime).Format("%Y%m%d"), mx.DateTime.DateTimeFromTicks(close_datetime).Format("%Y%m%d"))
+            ret += u'\t{0}\t{1}\n'.format(mx.DateTime.DateTimeFromTicks(open_datetime).Format(), mx.DateTime.DateTimeFromTicks(close_datetime).Format())
         if self.comma.props.active:
             ret = ret.replace(".", ",")
         return ret
 
     def _gen_axcel(self):
-        return "axcel"
+        ret = u''
+        for deal in self.deals.connection.execute("select security_name, datetime, quantity, price, volume, deal_sign, broker_comm + stock_comm from deals order by security_name, datetime"):
+            ret += u'{0}\t{1}\t{2}\t'.format(deal[0], deal[1], mx.DateTime.DateTimeFromTicks(deal[1]).Format())
+            a = u'{0}\n'.format(reduce(lambda a, b: u'{0}\t{1}'.format(a,b), deal[2:]))
+            if self.comma.props.active:
+                a = a.replace(".", ",")
+            ret += a
+        return ret
 
     def clicked(self, button, call_me):
         if hasattr(self, "coats") and self.coats.checked and hasattr(self, "deals") and self.deals.ready:
