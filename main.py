@@ -36,12 +36,16 @@ class main_ui():
 
     def _gen_axcel(self):
         ret = u''
-        for deal in self.deals.connection.execute("select security_name, datetime, quantity, price, volume, deal_sign, broker_comm + stock_comm from deals order by security_name, datetime"):
-            ret += u'{0}\t{1}\t{2}\t'.format(deal[0], deal[1], mx.DateTime.DateTimeFromTicks(deal[1]).Format())
-            a = u'{0}\n'.format(reduce(lambda a, b: u'{0}\t{1}'.format(a,b), deal[2:]))
+        for pos in self.deals.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions order by close_datetime, open_datetime"):
+            ddd = map(lambda a: mx.DateTime.DateTimeFromTicks(a), pos[:2])
+            vvv = map(lambda a: [a.Format("%d.%m.%Y"), a.Format("%H:%M:%S")], ddd)
+            ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
+            ret += u'\t{0}\t{1}'.format(pos[2], -1 == pos[3] and 'L' or 'S')
+            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[4:])
             if self.comma.props.active:
-                a = a.replace(".", ",")
-            ret += a
+                aa = aa.replace('.', ',')
+            ret += u'\t{0}\n'.format(aa)
+            
         return ret
 
     def clicked(self, button, call_me):
