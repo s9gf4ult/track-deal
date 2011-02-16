@@ -206,7 +206,7 @@ class deals_proc():
             (a,b) = self.connection.execute("select sum(volume), sum(quantity) from deals where {0}".format(roll_id_or(second_id))).fetchone()
             cprice = a / b
         else:
-            (cprice,) = self.connection.execute("select price from deals where id = ?", (second_id,)).fetchone()
+            (cprice,) = self.connection.execute("select price from deals where id = ?", (second_id[0],)).fetchone()
         
         (ovolume, odatetime, obroker_comm, obroker_comm_nds, ostock_comm, ostock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(first_id))).fetchone()
         (cvolume, cdatetime, cbroker_comm, cbroker_comm_nds, cstock_comm, cstock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(second_id))).fetchone()
@@ -241,8 +241,6 @@ class deals_proc():
                 else:
                     opened_deals.append(deal)
                     
-            opened_deals = []
-            for deal in self.connection.execute("select id, deal_sign, quantity, datetime from deals where position_id is null and security_name = ? order by datetime", (ticket,)):
                 
             
                         
