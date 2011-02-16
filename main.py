@@ -168,10 +168,44 @@ class deals_proc():
                 raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
 
     def make_position(self, first_id, second_id): # FIXME это надо сделать так чтобы можно было закрывать не сбалансированные позиции
-        (ticket, quantity, osign, oprice, ovolume, odatetime, obroker_comm, obroker_comm_nds, ostock_comm, ostock_comm_nds) = self.connection.execute("select security_name, quantity, deal_sign, price, volume, datetime, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where id = ?", (first_id,)).fetchone()
-        (csign, cprice, cvolume, cdatetime, cbroker_comm, cbroker_comm_nds, cstock_comm, cstock_comm_nds) = self.connection.execute("select deal_sign, price, volume, datetime, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds from deals where id = ?", (second_id,)).fetchone()
-        if osign != -(csign):
-            raise Exception(u'Попытка создать позицию из сделок в одну сторону')
+        def roll_id_or(idarray):
+            return u'({0})'.format(reduce(lambda a, b: u'{0} or {1}'.format(a, b), map(lambda a: u'id = {0}'.format(a), idarray)))
+        if not isinstance(first_id, list):
+            first_id = [first_id]
+        if not isinstance(second_id, list):
+            second_id = [second_id]
+        (oticks,) = self.connection.execute("select count(*) from (select distinct security_name from deals where {0})".format(roll_id_or(first_id))).fetchone()
+        (cticks,) = self.connection.execute("select count(*) from (select distinct security_name from deals where {0})".format(roll_id_or(second_id))).fetchone()
+        if 1 != oticks:
+            raise Exception(u'Чето косяк: сделки на открытие позиции идут по {0} разным тикерам'.format(oticks))
+        if 1 != cticks:
+            raise Exception(u'Чето косяк: сделки на закрытие позиции идут по {0} разным тикерам'.format(cticks))
+        (otick,) = self.connection.execute("select security_name from deals where id = ?", (first_id[0],)).fetchone()
+        (ctick,) = self.connection.execute("select security_name from deals where id = ?", (second_id[0],)).fetchone()
+        if otick != ctick:
+            raise Exception(u'КЭП предупреждает: нельзя открыть позицию по бумаге {0} и закрыть по {1}'.format(otick, ctick))
+        (oquant, osign_sum) = self.connection.execute("select sum(quantity), sum(deal_sign * quantity) from deals where {0}".format(roll_id_or(first_id))).fetchone()
+        (cquant, csign_sum) = self.connection.execute("select sum(quantity), sum(deal_sign * quantity) from deals where {0}".format(roll_id_or(second_id))).fetchone()
+        if oquant != abs(osign_sum):
+            raise Exception(u'Чето косяк: в открывающих сделках есть сделки в разную сторону либо {0} либо {1} сделок не в ту сторону'.format(abs(oquant - abs(osign_sum)), abs(osign_sum)))
+        if cquant != abs(csign_sum):
+            raise Exception(u'Чето косяк: в закрывающих сделках есть сделки в разную сторону либо {0} либо {1} сделок не в ту сторону'.format(abs(cquant - abs(csign_sum)), abs(csign_sum)))
+        oprice = None
+        cprice = None
+        if first_id.__len__() > 1:
+            (a,b) = self.connection.execute("select sum(volume), sum(quantity) from deals where {0}".format(roll_id_or(first_id))).fetchone()
+            oprice = a / b
+        else:
+            (oprice,) = self.connection.execute("select price from deals where id = ?", (first_id[0],)).fetchone()
+
+        if second_id.__len__() > 1:
+            (a,b) = self.connection.execute("select sum(volume), sum(quantity) from deals where {0}".format(roll_id_or(second_id))).fetchone()
+            cprice = a / b
+        else:
+            (cprice,) = self.connection.execute("select price from deals where id = ?", (second_id,)).fetchone()
+        
+        (ovolume, odatetime, obroker_comm, obroker_comm_nds, ostock_comm, ostock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(first_id))).fetchone()
+        (cvolume, cdatetime, cbroker_comm, cbroker_comm_nds, cstock_comm, cstock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(second_id))).fetchone()
         
         pos_id = self._insert_into("positions",
                                    ["ticket", "direction", "count",
@@ -192,6 +226,7 @@ class deals_proc():
     def make_positions(self):
         for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null"):
             # проходим по сделкам запоминая сделки которые уже были и закрывая их если находим подходящую парную сделку
+            
             opened_deals = []
             for deal in self.connection.execute("select id, deal_sign, quantity from deals where position_id is null and security_name = ? order by datetime", (ticket,)):
                 oposing_deals = filter(lambda a: a[1] == -(deal[1]) and a[2] == deal[2], opened_deals)
@@ -202,6 +237,8 @@ class deals_proc():
                 else:
                     opened_deals.append(deal)
                     
+            opened_deals = []
+            for deal in self.connection.execute("select id, deal_sign, quantity, datetime from deals where position_id is null and security_name = ? order by datetime", (ticket,)):
                 
             
                         
