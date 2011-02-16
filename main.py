@@ -190,6 +190,10 @@ class deals_proc():
             raise Exception(u'Чето косяк: в открывающих сделках есть сделки в разную сторону либо {0} либо {1} сделок не в ту сторону'.format(abs(oquant - abs(osign_sum)), abs(osign_sum)))
         if cquant != abs(csign_sum):
             raise Exception(u'Чето косяк: в закрывающих сделках есть сделки в разную сторону либо {0} либо {1} сделок не в ту сторону'.format(abs(cquant - abs(csign_sum)), abs(csign_sum)))
+        
+        if abs(osign_sum)/osign_sum != -abs(csign_sum)/csign_sum:
+            raise Exception(u'Попытка создать закрыть позицию сделками в ту же сторону')
+        
         oprice = None
         cprice = None
         if first_id.__len__() > 1:
@@ -206,18 +210,18 @@ class deals_proc():
         
         (ovolume, odatetime, obroker_comm, obroker_comm_nds, ostock_comm, ostock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(first_id))).fetchone()
         (cvolume, cdatetime, cbroker_comm, cbroker_comm_nds, cstock_comm, cstock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(second_id))).fetchone()
-        
+        dsign = abs(osign_sum) / osign_sum
         pos_id = self._insert_into("positions",
                                    ["ticket", "direction", "count",
                                     "open_volume", "close_volume", "open_coast", "close_coast",
                                     "open_datetime", "close_datetime", "broker_comm", "broker_comm_nds",
                                     "stock_comm", "stock_comm_nds", "pl_gross", "pl_net"],
-                                   (ticket, osign, quantity, ovolume, cvolume, oprice, cprice,
+                                   (otick, dsign, oquant, ovolume, cvolume, oprice, cprice,
                                     odatetime, cdatetime, obroker_comm + cbroker_comm,
                                     obroker_comm_nds + cbroker_comm_nds, ostock_comm + cstock_comm,
-                                    ostock_comm_nds + cstock_comm_nds, (ovolume - cvolume) * osign,
-                                    (ovolume - cvolume) * osign - (obroker_comm + cbroker_comm + ostock_comm + cstock_comm))).lastrowid
-        self.connection.execute("update deals set position_id = ? where id = ? or id = ?", (pos_id, first_id, second_id))
+                                    ostock_comm_nds + cstock_comm_nds, (ovolume - cvolume) * dsign,
+                                    (ovolume - cvolume) * dsign - (obroker_comm + cbroker_comm + ostock_comm + cstock_comm))).lastrowid
+        self.connection.execute("update deals set position_id = ? where {0}".format(roll_id_or(first_id + second_id)), (pos_id,))
         
 
         
