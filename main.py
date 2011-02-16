@@ -94,7 +94,7 @@ class xml_parser():
         self.common_deal = self.report.getElementsByTagName("common_deal")[0].getElementsByTagName("item")
         self.account_totally = self.report.getElementsByTagName("account_totally_line")[0].getElementsByTagName("item")
         self.briefcase = self.report.getElementsByTagName("briefcase_position")[0].getElementsByTagName("item")
-        if not (self.common_deal.length > 0 and self.account_totally.length > 1 and self.briefcase.length > 1):
+        if not (self.common_deal.__len__() > 0 and self.account_totally.__len__() > 1 and self.briefcase.__len__() > 0):
             raise Exception(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
         self.checked=True
         
