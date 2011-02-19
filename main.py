@@ -227,7 +227,9 @@ class deals_proc():
         
 
     def try_make_grouped(deals):
-        
+        ret = []
+        counting = map(lambda m: map(lambda a: [(isinstance(a, list) and (reduce(lambda x, y: x + y, map(lambda aa: aa[2], a)) * a[0][1]) or a[2] * a[1])], m), deals)
+        print(counting)
         
             
     def make_positions(self):
