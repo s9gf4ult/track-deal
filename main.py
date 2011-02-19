@@ -226,9 +226,8 @@ class deals_proc():
         self.connection.execute("update deals set position_id = ? where {0}".format(roll_id_or(first_id + second_id)), (pos_id,))
         
 
-    def try_make_grouped(deals):
-        ret = []
-        counting = map(lambda m: map(lambda a: [(isinstance(a, list) and (reduce(lambda x, y: x + y, map(lambda aa: aa[2], a)) * a[0][1]) or a[2] * a[1])], m), deals)
+    def try_make_grouped(self, deals):
+        counting = map(lambda m: map(lambda a: [(isinstance(a, list) and (reduce(lambda x, y: x + y, map(lambda aa: aa[2], a)) * a[0][1]) or a[2] * a[1]), a], m), deals)
         print(counting)
         
             
@@ -261,9 +260,9 @@ class deals_proc():
                 opened_deals.append(opened_signed)
 
             opened_deals = self.try_make_grouped(opened_deals)
-            (pc, ) = self.connection.execute("select count(*) from deals where position_id is null and security_name = ?", (ticket, )).fetchone()
-            if 0 != pc:
-                self.try_group_ungrouped(opened_deals)
+            # (pc, ) = self.connection.execute("select count(*) from deals where position_id is null and security_name = ?", (ticket, )).fetchone()
+            # if 0 != pc:
+            #     self.try_group_ungrouped(opened_deals)
                 
         (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
         if 0 != pc:
