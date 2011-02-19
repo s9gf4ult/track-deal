@@ -226,9 +226,25 @@ class deals_proc():
         self.connection.execute("update deals set position_id = ? where {0}".format(roll_id_or(first_id + second_id)), (pos_id,))
         
 
-    def try_make_grouped(self, deals):
-        counting = map(lambda m: map(lambda a: [(isinstance(a, list) and (reduce(lambda x, y: x + y, map(lambda aa: aa[2], a)) * a[0][1]) or a[2] * a[1]), a], m), deals)
+    def try_make_grouped(self, ticket):
+        counting = map(lambda m: map(lambda a: [(isinstance(a, list) and (reduce(lambda x, y: x + y, map(lambda aa: aa[2], a)) * a[0][1]) or a[2] * a[1]), a], m), self.obtain_opened_deals(ticket))
         print(counting)
+
+    def obtain_opened_deals(self, ticket):
+        opened_deals = []
+        for sign in [-1, 1]:
+            opened_signed = []
+            for deal in self.connection.execute("select id, deal_sign, quantity, datetime from deals where position_id is null and security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
+                islastlist = [] != opened_signed and isinstance(opened_signed[-1], list)
+                if [] != opened_signed and deal[3] - (islastlist and opened_signed[-1][-1] or opened_signed[-1])[3] <= 5:
+                    if islastlist:
+                        opened_signed[-1].append(deal)
+                    else:
+                        opened_signed[-1] = [opened_signed[-1], deal]
+                else:
+                    opened_signed.append(deal)
+            opened_deals.append(opened_signed)
+        return opened_deals
         
             
     def make_positions(self):
@@ -245,21 +261,7 @@ class deals_proc():
                 else:
                     opened_deals.append(deal)
                     
-            opened_deals = []
-            for sign in [-1, 1]:
-                opened_signed = []
-                for deal in self.connection.execute("select id, deal_sign, quantity, datetime from deals where position_id is null and security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
-                    islastlist = [] != opened_signed and isinstance(opened_signed[-1], list)
-                    if [] != opened_signed and deal[3] - (islastlist and opened_signed[-1][-1] or opened_signed[-1])[3] <= 5:
-                        if islastlist:
-                            opened_signed[-1].append(deal)
-                        else:
-                            opened_signed[-1] = [opened_signed[-1], deal]
-                    else:
-                        opened_signed.append(deal)
-                opened_deals.append(opened_signed)
-
-            opened_deals = self.try_make_grouped(opened_deals)
+            self.try_make_grouped(ticket)
             # (pc, ) = self.connection.execute("select count(*) from deals where position_id is null and security_name = ?", (ticket, )).fetchone()
             # if 0 != pc:
             #     self.try_group_ungrouped(opened_deals)
