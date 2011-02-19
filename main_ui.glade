@@ -89,6 +89,7 @@ everything</property>
                 <child>
                   <object class="GtkFileChooserButton" id="choose_file">
                     <property name="visible">True</property>
+                    <property name="filter">filefilter</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -113,4 +114,5 @@ everything</property>
     </child>
   </object>
   <object class="GtkTextBuffer" id="buffer"/>
+  <object class="GtkFileFilter" id="filefilter"/>
 </interface>

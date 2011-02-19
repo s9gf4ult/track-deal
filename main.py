@@ -18,6 +18,8 @@ class main_ui():
         self.choose_file = a.get_object("choose_file")
         self.buffer = a.get_object("buffer")
         self.comma = a.get_object("comma_separator")
+        self.filefilter = a.get_object("filefilter")
+        self.filefilter.add_mime_type("application/xml")
         self.window.connect("destroy", gtk.main_quit)
         self.choose_file.connect("file-set", self.file_set)
         self.segfault.connect("clicked", self.clicked, self._gen_seg)
