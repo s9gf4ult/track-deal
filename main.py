@@ -27,7 +27,7 @@ class main_ui():
 
     def _gen_seg(self):
         ret = u''
-        for pos in self.deals.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions order by close_datetime, open_datetime"):
+        for pos in self.deals.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions where ticket is not null order by close_datetime, open_datetime"):
             (open_datetime, close_datetime) = map(lambda a: mx.DateTime.DateTimeFromTicks(a).Format("%d.%m.%Y"), pos[-2:])
             ret += u'{0}\t{1}'.format(pos[0], -1 == pos[1] and 'L' or 'S')
             v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[2:-2])
@@ -38,7 +38,7 @@ class main_ui():
 
     def _gen_axcel(self):
         ret = u''
-        for pos in self.deals.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions order by close_datetime, open_datetime"):
+        for pos in self.deals.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions where ticket is not null order by close_datetime, open_datetime"):
             ddd = map(lambda a: mx.DateTime.DateTimeFromTicks(a), pos[:2])
             vvv = map(lambda a: [a.Format("%d.%m.%Y"), a.Format("%H:%M:%S")], ddd)
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
@@ -122,9 +122,11 @@ class deals_proc():
         stock_comm_nds real,
         pl_gross real,
         pl_net real)""")
+        self.connection.execute("insert into positions(id) values (-1)") # спец позиция на которую будут списываться сделки разбитые на несколько, или возможно потерявшие актуальность в других случаях
 
         self.connection.execute("""create table deals(
         id integer primary key not null,
+        parent_deal_id,
         datetime real,
         datetime_day text,
         security_type text,
@@ -139,7 +141,8 @@ class deals_proc():
         stock_comm real,
         stock_comm_nds real,
         position_id integer,
-        foreign key (position_id) references positions(id) on delete set null)""")
+        foreign key (position_id) references positions(id) on delete set null
+        foreign key (parent_deal_id) references deals(id) on delete set null)""")
         for coat in coats.common_deal:
             date = mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes['deal_time'].value)))
             x = [date.ticks(), date.Format("%Y%m%d")]
@@ -227,8 +230,16 @@ class deals_proc():
         
 
     def try_make_grouped(self, ticket):
-        counting = map(lambda m: map(lambda a: [(isinstance(a, list) and (reduce(lambda x, y: x + y, map(lambda aa: aa[2], a)) * a[0][1]) or a[2] * a[1]), a], m), self.obtain_opened_deals(ticket))
-        print(counting)
+        counting = self.obtain_opened_with_data(ticket)
+        for (opened, closed) in [(counting[0], counting[1]),
+                                 (counting[1], counting[0])]:
+            for opendd in opened:
+                for closedd in closed:
+                    if opendd[2] < closedd [1] and opendd[0] == -closedd[0]:
+                        self.make_position(opendd, closedd)
+
+    def obtain_opened_with_data(self, ticket):
+        return map(lambda m: map(lambda a: [(isinstance(a, list) and sum(map(lambda aa: aa[2], a)) * a[0][1] or a[2] * a[1]),(isinstance(a, list) and min(map(lambda aa: aa[3], a)) or a[3]), (isinstance(a, list) and max(map(lambda aa: aa[3], a)) or a[3]), a], m), self.obtain_opened_deals(ticket))
 
     def obtain_opened_deals(self, ticket):
         opened_deals = []
