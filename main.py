@@ -179,9 +179,10 @@ class deals_proc():
                 raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
 
     def make_position(self, first_id, second_id):
+        print((first_id, second_id))
         def roll_id_or(idarray):
             if 1 == len(idarray):
-                return u'({0})'.format(idarray[0])
+                return u'(id = {0})'.format(idarray[0])
             else:
                 return u'({0})'.format(reduce(lambda a, b: u'{0} or {1}'.format(a, b), map(lambda a: u'id = {0}'.format(a), idarray)))
         if not isinstance(first_id, list):
@@ -240,7 +241,7 @@ class deals_proc():
 
     def try_make_grouped(self, ticket):
         for (ogid, ogsign, ogquant, ogdate) in self.connection.execute("select g.id, g.deal_sign, sum(d.quantity), max(d.datetime) from deals d inner join deal_groups g on d.group_id = g.id where d.position_id is null and g.ticket = ? group by g.id", (ticket,)):
-            (cgid,) = self.connection.execute("select id from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? group by g.id) where datetime > ? and quantity = ?  order by datetime", (ticket, -ogsign, ogdate, ogquant)).fetchone() or (None,)
+            (cgid,) = self.connection.execute("select id from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null group by g.id) where datetime > ? and quantity = ?  order by datetime", (ticket, -ogsign, ogdate, ogquant)).fetchone() or (None,)
             if cgid:
                 self.make_position_from_groups(ogid, cgid)
                 #print((ogid, self.connection.execute("select count(*) from deals where group_id = ?", (ogid,)).fetchone()[0], cgid, self.connection.execute("select count(*) from deals where group_id = ?", (cgid,)).fetchone()[0]))
@@ -253,7 +254,7 @@ class deals_proc():
         for sign in [-1, 1]:
             opened_signed = []
             for (deal_id, deal_datetime) in self.connection.execute("select id, datetime from deals where position_id is null and security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
-                (group_id,) = self.connection.execute("select id from (select max(d.datetime) as datetime, g.id as id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? group by g.id) where datetime <= ? and ? - datetime <= 5 order by datetime desc", (ticket, sign, deal_datetime, deal_datetime)).fetchone() or (None, )
+                (group_id,) = self.connection.execute("select id from (select max(d.datetime) as datetime, g.id as id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null group by g.id) where datetime <= ? and ? - datetime <= 5 order by datetime desc", (ticket, sign, deal_datetime, deal_datetime)).fetchone() or (None, )
                 if group_id:
                     self.connection.execute("update deals set group_id = ? where id = ?", (group_id, deal_id))
                 else:
