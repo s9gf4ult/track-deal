@@ -179,7 +179,7 @@ class deals_proc():
                 raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
 
     def make_position(self, first_id, second_id):
-        print((first_id, second_id))
+        #print((first_id, second_id))
         def roll_id_or(idarray):
             if 1 == len(idarray):
                 return u'(id = {0})'.format(idarray[0])
@@ -244,7 +244,7 @@ class deals_proc():
             for (ogid, ogsign, ogquant, ogdate) in self.connection.execute("select g.id, g.deal_sign, sum(d.quantity), max(d.datetime) from deals d inner join deal_groups g on d.group_id = g.id where d.position_id is null and g.ticket = ? group by g.id order by max(d.datetime)", (ticket,)):
                 (cgid,) = self.connection.execute("select id from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null group by g.id) where datetime > ? and quantity = ?  order by datetime", (ticket, -ogsign, ogdate, ogquant)).fetchone() or (None,)
                 if cgid:
-                    print((ogid, self.connection.execute("select count(*) from deals where group_id = ?", (ogid,)).fetchone()[0], cgid, self.connection.execute("select count(*) from deals where group_id = ?", (cgid,)).fetchone()[0]))
+                    #print((ogid, self.connection.execute("select count(*) from deals where group_id = ?", (ogid,)).fetchone()[0], cgid, self.connection.execute("select count(*) from deals where group_id = ?", (cgid,)).fetchone()[0]))
                     self.make_position_from_groups(ogid, cgid)
                     return True
             return False
@@ -270,7 +270,33 @@ class deals_proc():
         pass
 
     def split_deal(self, deal_id, needed_quantity):
-        pass
+        (quant,) = self.connection.execute("select quantity from deals where id = ?", (deal_id,)).fetchone() or (None,)
+        if not quant:
+            raise Exception(u'There is no deal with id {0}'.format(deal_id))
+        if quant == needed_quantity:
+            return [deal_id]
+        if quant < needed_quantity:
+            raise Exception(u'КО в недоразумении: попытка разбить сделку из {0} позиций чтобы была сделка с {0} позициями'.format(quant, needed_quantity))
+        m1 = [needed_quantity] + map(lambda a: float(needed_quantity) / quant, range(0, 5))
+        m2 = [quant - needed_quantity] + map(lambda a: float(quant - needed_quantity) / quant, range(0, 5))
+        ret = []
+        for mm in [m1, m2]:
+            cid = self.connection.execute("insert into deals(parent_deal_id, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, quantity, volume, deal_sign, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds, position_id) select ?, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, ?, volume * ?, deal_sign, broker_comm * ?, broker_comm_nds * ?, stock_comm * ?, stock_comm_nds * ?, position_id from deals where id = ?", [deal_id] + mm + [deal_id]).lastrowid
+            ret.append(cid)
+        self.connection.execute("update deals set position_id = -1 where id = ?", (deal_id,))
+        return ret
+
+    # def split_all_deals(self):
+    #     def split_once_more(self):
+    #         (did,) = self.connection.execute("select id from deals where quantity > 1 and position_id <> -1").fetchone() or (None,)
+    #         if did:
+    #             self.split_deal(did, 1)
+    #             return True
+    #         return False
+
+    #     while split_once_more(self):
+    #         pass
+        
         
             
     def make_positions(self):
@@ -293,6 +319,8 @@ class deals_proc():
 
         # for dg in self.connection.execute("select sum(d.quantity), g.deal_sign, g.id from deals d inner join deal_groups g on d.group_id = g.id group by g.id"):
         #     print(dg)
+        # for p in self.connection.execute("select g.id, count(d.id) from deals d inner join deal_groups g on d.group_id = g.id  where d.position_id <> -1 group by g.id"):
+        #     print(p)
                 
         (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
         if 0 != pc:
