@@ -234,8 +234,14 @@ class deals_proc():
         
 
     def try_make_grouped(self, ticket):
-        pass
-        #for group in self.connection.execute("select g.id, g.deal_sign, sum(d.quantity)"
+        for (ogid, ogsign, ogquant, ogdate) in self.connection.execute("select g.id, g.deal_sign, sum(d.quantity), max(d.datetime) from deals d inner join deal_groups g on d.group_id = g.id where d.position_id is null and g.ticket = ? group by g.id", (ticket,)):
+            (cgid,) = self.connection.execute("select id from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? group by g.id) where datetime > ? and quantity = ?  order by datetime", (ticket, -ogsign, ogdate, ogquant)).fetchone() or (None,)
+            if cgid:
+                self.make_position_from_groups(ogid, cgid)
+
+
+    def make_position_from_groups(self, opos, cpos):
+        self.make_position(map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.group_id = ?", (opos,)).fetchall()), map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.group_id = ?", (cpos,)).fetchall()))
 
     def make_groups(self, ticket):
         for sign in [-1, 1]:
@@ -265,7 +271,7 @@ class deals_proc():
                     opened_deals.append(deal)
                     
             self.make_groups(ticket)
-            #self.try_make_grouped(ticket)
+            self.try_make_grouped(ticket)
 
         # for dg in self.connection.execute("select sum(d.quantity), g.deal_sign from deals d inner join deal_groups g on d.group_id = g.id group by g.id"):
         #     print(dg)
