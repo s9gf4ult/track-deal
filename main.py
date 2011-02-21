@@ -124,9 +124,12 @@ class deals_proc():
         pl_net real)""")
         self.connection.execute("insert into positions(id) values (-1)") # спец позиция на которую будут списываться сделки разбитые на несколько, или возможно потерявшие актуальность в других случаях
 
+        self.connection.execute("create table deal_groups (id integer primary key not null, deal_sign integer not null, ticket text not null)")
+
         self.connection.execute("""create table deals(
         id integer primary key not null,
-        parent_deal_id,
+        parent_deal_id integer,
+        group_id integer,
         datetime real,
         datetime_day text,
         security_type text,
@@ -142,7 +145,8 @@ class deals_proc():
         stock_comm_nds real,
         position_id integer,
         foreign key (position_id) references positions(id) on delete set null
-        foreign key (parent_deal_id) references deals(id) on delete set null)""")
+        foreign key (parent_deal_id) references deals(id) on delete set null
+        foreign key (group_id) references deal_groups(id) on delete set null)""")
         for coat in coats.common_deal:
             date = mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes['deal_time'].value)))
             x = [date.ticks(), date.Format("%Y%m%d")]
@@ -230,32 +234,20 @@ class deals_proc():
         
 
     def try_make_grouped(self, ticket):
-        counting = self.obtain_opened_with_data(ticket)
-        for (opened, closed) in [(counting[0], counting[1]),
-                                 (counting[1], counting[0])]:
-            for opendd in opened:
-                for closedd in closed:
-                    if opendd[2] < closedd [1] and opendd[0] == -closedd[0]:
-                        self.make_position(opendd, closedd)
+        pass
+        #for group in self.connection.execute("select g.id, g.deal_sign, sum(d.quantity)"
 
-    def obtain_opened_with_data(self, ticket):
-        return map(lambda m: map(lambda a: [(isinstance(a, list) and sum(map(lambda aa: aa[2], a)) * a[0][1] or a[2] * a[1]),(isinstance(a, list) and min(map(lambda aa: aa[3], a)) or a[3]), (isinstance(a, list) and max(map(lambda aa: aa[3], a)) or a[3]), a], m), self.obtain_opened_deals(ticket))
-
-    def obtain_opened_deals(self, ticket):
-        opened_deals = []
+    def make_groups(self, ticket):
         for sign in [-1, 1]:
             opened_signed = []
-            for deal in self.connection.execute("select id, deal_sign, quantity, datetime from deals where position_id is null and security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
-                islastlist = [] != opened_signed and isinstance(opened_signed[-1], list)
-                if [] != opened_signed and deal[3] - (islastlist and opened_signed[-1][-1] or opened_signed[-1])[3] <= 5:
-                    if islastlist:
-                        opened_signed[-1].append(deal)
-                    else:
-                        opened_signed[-1] = [opened_signed[-1], deal]
+            for (deal_id, deal_datetime) in self.connection.execute("select id, datetime from deals where position_id is null and security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
+                (group_id,) = self.connection.execute("select id from (select max(d.datetime) as datetime, g.id as id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? group by g.id) where datetime <= ? and ? - datetime <= 5 order by datetime desc", (ticket, sign, deal_datetime, deal_datetime)).fetchone() or (None, )
+                if group_id:
+                    self.connection.execute("update deals set group_id = ? where id = ?", (group_id, deal_id))
                 else:
-                    opened_signed.append(deal)
-            opened_deals.append(opened_signed)
-        return opened_deals
+                    new_group_id = self._insert_into("deal_groups", ["deal_sign", "ticket"], [sign, ticket]).lastrowid
+                    self.connection.execute("update deals set group_id = ? where id = ?", (new_group_id, deal_id))
+        
         
             
     def make_positions(self):
@@ -272,10 +264,11 @@ class deals_proc():
                 else:
                     opened_deals.append(deal)
                     
-            self.try_make_grouped(ticket)
-            # (pc, ) = self.connection.execute("select count(*) from deals where position_id is null and security_name = ?", (ticket, )).fetchone()
-            # if 0 != pc:
-            #     self.try_group_ungrouped(opened_deals)
+            self.make_groups(ticket)
+            #self.try_make_grouped(ticket)
+
+        # for dg in self.connection.execute("select sum(d.quantity), g.deal_sign from deals d inner join deal_groups g on d.group_id = g.id group by g.id"):
+        #     print(dg)
                 
         (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
         if 0 != pc:
