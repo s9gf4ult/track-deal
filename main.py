@@ -90,13 +90,13 @@ class xml_parser():
         if not (self.xml.childNodes.length == 1 and self.xml.childNodes[0].nodeName == "report"):
             raise Exception(u'Нет тега report')
         self.report = self.xml.childNodes[0]
-        for name in ["common_deal", "briefcase_position", "account_totally_line"]:
+        for name in ["common_deal", "account_totally_line"]:
             if self.report.getElementsByTagName(name).length != 1:
                 raise Exception("there is no {0} in report or more that one found".format(name))
         self.common_deal = self.report.getElementsByTagName("common_deal")[0].getElementsByTagName("item")
         self.account_totally = self.report.getElementsByTagName("account_totally_line")[0].getElementsByTagName("item")
-        self.briefcase = self.report.getElementsByTagName("briefcase_position")[0].getElementsByTagName("item")
-        if not (self.common_deal.__len__() > 0 and self.account_totally.__len__() > 1 and self.briefcase.__len__() > 0):
+        #self.briefcase = self.report.getElementsByTagName("briefcase_position")[0].getElementsByTagName("item")
+        if not (self.common_deal.__len__() > 0 and self.account_totally.__len__() > 1):
             raise Exception(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
         self.checked=True
         
@@ -148,10 +148,12 @@ class deals_proc():
         foreign key (parent_deal_id) references deals(id) on delete set null
         foreign key (group_id) references deal_groups(id) on delete set null)""")
         for coat in coats.common_deal:
-            date = mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes['deal_time'].value)))
+            date = mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes.has_key('deal_time') and coat.attributes['deal_time'].value or (coat.attributes.has_key('deal_date') and coat.attributes['deal_date'].value))))
             x = [date.ticks(), date.Format("%Y%m%d")]
-            x.extend(map(lambda name: coat.attributes[name].value, ('security_type', 'security_name', 'grn_code')))
-            x.extend(map(lambda name: float(coat.attributes[name].value), ('price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds')))
+            x.extend(map(lambda name: coat.attributes.has_key(name) and coat.attributes[name].value, ('security_type', 'security_name', 'grn_code')))
+            x.extend(map(lambda name: coat.attributes.has_key(name) and float(coat.attributes[name].value) or 0, ('price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds')))
+            if x[7] == 0:
+                x[7] = x[5] * x[6]
             self._insert_into("deals", ["datetime",
                                         "datetime_day",
                                         "security_type",
@@ -176,9 +178,12 @@ class deals_proc():
             if buy != sell:
                 raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
 
-    def make_position(self, first_id, second_id): # FIXME это надо сделать так чтобы можно было закрывать не сбалансированные позиции
+    def make_position(self, first_id, second_id):
         def roll_id_or(idarray):
-            return u'({0})'.format(reduce(lambda a, b: u'{0} or {1}'.format(a, b), map(lambda a: u'id = {0}'.format(a), idarray)))
+            if 1 == len(idarray):
+                return u'({0})'.format(idarray[0])
+            else:
+                return u'({0})'.format(reduce(lambda a, b: u'{0} or {1}'.format(a, b), map(lambda a: u'id = {0}'.format(a), idarray)))
         if not isinstance(first_id, list):
             first_id = [first_id]
         if not isinstance(second_id, list):
@@ -238,6 +243,7 @@ class deals_proc():
             (cgid,) = self.connection.execute("select id from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? group by g.id) where datetime > ? and quantity = ?  order by datetime", (ticket, -ogsign, ogdate, ogquant)).fetchone() or (None,)
             if cgid:
                 self.make_position_from_groups(ogid, cgid)
+                #print((ogid, self.connection.execute("select count(*) from deals where group_id = ?", (ogid,)).fetchone()[0], cgid, self.connection.execute("select count(*) from deals where group_id = ?", (cgid,)).fetchone()[0]))
 
 
     def make_position_from_groups(self, opos, cpos):
@@ -254,6 +260,11 @@ class deals_proc():
                     new_group_id = self._insert_into("deal_groups", ["deal_sign", "ticket"], [sign, ticket]).lastrowid
                     self.connection.execute("update deals set group_id = ? where id = ?", (new_group_id, deal_id))
         
+    def try_make_ungrouped(self, ticket):
+        pass
+
+    def split_deal(self, deal_id, needed_quantity):
+        pass
         
             
     def make_positions(self):
@@ -272,8 +283,9 @@ class deals_proc():
                     
             self.make_groups(ticket)
             self.try_make_grouped(ticket)
+            self.try_make_ungrouped(ticket)
 
-        # for dg in self.connection.execute("select sum(d.quantity), g.deal_sign from deals d inner join deal_groups g on d.group_id = g.id group by g.id"):
+        # for dg in self.connection.execute("select sum(d.quantity), g.deal_sign, g.id from deals d inner join deal_groups g on d.group_id = g.id group by g.id"):
         #     print(dg)
                 
         (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
