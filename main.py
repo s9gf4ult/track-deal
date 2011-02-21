@@ -239,7 +239,7 @@ class deals_proc():
         self.connection.execute("update deals set position_id = ? where {0}".format(roll_id_or(first_id + second_id)), (pos_id,))
         
 
-    def try_make_grouped(self, ticket): #FIXME Косяк в том что надо делать так: проверить есить ли пары, закрыть пару, проверить и снова закрыть и так до тех пор пока не найдется ни одной не закрытой
+    def try_make_grouped(self, ticket):
         def fetchclose_pair(self, ticket):
             for (ogid, ogsign, ogquant, ogdate) in self.connection.execute("select g.id, g.deal_sign, sum(d.quantity), max(d.datetime) from deals d inner join deal_groups g on d.group_id = g.id where d.position_id is null and g.ticket = ? group by g.id order by max(d.datetime)", (ticket,)):
                 (cgid,) = self.connection.execute("select id from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null group by g.id) where datetime > ? and quantity = ?  order by datetime", (ticket, -ogsign, ogdate, ogquant)).fetchone() or (None,)
