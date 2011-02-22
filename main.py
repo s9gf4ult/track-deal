@@ -286,6 +286,21 @@ class deals_proc():
         self.connection.execute("update deals set position_id = -1 where id = ?", (deal_id,))
         return ret
 
+    def split_deal_group(self, group_id, needed_quantiry):
+        (quant,) = self.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where g.id = ?", (group_id,)).fetchone() or (None, )
+        if not quant:
+            raise Exception(u'{0} это не существующий id группы'.format(group_id))
+
+        if quant < needed_quantity:
+            raise Exception(u'Попытка разбить группу из {0} контрактов на группу с {1} контрактами'.format(quant, needed_quantity))
+        if quant == needed_quantity:
+            return [group_id]
+
+        ret = []
+        
+
+        
+
     # def split_all_deals(self):
     #     def split_once_more(self):
     #         (did,) = self.connection.execute("select id from deals where quantity > 1 and position_id <> -1").fetchone() or (None,)
