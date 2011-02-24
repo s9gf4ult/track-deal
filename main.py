@@ -289,7 +289,7 @@ class deals_proc():
         self.connection.execute("update deals set not_actual = 1 where id = ?", (deal_id,))
         return ret
 
-    def split_deal_group(self, group_id, needed_quantiry):
+    def split_deal_group(self, group_id, needed_quantity):
         (quant,) = self.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where g.id = ? and d.not_actual is null", (group_id,)).fetchone() or (None, )
         if not quant:
             raise Exception(u'{0} это не существующий id группы'.format(group_id))
@@ -300,7 +300,10 @@ class deals_proc():
             return [group_id]
 
         def reduce_and_not_id(ids):
-            return u'({0})'.format(reduce(lambda a, b:u'{0} and {1}'.format(a,b), map(lambda a: u'id <> {0}'.format(a), ids)))
+            if 1 == len(ids):
+                return u'(id <> {0})'.format(ids[0])
+            else:
+                return u'({0})'.format(reduce(lambda a, b:u'{0} and {1}'.format(a,b), map(lambda a: u'id <> {0}'.format(a), ids)))
         
         splited = []                    # отобранные сделки
         summ = 0                        # сумма отобранных сделок
@@ -312,7 +315,7 @@ class deals_proc():
                     break
                 
         if summ < needed_quantity:      # не получилось отобрать ровное количество сделок будем разбивать сделку
-            (spdid,) = self.connection.execute("select id from deals where not_actual is null and group_id = ? and quantity > ? and {0} order by datetime".format(reduce_and_not_id(map(lambda a:a[0], splited))), (group_id, needed_quantity - summ)).fetchone() or (None,)
+            (spdid,) = self.connection.execute("select id from deals where not_actual is null and group_id = ? and quantity > ? and {0} order by datetime".format(len(splited) > 0 and reduce_and_not_id(map(lambda a:a[0], splited)) or '1 = 1'), (group_id, needed_quantity - summ)).fetchone() or (None,)
             if not spdid:
                 raise Exception(u'Произошла странная ошибка: в группе не оказалось сделки которая там должна быть')
             spp = self.split_deal(spdid, needed_quantity - summ)[0] # id сделки с нужным количеством контрактов
