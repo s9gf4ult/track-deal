@@ -25,19 +25,19 @@ class balance(unittest.TestCase):
 
     def test_split_deals_balance(self):
         def split_them_all(self):
-            (did, dqu) = self.base.connection.execute("select id quantity from deals where (position_id is null or position_id <> -1) and quantity > 1").fetchone() or (None, None)
+            (did, dqu) = self.base.connection.execute("select id, quantity from deals where not_actual is null and quantity > 1").fetchone() or (None, None)
             if did:
-                self.base.split_deal(did, random.choise(range(1, dqu)))
+                self.base.split_deal(did, random.choice(range(1, dqu)))
                 return True
             return False
 
         while split_them_all(self):
             pass
 
-        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity > 1 and position_id <> -1").fetchone()[0])
-        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity = 1 and position_id = -1").fetchone()[0])
-        self.assertNotEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where position_id = -1").fetchone())
-        self.base.connection.execute("delete from deals where position_id is not null")
+        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity > 1 and not_actual is null").fetchone()[0])
+        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity = 1 and not_actual is not null").fetchone()[0])
+        self.assertNotEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is not null").fetchone())
+        self.base.connection.execute("delete from deals where not_actual is not null")
 
         try:
             self.base.check_balance()
@@ -47,7 +47,7 @@ class balance(unittest.TestCase):
             self.assertTrue(True)
 
         self.assertNotEqual(0, self.base.connection.execute("select count(*) from deals").fetchone()[0], u'После разбиения сделок осталось 0 сделок')
-        self.assertEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where quantity > 1").fetchone())
+        self.assertEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals").fetchone())
         self.assertEqual(self.base.connection.execute("select sum(quantity) from deals").fetchone()[0], self.base.connection.execute("select count(*) from deals").fetchone()[0])
 
 
