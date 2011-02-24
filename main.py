@@ -122,13 +122,13 @@ class deals_proc():
         stock_comm_nds real,
         pl_gross real not null,
         pl_net real not null)""")
-        self.connection.execute("insert into positions(id, ticket, direction, open_datetime, close_datetime, open_coast, close_coast, count, open_volume, close_volume, pl_gross, pl_net) values (-1, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)") # спец позиция на которую будут списываться сделки разбитые на несколько, или возможно потерявшие актуальность в других случаях
 
         self.connection.execute("create table deal_groups (id integer primary key not null, deal_sign integer not null, ticket text not null)")
 
         self.connection.execute("""create table deals(
         id integer primary key not null,
         parent_deal_id integer,
+        not_actual integer,
         group_id integer,
         datetime real not null,
         datetime_day text,
@@ -258,7 +258,7 @@ class deals_proc():
     def make_groups(self, ticket):
         for sign in [-1, 1]:
             opened_signed = []
-            for (deal_id, deal_datetime) in self.connection.execute("select id, datetime from deals where position_id is null and security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
+            for (deal_id, deal_datetime) in self.connection.execute("select id, datetime from deals where position_id is null and not_actual is null and  security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
                 (group_id,) = self.connection.execute("select id from (select max(d.datetime) as datetime, g.id as id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null group by g.id) where datetime <= ? and ? - datetime <= 5 order by datetime desc", (ticket, sign, deal_datetime, deal_datetime)).fetchone() or (None, )
                 if group_id:
                     self.connection.execute("update deals set group_id = ? where id = ?", (group_id, deal_id))
@@ -273,8 +273,8 @@ class deals_proc():
         (quant,) = self.connection.execute("select quantity from deals where id = ?", (deal_id,)).fetchone() or (None,)
         if not quant:
             raise Exception(u'There is no deal with id {0}'.format(deal_id))
-        (pid,) = self.connection.execute("select position_id from deals where id = ?", (deal_id,)).fetchone()
-        if pid == -1:
+        (pid,) = self.connection.execute("select not_actual from deals where id = ?", (deal_id,)).fetchone()
+        if pid:
             raise Exception(u'сделка с номером {0} уже разбита'.format(deal_id))
         if quant == needed_quantity:
             return [deal_id]
@@ -286,11 +286,11 @@ class deals_proc():
         for mm in [m1, m2]:
             cid = self.connection.execute("insert into deals(parent_deal_id, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, quantity, volume, deal_sign, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds, position_id) select ?, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, ?, volume * ?, deal_sign, broker_comm * ?, broker_comm_nds * ?, stock_comm * ?, stock_comm_nds * ?, position_id from deals where id = ?", [deal_id] + mm + [deal_id]).lastrowid
             ret.append(cid)
-        self.connection.execute("update deals set position_id = -1 where id = ?", (deal_id,))
+        self.connection.execute("update deals set not_actual = 1 where id = ?", (deal_id,))
         return ret
 
     def split_deal_group(self, group_id, needed_quantiry):
-        (quant,) = self.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where g.id = ? and d.position_id <> -1", (group_id,)).fetchone() or (None, )
+        (quant,) = self.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where g.id = ? and d.not_actual is null", (group_id,)).fetchone() or (None, )
         if not quant:
             raise Exception(u'{0} это не существующий id группы'.format(group_id))
 
@@ -302,9 +302,9 @@ class deals_proc():
         def reduce_and_not_id(ids):
             return u'({0})'.format(reduce(lambda a, b:u'{0} and {1}'.format(a,b), map(lambda a: u'id <> {0}'.format(a), ids)))
         
-        splited = []
+        splited = []                    # отобранные сделки
         summ = 0                        # сумма отобранных сделок
-        for deal in self.connection.execute("select id, quantity from deals where group_id = ? and position_id <> -1 order by quantity desc", (group_id,)):
+        for deal in self.connection.execute("select id, quantity from deals where group_id = ? and not_actual is null order by quantity desc", (group_id,)):
             if summ + deal[1] <= needed_quantity:
                 splited.append(deal)
                 summ += deal[1]
@@ -312,14 +312,14 @@ class deals_proc():
                     break
                 
         if summ < needed_quantity:      # не получилось отобрать ровное количество сделок будем разбивать сделку
-            (spdid,) = self.connection.execute("select id from deals where position_id <> -1 and group_id = ? and quantity > ? and {0} order by datetime".format(reduce_and_not_id(map(lambda a:a[0], splited))), (group_id, needed_quantity - summ)).fetchone() or (None,)
+            (spdid,) = self.connection.execute("select id from deals where not_actual is null and group_id = ? and quantity > ? and {0} order by datetime".format(reduce_and_not_id(map(lambda a:a[0], splited))), (group_id, needed_quantity - summ)).fetchone() or (None,)
             if not spdid:
                 raise Exception(u'Произошла странная ошибка: в группе не оказалось сделки которая там должна быть')
-            spp = self.split_deal(spdid, needed_quantity - summ)[0]
+            spp = self.split_deal(spdid, needed_quantity - summ)[0] # id сделки с нужным количеством контрактов
             splited.append(self.connection.execute("select id, quantity from deals where id = ?",(spp,)).fetchone())
 
-        new_group_id = self.connection.execute("insert into deal_groups(deal_sign, ticket) select deal_sign, ticket from deal_groups where id = ?",(group_id,)).lastrowid
-        self.connection.execute("update deals set group_id = ? where {0} and position_id <> -1 and group_id = ?".format(reduce_and_not_id(map(lambda a:a[0], splited))), (new_group_id, group_id))
+        new_group_id = self.connection.execute("insert into deal_groups(deal_sign, ticket) select deal_sign, ticket from deal_groups where id = ?",(group_id,)).lastrowid # создаем другую группу
+        self.connection.execute("update deals set group_id = ? where {0} and not_actual is null and group_id = ?".format(reduce_and_not_id(map(lambda a:a[0], splited))), (new_group_id, group_id)) # приписываем новой группе все сделки из нашей группы которые актуальные и не входят в множество отобранных
         return [group_id, new_group_id]
             
             
@@ -342,11 +342,11 @@ class deals_proc():
         
             
     def make_positions(self):
-        for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null"):
+        for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null and not_actual is null"):
             # проходим по сделкам запоминая сделки которые уже были и закрывая их если находим подходящую парную сделку
             
             opened_deals = []
-            for deal in self.connection.execute("select id, deal_sign, quantity from deals where position_id is null and security_name = ? order by datetime", (ticket,)):
+            for deal in self.connection.execute("select id, deal_sign, quantity from deals where position_id is null and not_actual is null and security_name = ? order by datetime", (ticket,)):
                 oposing_deals = filter(lambda a: a[1] == -(deal[1]) and a[2] == deal[2], opened_deals)
                 if 0 != oposing_deals.__len__():
                     opened_deals = filter(lambda a: a != oposing_deals[0], opened_deals)
