@@ -25,6 +25,7 @@ class balance(unittest.TestCase):
 
     def test_split_deals_balance(self):
         before = self.base.connection.execute("select sum(quantity) from deals").fetchone()[0]
+        
         def split_them_all(self):
             (did, dqu) = self.base.connection.execute("select id, quantity from deals where not_actual is null and quantity > 1").fetchone() or (None, None)
             if did:
@@ -38,6 +39,10 @@ class balance(unittest.TestCase):
         self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity > 1 and not_actual is null").fetchone()[0])
         self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity = 1 and not_actual is not null").fetchone()[0])
         self.assertNotEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is not null").fetchone())
+        self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is not null").fetchone()[0], 1)
+        (mmx,) = self.base.connection.execute("select max(quantity) from deals where not_actual is null").fetchone()
+        self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is null").fetchone()[0], mmx + 1)
+        
         self.base.connection.execute("delete from deals where not_actual is not null")
 
         try:
