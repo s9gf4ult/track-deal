@@ -67,6 +67,12 @@ class balance(unittest.TestCase):
             (bquan,) = self.base.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and g.ticket = ? and g.deal_sign = -1", (ticket,)).fetchone()
             (squan,) = self.base.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and g.ticket = ? and g.deal_sign = 1", (ticket,)).fetchone()
             self.assertEqual(bquan, squan)
+
+        for (gid, ) in self.base.connection.execute("select id from deal_groups"):
+            self.assertEqual(1, self.base.connection.execute("select count(*) from (select distinct security_name from deals where group_id = ?)", (gid,)).fetchone()[0])
+            self.assertEqual(1, self.base.connection.execute("select count(*) from (select distinct deal_sign from deals where group_id = ?)", (gid,)).fetchone()[0])
+            self.assertEqual(self.base.connection.execute("select deal_sign from deals where group_id = ?", (gid,)).fetchone()[0], self.base.connection.execute("select deal_sign from deal_groups where id = ?", (gid,)).fetchone()[0])
+            self.assertEqual(self.base.connection.execute("select security_name from deals where group_id = ?", (gid,)).fetchone()[0], self.base.connection.execute("select ticket from deal_groups where id = ?", (gid,)).fetchone()[0])
             
     def test_split_deal_group(self):
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
@@ -74,7 +80,19 @@ class balance(unittest.TestCase):
 
         for (gid, quant) in self.base.connection.execute("select g.id, sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null group by g.id"):
             self.assertEqual(quant, self.base.connection.execute("select sum(quantity) from deals where ({0}) and not_actual is null".format(reduce(lambda a, b: u'{0} or {1}'.format(a,b), map(lambda a: u'group_id = {0}'.format(a), self.base.split_deal_group(gid, random.choice(range(1, quant))))))).fetchone()[0])
-            
+
+        def split_them_all(self):
+            (gid, gquant) = self.base.connection.execute("select * from (select g.id as id , sum(d.quantity) as quantity from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null group by g.id) where quantity > 1").fetchone() or (None, None)
+            if gid:
+                self.base.split_deal_group(gid, random.choice(range(1, gquant)))
+                return True
+            return False
+
+        while split_them_all(self):
+            pass
+
+        self.assertEqual(self.base.connection.execute("select sum(quantity) from deals where not_actual is null").fetchone()[0], self.base.connection.execute("select count(*) from deal_groups").fetchone()[0])
+        self.assertEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is null").fetchone())
 
 if __name__ == "__main__":
     unittest.main()
