@@ -239,19 +239,6 @@ class deals_proc():
         self.connection.execute("update deals set position_id = ? where {0}".format(roll_id_or(first_id + second_id)), (pos_id,))
         
 
-    def try_make_grouped(self, ticket):
-        def fetchclose_pair(self, ticket):
-            for (ogid, ogsign, ogquant, ogdate) in self.connection.execute("select g.id, g.deal_sign, sum(d.quantity), max(d.datetime) from deals d inner join deal_groups g on d.group_id = g.id where d.position_id is null and g.ticket = ? group by g.id order by max(d.datetime)", (ticket,)):
-                (cgid,) = self.connection.execute("select id from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null group by g.id) where datetime > ? and quantity = ?  order by datetime", (ticket, -ogsign, ogdate, ogquant)).fetchone() or (None,)
-                if cgid:
-                    #print((ogid, self.connection.execute("select count(*) from deals where group_id = ?", (ogid,)).fetchone()[0], cgid, self.connection.execute("select count(*) from deals where group_id = ?", (cgid,)).fetchone()[0]))
-                    self.make_position_from_groups(ogid, cgid)
-                    return True
-            return False
-        while fetchclose_pair(self, ticket):
-            pass
-
-
     def make_position_from_groups(self, opos, cpos):
         self.make_position(map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.group_id = ?", (opos,)).fetchall()), map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.group_id = ?", (cpos,)).fetchall()))
 
@@ -266,9 +253,6 @@ class deals_proc():
                     new_group_id = self._insert_into("deal_groups", ["deal_sign", "ticket"], [sign, ticket]).lastrowid
                     self.connection.execute("update deals set group_id = ? where id = ?", (new_group_id, deal_id))
         
-    def try_make_ungrouped(self, ticket):
-        pass
-
     def split_deal(self, deal_id, needed_quantity):
         (quant,) = self.connection.execute("select quantity from deals where id = ?", (deal_id,)).fetchone() or (None,)
         if not quant:
@@ -326,46 +310,29 @@ class deals_proc():
         return [group_id, new_group_id]
             
             
-            
-            
-
-        
-
-    # def split_all_deals(self):
-    #     def split_once_more(self):
-    #         (did,) = self.connection.execute("select id from deals where quantity > 1 and position_id <> -1").fetchone() or (None,)
-    #         if did:
-    #             self.split_deal(did, 1)
-    #             return True
-    #         return False
-
-    #     while split_once_more(self):
-    #         pass
-        
-        
-            
     def make_positions(self):
-        for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null and not_actual is null"):
-            # проходим по сделкам запоминая сделки которые уже были и закрывая их если находим подходящую парную сделку
+        
+        def fetch_one_pair_and_close(self, ticket):
+            (ogid, osign, oquant, odate) = self.connection.execute("select * from (select g.id as id, g.deal_sign as sign, sum(d.quantity) as quantity, max(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and d.position_id is null and g.ticket = ? group by g.id) where quantity > 0 order by datetime", (ticket,)).fetchone() or (None, None, None, None)
+            if ogid:
+                (cgid, cquant) = self.connection.execute("select id, quantity from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and d.position_id is null and g.ticket = ? and g.deal_sign = ? group by g.id) where quantity > 0 and datetime >= ? order by datetime", (ticket, -osign, odate)).fetchone() or (None, None)
+                if cgid:
+                    if oquant < cquant:
+                        cgid = self.split_deal_group(cgid, oquant)[0]
+                    elif oquant > cquant:
+                        ogid = self.split_deal_group(ogid, cquant)[0]
+                    self.make_position_from_groups(ogid, cgid)
+                    return True
+            return False
             
-            opened_deals = []
-            for deal in self.connection.execute("select id, deal_sign, quantity from deals where position_id is null and not_actual is null and security_name = ? order by datetime", (ticket,)):
-                oposing_deals = filter(lambda a: a[1] == -(deal[1]) and a[2] == deal[2], opened_deals)
-                if 0 != oposing_deals.__len__():
-                    opened_deals = filter(lambda a: a != oposing_deals[0], opened_deals)
-                    self.make_position(oposing_deals[0][0], deal[0])
-                    continue
-                else:
-                    opened_deals.append(deal)
-                    
+        for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null and not_actual is null"):
             self.make_groups(ticket)
-            self.try_make_grouped(ticket)
-            self.try_make_ungrouped(ticket)
-
-        # for dg in self.connection.execute("select sum(d.quantity), g.deal_sign, g.id from deals d inner join deal_groups g on d.group_id = g.id group by g.id"):
-        #     print(dg)
-        # for p in self.connection.execute("select g.id, count(d.id) from deals d inner join deal_groups g on d.group_id = g.id  where d.position_id <> -1 group by g.id"):
-        #     print(p)
+            
+        for (ticket,) in self.connection.execute("select distinct security_name from deals"):
+            while fetch_one_pair_and_close(self, ticket):
+                pass
+            
+            
                 
         (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
         if 0 != pc:
