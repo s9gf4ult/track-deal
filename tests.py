@@ -94,5 +94,20 @@ class balance(unittest.TestCase):
         self.assertEqual(self.base.connection.execute("select sum(quantity) from deals where not_actual is null").fetchone()[0], self.base.connection.execute("select count(*) from deal_groups").fetchone()[0])
         self.assertEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is null").fetchone())
 
+    def test_make_positions(self):
+        self.base.make_positions()
+        self.assertEqual(self.base.connection.execute("select sum(deal_sign * volume) from deals where not_actual is null and position_id is not null").fetchone()[0], self.base.connection.execute("select sum(direction * (open_volume - close_volume)) from positions").fetchone()[0])
+
+class balance2(balance):
+    def setUp(self):
+        coats = main.xml_parser('test_report2.xml')
+        coats.check_file()
+        self.base = main.deals_proc(coats)
+        
+
 if __name__ == "__main__":
-    unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(balance)
+    unittest.TextTestRunner(verbosity=3).run(suite)
+
+    suite2 = unittest.TestLoader().loadTestsFromTestCase(balance2)
+    unittest.TextTestRunner(verbosity=3).run(suite2)

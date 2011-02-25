@@ -122,8 +122,13 @@ class deals_proc():
         stock_comm_nds real,
         pl_gross real not null,
         pl_net real not null)""")
+        self.connection.execute("create index positions_ticket on positions(ticket)")
+        
 
         self.connection.execute("create table deal_groups (id integer primary key not null, deal_sign integer not null, ticket text not null)")
+        self.connection.executescript("""
+        create index deal_groups_deal_sign on deal_groups(deal_sign);
+        create index deal_groups_ticket on deal_groups(ticket);""")
 
         self.connection.execute("""create table deals(
         id integer primary key not null,
@@ -147,6 +152,13 @@ class deals_proc():
         foreign key (position_id) references positions(id) on delete set null
         foreign key (parent_deal_id) references deals(id) on delete set null
         foreign key (group_id) references deal_groups(id) on delete set null)""")
+        self.connection.executescript("""
+        create index delas_not_actual on deals(not_actual);
+        create index deals_datetime on deals(datetime);
+        create index deals_security_name on deals(security_name);
+        create index deals_quantity on deals(quantity);
+        create index deals_deal_sign on deals(deal_sign);""")
+        
         for coat in coats.common_deal:
             date = mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes.has_key('deal_time') and coat.attributes['deal_time'].value or (coat.attributes.has_key('deal_date') and coat.attributes['deal_date'].value))))
             x = [date.ticks(), date.Format("%Y%m%d")]
