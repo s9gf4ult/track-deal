@@ -106,11 +106,21 @@ class balance2(balance):
         coats.check_file()
         self.base = main.deals_proc(coats)
         self.accute = 8
-        
+
+class balance3(balance):
+    def setUp(self):
+        coats = main.xml_parser('test_report3.xml')
+        coats.check_file()
+        self.base = main.deals_proc(coats)
+        self.accute = 10
+
 
 if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(balance)
     unittest.TextTestRunner(verbosity=3).run(suite)
 
     suite2 = unittest.TestLoader().loadTestsFromTestCase(balance2)
+    unittest.TextTestRunner(verbosity=3).run(suite2)
+
+    suite2 = unittest.TestLoader().loadTestsFromTestCase(balance3)
     unittest.TextTestRunner(verbosity=3).run(suite2)
