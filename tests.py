@@ -10,6 +10,7 @@ class balance(unittest.TestCase):
         coats = main.xml_parser('test_report1.xml')
         coats.check_file()
         self.base = main.deals_proc(coats)
+        self.accute = 4
 
     def test_balanced(self):
         try:
@@ -39,7 +40,8 @@ class balance(unittest.TestCase):
         self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity > 1 and not_actual is null").fetchone()[0])
         self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity = 1 and not_actual is not null").fetchone()[0])
         self.assertNotEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is not null").fetchone())
-        self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is not null").fetchone()[0], 1)
+        if self.base.connection.execute("select count(*) from deals where not_actual is not null").fetchone()[0] > 0:
+            self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is not null").fetchone()[0], 1)
         (mmx,) = self.base.connection.execute("select max(quantity) from deals where not_actual is null").fetchone()
         self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is null").fetchone()[0], mmx + 1)
         
@@ -60,7 +62,7 @@ class balance(unittest.TestCase):
     def test_make_groups(self):
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
             self.base.make_groups(ticket)
-        self.assertEqual(4, self.base.connection.execute("select count(*) from deal_groups").fetchone()[0]) # отчет сгенерирован так специально
+        self.assertEqual(self.accute, self.base.connection.execute("select count(*) from deal_groups").fetchone()[0]) # отчет сгенерирован так специально
         self.assertEqual(0, self.base.connection.execute("select count(*) from deals where group_id is null").fetchone()[0])
         
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
@@ -78,7 +80,7 @@ class balance(unittest.TestCase):
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
             self.base.make_groups(ticket)
 
-        for (gid, quant) in self.base.connection.execute("select g.id, sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null group by g.id"):
+        for (gid, quant) in self.base.connection.execute("select * from (select g.id as id, sum(d.quantity) as quantity from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null group by g.id) where quantity > 1"):
             self.assertEqual(quant, self.base.connection.execute("select sum(quantity) from deals where ({0}) and not_actual is null".format(reduce(lambda a, b: u'{0} or {1}'.format(a,b), map(lambda a: u'group_id = {0}'.format(a), self.base.split_deal_group(gid, random.choice(range(1, quant))))))).fetchone()[0])
 
         def split_them_all(self):
@@ -103,6 +105,7 @@ class balance2(balance):
         coats = main.xml_parser('test_report2.xml')
         coats.check_file()
         self.base = main.deals_proc(coats)
+        self.accute = 8
         
 
 if __name__ == "__main__":
