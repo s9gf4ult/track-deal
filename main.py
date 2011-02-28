@@ -18,6 +18,7 @@ class main_ui():
         self.choose_file = a.get_object("choose_file")
         self.buffer = a.get_object("buffer")
         self.comma = a.get_object("comma_separator")
+        self.stock_buttons = a.get_object("stock_buttons")
         self.filefilter = a.get_object("filefilter")
         self.filefilter.add_mime_type("application/xml")
         self.window.connect("destroy", gtk.main_quit)
@@ -25,9 +26,11 @@ class main_ui():
         self.segfault.connect("clicked", self.clicked, self._gen_seg)
         self.axce1.connect("clicked", self.clicked, self._gen_axcel)
 
-    def _gen_seg(self):
+    def _gen_seg(self, ticks):
         ret = u''
         for pos in self.deals.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions where id <> -1 order by close_datetime, open_datetime"):
+            if not pos[0] in ticks:
+                continue
             (open_datetime, close_datetime) = map(lambda a: mx.DateTime.DateTimeFromTicks(a).Format("%d.%m.%Y"), pos[-2:])
             ret += u'{0}\t{1}'.format(pos[0], -1 == pos[1] and 'L' or 'S')
             v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[2:-2])
@@ -36,14 +39,16 @@ class main_ui():
             ret += u'\t{0}\t\t\t\t\t\t{1}\t{2}\n'.format(v, open_datetime, close_datetime)
         return ret
 
-    def _gen_axcel(self):
+    def _gen_axcel(self, ticks):
         ret = u''
         for pos in self.deals.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions where id <> -1 order by close_datetime, open_datetime"):
+            if not pos[2] in ticks:
+                continue
             ddd = map(lambda a: mx.DateTime.DateTimeFromTicks(a), pos[:2])
             vvv = map(lambda a: [a.Format("%d.%m.%Y"), a.Format("%H:%M:%S")], ddd)
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
             ret += u'\t{0}\t{1}'.format(pos[2], -1 == pos[3] and 'L' or 'S')
-            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[4:])
+            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: float(a).__trunc__(), pos[4:]))
             if self.comma.props.active:
                 aa = aa.replace('.', ',')
             ret += u'\t{0}\n'.format(aa)
@@ -52,7 +57,9 @@ class main_ui():
 
     def clicked(self, button, call_me):
         if hasattr(self, "coats") and self.coats.checked and hasattr(self, "deals") and self.deals.ready:
-            self.buffer.set_text(call_me())
+            bc = []
+            self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.get_active() and bc.append(wid.get_label()))
+            self.buffer.set_text(call_me(bc))
         else:
             self.show_error(u'Сначала надо указать валидный файл')
 
@@ -77,6 +84,22 @@ class main_ui():
         except Exception as e:
             self.show_error(traceback.format_exc())
             return
+
+        self.stock_buttons.foreach(self.stock_buttons.remove)
+        for (ticket,) in self.deals.connection.execute("select distinct security_name from deals order by security_name"):
+            b = gtk.ToggleButton(label = ticket)
+            b.set_active(True)
+            self.stock_buttons.pack_start(b, False, True, 5)
+
+        self.stock_buttons.pack_start(gtk.HSeparator(), False, True)
+        resall = gtk.Button(u'Сбросить все')
+        resall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(False)))
+        self.stock_buttons.pack_start(resall, False, True)
+        invall = gtk.Button(u'Реверс все')
+        invall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
+        self.stock_buttons.pack_start(invall, False, True)
+            
+        self.window.show_all()
             
     def show(self):
         self.window.show_all()
