@@ -73,7 +73,7 @@
                       <object class="GtkHButtonBox" id="hbuttonbox2">
                         <property name="visible">True</property>
                         <property name="spacing">20</property>
-                        <property name="layout_style">start</property>
+                        <property name="layout_style">spread</property>
                         <child>
                           <object class="GtkButton" id="gen_seg">
                             <property name="label" translatable="yes">segfault</property>
@@ -131,23 +131,36 @@
                     <property name="visible">True</property>
                     <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkTreeView" id="date_view">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="model">date_store</property>
-                      </object>
-                      <packing>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
                       <object class="GtkTreeView" id="stock_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">stock_store</property>
+                        <property name="search_column">0</property>
                       </object>
                       <packing>
+                        <property name="expand">False</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHSeparator" id="hseparator1">
+                        <property name="visible">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
                         <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkTreeView" id="date_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">date_store</property>
+                        <property name="search_column">0</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -157,13 +170,23 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkVSeparator" id="vseparator1">
+                    <property name="visible">True</property>
+                    <property name="orientation">vertical</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkTextView" id="textview1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="buffer">blog_buffer</property>
                   </object>
                   <packing>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>

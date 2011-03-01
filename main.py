@@ -19,6 +19,12 @@ class main_ui():
         self.buffer = a.get_object("buffer")
         self.comma = a.get_object("comma_separator")
         self.stock_buttons = a.get_object("stock_buttons")
+        self.stock_store = a.get_object("stock_store")
+        self.date_store = a.get_object("date_store")
+        self.stock_view = a.get_object("stock_view")
+        self.date_view = a.get_object("date_view")
+        self.stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 1))
+        self.date_view.append_column(gtk.TreeViewColumn(u'Даты начала - конца',gtk.CellRendererText(), text = 1))
         self.filefilter = a.get_object("filefilter")
         self.filefilter.add_mime_type("application/xml")
         self.window.connect("destroy", gtk.main_quit)
@@ -90,6 +96,7 @@ class main_ui():
             b = gtk.ToggleButton(label = ticket)
             b.set_active(True)
             self.stock_buttons.pack_start(b, False, True, 5)
+            self.stock_store.append([ticket])
 
         resall = gtk.Button(u'Сбросить все')
         resall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(False)))
@@ -97,7 +104,6 @@ class main_ui():
         invall = gtk.Button(u'Реверс все')
         invall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
         self.stock_buttons.pack_end(invall, False, True)
-
         self.show()
             
     def show(self):
