@@ -91,13 +91,12 @@ class main_ui():
             b.set_active(True)
             self.stock_buttons.pack_start(b, False, True, 5)
 
-        self.stock_buttons.pack_start(gtk.HSeparator(), False, True)
         resall = gtk.Button(u'Сбросить все')
         resall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(False)))
-        self.stock_buttons.pack_start(resall, False, True)
+        self.stock_buttons.pack_end(resall, False, True)
         invall = gtk.Button(u'Реверс все')
         invall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
-        self.stock_buttons.pack_start(invall, False, True)
+        self.stock_buttons.pack_end(invall, False, True)
             
         self.window.show_all()
             
