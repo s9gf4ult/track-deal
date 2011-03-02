@@ -9,6 +9,45 @@ import re
 import traceback
 
 class main_ui():
+    def _stock_cursor_changed(self, tw, date_store):
+        path = tw.get_cursor()[0]
+        stock = self.stock_store.get_value(self.stock_store.get_iter(path), 0)
+        ii = date_store.get_iter_first()
+        while ii:
+            date_store.remove(ii)
+            ii = date_store.get_iter_first()
+        for (pid, pcount, bdate, edate) in self.deals.connection.execute("select id, count, open_datetime, close_datetime from positions where ticket = ? order by close_datetime, open_datetime", (stock.decode('utf-8'),)):
+            ins = u'{0} - {1}'.format(mx.DateTime.DateTimeFromTicks(bdate).Format("%Y-%m-%dT%H:%M:%S"), mx.DateTime.DateTimeFromTicks(edate).Format("%Y-%m-%dT%H:%M:%S"))
+            date_store.append([ins, pcount, pid])
+
+    def _get_text_for_blog(self, pid):
+        (ticket, direction, open_date, close_date, open_coast, close_coast, count, com, pl_net) = self.deals.connection.execute("select ticket, direction, open_datetime, close_datetime, open_coast, close_coast, count, broker_comm + stock_comm, pl_net from positions where id = ?", (pid,)).fetchone()
+        isprof = pl_net > 0
+        ret = u'''{0} {1} позиция по {2} инструмента {3}.
+Цена открытия {4} в {5}.
+Цена закрытия {6} в {7}.
+Движение составило {8}.
+{9}.
+{10}
+'''.format(direction == -1 and u'Длинная' or u'Короткая',
+           pl_net > 0 and u'прибыльная' or u'убыточная',
+           count == 1 and u'1 контракту' or u'{0} контрактам'.format(count),
+           ticket,
+           open_coast, mx.DateTime.DateTimeFromTicks(open_date).Format("%H:%M:%S"),
+           close_coast, mx.DateTime.DateTimeFromTicks(close_date).Format("%H:%M:%S"),
+           direction * (open_coast - close_coast),
+           pl_net > 0 and u'Прибыль составила {0}'.format(pl_net) or u'Убыток составил {0}'.format(-pl_net),
+           com > 0 and u'Комиссия составила {0}.\n'.format(com) or '')
+                   
+                                                   
+        return ret
+
+    def _date_cursor_changed(self, tw):
+        path = tw.get_cursor()[0]
+        pid = self.date_store.get_value(self.date_store.get_iter(path), 2)
+        self.blog_buffer.set_text(self._get_text_for_blog(pid))
+        
+    
     def __init__(self):
         a = gtk.Builder()
         a.add_from_file("main_ui.glade")
@@ -22,9 +61,13 @@ class main_ui():
         self.stock_store = a.get_object("stock_store")
         self.date_store = a.get_object("date_store")
         self.stock_view = a.get_object("stock_view")
+        self.stock_view.connect("cursor-changed", self._stock_cursor_changed, self.date_store)
         self.date_view = a.get_object("date_view")
-        self.stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 1))
-        self.date_view.append_column(gtk.TreeViewColumn(u'Даты начала - конца',gtk.CellRendererText(), text = 1))
+        self.date_view.connect("cursor-changed", self._date_cursor_changed)
+        self.stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
+        self.date_view.append_column(gtk.TreeViewColumn(u'Даты начала - конца', gtk.CellRendererText(), text = 0))
+        self.date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 1))
+        self.blog_buffer = a.get_object("blog_buffer")
         self.filefilter = a.get_object("filefilter")
         self.filefilter.add_mime_type("application/xml")
         self.window.connect("destroy", gtk.main_quit)
