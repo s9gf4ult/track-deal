@@ -8,7 +8,7 @@
     <item deal_time="2010-01-01T00:00:00" security_name="A" price="1" quantity="10" volume="10" deal_sign="-1" ></item>
     <item deal_time="2010-01-01T00:00:02" security_name="A" price="1" quantity="10" volume="10" deal_sign="1" ></item>
     <item deal_time="2010-01-01T00:00:03" security_name="B" price="1" quantity="7" volume="7" deal_sign="-1" ></item>
-    <item deal_time="2010-01-01T00:00:04" security_name="B" price="1" quantity="3" volume="7" deal_sign="-1" ></item>
+    <item deal_time="2010-01-01T00:00:04" security_name="B" price="1" quantity="3" volume="3" deal_sign="-1" ></item>
     <item deal_time="2010-01-01T00:00:05" security_name="B" price="1" quantity="10" volume="10" deal_sign="1"/>
   </common_deal>
 </report>

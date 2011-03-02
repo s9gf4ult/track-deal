@@ -26,6 +26,7 @@ class balance(unittest.TestCase):
 
     def test_split_deals_balance(self):
         before = self.base.connection.execute("select sum(quantity) from deals").fetchone()[0]
+        before_vol = self.base.connection.execute("select sum(volume) from deals").fetchone()[0]
         
         def split_them_all(self):
             (did, dqu) = self.base.connection.execute("select id, quantity from deals where not_actual is null and quantity > 1").fetchone() or (None, None)
@@ -37,6 +38,7 @@ class balance(unittest.TestCase):
         while split_them_all(self):
             pass
 
+        self.assertAlmostEqual(self.base.connection.execute("select sum(volume) from deals where not_actual is null").fetchone()[0], before_vol)
         self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity > 1 and not_actual is null").fetchone()[0])
         self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity = 1 and not_actual is not null").fetchone()[0])
         self.assertNotEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is not null").fetchone())
@@ -108,10 +110,12 @@ class balance(unittest.TestCase):
 
     def test_volumes(self):
         self.base.make_positions()
-        (osv, csv) = self.base.connection.execute("select sum(open_volume), sum(close_volume) from positions").fetchone()
-        (oov, cov) = self.base.connection.execute("select sum(open_coast * count), sum(close_coast * count) from positions").fetchone()
-        self.assertAlmostEqual(osv, oov)
-        self.assertAlmostEqual(csv, cov)
+        for (vol, price ,quant, ticket) in self.base.connection.execute("select volume, price, quantity, security_name from deals where not_actual is null and position_id is not null"):
+            self.assertAlmostEqual(float(vol), float(price * quant), 7, u'{0}::: vol={1}, price={2}, quantity={3}'.format(ticket, vol, price, quant))
+        # (osv, csv) = self.base.connection.execute("select sum(open_volume), sum(close_volume) from positions").fetchone()
+        # (oov, cov) = self.base.connection.execute("select sum(open_coast * count), sum(close_coast * count) from positions").fetchone()
+        # self.assertAlmostEqual(osv, oov)
+        # self.assertAlmostEqual(csv, cov)
 
 class balance2(balance):
     def setUp(self):
@@ -132,7 +136,7 @@ class balance4(balance):
         coats = main.xml_parser('test_report4.xml')
         coats.check_file()
         self.base = main.deals_proc(coats)
-        self.accute = 12
+        self.accute = 14
 
         
 if __name__ == "__main__":
