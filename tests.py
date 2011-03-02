@@ -100,6 +100,19 @@ class balance(unittest.TestCase):
         self.base.make_positions()
         self.assertAlmostEqual(self.base.connection.execute("select sum(deal_sign * volume) from deals where not_actual is null and position_id is not null").fetchone()[0], self.base.connection.execute("select sum(direction * (open_volume - close_volume)) from positions").fetchone()[0])
 
+    def test_pl_net_value(self):
+        self.base.make_positions()
+        (sm,) = self.base.connection.execute("select sum((deal_sign * volume) - broker_comm - stock_comm) from deals where not_actual is null and position_id is not null").fetchone()
+        (spm,) = self.base.connection.execute("select sum(pl_net) from positions").fetchone()
+        self.assertAlmostEqual(sm, spm)
+
+    def test_volumes(self):
+        self.base.make_positions()
+        (osv, csv) = self.base.connection.execute("select sum(open_volume), sum(close_volume) from positions").fetchone()
+        (oov, cov) = self.base.connection.execute("select sum(open_coast * count), sum(close_coast * count) from positions").fetchone()
+        self.assertAlmostEqual(osv, oov)
+        self.assertAlmostEqual(csv, cov)
+
 class balance2(balance):
     def setUp(self):
         coats = main.xml_parser('test_report2.xml')
@@ -113,8 +126,16 @@ class balance3(balance):
         coats.check_file()
         self.base = main.deals_proc(coats)
         self.accute = 10
+
+class balance4(balance):
+    def setUp(self):
+        coats = main.xml_parser('test_report4.xml')
+        coats.check_file()
+        self.base = main.deals_proc(coats)
+        self.accute = 12
+
         
 if __name__ == "__main__":
-    for utest in [balance, balance2, balance3]:
+    for utest in [balance, balance2, balance3, balance4]:
         suite = unittest.TestLoader().loadTestsFromTestCase(utest)
         unittest.TextTestRunner(verbosity=4).run(suite)

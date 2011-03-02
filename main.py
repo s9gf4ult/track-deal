@@ -127,6 +127,7 @@ class deals_proc():
         self.ready = False
         self.connection = sqlite3.connect(":memory:")
         self.connection.execute("pragma foreign_keys=on")
+        sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
         self.connection.execute("""create table positions(
         id integer primary key not null,
         ticket text not null,
