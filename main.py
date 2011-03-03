@@ -97,8 +97,8 @@ class main_ui():
         invall = gtk.Button(u'Реверс все')
         invall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
         self.stock_buttons.pack_end(invall, False, True)
-            
-        self.window.show_all()
+
+        self.show()
             
     def show(self):
         self.window.show_all()
@@ -275,7 +275,7 @@ class deals_proc():
         
 
     def make_position_from_groups(self, opos, cpos):
-        self.make_position(map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.group_id = ?", (opos,)).fetchall()), map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.group_id = ?", (cpos,)).fetchall()))
+        self.make_position(map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.not_actual is null and d.group_id = ?", (opos,)).fetchall()), map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.not_actual is null and d.group_id = ?", (cpos,)).fetchall()))
 
     def make_groups(self, ticket):
         for sign in [-1, 1]:
@@ -369,7 +369,7 @@ class deals_proc():
             
             
                 
-        (pc,) = self.connection.execute("select count(*) from deals where position_id is null").fetchone()
+        (pc,) = self.connection.execute("select count(*) from deals where position_id is null and not_actual is null").fetchone()
         if 0 != pc:
             raise Exception(u'Не получилось расписать по позициям {0} сделок'.format(pc))
         
