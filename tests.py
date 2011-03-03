@@ -112,10 +112,10 @@ class balance(unittest.TestCase):
         self.base.make_positions()
         for (vol, price ,quant, ticket) in self.base.connection.execute("select volume, price, quantity, security_name from deals where not_actual is null and position_id is not null"):
             self.assertAlmostEqual(float(vol), float(price * quant), 7, u'{0}::: vol={1}, price={2}, quantity={3}'.format(ticket, vol, price, quant))
-        # (osv, csv) = self.base.connection.execute("select sum(open_volume), sum(close_volume) from positions").fetchone()
-        # (oov, cov) = self.base.connection.execute("select sum(open_coast * count), sum(close_coast * count) from positions").fetchone()
-        # self.assertAlmostEqual(osv, oov)
-        # self.assertAlmostEqual(csv, cov)
+        (osv, csv) = self.base.connection.execute("select sum(open_volume), sum(close_volume) from positions").fetchone()
+        (oov, cov) = self.base.connection.execute("select sum(open_coast * count), sum(close_coast * count) from positions").fetchone()
+        self.assertAlmostEqual(osv, oov)
+        self.assertAlmostEqual(csv, cov)
 
 class balance2(balance):
     def setUp(self):
