@@ -57,6 +57,8 @@ class main_ui():
         self.choose_file = a.get_object("choose_file")
         self.buffer = a.get_object("buffer")
         self.comma = a.get_object("comma_separator")
+        self.comma.configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
+        self.comma_as_splitter = a.get_object("comma_as_splitter")
         self.stock_buttons = a.get_object("stock_buttons")
         self.stock_store = a.get_object("stock_store")
         self.date_store = a.get_object("date_store")
@@ -82,8 +84,8 @@ class main_ui():
                 continue
             (open_datetime, close_datetime) = map(lambda a: mx.DateTime.DateTimeFromTicks(a).Format("%d.%m.%Y"), pos[-2:])
             ret += u'{0}\t{1}'.format(pos[0], -1 == pos[1] and 'L' or 'S')
-            v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), pos[2:-2])
-            if self.comma.props.active:
+            v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[2:-2]))
+            if self.comma_as_splitter.props.active:
                 v = v.replace('.', ',')
             ret += u'\t{0}\t\t\t\t\t\t{1}\t{2}\n'.format(v, open_datetime, close_datetime)
         return ret
@@ -97,8 +99,8 @@ class main_ui():
             vvv = map(lambda a: [a.Format("%d.%m.%Y"), a.Format("%H:%M:%S")], ddd)
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
             ret += u'\t{0}\t{1}'.format(pos[2], -1 == pos[3] and 'L' or 'S')
-            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: float(a).__trunc__(), pos[4:]))
-            if self.comma.props.active:
+            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[4:]))
+            if self.comma_as_splitter.props.active:
                 aa = aa.replace('.', ',')
             ret += u'\t{0}\n'.format(aa)
             
