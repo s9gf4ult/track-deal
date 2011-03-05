@@ -2,14 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import main
+import deals_core
+import sources
 import random
 
 class balance(unittest.TestCase):
     def setUp(self):
-        coats = main.xml_parser('test_report1.xml')
+        coats = sources.xml_parser('tests/test_report1.xml')
         coats.check_file()
-        self.base = main.deals_proc(coats)
+        self.base = deals_core.deals_proc(coats)
         self.accute = 4
 
     def test_balanced(self):
@@ -119,23 +120,23 @@ class balance(unittest.TestCase):
 
 class balance2(balance):
     def setUp(self):
-        coats = main.xml_parser('test_report2.xml')
+        coats = sources.xml_parser('tests/test_report2.xml')
         coats.check_file()
-        self.base = main.deals_proc(coats)
+        self.base = deals_core.deals_proc(coats)
         self.accute = 8
 
 class balance3(balance):
     def setUp(self):
-        coats = main.xml_parser('test_report3.xml')
+        coats = sources.xml_parser('tests/test_report3.xml')
         coats.check_file()
-        self.base = main.deals_proc(coats)
+        self.base = deals_core.deals_proc(coats)
         self.accute = 10
 
 class balance4(balance):
     def setUp(self):
-        coats = main.xml_parser('test_report4.xml')
+        coats = sources.xml_parser('tests/test_report4.xml')
         coats.check_file()
-        self.base = main.deals_proc(coats)
+        self.base = deals_core.deals_proc(coats)
         self.accute = 14
 
         
