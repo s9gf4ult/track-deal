@@ -7,16 +7,18 @@ import re
 
 class deals_proc():
     def __init__(self):
-        self.ready = False
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
+        self.connection = None
+        self.have_changes = False
 
     def open(self, filename):
         self.filename = filename
         self.connection = sqlite3.connect(filename, detect_types = sqlite3.PARSE_DECLTYPES)
+        self.last_total_changes = self.connection.total_changes
         self.connection.execute("pragma foreign_keys=on")
-        self.ready = True
+        self.connection.execute("begin transaction")
 
     def create_new(self, filename):
         self.open(filename)
@@ -72,27 +74,44 @@ class deals_proc():
         create index deals_security_name on deals(security_name);
         create index deals_quantity on deals(quantity);
         create index deals_deal_sign on deals(deal_sign);""")
+        self.connection.commit()
+        self.connection.execute("begin transaction")
 
     def close(self):
-        self.connection.close()
-        self.ready = False
+        if self.connection:
+            if self.last_total_changes < self.connection.total_changes and self.filename != ":memory:"
+                raise Exception(u'В базе данных проведено {0} изменений. Выполните Commit или Rollback'.format(self.connection.total_changes - self.last_total_changes))
+            else:
+                self.connection.close()
+                self.connection = None
+                self.have_changes = False
+                self.filename = None
+            
+            
 
     def get_from_source(self, coats):
         for coat in coats.common_deals:
             coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
             self._insert_from_hash('deals', coat)
         
-        
+    def commit(self):
+        self.connection.commit()
+        self.last_total_changes = self.connection.total_changes
+
+    def rollback(self):
+        self.connection.rollback()
+        self.last_total_changes = self.connection.total_changes
 
     def _insert_into(self, tablename, fields, values):
-        return self.connection.execute(u'insert into {0}({1}) values ({2})'.format(tablename, reduce(lambda a, b: u'{0}, {1}'.format(a, b), fields), reduce(lambda a, b: u'{0}, {1}'.format(a, b), map(lambda a: '?', fields))), values)
+        ret = self.connection.execute(u'insert into {0}({1}) values ({2})'.format(tablename, reduce(lambda a, b: u'{0}, {1}'.format(a, b), fields), reduce(lambda a, b: u'{0}, {1}'.format(a, b), map(lambda a: '?', fields))), values)
+        return ret
 
     def _insert_from_hash(self, tablename, hashtable):
         fields, values = [], []
         for key in hashtable:
             fields.append(key)
             values.append(hashtable[key])
-        self._insert_into(tablename, fields, values)
+        return self._insert_into(tablename, fields, values)
 
     def check_balance(self):
         for (ticket,) in self.connection.execute("select distinct security_name from deals"):

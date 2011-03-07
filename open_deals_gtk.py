@@ -49,8 +49,9 @@ class main_ui():
         
     
     def __init__(self):
-        a = gtk.Builder()
-        a.add_from_file("main_ui.glade")
+        self.database = deals_core.deals_proc()
+        self.builder = gtk.Builder()
+        self.builder.add_from_file("main_ui.glade")
         self.window = a.get_object("main_window")
         self.axce1 = a.get_object("gen_axcel")
         self.segfault = a.get_object("gen_seg")
