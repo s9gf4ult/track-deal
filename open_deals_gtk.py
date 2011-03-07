@@ -56,24 +56,54 @@ class main_ui():
             print(traceback.format_exc())
         
     def create_in_memory(self, wid):
-        self.database.create_new(":memory:")
+        if self.database.connection:
+            self.close(None)
+        if not self.database.connection:
+            self.database.create_new(":memory:")
 
     def create_in_file(self, wid):
-        win = self.builder.get_object("main_window")
-        diag = gtk.FileChooserDialog(title = u'Новая база', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE)
-        diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
-        diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
-        if diag.run() == gtk.BUTTONS_OK:
-            try:
-                self.database.create_new(diag.get_filename())
-            except Exception as e:
-                self.show_error(e.__str__())
-                print(traceback.format_exc())
-        diag.destroy()
+        if self.database.connection:
+            self.close(None)
+        if not self.database.connection:
+            win = self.builder.get_object("main_window")
+            diag = gtk.FileChooserDialog(title = u'Новая база', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE)
+            diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
+            diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
+            if diag.run() == gtk.BUTTONS_OK:
+                try:
+                    self.database.create_new(diag.get_filename())
+                except Exception as e:
+                    self.show_error(e.__str__())
+                    print(traceback.format_exc())
+            diag.destroy()
 
     def open_existing(self, wid):
-        diag = self.builder.get_object("open_sqlite_database")
-        diag.show()
+        if self.database.connection:
+            self.close(None)
+        if not self.database.connection:
+            win = self.builder.get_object("main_window")
+            diag = gtk.FileChooserDialog(title = u'Открыть базу', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
+            diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
+            diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
+            fl = gtk.FileFilter()
+            fl.add_mime_type('application/x-sqlite3')
+            diag.set_filter(fl)
+            if diag.run() == gtk.BUTTONS_OK:
+                try:
+                    self.database.open_existing(diag.get_filename())
+                except Exception as e:
+                    self.show_error(e.__str__())
+                    print(traceback.format_exc())
+            diag.destroy()
+            fl.destroy()
+            
+    def close(self, wid):
+        try:
+            self.database.close()
+        except Exception as e:
+            self.show_error(e.__str__())
+            print(traceback.format_exc())
+        
                 
     def __init__(self):
         self.database = deals_core.deals_proc()
@@ -83,6 +113,7 @@ class main_ui():
                                       "on_create_database_in_memory_activate" : self.create_in_memory,
                                       "on_create_database_activate" : self.create_in_file,
                                       "on_open_database_activate" : self.open_existing,
+                                      "on_close_database_activate" : self.close,
                                       "on_quit_activate" : self.quit})
     
         
