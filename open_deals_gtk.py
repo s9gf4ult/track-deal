@@ -50,10 +50,15 @@ class main_ui():
     def quit(self, wid):
         try:
             self.database.close()
-            gtk.main_quit()
         except Exception as e:
             self.show_error(e.__str__())
             print(traceback.format_exc())
+            return True
+        gtk.main_quit()
+        return False
+
+    def window_quit(self, wid, evt):
+        return self.quit(wid)
         
     def create_in_memory(self, wid):
         if self.database.connection:
@@ -111,18 +116,42 @@ class main_ui():
     def rollback(self, wid):
         if self.database.connection:
             self.database.rollback()
-                
+
+    def load_open_ru(self, wid):
+        if not self.database.connection:
+            self.show_error(u'Сначала открыть или создать новую базу')
+            return
+        win = self.builder.get_object("main_window")
+        diag = gtk.FileChooserDialog(title = u'Открыть отчет "Открытие"', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
+        diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
+        diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
+        fl = gtk.FileFilter()
+        fl.add_mime_type('application/xml')
+        diag.set_filter(fl)
+        if diag.run() == gtk.BUTTONS_OK:
+            try:
+                xs = sources.xml_parser(diag.get_filename())
+                xs.check_file()
+                self.database.get_from_source(xs)
+            except Exception as e:
+                self.show_error(e.__str__())
+                print(traceback.format_exc())
+        diag.destroy()
+        fl.destroy()
+
+
     def __init__(self):
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
-        self.builder.connect_signals({"on_main_window_destroy" : self.quit,
+        self.builder.connect_signals({"on_main_window_delete_event" : self.window_quit,
                                       "on_create_database_in_memory_activate" : self.create_in_memory,
                                       "on_create_database_activate" : self.create_in_file,
                                       "on_open_database_activate" : self.open_existing,
                                       "on_close_database_activate" : self.close,
                                       "on_transaction_commit_activate" : self.commit,
                                       "on_transaction_rollback_activate" : self.rollback,
+                                      "on_deals_load_open_ru_activate" : self.load_open_ru,
                                       "on_quit_activate" : self.quit})
     
         

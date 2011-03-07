@@ -23,7 +23,7 @@
     <property name="role">open_deals_main_window</property>
     <property name="default_width">600</property>
     <property name="default_height">500</property>
-    <signal name="destroy" handler="on_main_window_destroy"/>
+    <signal name="delete_event" handler="on_main_window_delete_event"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -445,16 +445,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkFileChooserButton" id="choose_file">
-            <property name="visible">True</property>
-            <property name="filter">xml_filter</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkStatusbar" id="statusbar1">
             <property name="visible">True</property>
             <property name="spacing">2</property>
@@ -462,14 +452,13 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>
     </child>
   </object>
   <object class="GtkTextBuffer" id="buffer"/>
-  <object class="GtkFileFilter" id="xml_filter"/>
   <object class="GtkTextBuffer" id="blog_buffer"/>
   <object class="GtkAction" id="quit">
     <property name="stock_id">gtk-quit</property>
@@ -503,6 +492,7 @@
   </object>
   <object class="GtkAction" id="deals_load_open_ru">
     <property name="label">&#x417;&#x430;&#x433;&#x440;&#x443;&#x437;&#x438;&#x442;&#x44C; &#x438;&#x437; &#x43E;&#x442;&#x447;&#x435;&#x442;&#x430; "&#x41E;&#x442;&#x43A;&#x440;&#x44B;&#x442;&#x438;&#x435;"</property>
+    <signal name="activate" handler="on_deals_load_open_ru_activate"/>
   </object>
   <object class="GtkAction" id="positions_make">
     <property name="label">&#x420;&#x430;&#x441;&#x43F;&#x438;&#x441;&#x430;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
@@ -512,5 +502,4 @@
     <property name="icon_name">computer</property>
     <signal name="activate" handler="on_create_database_in_memory_activate"/>
   </object>
-  <object class="GtkFileFilter" id="sqlite_filter"/>
 </interface>
