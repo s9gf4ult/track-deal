@@ -103,7 +103,14 @@ class main_ui():
         except Exception as e:
             self.show_error(e.__str__())
             print(traceback.format_exc())
-        
+
+    def commit(self, wid):
+        if self.database.connection:
+            self.database.commit()
+
+    def rollback(self, wid):
+        if self.database.connection:
+            self.database.rollback()
                 
     def __init__(self):
         self.database = deals_core.deals_proc()
@@ -114,6 +121,8 @@ class main_ui():
                                       "on_create_database_activate" : self.create_in_file,
                                       "on_open_database_activate" : self.open_existing,
                                       "on_close_database_activate" : self.close,
+                                      "on_transaction_commit_activate" : self.commit,
+                                      "on_transaction_rollback_activate" : self.rollback,
                                       "on_quit_activate" : self.quit})
     
         

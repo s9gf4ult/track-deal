@@ -490,10 +490,12 @@
   <object class="GtkAction" id="transaction_commit">
     <property name="label">Commit</property>
     <property name="stock_id">gtk-apply</property>
+    <signal name="activate" handler="on_transaction_commit_activate"/>
   </object>
   <object class="GtkAction" id="transaction_rollback">
     <property name="label">Rollback</property>
     <property name="stock_id">gtk-cancel</property>
+    <signal name="activate" handler="on_transaction_rollback_activate"/>
   </object>
   <object class="GtkAction" id="close_database">
     <property name="stock_id">gtk-close</property>
