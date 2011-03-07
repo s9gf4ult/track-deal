@@ -57,28 +57,11 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem3">
-                        <property name="visible">True</property>
-                        <property name="related_action">save_database</property>
-                        <property name="use_action_appearance">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem4">
-                        <property name="visible">True</property>
-                        <property name="related_action">save_as_database</property>
-                        <property name="use_action_appearance">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem6">
                         <property name="visible">True</property>
                         <property name="related_action">close_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -101,9 +84,49 @@
               </object>
             </child>
             <child>
+              <object class="GtkMenuItem" id="menuitem5">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">&#x421;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu4">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem3">
+                        <property name="visible">True</property>
+                        <property name="related_action">deals_load_open_ru</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem6">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">&#x41F;&#x43E;&#x437;&#x438;&#x446;&#x438;&#x438;</property>
+                <property name="use_underline">True</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu5">
+                    <property name="visible">True</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem4">
+                        <property name="visible">True</property>
+                        <property name="related_action">positions_make</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
               <object class="GtkMenuItem" id="menuitem2">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">_&#x422;&#x440;&#x430;&#x43D;&#x437;&#x430;&#x43A;&#x446;&#x438;&#x44F;</property>
+                <property name="label" translatable="yes">_&#x411;&#x430;&#x437;&#x430;</property>
                 <property name="use_underline">True</property>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu2">
@@ -449,12 +472,6 @@
   <object class="GtkAction" id="open_database">
     <property name="stock_id">gtk-open</property>
   </object>
-  <object class="GtkAction" id="save_database">
-    <property name="stock_id">gtk-save</property>
-  </object>
-  <object class="GtkAction" id="save_as_database">
-    <property name="stock_id">gtk-save-as</property>
-  </object>
   <object class="GtkAction" id="transaction_commit">
     <property name="label">Commit</property>
     <property name="stock_id">gtk-apply</property>
@@ -465,5 +482,11 @@
   </object>
   <object class="GtkAction" id="close_database">
     <property name="stock_id">gtk-close</property>
+  </object>
+  <object class="GtkAction" id="deals_load_open_ru">
+    <property name="label">&#x417;&#x430;&#x433;&#x440;&#x443;&#x437;&#x438;&#x442;&#x44C; &#x438;&#x437; &#x43E;&#x442;&#x447;&#x435;&#x442;&#x430; "&#x41E;&#x442;&#x43A;&#x440;&#x44B;&#x442;&#x438;&#x435;"</property>
+  </object>
+  <object class="GtkAction" id="positions_make">
+    <property name="label">&#x420;&#x430;&#x441;&#x43F;&#x438;&#x441;&#x430;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
   </object>
 </interface>
