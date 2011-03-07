@@ -1,21 +1,31 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import sqlite3
-import mx.DateTime
+import time
+import datetime
 import re
 
 class deals_proc():
-    def __init__(self, coats):
+    def __init__(self):
         self.ready = False
-        self.connection = sqlite3.connect(":memory:")
-        self.connection.execute("pragma foreign_keys=on")
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
+        sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
+        sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
+
+    def open(self, filename):
+        self.filename = filename
+        self.connection = sqlite3.connect(filename, detect_types = sqlite3.PARSE_DECLTYPES)
+        self.connection.execute("pragma foreign_keys=on")
+        self.ready = True
+
+    def create_new(self, filename):
+        self.open(filename)
         self.connection.execute("""create table positions(
         id integer primary key not null,
         ticket text not null,
         direction integer not null,
-        open_datetime real not null,
-        close_datetime real not null,
+        open_datetime datetime not null,
+        close_datetime datetime not null,
         open_coast real not null,
         close_coast real not null,
         count integer not null,
@@ -28,7 +38,6 @@ class deals_proc():
         pl_gross real not null,
         pl_net real not null)""")
         self.connection.execute("create index positions_ticket on positions(ticket)")
-        
 
         self.connection.execute("create table deal_groups (id integer primary key not null, deal_sign integer not null, ticket text not null)")
         self.connection.executescript("""
@@ -40,7 +49,7 @@ class deals_proc():
         parent_deal_id integer,
         not_actual integer,
         group_id integer,
-        datetime real not null,
+        datetime datetime not null,
         datetime_day text,
         security_type text,
         security_name text not null,
@@ -63,30 +72,27 @@ class deals_proc():
         create index deals_security_name on deals(security_name);
         create index deals_quantity on deals(quantity);
         create index deals_deal_sign on deals(deal_sign);""")
+
+    def close(self):
+        self.connection.close()
+        self.ready = False
+
+    def get_from_source(self, coats):
+        for coat in coats.common_deals:
+            coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
+            self._insert_from_hash('deals', coat)
         
-        for coat in coats.common_deal:
-            date = mx.DateTime.DateTime(*map(int, re.split("[-T:]+", coat.attributes.has_key('deal_time') and coat.attributes['deal_time'].value or (coat.attributes.has_key('deal_date') and coat.attributes['deal_date'].value))))
-            x = [date.ticks(), date.Format("%Y%m%d")]
-            x.extend(map(lambda name: coat.attributes.has_key(name) and coat.attributes[name].value, ('security_type', 'security_name', 'grn_code')))
-            x.extend(map(lambda name: coat.attributes.has_key(name) and float(coat.attributes[name].value) or 0, ('price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds')))
-            if x[7] == 0:
-                x[7] = x[5] * x[6]
-            self._insert_into("deals", ["datetime",
-                                        "datetime_day",
-                                        "security_type",
-                                        "security_name",
-                                        "grn_code",
-                                        "price",
-                                        "quantity",
-                                        "volume",
-                                        "deal_sign",
-                                        "broker_comm",
-                                        "broker_comm_nds",
-                                        "stock_comm",
-                                        "stock_comm_nds"], x)
+        
 
     def _insert_into(self, tablename, fields, values):
         return self.connection.execute(u'insert into {0}({1}) values ({2})'.format(tablename, reduce(lambda a, b: u'{0}, {1}'.format(a, b), fields), reduce(lambda a, b: u'{0}, {1}'.format(a, b), map(lambda a: '?', fields))), values)
+
+    def _insert_from_hash(self, tablename, hashtable):
+        fields, values = [], []
+        for key in hashtable:
+            fields.append(key)
+            values.append(hashtable[key])
+        self._insert_into(tablename, fields, values)
 
     def check_balance(self):
         for (ticket,) in self.connection.execute("select distinct security_name from deals"):

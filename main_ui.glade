@@ -43,6 +43,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">create_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -51,6 +52,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">open_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -59,6 +61,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">save_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -66,6 +69,15 @@
                       <object class="GtkImageMenuItem" id="imagemenuitem4">
                         <property name="visible">True</property>
                         <property name="related_action">save_as_database</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem6">
+                        <property name="visible">True</property>
+                        <property name="related_action">close_database</property>
                         <property name="use_action_appearance">True</property>
                         <property name="use_stock">True</property>
                       </object>
@@ -80,6 +92,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">quit</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -100,6 +113,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">transaction_commit</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -108,6 +122,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">transaction_rollback</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -128,6 +143,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">about_dialog_show</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -446,5 +462,8 @@
   <object class="GtkAction" id="transaction_rollback">
     <property name="label">Rollback</property>
     <property name="stock_id">gtk-cancel</property>
+  </object>
+  <object class="GtkAction" id="close_database">
+    <property name="stock_id">gtk-close</property>
   </object>
 </interface>

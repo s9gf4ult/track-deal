@@ -4,7 +4,7 @@ import sources
 import deals_core
 import gtk
 import sqlite3
-import mx.DateTime
+import datetime
 import re
 import traceback
 
@@ -17,7 +17,7 @@ class main_ui():
             date_store.remove(ii)
             ii = date_store.get_iter_first()
         for (pid, pcount, bdate, edate) in self.deals.connection.execute("select id, count, open_datetime, close_datetime from positions where ticket = ? order by close_datetime, open_datetime", (stock.decode('utf-8'),)):
-            ins = u'{0} - {1}'.format(mx.DateTime.DateTimeFromTicks(bdate).Format("%Y-%m-%dT%H:%M:%S"), mx.DateTime.DateTimeFromTicks(edate).Format("%Y-%m-%dT%H:%M:%S"))
+            ins = u'{0} - {1}'.format(bdate.isoformat(), edate.isoformat())
             date_store.append([ins, pcount, pid])
 
     def _get_text_for_blog(self, pid):
@@ -33,8 +33,8 @@ class main_ui():
            pl_net > 0 and u'прибыльная' or u'убыточная',
            count == 1 and u'1 контракту' or u'{0} контрактам'.format(count),
            ticket,
-           open_coast, mx.DateTime.DateTimeFromTicks(open_date).Format("%H:%M:%S"),
-           close_coast, mx.DateTime.DateTimeFromTicks(close_date).Format("%H:%M:%S"),
+           open_coast, open_date.isoformat(),
+           close_coast, close_date.isoformat(),
            abs(open_coast - close_coast),
            pl_net > 0 and u'Прибыль составила {0}'.format(pl_net) or u'Убыток составил {0}'.format(-pl_net),
            com > 0 and u'Комиссия составила {0}.\n'.format(com) or '')
@@ -82,7 +82,7 @@ class main_ui():
         for pos in self.deals.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions where id <> -1 order by close_datetime, open_datetime"):
             if not pos[0] in ticks:
                 continue
-            (open_datetime, close_datetime) = map(lambda a: mx.DateTime.DateTimeFromTicks(a).Format("%d.%m.%Y"), pos[-2:])
+            (open_datetime, close_datetime) = map(lambda a: u'{0}.{1}.{2}'.format(a.year, a.month, a.day), pos[-2:])
             ret += u'{0}\t{1}'.format(pos[0], -1 == pos[1] and 'L' or 'S')
             v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[2:-2]))
             if self.comma_as_splitter.props.active:
@@ -95,8 +95,7 @@ class main_ui():
         for pos in self.deals.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions where id <> -1 order by close_datetime, open_datetime"):
             if not pos[2] in ticks:
                 continue
-            ddd = map(lambda a: mx.DateTime.DateTimeFromTicks(a), pos[:2])
-            vvv = map(lambda a: [a.Format("%d.%m.%Y"), a.Format("%H:%M:%S")], ddd)
+            vvv = map(lambda a: [u'{0}.{1}.{2}'.format(a.year, a.month, a.day), u'{0}:{1}:{2}'.format(a.hour, a.minute, a.second)], pos[:2])
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
             ret += u'\t{0}\t{1}'.format(pos[2], -1 == pos[3] and 'L' or 'S')
             aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[4:]))
@@ -129,7 +128,9 @@ class main_ui():
 
         try:
             self.coats.check_file()
-            self.deals = deals_core.deals_proc(self.coats)
+            self.deals = deals_core.deals_proc()
+            self.deals.create_new(':memory:')
+            self.deals.get_from_source(self.coats)
             self.deals.check_balance()
             self.deals.make_positions()
         except Exception as e:
