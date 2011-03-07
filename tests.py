@@ -10,7 +10,9 @@ class balance(unittest.TestCase):
     def setUp(self):
         coats = sources.xml_parser('tests/test_report1.xml')
         coats.check_file()
-        self.base = deals_core.deals_proc(coats)
+        self.base = deals_core.deals_proc()
+        self.base.create_new(':memory:')
+        self.base.get_from_source(coats)
         self.accute = 4
 
     def test_balanced(self):
@@ -112,7 +114,7 @@ class balance(unittest.TestCase):
     def test_volumes(self):
         self.base.make_positions()
         for (vol, price ,quant, ticket) in self.base.connection.execute("select volume, price, quantity, security_name from deals where not_actual is null and position_id is not null"):
-            self.assertAlmostEqual(float(vol), float(price * quant), 7, u'{0}::: vol={1}, price={2}, quantity={3}'.format(ticket, vol, price, quant))
+            self.assertAlmostEqual(float(vol), float(price * quant), 5, u'{0}::: vol={1}, price={2}, quantity={3}'.format(ticket, vol, price, quant))
         (osv, csv) = self.base.connection.execute("select sum(open_volume), sum(close_volume) from positions").fetchone()
         (oov, cov) = self.base.connection.execute("select sum(open_coast * count), sum(close_coast * count) from positions").fetchone()
         self.assertAlmostEqual(osv, oov)
@@ -122,21 +124,27 @@ class balance2(balance):
     def setUp(self):
         coats = sources.xml_parser('tests/test_report2.xml')
         coats.check_file()
-        self.base = deals_core.deals_proc(coats)
+        self.base = deals_core.deals_proc()
+        self.base.create_new(':memory:')
+        self.base.get_from_source(coats)
         self.accute = 8
 
 class balance3(balance):
     def setUp(self):
         coats = sources.xml_parser('tests/test_report3.xml')
         coats.check_file()
-        self.base = deals_core.deals_proc(coats)
+        self.base = deals_core.deals_proc()
+        self.base.create_new(':memory:')
+        self.base.get_from_source(coats)
         self.accute = 10
 
 class balance4(balance):
     def setUp(self):
         coats = sources.xml_parser('tests/test_report4.xml')
         coats.check_file()
-        self.base = deals_core.deals_proc(coats)
+        self.base = deals_core.deals_proc()
+        self.base.create_new(':memory:')
+        self.base.get_from_source(coats)
         self.accute = 14
 
         

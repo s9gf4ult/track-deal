@@ -31,5 +31,7 @@ class xml_parser():
                 deal[cc] = at.has_key(cc) and at[cc].value
             for cc in ['price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds']:
                 deal[cc] = at.has_key(cc) and float(at[cc].value) or 0
+            if deal['volume'] == 0:
+                deal['volume'] = deal['price'] * deal['quantity']
             self.common_deals.append(deal)
         self.checked=True
