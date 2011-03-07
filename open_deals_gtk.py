@@ -57,13 +57,34 @@ class main_ui():
         
     def create_in_memory(self, wid):
         self.database.create_new(":memory:")
-    
+
+    def create_in_file(self, wid):
+        win = self.builder.get_object("main_window")
+        diag = gtk.FileChooserDialog(title = u'Новая база', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE)
+        diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
+        diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
+        if diag.run() == gtk.BUTTONS_OK:
+            try:
+                self.database.create_new(diag.get_filename())
+            except Exception as e:
+                self.show_error(e.__str__())
+                print(traceback.format_exc())
+        diag.destroy()
+
+    def open_existing(self, wid):
+        diag = self.builder.get_object("open_sqlite_database")
+        diag.show()
+                
     def __init__(self):
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
         self.builder.connect_signals({"on_main_window_destroy" : self.quit,
+                                      "on_create_database_in_memory_activate" : self.create_in_memory,
+                                      "on_create_database_activate" : self.create_in_file,
+                                      "on_open_database_activate" : self.open_existing,
                                       "on_quit_activate" : self.quit})
+    
         
         # self.window = a.get_object("main_window")
         # self.axce1 = a.get_object("gen_axcel")
@@ -128,7 +149,8 @@ class main_ui():
             self.show_error(u'Сначала надо указать валидный файл')
 
     def show_error(self, text):
-        dial = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons = gtk.BUTTONS_OK, flags=gtk.DIALOG_MODAL, parent = self.window)
+        win = self.builder.get_object("main_window")
+        dial = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons = gtk.BUTTONS_OK, flags=gtk.DIALOG_MODAL, parent = win)
         dial.props.text = text
         dial.run()
         dial.destroy()

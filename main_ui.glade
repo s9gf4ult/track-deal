@@ -447,7 +447,7 @@
         <child>
           <object class="GtkFileChooserButton" id="choose_file">
             <property name="visible">True</property>
-            <property name="filter">filefilter</property>
+            <property name="filter">xml_filter</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -469,7 +469,7 @@
     </child>
   </object>
   <object class="GtkTextBuffer" id="buffer"/>
-  <object class="GtkFileFilter" id="filefilter"/>
+  <object class="GtkFileFilter" id="xml_filter"/>
   <object class="GtkTextBuffer" id="blog_buffer"/>
   <object class="GtkAction" id="quit">
     <property name="stock_id">gtk-quit</property>
@@ -481,9 +481,11 @@
   <object class="GtkAction" id="create_database">
     <property name="label">&#x421;&#x43E;&#x437;&#x434;&#x430;&#x442;&#x44C; &#x431;&#x430;&#x437;&#x443; &#x432; &#x444;&#x430;&#x439;&#x43B;&#x435;</property>
     <property name="stock_id">gtk-new</property>
+    <signal name="activate" handler="on_create_database_activate"/>
   </object>
   <object class="GtkAction" id="open_database">
     <property name="stock_id">gtk-open</property>
+    <signal name="activate" handler="on_open_database_activate"/>
   </object>
   <object class="GtkAction" id="transaction_commit">
     <property name="label">Commit</property>
@@ -505,5 +507,68 @@
   <object class="GtkAction" id="create_database_in_memory">
     <property name="label">&#x421;&#x43E;&#x437;&#x434;&#x430;&#x442;&#x44C; &#x431;&#x430;&#x437;&#x443; &#x434;&#x430;&#x43D;&#x43D;&#x44B;&#x445; &#x432; &#x43F;&#x430;&#x43C;&#x44F;&#x442;&#x438;</property>
     <property name="icon_name">computer</property>
+    <signal name="activate" handler="on_create_database_in_memory_activate"/>
   </object>
+  <object class="GtkFileChooserDialog" id="open_sqlite_database">
+    <property name="border_width">5</property>
+    <property name="title" translatable="yes">&#x41E;&#x442;&#x43A;&#x440;&#x44B;&#x442;&#x44C; &#x431;&#x430;&#x437;&#x443;</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="type_hint">normal</property>
+    <property name="transient_for">main_window</property>
+    <property name="has_separator">True</property>
+    <property name="filter">sqlite_filter</property>
+    <child internal-child="vbox">
+      <object class="GtkVBox" id="dialog-vbox1">
+        <property name="visible">True</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkHButtonBox" id="dialog-action_area1">
+            <property name="visible">True</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="cancel_open_database">
+                <property name="label">gtk-cancel</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="open_open_database">
+                <property name="label">gtk-open</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="activate" handler="on_open_open_database_activate"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">cancel_open_database</action-widget>
+      <action-widget response="0">open_open_database</action-widget>
+    </action-widgets>
+  </object>
+  <object class="GtkFileFilter" id="sqlite_filter"/>
 </interface>
