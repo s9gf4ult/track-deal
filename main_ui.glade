@@ -20,9 +20,10 @@
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="border_width">5</property>
-    <property name="window_position">center</property>
-    <property name="default_width">450</property>
-    <property name="default_height">350</property>
+    <property name="role">open_deals_main_window</property>
+    <property name="default_width">600</property>
+    <property name="default_height">500</property>
+    <signal name="destroy" handler="on_main_window_destroy"/>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
@@ -472,6 +473,7 @@
   <object class="GtkTextBuffer" id="blog_buffer"/>
   <object class="GtkAction" id="quit">
     <property name="stock_id">gtk-quit</property>
+    <signal name="activate" handler="on_quit_activate"/>
   </object>
   <object class="GtkAction" id="about_dialog_show">
     <property name="stock_id">gtk-about</property>

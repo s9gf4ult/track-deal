@@ -84,7 +84,7 @@ class deals_proc():
 
     def close(self):
         if self.connection:
-            if self.last_total_changes < self.connection.total_changes and self.filename != ":memory:"
+            if self.last_total_changes < self.connection.total_changes and self.filename != ":memory:":
                 raise Exception(u'В базе данных проведено {0} изменений. Выполните Commit или Rollback'.format(self.connection.total_changes - self.last_total_changes))
             else:
                 self.connection.close()

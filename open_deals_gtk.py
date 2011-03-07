@@ -46,37 +46,50 @@ class main_ui():
         path = tw.get_cursor()[0]
         pid = self.date_store.get_value(self.date_store.get_iter(path), 2)
         self.blog_buffer.set_text(self._get_text_for_blog(pid))
+
+    def quit(self, wid):
+        try:
+            self.database.close()
+            gtk.main_quit()
+        except Exception as e:
+            self.show_error(e.__str__())
+            print(traceback.format_exc())
         
+    def create_in_memory(self, wid):
+        self.database.create_new(":memory:")
     
     def __init__(self):
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
-        self.window = a.get_object("main_window")
-        self.axce1 = a.get_object("gen_axcel")
-        self.segfault = a.get_object("gen_seg")
-        self.choose_file = a.get_object("choose_file")
-        self.buffer = a.get_object("buffer")
-        self.comma = a.get_object("comma_separator")
-        self.comma.configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
-        self.comma_as_splitter = a.get_object("comma_as_splitter")
-        self.stock_buttons = a.get_object("stock_buttons")
-        self.stock_store = a.get_object("stock_store")
-        self.date_store = a.get_object("date_store")
-        self.stock_view = a.get_object("stock_view")
-        self.stock_view.connect("cursor-changed", self._stock_cursor_changed, self.date_store)
-        self.date_view = a.get_object("date_view")
-        self.date_view.connect("cursor-changed", self._date_cursor_changed)
-        self.stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
-        self.date_view.append_column(gtk.TreeViewColumn(u'Даты начала - конца', gtk.CellRendererText(), text = 0))
-        self.date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 1))
-        self.blog_buffer = a.get_object("blog_buffer")
-        self.filefilter = a.get_object("filefilter")
-        self.filefilter.add_mime_type("application/xml")
-        self.window.connect("destroy", gtk.main_quit)
-        self.choose_file.connect("file-set", self.file_set)
-        self.segfault.connect("clicked", self.clicked, self._gen_seg)
-        self.axce1.connect("clicked", self.clicked, self._gen_axcel)
+        self.builder.connect_signals({"on_main_window_destroy" : self.quit,
+                                      "on_quit_activate" : self.quit})
+        
+        # self.window = a.get_object("main_window")
+        # self.axce1 = a.get_object("gen_axcel")
+        # self.segfault = a.get_object("gen_seg")
+        # self.choose_file = a.get_object("choose_file")
+        # self.buffer = a.get_object("buffer")
+        # self.comma = a.get_object("comma_separator")
+        # self.comma.configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
+        # self.comma_as_splitter = a.get_object("comma_as_splitter")
+        # self.stock_buttons = a.get_object("stock_buttons")
+        # self.stock_store = a.get_object("stock_store")
+        # self.date_store = a.get_object("date_store")
+        # self.stock_view = a.get_object("stock_view")
+        # self.stock_view.connect("cursor-changed", self._stock_cursor_changed, self.date_store)
+        # self.date_view = a.get_object("date_view")
+        # self.date_view.connect("cursor-changed", self._date_cursor_changed)
+        # self.stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
+        # self.date_view.append_column(gtk.TreeViewColumn(u'Даты начала - конца', gtk.CellRendererText(), text = 0))
+        # self.date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 1))
+        # self.blog_buffer = a.get_object("blog_buffer")
+        # self.filefilter = a.get_object("filefilter")
+        # self.filefilter.add_mime_type("application/xml")
+        # self.window.connect("destroy", gtk.main_quit)
+        # self.choose_file.connect("file-set", self.file_set)
+        # self.segfault.connect("clicked", self.clicked, self._gen_seg)
+        # self.axce1.connect("clicked", self.clicked, self._gen_axcel)
 
     def _gen_seg(self, ticks):
         ret = u''
@@ -154,7 +167,8 @@ class main_ui():
         self.show()
             
     def show(self):
-        self.window.show_all()
+        win = self.builder.get_object("main_window")
+        win.show_all()
 
         
 if __name__ == "__main__":
