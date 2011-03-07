@@ -20,6 +20,11 @@ class deals_proc():
         self.connection.execute("pragma foreign_keys=on")
         self.connection.execute("begin transaction")
 
+    def open_existing(self, filename):
+        self.open(filename)
+        if 3 != self.connection.execute("select count(*) from sqlite_master where type = 'table' and (name = 'positions' or name = 'deals' or name = 'deal_groups')").fetchone()[0]:
+            raise Exception(u'Эта sqlite3 база скорее всего не является базой созданной open-deals')
+
     def create_new(self, filename):
         self.open(filename)
         self.connection.execute("""create table positions(
