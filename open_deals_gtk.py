@@ -82,7 +82,7 @@ class main_ui():
         for pos in self.deals.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions where id <> -1 order by close_datetime, open_datetime"):
             if not pos[0] in ticks:
                 continue
-            (open_datetime, close_datetime) = map(lambda a: u'{0}.{1}.{2}'.format(a.year, a.month, a.day), pos[-2:])
+            (open_datetime, close_datetime) = map(lambda a: u'{0:4}.{1:02}.{2:02}'.format(a.year, a.month, a.day), pos[-2:])
             ret += u'{0}\t{1}'.format(pos[0], -1 == pos[1] and 'L' or 'S')
             v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[2:-2]))
             if self.comma_as_splitter.props.active:
@@ -95,7 +95,7 @@ class main_ui():
         for pos in self.deals.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions where id <> -1 order by close_datetime, open_datetime"):
             if not pos[2] in ticks:
                 continue
-            vvv = map(lambda a: [u'{0}.{1}.{2}'.format(a.year, a.month, a.day), u'{0}:{1}:{2}'.format(a.hour, a.minute, a.second)], pos[:2])
+            vvv = map(lambda a: [u'{0:4}.{1:02}.{2:02}'.format(a.year, a.month, a.day), u'{0:02}:{1:02}:{2:02}'.format(a.hour, a.minute, a.second)], pos[:2])
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
             ret += u'\t{0}\t{1}'.format(pos[2], -1 == pos[3] and 'L' or 'S')
             aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[4:]))
