@@ -281,9 +281,9 @@ class deals_proc():
             
             
                 
-        (pc,) = self.connection.execute("select count(*) from deals where position_id is null and not_actual is null").fetchone()
-        if 0 != pc:
-            raise Exception(u'Не получилось расписать по позициям {0} сделок'.format(pc))
+        # (pc,) = self.connection.execute("select count(*) from deals where position_id is null and not_actual is null").fetchone()
+        # if 0 != pc:
+        #     raise Exception(u'Не получилось расписать по позициям {0} сделок'.format(pc))
         
         self.ready = True
 

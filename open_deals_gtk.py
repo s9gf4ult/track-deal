@@ -101,6 +101,7 @@ class main_ui():
                     print(traceback.format_exc())
             diag.destroy()
             fl.destroy()
+            self.update_view()
             
     def close(self, wid):
         try:
@@ -118,8 +119,7 @@ class main_ui():
             self.database.rollback()
 
     def load_open_ru(self, wid):
-        if not self.database.connection:
-            self.show_error(u'Сначала открыть или создать новую базу')
+        if not self.check_if_database_open():
             return
         win = self.builder.get_object("main_window")
         diag = gtk.FileChooserDialog(title = u'Открыть отчет "Открытие"', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
@@ -138,7 +138,20 @@ class main_ui():
                 print(traceback.format_exc())
         diag.destroy()
         fl.destroy()
+        self.update_view()
 
+
+    def check_if_database_open(self):
+        if self.database.connection:
+            return True
+        else:
+            self.show_error(u'Необходимо открыть или создать новую базу данных')
+            return False
+
+    def make_positions(self, wid):
+        if self.check_if_database_open():
+            self.database.make_positions()
+            self.update_view()
 
     def __init__(self):
         self.database = deals_core.deals_proc()
@@ -152,6 +165,7 @@ class main_ui():
                                       "on_transaction_commit_activate" : self.commit,
                                       "on_transaction_rollback_activate" : self.rollback,
                                       "on_deals_load_open_ru_activate" : self.load_open_ru,
+                                      "on_positions_make_activate" : self.make_positions,
                                       "on_quit_activate" : self.quit})
     
         
@@ -224,37 +238,21 @@ class main_ui():
         dial.run()
         dial.destroy()
 
-    def file_set(self, widget):
-        try:
-            self.coats = sources.xml_parser(widget.get_filename())
-        except:
-            self.show_error(u'Это походу не xml')
-            return
 
-        try:
-            self.coats.check_file()
-            self.deals = deals_core.deals_proc()
-            self.deals.create_new(':memory:')
-            self.deals.get_from_source(self.coats)
-            self.deals.check_balance()
-            self.deals.make_positions()
-        except Exception as e:
-            self.show_error(traceback.format_exc())
-            return
-
-        self.stock_buttons.foreach(self.stock_buttons.remove)
-        for (ticket,) in self.deals.connection.execute("select distinct security_name from deals order by security_name"):
+    def update_view(self):
+        stock_pack = self.builder.get_object("stock_buttons")
+        stock_pack.foreach(stock_pack.remove)
+        for (ticket,) in self.database.connection.execute("select distinct security_name from deals where not_actual is null and position_id is not null order by security_name"):
             b = gtk.ToggleButton(label = ticket)
             b.set_active(True)
-            self.stock_buttons.pack_start(b, False, True, 5)
-            self.stock_store.append([ticket])
+            stock_pack.pack_start(b, False, True, 5)
 
         resall = gtk.Button(u'Сбросить все')
-        resall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(False)))
-        self.stock_buttons.pack_end(resall, False, True)
+        resall.connect("clicked", lambda ww: stock_pack.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(False)))
+        stock_pack.pack_end(resall, False, True)
         invall = gtk.Button(u'Реверс все')
-        invall.connect("clicked", lambda ww: self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
-        self.stock_buttons.pack_end(invall, False, True)
+        invall.connect("clicked", lambda ww: stock_pack.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
+        stock_pack.pack_end(invall, False, True)
         self.show()
             
     def show(self):

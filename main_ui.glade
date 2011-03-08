@@ -44,6 +44,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">create_database_in_memory</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -496,6 +497,7 @@
   </object>
   <object class="GtkAction" id="positions_make">
     <property name="label">&#x420;&#x430;&#x441;&#x43F;&#x438;&#x441;&#x430;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
+    <signal name="activate" handler="on_positions_make_activate"/>
   </object>
   <object class="GtkAction" id="create_database_in_memory">
     <property name="label">&#x421;&#x43E;&#x437;&#x434;&#x430;&#x442;&#x44C; &#x431;&#x430;&#x437;&#x443; &#x434;&#x430;&#x43D;&#x43D;&#x44B;&#x445; &#x432; &#x43F;&#x430;&#x43C;&#x44F;&#x442;&#x438;</property>
