@@ -153,6 +153,10 @@ class main_ui():
             self.database.make_positions()
             self.update_view()
 
+    def radio_report_toggled(self, wid):
+        if wid.get_active():
+            self.update_report(None)
+
     def __init__(self):
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
@@ -166,8 +170,13 @@ class main_ui():
                                       "on_transaction_rollback_activate" : self.rollback,
                                       "on_deals_load_open_ru_activate" : self.load_open_ru,
                                       "on_positions_make_activate" : self.make_positions,
+                                      "on_radio_segfault_toggled" : self.radio_report_toggled,
+                                      "on_radio_axce1_toggled" : self.radio_report_toggled,
+                                      "on_comma_as_splitter_toggled" : self.update_report,
+                                      "on_comma_separator_change_value" : self.update_report,
                                       "on_quit_activate" : self.quit})
-    
+        
+        self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
         
         # self.window = a.get_object("main_window")
         # self.axce1 = a.get_object("gen_axcel")
@@ -197,39 +206,35 @@ class main_ui():
 
     def _gen_seg(self, ticks):
         ret = u''
-        for pos in self.deals.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions where id <> -1 order by close_datetime, open_datetime"):
+        is_comma = self.builder.get_object("comma_as_splitter").get_active()
+        after_comma = self.builder.get_object("comma_separator").get_value_as_int()
+        for pos in self.database.connection.execute("select ticket, direction, count, open_coast, close_coast, broker_comm + stock_comm, open_datetime, close_datetime from positions order by close_datetime, open_datetime"):
             if not pos[0] in ticks:
                 continue
             (open_datetime, close_datetime) = map(lambda a: u'{0:4}.{1:02}.{2:02}'.format(a.year, a.month, a.day), pos[-2:])
             ret += u'{0}\t{1}'.format(pos[0], -1 == pos[1] and 'L' or 'S')
-            v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[2:-2]))
-            if self.comma_as_splitter.props.active:
+            v = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: after_comma < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, after_comma), pos[2:-2]))
+            if is_comma:
                 v = v.replace('.', ',')
             ret += u'\t{0}\t\t\t\t\t\t{1}\t{2}\n'.format(v, open_datetime, close_datetime)
         return ret
 
     def _gen_axcel(self, ticks):
+        after_comma = self.builder.get_object("comma_separator").get_value_as_int()
+        is_comma = self.builder.get_object("comma_as_splitter").get_active()
         ret = u''
-        for pos in self.deals.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions where id <> -1 order by close_datetime, open_datetime"):
+        for pos in self.database.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions order by close_datetime, open_datetime"):
             if not pos[2] in ticks:
                 continue
             vvv = map(lambda a: [u'{0:4}.{1:02}.{2:02}'.format(a.year, a.month, a.day), u'{0:02}:{1:02}:{2:02}'.format(a.hour, a.minute, a.second)], pos[:2])
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
             ret += u'\t{0}\t{1}'.format(pos[2], -1 == pos[3] and 'L' or 'S')
-            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: self.comma.get_value_as_int() < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, self.comma.get_value_as_int()), pos[4:]))
-            if self.comma_as_splitter.props.active:
+            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: after_comma < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, after_comma), pos[4:]))
+            if is_comma:
                 aa = aa.replace('.', ',')
             ret += u'\t{0}\n'.format(aa)
             
         return ret
-
-    def clicked(self, button, call_me):
-        if hasattr(self, "coats") and self.coats.checked and hasattr(self, "deals") and self.deals.ready:
-            bc = []
-            self.stock_buttons.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.get_active() and bc.append(wid.get_label()))
-            self.buffer.set_text(call_me(bc))
-        else:
-            self.show_error(u'Сначала надо указать валидный файл')
 
     def show_error(self, text):
         win = self.builder.get_object("main_window")
@@ -237,7 +242,16 @@ class main_ui():
         dial.props.text = text
         dial.run()
         dial.destroy()
-
+        
+    def update_report(self, tb):
+        buf = self.builder.get_object("buffer") # буфер отчета
+        pack = self.builder.get_object("stock_buttons")
+        ticks = []
+        pack.foreach(lambda w: w.__class__ == gtk.ToggleButton and w.get_active() and ticks.append(w.get_label()))
+        if self.builder.get_object("radio_segfault").get_active():
+            buf.set_text(self._gen_seg(ticks))
+        elif self.builder.get_object("radio_axce1").get_active():
+            buf.set_text(self._gen_axcel(ticks))
 
     def update_view(self):
         stock_pack = self.builder.get_object("stock_buttons")
@@ -245,6 +259,7 @@ class main_ui():
         for (ticket,) in self.database.connection.execute("select distinct security_name from deals where not_actual is null and position_id is not null order by security_name"):
             b = gtk.ToggleButton(label = ticket)
             b.set_active(True)
+            b.connect("toggled", self.update_report)
             stock_pack.pack_start(b, False, True, 5)
 
         resall = gtk.Button(u'Сбросить все')
@@ -253,6 +268,7 @@ class main_ui():
         invall = gtk.Button(u'Реверс все')
         invall.connect("clicked", lambda ww: stock_pack.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
         stock_pack.pack_end(invall, False, True)
+        self.update_report(None)
         self.show()
             
     def show(self):
