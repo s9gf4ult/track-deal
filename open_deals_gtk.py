@@ -175,21 +175,11 @@ class main_ui():
                                       "on_radio_axce1_toggled" : self.radio_report_toggled,
                                       "on_comma_as_splitter_toggled" : self.update_report,
                                       "on_comma_separator_value_changed" : self.update_report,
+                                      "on_stock_view_cursor_changed" : self.stock_open
                                       "on_quit_activate" : self.quit})
         
         self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
         
-        # self.window = a.get_object("main_window")
-        # self.axce1 = a.get_object("gen_axcel")
-        # self.segfault = a.get_object("gen_seg")
-        # self.choose_file = a.get_object("choose_file")
-        # self.buffer = a.get_object("buffer")
-        # self.comma = a.get_object("comma_separator")
-        # self.comma.configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
-        # self.comma_as_splitter = a.get_object("comma_as_splitter")
-        # self.stock_buttons = a.get_object("stock_buttons")
-        # self.stock_store = a.get_object("stock_store")
-        # self.date_store = a.get_object("date_store")
         # self.stock_view = a.get_object("stock_view")
         # self.stock_view.connect("cursor-changed", self._stock_cursor_changed, self.date_store)
         # self.date_view = a.get_object("date_view")
