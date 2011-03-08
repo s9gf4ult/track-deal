@@ -251,7 +251,7 @@
                                 <property name="invisible_char">&#x25CF;</property>
                                 <property name="primary_icon_stock">gtk-zoom-100</property>
                                 <property name="wrap">True</property>
-                                <signal name="change_value" handler="on_comma_separator_change_value"/>
+                                <signal name="value_changed" handler="on_comma_separator_value_changed"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -310,6 +310,7 @@
                             <signal name="toggled" handler="on_radio_segfault_toggled"/>
                           </object>
                           <packing>
+                            <property name="expand">False</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
@@ -325,6 +326,7 @@
                             <signal name="toggled" handler="on_radio_axce1_toggled"/>
                           </object>
                           <packing>
+                            <property name="expand">False</property>
                             <property name="position">1</property>
                           </packing>
                         </child>

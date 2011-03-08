@@ -106,6 +106,7 @@ class main_ui():
     def close(self, wid):
         try:
             self.database.close()
+            self.update_report(None)
         except Exception as e:
             self.show_error(e.__str__())
             print(traceback.format_exc())
@@ -173,7 +174,7 @@ class main_ui():
                                       "on_radio_segfault_toggled" : self.radio_report_toggled,
                                       "on_radio_axce1_toggled" : self.radio_report_toggled,
                                       "on_comma_as_splitter_toggled" : self.update_report,
-                                      "on_comma_separator_change_value" : self.update_report,
+                                      "on_comma_separator_value_changed" : self.update_report,
                                       "on_quit_activate" : self.quit})
         
         self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
@@ -246,6 +247,12 @@ class main_ui():
     def update_report(self, tb):
         buf = self.builder.get_object("buffer") # буфер отчета
         pack = self.builder.get_object("stock_buttons")
+
+        if not self.database.connection:
+            buf.set_text("")
+            pack.foreach(pack.remove)
+            return
+        
         ticks = []
         pack.foreach(lambda w: w.__class__ == gtk.ToggleButton and w.get_active() and ticks.append(w.get_label()))
         if self.builder.get_object("radio_segfault").get_active():
