@@ -2,20 +2,22 @@
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkListStore" id="stock_store">
-    <columns>
-      <!-- column-name gchararray1 -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkListStore" id="date_store">
     <columns>
-      <!-- column-name gchararray1 -->
+      <!-- column-name open_date -->
       <column type="gchararray"/>
-      <!-- column-name gint1 -->
+      <!-- column-name close_date -->
+      <column type="gchararray"/>
+      <!-- column-name count -->
+      <column type="guint"/>
+      <!-- column-name id -->
       <column type="gint"/>
-      <!-- column-name gint2 -->
-      <column type="gint"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="stock_store">
+    <columns>
+      <!-- column-name stock_name -->
+      <column type="gchararray"/>
     </columns>
   </object>
   <object class="GtkWindow" id="main_window">

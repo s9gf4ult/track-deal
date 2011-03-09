@@ -9,19 +9,23 @@ import re
 import traceback
 
 class main_ui():
-    def _stock_cursor_changed(self, tw, date_store):
+    def _stock_cursor_changed(self, tw):
         path = tw.get_cursor()[0]
-        stock = self.stock_store.get_value(self.stock_store.get_iter(path), 0)
+        stock_store = self.builder.get_object("stock_store")
+        date_store = self.builder.get_object("date_store")
+        stock = stock_store.get_value(stock_store.get_iter(path), 0)
+        
         ii = date_store.get_iter_first()
         while ii:
             date_store.remove(ii)
             ii = date_store.get_iter_first()
-        for (pid, pcount, bdate, edate) in self.deals.connection.execute("select id, count, open_datetime, close_datetime from positions where ticket = ? order by close_datetime, open_datetime", (stock.decode('utf-8'),)):
-            ins = u'{0} - {1}'.format(bdate.isoformat(), edate.isoformat())
-            date_store.append([ins, pcount, pid])
+            
+        for (pid, pcount, bdate, edate) in self.database.connection.execute("select id, count, open_datetime, close_datetime from positions where ticket = ? order by close_datetime, open_datetime, count", (stock,)):
+            ins = map(lambda a: a.isoformat(), [bdate, edate])
+            date_store.append(ins + [pcount, pid])
 
     def _get_text_for_blog(self, pid):
-        (ticket, direction, open_date, close_date, open_coast, close_coast, count, com, pl_net) = self.deals.connection.execute("select ticket, direction, open_datetime, close_datetime, open_coast, close_coast, count, broker_comm + stock_comm, pl_net from positions where id = ?", (pid,)).fetchone()
+        (ticket, direction, open_date, close_date, open_coast, close_coast, count, com, pl_net) = self.database.connection.execute("select ticket, direction, open_datetime, close_datetime, open_coast, close_coast, count, broker_comm + stock_comm, pl_net from positions where id = ?", (pid,)).fetchone()
         isprof = pl_net > 0
         ret = u'''{0} {1} позиция по {2} инструмента {3}.
 Цена открытия {4} в {5}.
@@ -38,14 +42,15 @@ class main_ui():
            abs(open_coast - close_coast),
            pl_net > 0 and u'Прибыль составила {0}'.format(pl_net) or u'Убыток составил {0}'.format(-pl_net),
            com > 0 and u'Комиссия составила {0}.\n'.format(com) or '')
-                   
-                                                   
         return ret
 
     def _date_cursor_changed(self, tw):
         path = tw.get_cursor()[0]
-        pid = self.date_store.get_value(self.date_store.get_iter(path), 2)
-        self.blog_buffer.set_text(self._get_text_for_blog(pid))
+        date_store = self.builder.get_object("date_store")
+        blog_buffer = self.builder.get_object("blog_buffer")
+        pid = date_store.get_value(date_store.get_iter(path), 3)
+        blog_buffer.set_text(self._get_text_for_blog(pid))
+        
 
     def quit(self, wid):
         try:
@@ -85,7 +90,7 @@ class main_ui():
     def open_existing(self, wid):
         if self.database.connection:
             self.close(None)
-        if not self.database.connection:
+        if not self.database.connection: # это значит если база закрылась
             win = self.builder.get_object("main_window")
             diag = gtk.FileChooserDialog(title = u'Открыть базу', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
             diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
@@ -106,7 +111,7 @@ class main_ui():
     def close(self, wid):
         try:
             self.database.close()
-            self.update_report(None)
+            self.update_view()
         except Exception as e:
             self.show_error(e.__str__())
             print(traceback.format_exc())
@@ -114,10 +119,12 @@ class main_ui():
     def commit(self, wid):
         if self.database.connection:
             self.database.commit()
+            self.update_view()
 
     def rollback(self, wid):
         if self.database.connection:
             self.database.rollback()
+            self.update_view()
 
     def load_open_ru(self, wid):
         if not self.check_if_database_open():
@@ -175,15 +182,19 @@ class main_ui():
                                       "on_radio_axce1_toggled" : self.radio_report_toggled,
                                       "on_comma_as_splitter_toggled" : self.update_report,
                                       "on_comma_separator_value_changed" : self.update_report,
-                                      "on_stock_view_cursor_changed" : self.stock_open
+                                      "on_stock_view_cursor_changed" : self._stock_cursor_changed,
+                                      "on_date_view_cursor_changed" : self._date_cursor_changed,
                                       "on_quit_activate" : self.quit})
         
         self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
-        
-        # self.stock_view = a.get_object("stock_view")
-        # self.stock_view.connect("cursor-changed", self._stock_cursor_changed, self.date_store)
-        # self.date_view = a.get_object("date_view")
-        # self.date_view.connect("cursor-changed", self._date_cursor_changed)
+
+        stock_view = self.builder.get_object("stock_view")
+        date_view = self.builder.get_object("date_view")
+        stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
+        date_view.append_column(gtk.TreeViewColumn(u'Дата открытия', gtk.CellRendererText(), text = 0))
+        date_view.append_column(gtk.TreeViewColumn(u'Дата закрытия', gtk.CellRendererText(), text = 1))
+        date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
+                                
         # self.stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
         # self.date_view.append_column(gtk.TreeViewColumn(u'Даты начала - конца', gtk.CellRendererText(), text = 0))
         # self.date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 1))
@@ -253,6 +264,19 @@ class main_ui():
     def update_view(self):
         stock_pack = self.builder.get_object("stock_buttons")
         stock_pack.foreach(stock_pack.remove)
+        date_store = self.builder.get_object("date_store")
+        stock_store = self.builder.get_object("stock_store")
+        for store in [date_store, stock_store]:
+            ii = store.get_iter_first()
+            while ii:
+                store.remove(ii)
+                ii = store.get_iter_first()
+        self.builder.get_object("buffer").set_text("")
+        self.builder.get_object("blog_buffer").set_text("")
+
+        if not self.database.connection:
+            return
+
         for (ticket,) in self.database.connection.execute("select distinct security_name from deals where not_actual is null and position_id is not null order by security_name"):
             b = gtk.ToggleButton(label = ticket)
             b.set_active(True)
@@ -266,6 +290,10 @@ class main_ui():
         invall.connect("clicked", lambda ww: stock_pack.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
         stock_pack.pack_end(invall, False, True)
         self.update_report(None)
+        
+        for (ticket,) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
+            stock_store.append([ticket])
+        
         self.show()
             
     def show(self):
