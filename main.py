@@ -35,7 +35,7 @@ class main_ui():
            ticket,
            open_coast, mx.DateTime.DateTimeFromTicks(open_date).Format("%H:%M:%S"),
            close_coast, mx.DateTime.DateTimeFromTicks(close_date).Format("%H:%M:%S"),
-           direction * (open_coast - close_coast),
+           abs(open_coast - close_coast),
            pl_net > 0 and u'Прибыль составила {0}'.format(pl_net) or u'Убыток составил {0}'.format(-pl_net),
            com > 0 and u'Комиссия составила {0}.\n'.format(com) or '')
                    
