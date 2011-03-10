@@ -70,9 +70,11 @@ class deals_proc():
         stock_comm real,
         stock_comm_nds real,
         position_id integer,
-        foreign key (position_id) references positions(id) on delete set null
-        foreign key (parent_deal_id) references deals(id) on delete set null
-        foreign key (group_id) references deal_groups(id) on delete set null)""")
+        foreign key (position_id) references positions(id) on delete set null,
+        foreign key (parent_deal_id) references deals(id) on delete set null,
+        foreign key (group_id) references deal_groups(id) on delete set null,
+        unique(datetime, security_name, security_type, price, quantity, volume, deal_sign)
+        )""")
         self.connection.executescript("""
         create index delas_not_actual on deals(not_actual);
         create index deals_datetime on deals(datetime);
@@ -91,13 +93,16 @@ class deals_proc():
                 self.connection = None
                 self.have_changes = False
                 self.filename = None
-            
-            
 
     def get_from_source(self, coats):
         for coat in coats.common_deals:
-            coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
-            self._insert_from_hash('deals', coat)
+            try:
+                coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
+                self._insert_from_hash('deals', coat)
+            except sqlite3.IntegrityError:
+                continue
+            except Exception as e:
+                raise e
         
     def commit(self):
         self.connection.commit()
