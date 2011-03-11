@@ -19,11 +19,10 @@ class xml_parser():
                 raise Exception("there is no {0} in report or more that one found".format(name))
         cd = self.report.getElementsByTagName("common_deal")[0].getElementsByTagName("item")
         ta = self.report.getElementsByTagName("account_totally_line")[0].getElementsByTagName("item")
-        #self.briefcase = self.report.getElementsByTagName("briefcase_position")[0].getElementsByTagName("item")
         if not (len(cd) > 0 and len(ta) > 1):
             raise Exception(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
         self.common_deals = []
-        for cod in cd:
+        for cod in cd:                  # идем по тегам тега common_deals
             at = cod.attributes
             deal = {}
             dt = at.has_key('deal_time') and at['deal_time'].value or at['deal_date'].value
@@ -44,4 +43,12 @@ class xml_parser():
                                                                                      at['order_number'],
                                                                                      at['deal_number']]).encode('utf-8')).hexdigest()
             self.common_deals.append(deal)
+            
+        # if self.report.attributes['board_list'].value.find('FORTS') >= 0: # если в атрибуте тега report присутствует слово FORTS то расписываем суммарную коммисию поровну по всем сделкам пропрорционально объему
+        #     broker_comm = int(filter(lambda a: a.attributes['total_description'].value == u'Вознаграждение Брокера', ta)[0])
+        #     stock_comm = int(filter(lambda a: a.attributes['total_description'].value == u'Биржевой сбор', ta)[0])
+        #     summ_volume = sum(map(lambda a: a['volume'], self.common_deals))
+        #     for deal in self.common_deals:
+        #         deal['broker_comm'] = broker_comm / summ_volume * deal['volume']
+        #         deal['stock_comm'] = stock_comm / summ_volume * deal['volume']
         self.checked=True
