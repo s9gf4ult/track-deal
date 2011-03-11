@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <report title="Отчет ОАО &quot;Брокерский дом &quot;ОТКРЫТИЕ&quot; за 21.02.2011" board_list="FORTS, РТС СТАНДАРТ, Биржа &quot;Санкт-Петербург&quot;, МОСЭНЕРГОБИРЖА" date_from="2011-02-21T00:00:00" date_to="2011-02-21T00:00:00" client_code="17937" client_short_name="" agreement_number="" agreement_date="" account_count="1" is_trade_tariff_plan="0" is_new_tariff_plan="1" build_date="2011-02-21T11:48:42.320">
   <account_totally_line>
-    <item></item>
-    <item></item>
-    <item></item>
+    <item total_description="Вознаграждение Брокера"
+    total_value="-6.85" neg_description="Вознаграждение брокера"
+    neg_amount="6.85" neg_nds="1.04" />
+    <item total_description="Биржевой сбор" total_value="-1.43"
+    neg_description="Биржевой сбор" neg_amount="1.43" />
   </account_totally_line>
   <guarantee_info_line>
   </guarantee_info_line>

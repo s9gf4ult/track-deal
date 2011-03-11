@@ -44,11 +44,12 @@ class xml_parser():
                                                                                      at['deal_number']]).encode('utf-8')).hexdigest()
             self.common_deals.append(deal)
             
-        # if self.report.attributes['board_list'].value.find('FORTS') >= 0: # если в атрибуте тега report присутствует слово FORTS то расписываем суммарную коммисию поровну по всем сделкам пропрорционально объему
-        #     broker_comm = int(filter(lambda a: a.attributes['total_description'].value == u'Вознаграждение Брокера', ta)[0])
-        #     stock_comm = int(filter(lambda a: a.attributes['total_description'].value == u'Биржевой сбор', ta)[0])
-        #     summ_volume = sum(map(lambda a: a['volume'], self.common_deals))
-        #     for deal in self.common_deals:
-        #         deal['broker_comm'] = broker_comm / summ_volume * deal['volume']
-        #         deal['stock_comm'] = stock_comm / summ_volume * deal['volume']
+        if self.report.attributes['board_list'].value.find('FORTS') >= 0: # если в атрибуте тега report присутствует слово FORTS то расписываем суммарную коммисию поровну по всем сделкам пропрорционально объему
+            broker_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Вознаграждение Брокера', ta)[0].attributes['total_value'].value))
+            stock_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Биржевой сбор', ta)[0].attributes['total_value'].value))
+            summ_volume = sum(map(lambda a: a['volume'], self.common_deals))
+            for deal in self.common_deals:
+                deal['broker_comm'] = broker_comm / summ_volume * deal['volume']
+                deal['stock_comm'] = stock_comm / summ_volume * deal['volume']
+                
         self.checked=True
