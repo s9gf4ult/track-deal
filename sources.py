@@ -40,6 +40,8 @@ class xml_parser():
                                                                                      deal['price'],
                                                                                      deal['quantity'],
                                                                                      deal['volume'],
-                                                                                     deal['deal_sign']]).encode('utf-8')).hexdigest()
+                                                                                     deal['deal_sign'],
+                                                                                     at['order_number'],
+                                                                                     at['deal_number']]).encode('utf-8')).hexdigest()
             self.common_deals.append(deal)
         self.checked=True
