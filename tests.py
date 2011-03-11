@@ -19,10 +19,11 @@ class balance(unittest.TestCase):
         self.accute = 4
 
     def test_check_splitted_comm(self):
-        broker_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Вознаграждение Брокера', self.coats.total_account)[0].attributes['total_value'].value))
-        stock_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Биржевой сбор', self.coats.total_account)[0].attributes['total_value'].value))
-        self.assertAlmostEqual(broker_comm, self.base.connection.execute("select sum(broker_comm) from deals").fetchone()[0])
-        self.assertAlmostEqual(stock_comm, self.base.connection.execute("select sum(stock_comm) from deals").fetchone()[0])
+        if self.coats.report.attributes['board_list'].value.find('FORTS') >= 0:
+            broker_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Вознаграждение Брокера', self.coats.total_account)[0].attributes['total_value'].value))
+            stock_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Биржевой сбор', self.coats.total_account)[0].attributes['total_value'].value))
+            self.assertAlmostEqual(broker_comm, self.base.connection.execute("select sum(broker_comm) from deals").fetchone()[0])
+            self.assertAlmostEqual(stock_comm, self.base.connection.execute("select sum(stock_comm) from deals").fetchone()[0])
 
     def test_balanced(self):
         try:
@@ -131,17 +132,17 @@ class balance(unittest.TestCase):
 
 class balance2(balance):
     def pre_setup(self):
-        coats = sources.xml_parser('tests/test_report2.xml')
+        self.coats = sources.xml_parser('tests/test_report2.xml')
         self.accute = 8
 
 class balance3(balance):
     def pre_setup(self):
-        coats = sources.xml_parser('tests/test_report3.xml')
+        self.coats = sources.xml_parser('tests/test_report3.xml')
         self.accute = 10
 
 class balance4(balance):
     def pre_setup(self):
-        coats = sources.xml_parser('tests/test_report4.xml')
+        self.coats = sources.xml_parser('tests/test_report4.xml')
         self.accute = 14
 
         
