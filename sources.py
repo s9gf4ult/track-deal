@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from xml.dom.minidom import parse
 import datetime
+import hashlib
 
 
 class xml_parser():
@@ -33,5 +34,12 @@ class xml_parser():
                 deal[cc] = at.has_key(cc) and float(at[cc].value) or 0
             if deal['volume'] == 0:
                 deal['volume'] = deal['price'] * deal['quantity']
+            deal['sha1'] = hashlib.sha1(reduce(lambda a, b: u'{0}{1}'.format(a, b), [deal['security_name'],
+                                                                                     deal['security_type'],
+                                                                                     deal['datetime'],
+                                                                                     deal['price'],
+                                                                                     deal['quantity'],
+                                                                                     deal['volume'],
+                                                                                     deal['deal_sign']]).encode('utf-8')).hexdigest()
             self.common_deals.append(deal)
         self.checked=True

@@ -53,6 +53,7 @@ class deals_proc():
 
         self.connection.execute("""create table deals(
         id integer primary key not null,
+        sha1 text,
         parent_deal_id integer,
         not_actual integer,
         group_id integer,
@@ -73,7 +74,7 @@ class deals_proc():
         foreign key (position_id) references positions(id) on delete set null,
         foreign key (parent_deal_id) references deals(id) on delete set null,
         foreign key (group_id) references deal_groups(id) on delete set null,
-        unique(datetime, security_name, security_type, price, quantity, volume, deal_sign)
+        unique(sha1)
         )""")
         self.connection.executescript("""
         create index delas_not_actual on deals(not_actual);
@@ -220,7 +221,7 @@ class deals_proc():
         m2 = [quant - needed_quantity] + map(lambda a: float(quant - needed_quantity) / quant, range(0, 5))
         ret = []
         for mm in [m1, m2]:
-            cid = self.connection.execute("insert into deals(parent_deal_id, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, quantity, volume, deal_sign, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds, position_id) select ?, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, ?, volume * ?, deal_sign, broker_comm * ?, broker_comm_nds * ?, stock_comm * ?, stock_comm_nds * ?, position_id from deals where id = ?", [deal_id] + mm + [deal_id]).lastrowid
+            cid = self.connection.execute("insert into deals (parent_deal_id, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, quantity, volume, deal_sign, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds, position_id) select ?, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, ?, volume * ?, deal_sign, broker_comm * ?, broker_comm_nds * ?, stock_comm * ?, stock_comm_nds * ?, position_id from deals where id = ?", [deal_id] + mm + [deal_id]).lastrowid
             ret.append(cid)
         self.connection.execute("update deals set not_actual = 1 where id = ?", (deal_id,))
         return ret
