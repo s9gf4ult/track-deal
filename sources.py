@@ -19,6 +19,7 @@ class xml_parser():
                 raise Exception("there is no {0} in report or more that one found".format(name))
         cd = self.report.getElementsByTagName("common_deal")[0].getElementsByTagName("item")
         ta = self.report.getElementsByTagName("account_totally_line")[0].getElementsByTagName("item")
+        self.total_account = ta
         if not (len(cd) > 0 and len(ta) > 1):
             raise Exception(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
         self.common_deals = []
