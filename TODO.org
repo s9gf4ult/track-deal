@@ -1,3 +1,6 @@
 #+TODO:TODO(t) WORKING(w!) | DONE(d@) REJECTED(r@)
+#+TODO:IDEA(i@) | TODO(t) REJECTED(r@)
+#+TODO: BUG(b@) KNOWNCAUSE(k@) | FIXED(f@)
 #+ARCHIVE: ::* Archived
 
+* TODO Сделать вкладку со сделками
