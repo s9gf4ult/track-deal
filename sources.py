@@ -36,7 +36,7 @@ class xml_parser():
                 deal['volume'] = deal['price'] * deal['quantity']
             deal['sha1'] = hashlib.sha1(reduce(lambda a, b: u'{0}{1}'.format(a, b), [deal['security_name'],
                                                                                      deal['security_type'],
-                                                                                     deal['datetime'],
+                                                                                     deal['datetime'].isoformat(),
                                                                                      deal['price'],
                                                                                      deal['quantity'],
                                                                                      deal['volume'],
