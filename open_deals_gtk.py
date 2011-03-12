@@ -119,7 +119,6 @@ class main_ui():
     def commit(self, wid):
         if self.database.connection:
             self.database.commit()
-            self.update_view()
 
     def rollback(self, wid):
         if self.database.connection:
@@ -196,12 +195,25 @@ class main_ui():
         date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
         deals_view = self.builder.get_object("deals_view")
         for dd in [('id', 0),
+                   (u'Дата', 5),
                    (u'Инструмент', 1),
                    (u'Направление', 2),
                    (u'Количество', 3),
-                   (u'Цена', 4),
-                   (u'Дата', 5)]:
-            deals_view.append_column(gtk.TreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1]))
+                   (u'Цена', 4)]:
+            col = gtk.TreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1])
+            col.set_clickable(True)
+            col.connect("clicked", self.deals_view_column_clicked)
+            deals_view.append_column(col)
+
+    def deals_view_column_clicked(self, column):
+        if not column.get_sort_indicator():
+            column.set_sort_indicator(True)
+            column.set_sort_order(gtk.SORT_ASCENDING)
+        else:
+            if gtk.SORT_ASCENDING == column.get_sort_order():
+                column.set_sort_order(gtk.SORT_DESCENDING)
+            else:
+                column.set_sort_indicator(False)
         
                                 
     def _gen_seg(self, ticks):

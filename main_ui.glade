@@ -229,6 +229,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="model">deals_store</property>
+                        <property name="rubber_banding">True</property>
                       </object>
                     </child>
                   </object>
