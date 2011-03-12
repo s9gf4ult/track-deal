@@ -77,9 +77,9 @@ class main_ui():
         if not self.database.connection:
             win = self.builder.get_object("main_window")
             diag = gtk.FileChooserDialog(title = u'Новая база', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE)
-            diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
-            diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
-            if diag.run() == gtk.BUTTONS_OK:
+            diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+            diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
+            if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self.database.create_new(diag.get_filename())
                 except Exception as e:
@@ -93,12 +93,12 @@ class main_ui():
         if not self.database.connection: # это значит если база закрылась
             win = self.builder.get_object("main_window")
             diag = gtk.FileChooserDialog(title = u'Открыть базу', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
-            diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
-            diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
+            diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+            diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
             fl = gtk.FileFilter()
             fl.add_mime_type('application/x-sqlite3')
             diag.set_filter(fl)
-            if diag.run() == gtk.BUTTONS_OK:
+            if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self.database.open_existing(diag.get_filename())
                 except Exception as e:
@@ -131,12 +131,12 @@ class main_ui():
             return
         win = self.builder.get_object("main_window")
         diag = gtk.FileChooserDialog(title = u'Открыть отчет "Открытие"', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
-        diag.add_button(gtk.STOCK_CANCEL, gtk.BUTTONS_CANCEL)
-        diag.add_button(gtk.STOCK_OPEN, gtk.BUTTONS_OK)
+        diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+        diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
         fl = gtk.FileFilter()
         fl.add_mime_type('application/xml')
         diag.set_filter(fl)
-        if diag.run() == gtk.BUTTONS_OK:
+        if diag.run() == gtk.RESPONSE_ACCEPT:
             try:
                 xs = sources.xml_parser(diag.get_filename())
                 xs.check_file()
