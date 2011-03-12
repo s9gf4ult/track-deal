@@ -199,7 +199,8 @@ class main_ui():
                    (u'Инструмент', 1),
                    (u'Направление', 2),
                    (u'Количество', 3),
-                   (u'Цена', 4)]:
+                   (u'Цена', 4),
+                   (u'Дата', 5)]:
             deals_view.append_column(gtk.TreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1]))
         
                                 
@@ -265,8 +266,8 @@ class main_ui():
             it = store.get_iter_first()
 
     def _insert_deal_to_store(self, store, parent_iter, deal_id):
-        (did, dstock, ddir, dcount, dprice) = self.database.connection.execute("select id, security_name, deal_sign, quantity, price from deals where id = ?", (deal_id,)).fetchone()
-        citer = store.insert(parent_iter, -1, [did, dstock, ddir == -1 and "B" or "S", dcount, dprice])
+        (did, dstock, ddir, dcount, dprice, ddate) = self.database.connection.execute("select id, security_name, deal_sign, quantity, price, datetime from deals where id = ?", (deal_id,)).fetchone()
+        citer = store.insert(parent_iter, -1, [did, dstock, ddir == -1 and "B" or "S", dcount, dprice, ddate.isoformat()])
         for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ? order by datetime", (deal_id,)):
             self._insert_deal_to_store(store, citer, cid)
 
