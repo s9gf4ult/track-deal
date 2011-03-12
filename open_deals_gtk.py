@@ -194,18 +194,15 @@ class main_ui():
         date_view.append_column(gtk.TreeViewColumn(u'Дата открытия', gtk.CellRendererText(), text = 0))
         date_view.append_column(gtk.TreeViewColumn(u'Дата закрытия', gtk.CellRendererText(), text = 1))
         date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
+        deals_view = self.builder.get_object("deals_view")
+        for dd in [('id', 0),
+                   (u'Инструмент', 1),
+                   (u'Направление', 2),
+                   (u'Количество', 3),
+                   (u'Цена', 4)]:
+            deals_view.append_column(gtk.TreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1]))
+        
                                 
-        # self.stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
-        # self.date_view.append_column(gtk.TreeViewColumn(u'Даты начала - конца', gtk.CellRendererText(), text = 0))
-        # self.date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 1))
-        # self.blog_buffer = a.get_object("blog_buffer")
-        # self.filefilter = a.get_object("filefilter")
-        # self.filefilter.add_mime_type("application/xml")
-        # self.window.connect("destroy", gtk.main_quit)
-        # self.choose_file.connect("file-set", self.file_set)
-        # self.segfault.connect("clicked", self.clicked, self._gen_seg)
-        # self.axce1.connect("clicked", self.clicked, self._gen_axcel)
-
     def _gen_seg(self, ticks):
         ret = u''
         is_comma = self.builder.get_object("comma_as_splitter").get_active()
@@ -261,16 +258,27 @@ class main_ui():
         elif self.builder.get_object("radio_axce1").get_active():
             buf.set_text(self._gen_axcel(ticks))
 
+    def _flush_store(self, store):
+        it = store.get_iter_first()
+        while it:
+            store.remove(it)
+            it = store.get_iter_first()
+
+    def _insert_deal_to_store(self, store, parent_iter, deal_id):
+        (did, dstock, ddir, dcount, dprice) = self.database.connection.execute("select id, security_name, deal_sign, quantity, price from deals where id = ?", (deal_id,)).fetchone()
+        citer = store.insert(parent_iter, -1, [did, dstock, ddir == -1 and "B" or "S", dcount, dprice])
+        for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ? order by datetime", (deal_id,)):
+            self._insert_deal_to_store(store, citer, cid)
+
     def update_view(self):
         stock_pack = self.builder.get_object("stock_buttons")
         stock_pack.foreach(stock_pack.remove)
         date_store = self.builder.get_object("date_store")
         stock_store = self.builder.get_object("stock_store")
-        for store in [date_store, stock_store]:
-            ii = store.get_iter_first()
-            while ii:
-                store.remove(ii)
-                ii = store.get_iter_first()
+        deals_store = self.builder.get_object("deals_store")
+        for store in [date_store, stock_store, deals_store]:
+            self._flush_store(store)
+
         self.builder.get_object("buffer").set_text("")
         self.builder.get_object("blog_buffer").set_text("")
 
@@ -293,6 +301,10 @@ class main_ui():
         
         for (ticket,) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
             stock_store.append([ticket])
+
+        
+        for (did,) in self.database.connection.execute("select id from deals where parent_deal_id is null order by datetime"):
+            self._insert_deal_to_store(deals_store, None, did)
         
         self.show()
             

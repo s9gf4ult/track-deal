@@ -20,7 +20,20 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkTreeStore" id="deals-store"/>
+  <object class="GtkTreeStore" id="deals_store">
+    <columns>
+      <!-- column-name id -->
+      <column type="gint"/>
+      <!-- column-name stock -->
+      <column type="gchararray"/>
+      <!-- column-name direction -->
+      <column type="gchararray"/>
+      <!-- column-name count -->
+      <column type="gint"/>
+      <!-- column-name price -->
+      <column type="gfloat"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="border_width">5</property>
     <property name="role">open_deals_main_window</property>
@@ -204,10 +217,18 @@
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="treeview1">
+                  <object class="GtkScrolledWindow" id="scrolledwindow4">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">deals-store</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <object class="GtkTreeView" id="deals_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="model">deals_store</property>
+                      </object>
+                    </child>
                   </object>
                   <packing>
                     <property name="position">0</property>
