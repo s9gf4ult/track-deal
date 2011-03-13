@@ -333,7 +333,7 @@ class main_ui():
         for (ticket,) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
             stock_store.append([ticket])
 
-        
+        self.update_deals_tab()
         
         self.show()
 
