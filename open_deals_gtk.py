@@ -8,6 +8,11 @@ import datetime
 import re
 import traceback
 
+class MyTreeViewColumn(gtk.TreeViewColumn):
+    def __init__(self, title, renderer, **kargs):
+        super(MyTreeViewColumn, self).__init__(title, renderer, **kargs)
+        self.database_column = ''
+
 class main_ui():
     def _stock_cursor_changed(self, tw):
         path = tw.get_cursor()[0]
@@ -194,26 +199,40 @@ class main_ui():
         date_view.append_column(gtk.TreeViewColumn(u'Дата закрытия', gtk.CellRendererText(), text = 1))
         date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
         deals_view = self.builder.get_object("deals_view")
-        for dd in [('id', 0),
-                   (u'Дата', 5),
-                   (u'Инструмент', 1),
-                   (u'Направление', 2),
-                   (u'Количество', 3),
-                   (u'Цена', 4)]:
-            col = gtk.TreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1])
+        for dd in [('id', 0, "id"),
+                   (u'Дата', 5, "datetime"),
+                   (u'Инструмент', 1, "security_name"),
+                   (u'Направление', 2, "deal_sign"),
+                   (u'Количество', 3, "quantity"),
+                   (u'Цена', 4, "price")]:
+            col = MyTreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1])
             col.set_clickable(True)
             col.connect("clicked", self.deals_view_column_clicked)
+            col.database_column = dd[2]
             deals_view.append_column(col)
 
+        self.deals_order_by = ''        # добавляется к запросу для сортировки
+
     def deals_view_column_clicked(self, column):
+        if not self.database.connection:
+            return
+        tw = column.get_tree_view()
+        for col in tw.get_columns():
+            if col != column:
+                col.set_sort_indicator(False)
+        
         if not column.get_sort_indicator():
             column.set_sort_indicator(True)
             column.set_sort_order(gtk.SORT_ASCENDING)
+            self.deals_order_by = 'order by {0}'.format(column.database_column)
         else:
             if gtk.SORT_ASCENDING == column.get_sort_order():
                 column.set_sort_order(gtk.SORT_DESCENDING)
+                self.deals_order_by = 'order by {0} desc'.format(column.database_column)
             else:
                 column.set_sort_indicator(False)
+                self.deals_order_by = ''
+        self.update_deals_tab()
         
                                 
     def _gen_seg(self, ticks):
@@ -280,7 +299,7 @@ class main_ui():
     def _insert_deal_to_store(self, store, parent_iter, deal_id):
         (did, dstock, ddir, dcount, dprice, ddate) = self.database.connection.execute("select id, security_name, deal_sign, quantity, price, datetime from deals where id = ?", (deal_id,)).fetchone()
         citer = store.insert(parent_iter, -1, [did, dstock, ddir == -1 and "B" or "S", dcount, dprice, ddate.isoformat()])
-        for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ? order by datetime", (deal_id,)):
+        for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ? {0}".format(self.deals_order_by), (deal_id,)):
             self._insert_deal_to_store(store, citer, cid)
 
     def update_view(self):
@@ -288,8 +307,7 @@ class main_ui():
         stock_pack.foreach(stock_pack.remove)
         date_store = self.builder.get_object("date_store")
         stock_store = self.builder.get_object("stock_store")
-        deals_store = self.builder.get_object("deals_store")
-        for store in [date_store, stock_store, deals_store]:
+        for store in [date_store, stock_store]:
             self._flush_store(store)
 
         self.builder.get_object("buffer").set_text("")
@@ -316,10 +334,15 @@ class main_ui():
             stock_store.append([ticket])
 
         
-        for (did,) in self.database.connection.execute("select id from deals where parent_deal_id is null order by datetime"):
-            self._insert_deal_to_store(deals_store, None, did)
         
         self.show()
+
+    def update_deals_tab(self):
+        deals_store = self.builder.get_object("deals_store")
+        self._flush_store(deals_store)
+        for (did,) in self.database.connection.execute("select id from deals where parent_deal_id is null {0}".format(self.deals_order_by)):
+            self._insert_deal_to_store(deals_store, None, did)
+
             
     def show(self):
         win = self.builder.get_object("main_window")
