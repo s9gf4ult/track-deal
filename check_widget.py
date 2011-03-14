@@ -47,6 +47,10 @@ class check_widget():
     def button_clicked(self, bt, callme):
         self.tree_view.get_selection().selected_foreach(callme)
 
+    def get_widget(self):
+        return self.vbox
+    
+
 
 
 if __name__ == "__main__":
@@ -55,6 +59,6 @@ if __name__ == "__main__":
     cw = check_widget(u'hello')
     for x in range(1, 100):
         cw.list_store.append([True, x])
-    w.add(cw.vbox)
+    w.add(cw.get_widget())
     w.show_all()
     gtk.main()
