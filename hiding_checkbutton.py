@@ -3,7 +3,7 @@
 
 import gtk
 
-class hiding_widget():
+class hiding_checkbutton():
     def __init__(self, name, subwidget, active = False):
         self.frame = gtk.Frame()
         self.checkbutton = gtk.CheckButton(name)
