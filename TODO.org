@@ -3,7 +3,6 @@
 #+ARCHIVE: ::* Archived
 
 * WORKING Сделать вкладку со сделками
-  CLOCK: [2011-03-14 Пнд 21:24]
   - [ ] Note taken on [2011-03-14 Пнд 21:24] \\
     сделать фильтр сделок
   - State "WORKING"    from "TODO"       [2011-03-14 Пнд 21:21]
