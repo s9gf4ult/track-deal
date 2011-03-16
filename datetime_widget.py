@@ -16,10 +16,10 @@ class datetime_widget(hiding_checkbutton):
         time.pack_start(self.min, False)
         time.pack_start(gtk.Label(":"), False)
         time.pack_start(self.sec, False)
-        self.time = hiding_checkbutton(u'Учитывать время', time).get_widget()
+        self.time = hiding_checkbutton(u'Учитывать время', time)
         v = gtk.VBox()
         v.pack_start(self.calendar, True, True)
-        v.pack_start(self.time, False)
+        v.pack_start(self.time.get_widget(), False)
         hiding_checkbutton.__init__(self, name, v)
 
     def get_date(self):
@@ -28,7 +28,7 @@ class datetime_widget(hiding_checkbutton):
         else:
             return None
 
-    def get_date(self):
+    def get_time(self):
         if self.checkbutton.get_active() and self.time.checkbutton.get_active():
             return datetime.time(self.hour.get_value_as_int(), self.min.get_value_as_int(), self.sec.get_value_as_int())
         else:
