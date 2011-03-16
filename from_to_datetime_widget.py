@@ -36,11 +36,11 @@ class from_to_datetime_widget(hiding_checkbutton):
         else:
             return None
 
-def clicked(bt, dt, tb):
-    tb.set_text(u'{0} {1}'.format(dt.get_datetime_from() and dt.get_datetime_from().isoformat() or "", dt.get_datetime_to() and dt.get_datetime_to().isoformat() or ""))
     
 
 if __name__ == "__main__":
+    def clicked(bt, dt, tb):
+        tb.set_text(u'{0} {1}'.format(dt.get_datetime_from() and dt.get_datetime_from().isoformat() or "", dt.get_datetime_to() and dt.get_datetime_to().isoformat() or ""))
     w = gtk.Window()
     w.connect("delete-event", gtk.main_quit)
     box = gtk.HBox()
