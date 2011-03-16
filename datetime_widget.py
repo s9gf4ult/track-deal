@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import gtk
 from hiding_checkbutton import hiding_checkbutton
+import datetime
 
 class datetime_widget(hiding_checkbutton):
     def __init__(self, name):
@@ -20,6 +21,18 @@ class datetime_widget(hiding_checkbutton):
         v.pack_start(self.calendar, True, True)
         v.pack_start(self.time, False)
         hiding_checkbutton.__init__(self, name, v)
+
+    def get_date(self):
+        if self.checkbutton.get_active():
+            return datetime.date(*self.calendar.get_date())
+        else:
+            return None
+
+    def get_date(self):
+        if self.checkbutton.get_active() and self.time.checkbutton.get_active():
+            return datetime.time(self.hour.get_value_as_int(), self.min.get_value_as_int(), self.sec.get_value_as_int())
+        else:
+            return None
 
 if __name__ == "__main__":
     w = gtk.Window()
