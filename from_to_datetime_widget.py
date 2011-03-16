@@ -37,7 +37,7 @@ class from_to_datetime_widget(hiding_checkbutton):
             return None
 
 def clicked(bt, dt, tb):
-    tb.set_text(u'{0} {1}'.format(dt.get_datetime_from() and dt.get_datetime_from().isoformat() or "", dt.get_datetime_to() and dt.get_datetime_to().isoformat()))
+    tb.set_text(u'{0} {1}'.format(dt.get_datetime_from() and dt.get_datetime_from().isoformat() or "", dt.get_datetime_to() and dt.get_datetime_to().isoformat() or ""))
     
 
 if __name__ == "__main__":
@@ -52,8 +52,8 @@ if __name__ == "__main__":
     tw = gtk.TextView()
     tb = tw.get_buffer()
     bt = gtk.Button("pushme")
-    vb.pack_start(tw,False)
-    vb.pack_start(bt,False)
+    vb.pack_start(tw, False)
+    vb.pack_start(bt, False)
     bt.connect("clicked", clicked, a, tb)
     w.add(vb)
     w.show_all()
