@@ -5,7 +5,7 @@ from hiding_checkbutton import hiding_checkbutton
 import datetime
 
 class datetime_widget(hiding_checkbutton):
-    def __init__(self, name):
+    def __init__(self, name, hide = True):
         self.hour = gtk.SpinButton(gtk.Adjustment(lower = 0, upper = 23, step_incr = 1), climb_rate = 0.1, digits = 0)
         self.min = gtk.SpinButton(gtk.Adjustment(lower = 0, upper = 59, step_incr = 1), climb_rate = 0.1, digits = 0)
         self.sec = gtk.SpinButton(gtk.Adjustment(lower = 0, upper = 59, step_incr = 1), climb_rate = 0.1, digits = 0)
@@ -20,7 +20,7 @@ class datetime_widget(hiding_checkbutton):
         v = gtk.VBox()
         v.pack_start(self.calendar, False, True)
         v.pack_start(self.time.get_widget(), False)
-        hiding_checkbutton.__init__(self, name, v)
+        hiding_checkbutton.__init__(self, name, v, hide = hide)
 
     def get_date(self):
         if self.checkbutton.get_active():

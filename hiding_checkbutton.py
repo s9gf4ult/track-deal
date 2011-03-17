@@ -4,7 +4,8 @@
 import gtk
 
 class hiding_checkbutton():
-    def __init__(self, name, subwidget, active = False):
+    def __init__(self, name, subwidget, active = False, hide = True):
+        self.to_hide = hide
         self.frame = gtk.Frame()
         self.checkbutton = gtk.CheckButton(name)
         self.subwidget = subwidget
@@ -12,21 +13,34 @@ class hiding_checkbutton():
         self.frame.add(subwidget)
         self.checkbutton.set_active(active)
         if active:
-            subwidget.show()
+            if hide:
+                subwidget.show()
+            else:
+                subwidget.set_sensitive(False)
         else:
-            subwidget.hide()
+            if hide:
+                subwidget.hide()
+            else:
+                subwidget.set_sensitive(True)
         self.checkbutton.connect("toggled", self._toggled)
         self.subwidget.connect("show", self._on_show)
 
     def _toggled(self, tb):
         if tb.get_active():
             self.subwidget.show()
+            self.subwidget.set_sensitive(True)
         else:
-            self.subwidget.hide()
+            if self.to_hide:
+                self.subwidget.hide()
+            else:
+                self.subwidget.set_sensitive(False)
 
     def _on_show(self, wid):
         if not self.checkbutton.get_active():
-            wid.hide()
+            if self.to_hide:
+                wid.hide()
+            else:
+                wid.set_sensitive(False)
 
     def get_widget(self):
         return self.frame

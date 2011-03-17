@@ -238,7 +238,45 @@
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkHButtonBox" id="hbuttonbox1">
+                    <property name="visible">True</property>
+                    <property name="spacing">10</property>
+                    <property name="layout_style">start</property>
+                    <child>
+                      <object class="GtkButton" id="button1">
+                        <property name="label" translatable="yes">_&#x424;&#x438;&#x43B;&#x44C;&#x442;&#x440;</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="use_underline">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="padding">5</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="button2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <property name="related_action">update_deals_tab</property>
+                        <property name="use_action_appearance">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="padding">5</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
               </object>
             </child>
@@ -574,5 +612,9 @@
     <property name="label">&#x421;&#x43E;&#x437;&#x434;&#x430;&#x442;&#x44C; &#x431;&#x430;&#x437;&#x443; &#x434;&#x430;&#x43D;&#x43D;&#x44B;&#x445; &#x432; &#x43F;&#x430;&#x43C;&#x44F;&#x442;&#x438;</property>
     <property name="icon_name">computer</property>
     <signal name="activate" handler="on_create_database_in_memory_activate"/>
+  </object>
+  <object class="GtkAction" id="update_deals_tab">
+    <property name="label">_&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
+    <property name="stock_id">gtk-refresh</property>
   </object>
 </interface>
