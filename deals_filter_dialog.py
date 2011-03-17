@@ -49,7 +49,7 @@ class deals_filter_dialog():
         self.close.connect("clicked", self.close_clicked)
         self.window.connect("delete-event", self.window_delete)
 
-    def update_widget(stock_list = None, min_max_price = None, min_max_count = None, min_max_commission = None):
+    def update_widget(self, stock_list = None, min_max_price = None, min_max_count = None, min_max_commission = None):
         if stock_list:
             self.stock_check.update_widget(stock_list)
 

@@ -52,7 +52,7 @@ class check_widget():
 
     def flush_list(self):
         it = self.list_store.get_iter_first()
-        if it:
+        while it:
             self.list_store.remove(it)
             it = self.list_store.get_iter_first()
 
@@ -62,7 +62,7 @@ class check_widget():
         while it:
             found[self.list_store.get_value(it, 1)] = self.list_store.get_value(it, 0)
             it = self.list_store.iter_next(it)
-
+        print(len(found))
         self.flush_list()
         for elt in elt_list:
             self.list_store.append([found.has_key(elt) and found[elt] or True, elt])
