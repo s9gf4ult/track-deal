@@ -7,6 +7,7 @@ import sqlite3
 import datetime
 import re
 import traceback
+from deals_filter_dialog import deals_filter_dialog
 
 class MyTreeViewColumn(gtk.TreeViewColumn):
     def __init__(self, title, renderer, **kargs):
@@ -169,6 +170,9 @@ class main_ui():
         if wid.get_active():
             self.update_report(None)
 
+    def _call_filter_clicked(self, bt):
+        self.deals_filter.show()
+
     def __init__(self):
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
@@ -188,6 +192,7 @@ class main_ui():
                                       "on_comma_separator_value_changed" : self.update_report,
                                       "on_stock_view_cursor_changed" : self._stock_cursor_changed,
                                       "on_date_view_cursor_changed" : self._date_cursor_changed,
+                                      "on_call_deals_filter_clicked" : self._call_filter_clicked,
                                       "on_quit_activate" : self.quit})
         
         self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
@@ -212,6 +217,7 @@ class main_ui():
             deals_view.append_column(col)
 
         self.deals_order_by = ''        # добавляется к запросу для сортировки
+        self.deals_filter = deals_filter_dialog(parent = self.builder.get_object("main_window"), update_action = self.builder.get_object("update_deals_tab"))
 
     def deals_view_column_clicked(self, column):
         if not self.database.connection:

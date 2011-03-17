@@ -243,12 +243,13 @@
                     <property name="spacing">10</property>
                     <property name="layout_style">start</property>
                     <child>
-                      <object class="GtkButton" id="button1">
+                      <object class="GtkButton" id="call_deals_filter">
                         <property name="label" translatable="yes">_&#x424;&#x438;&#x43B;&#x44C;&#x442;&#x440;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_underline">True</property>
+                        <signal name="clicked" handler="on_call_deals_filter_clicked"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
