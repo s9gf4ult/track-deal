@@ -30,14 +30,15 @@ class deals_filter_dialog():
         self.stock_check = check_widget(u'Инструмент')
         self.notebook.insert_page(self.stock_check.get_widget(), tab_label = gtk.Label(u'Инструменты'))
         vbox2 = gtk.VBox()
-        self.is_position = select_widget(u'Позиция', {True : u'Сделка приписана к позиции', False : u'Сделка свободна'}, vertical = False)
+        self.is_position = select_widget(u'Позиция', {True : u'Сделка приписана к позиции', False : u'Сделка свободна'}, vertical = False, expand = True)
         vbox2.pack_start(self.is_position.get_widget(), False)
         self.price_diap = from_to_integer_widget(u'Цена сделки', None, None, vertical = False, expand = True, digits=2)
         vbox2.pack_start(self.price_diap.get_widget(), False)
         self.count_diap = from_to_integer_widget(u'Количество контрактов', None, None, vertical = False, expand = True)
         vbox2.pack_start(self.count_diap.get_widget(), False)
-        self.direction = select_widget(u'Направление сделки', {-1 : u'Покупка', 1 : u'Продажа'}, vertical = False)
+        self.direction = select_widget(u'Направление сделки', {-1 : u'Покупка', 1 : u'Продажа'}, vertical = False, expand = True)
         vbox2.pack_start(self.direction.get_widget(), False)
+        self.commission = from_to_integer_widget(u'Коммиссия', None, None, vertical = False, expand = True)
         
         
         self.notebook.insert_page(vbox2, tab_label = gtk.Label(u'Другое'))

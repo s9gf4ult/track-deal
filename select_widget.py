@@ -5,7 +5,7 @@ import gtk
 from hiding_checkbutton import hiding_checkbutton
 
 class select_widget(hiding_checkbutton):
-    def __init__(self, name, radios, vertical = True):
+    def __init__(self, name, radios, vertical = True, expand = False):
         self.radios = {}
         if vertical:
             box = gtk.VBox()
@@ -17,7 +17,7 @@ class select_widget(hiding_checkbutton):
             else:
                 radiobutton = gtk.RadioButton(label = radios[radio], group = self.radios.keys()[0])
             self.radios[radiobutton] = radio
-            box.pack_start(radiobutton, False)
+            box.pack_start(radiobutton, expand)
 
         hiding_checkbutton.__init__(self, name, box)
 
