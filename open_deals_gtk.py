@@ -170,8 +170,21 @@ class main_ui():
         if wid.get_active():
             self.update_report(None)
 
+    def _prepare_filter(self):
+        if self.database.connection:
+            sl = self.database.connection.execute("select distinct security_name from deals").fetchall()
+            print(sl.__class__)
+            self.deals_filter.update_widget(stock_list = sl)
+
+            
+                
+
     def _call_filter_clicked(self, bt):
+        self._prepare_filter()
         self.deals_filter.show()
+
+    def _update_deals_activated(self, action):
+        self.update_deals_tab()
 
     def __init__(self):
         self.database = deals_core.deals_proc()
@@ -193,6 +206,7 @@ class main_ui():
                                       "on_stock_view_cursor_changed" : self._stock_cursor_changed,
                                       "on_date_view_cursor_changed" : self._date_cursor_changed,
                                       "on_call_deals_filter_clicked" : self._call_filter_clicked,
+                                      "on_update_deals_tab_activate" : self._update_deals_activated,
                                       "on_quit_activate" : self.quit})
         
         self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)

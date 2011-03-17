@@ -617,5 +617,6 @@
   <object class="GtkAction" id="update_deals_tab">
     <property name="label">_&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
     <property name="stock_id">gtk-refresh</property>
+    <signal name="activate" handler="on_update_deals_tab_activate"/>
   </object>
 </interface>

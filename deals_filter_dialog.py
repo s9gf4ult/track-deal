@@ -49,6 +49,14 @@ class deals_filter_dialog():
         self.close.connect("clicked", self.close_clicked)
         self.window.connect("delete-event", self.window_delete)
 
+    def update_widget(stock_list = None, min_max_price = None, min_max_count = None, min_max_commission = None):
+        if stock_list:
+            self.stock_check.update_widget(stock_list)
+
+        if min_max_price:
+            self.price_diap.from_entry.set_adjustment(gtk.Adjustment(lower = min_max_price[0], upper = min_max_price[1], step_incr = 0.01))
+            self.price_diap.to_entry.set_adjustment(gtk.Adjustment(lower = min_max_price[0], upper = min_max_price[1], step_incr = 0.01))
+
     def close_clicked(self, bt):
         if self.update_action:
             self.update_action.activate()

@@ -49,8 +49,23 @@ class check_widget():
 
     def get_widget(self):
         return self.vbox
-    
 
+    def flush_list(self):
+        it = self.list_store.get_iter_first()
+        if it:
+            self.list_store.remove(it)
+            it = self.list_store.get_iter_first()
+
+    def update_widget(self, elt_list):
+        found = {}
+        it = self.list_store.get_iter_first()
+        while it:
+            found[self.list_store.get_value(it, 1)] = self.list_store.get_value(it, 0)
+            it = self.list_store.iter_next(it)
+
+        self.flush_list()
+        for elt in elt_list:
+            self.list_store.append([found.has_key(elt) and found[elt] or True, elt])
 
 
 if __name__ == "__main__":
