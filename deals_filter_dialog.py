@@ -38,7 +38,8 @@ class deals_filter_dialog():
         vbox2.pack_start(self.count_diap.get_widget(), False)
         self.direction = select_widget(u'Направление сделки', {-1 : u'Покупка', 1 : u'Продажа'}, vertical = False, expand = True)
         vbox2.pack_start(self.direction.get_widget(), False)
-        self.commission = from_to_integer_widget(u'Коммиссия', None, None, vertical = False, expand = True)
+        self.commission = from_to_integer_widget(u'Коммиссия', None, None, vertical = False, expand = True, digits = 2)
+        vbox2.pack_start(self.commission.get_widget(), False)
         
         
         self.notebook.insert_page(vbox2, tab_label = gtk.Label(u'Другое'))
