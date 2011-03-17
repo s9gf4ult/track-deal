@@ -5,9 +5,9 @@ import gtk
 from hiding_checkbutton import hiding_checkbutton
 
 class from_to_integer_widget(hiding_checkbutton):
-    def __init__(self, name, from_adjustment, to_adjustment, vertical = True, expand = False):
-        self.from_entry = gtk.SpinButton(adjustment = from_adjustment, climb_rate = 0.1, digits = 0)
-        self.to_entry = gtk.SpinButton(adjustment = to_adjustment, climb_rate = 0.1, digits = 0)
+    def __init__(self, name, from_adjustment, to_adjustment, vertical = True, expand = False, digits = 0):
+        self.from_entry = gtk.SpinButton(adjustment = from_adjustment, climb_rate = 0.1, digits = digits)
+        self.to_entry = gtk.SpinButton(adjustment = to_adjustment, climb_rate = 0.1, digits = digits)
         if vertical:
             box = gtk.VBox()
         else:
@@ -26,13 +26,13 @@ class from_to_integer_widget(hiding_checkbutton):
 
     def get_from_integer(self):
         if self.checkbutton.get_active() and self.from_hcheck.checkbutton.get_active():
-            return self.from_entry.get_value_as_int()
+            return self.from_entry.get_value()
         else:
             return None
 
     def get_to_ineger(self):
         if self.checkbutton.get_active() and self.to_hcheck.checkbutton.get_active():
-            return self.to_entry.get_value_as_int()
+            return self.to_entry.get_value()
         else:
             return None
 
