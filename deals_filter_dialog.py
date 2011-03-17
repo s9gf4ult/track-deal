@@ -6,6 +6,7 @@ from from_to_datetime_widget import from_to_datetime_widget
 from hiding_checkbutton import hiding_checkbutton
 from check_widget import check_widget
 from select_widget import select_widget
+from from_to_integer_widget import from_to_integer_widget
 
 class deals_filter_dialog():
 
@@ -24,13 +25,15 @@ class deals_filter_dialog():
         vbox.pack_start(self.notebook, True)
         vbox.pack_start(bbox, False, padding = 3)
         self.window.add(vbox)
-        self.date_selector = from_to_datetime_widget(u'Учитывать дату сделки', vertical = True)
+        self.date_selector = from_to_datetime_widget(u'Учитывать дату сделки', vertical = False, expand = True)
         self.notebook.insert_page(self.date_selector.get_widget(), tab_label= gtk.Label(u'Дата'))
         self.stock_check = check_widget(u'Инструмент')
         self.notebook.insert_page(self.stock_check.get_widget(), tab_label = gtk.Label(u'Инструменты'))
         vbox2 = gtk.VBox()
-        self.is_position = select_widget(u'Позиция', {True : u'Сделка приписана к позиции', False : u'Сделка свободна'})
+        self.is_position = select_widget(u'Позиция', {True : u'Сделка приписана к позиции', False : u'Сделка свободна'}, vertical = False)
         vbox2.pack_start(self.is_position.get_widget(), False)
+        self.price_diap = from_to_integer_widget(u'Цена сделки', None, None, vertical = False, expand = True)
+        vbox2.pack_start(self.price_diap.get_widget(), False)
         
         
         self.notebook.insert_page(vbox2, tab_label = gtk.Label(u'Другое'))

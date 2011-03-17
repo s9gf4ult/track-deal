@@ -7,7 +7,7 @@ from datetime_widget import datetime_widget
 import datetime
 
 class from_to_datetime_widget(hiding_checkbutton):
-    def __init__(self, name, vertical = True):
+    def __init__(self, name, vertical = True, expand = False):
         if vertical:
             box = gtk.VBox()
         else:
@@ -16,8 +16,8 @@ class from_to_datetime_widget(hiding_checkbutton):
         self.totime = datetime_widget("<=")
         self.fromtime.checkbutton.connect("toggled", self.child_toggled)
         self.totime.checkbutton.connect("toggled", self.child_toggled)
-        box.pack_start(self.fromtime.get_widget(), False)
-        box.pack_start(self.totime.get_widget(), False)
+        box.pack_start(self.fromtime.get_widget(), expand)
+        box.pack_start(self.totime.get_widget(), expand)
         hiding_checkbutton.__init__(self, name, box)
 
     def child_toggled(self, tb):
