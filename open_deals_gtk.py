@@ -361,7 +361,7 @@ class main_ui():
     def update_deals_tab(self):
         deals_store = self.builder.get_object("deals_store")
         self._flush_store(deals_store)
-        for (did,) in self.database.connection.execute("select id from deals where parent_deal_id is null {1}".format(self.pick_up_filter_condition(), self.deals_order_by)):
+        for (did,) in self.database.connection.execute("select id from deals where parent_deal_id is null {1} {0}".format(self.pick_up_filter_condition(), self.deals_order_by)):
             self._insert_deal_to_store(deals_store, None, did)
 
     def pick_up_filter_condition(self):
