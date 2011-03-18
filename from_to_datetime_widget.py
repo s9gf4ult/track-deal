@@ -25,13 +25,13 @@ class from_to_datetime_widget(hiding_checkbutton):
             self.checkbutton.set_active(False)
 
     def get_datetime_from(self):
-        if self.fromtime.checkbutton.get_active():
+        if self.fromtime.checkbutton.get_active() and self.checkbutton.get_active():
             return datetime.datetime.combine(self.fromtime.get_date(), self.fromtime.get_time() or datetime.time(0, 0, 0))
         else:
             return None
 
     def get_datetime_to(self):
-        if self.totime.checkbutton.get_active():
+        if self.totime.checkbutton.get_active() and self.checkbutton.get_active():
             return datetime.datetime.combine(self.totime.get_date(), self.totime.get_time() or datetime.time(23, 59, 59))
         else:
             return None

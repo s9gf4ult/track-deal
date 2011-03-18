@@ -220,12 +220,12 @@ class main_ui():
         date_view.append_column(gtk.TreeViewColumn(u'Дата закрытия', gtk.CellRendererText(), text = 1))
         date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
         deals_view = self.builder.get_object("deals_view")
-        for dd in [('id', 0, "id"),
-                   (u'Дата', 5, "datetime"),
-                   (u'Инструмент', 1, "security_name"),
-                   (u'Направление', 2, "deal_sign"),
-                   (u'Количество', 3, "quantity"),
-                   (u'Цена', 4, "price")]:
+        for dd in [('id', 0, "d.id"),
+                   (u'Дата', 5, "d.datetime"),
+                   (u'Инструмент', 1, "d.security_name"),
+                   (u'Направление', 2, "d.deal_sign"),
+                   (u'Количество', 3, "d.quantity"),
+                   (u'Цена', 4, "d.price")]:
             col = MyTreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1])
             col.set_clickable(True)
             col.connect("clicked", self.deals_view_column_clicked)
