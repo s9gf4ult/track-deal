@@ -364,7 +364,8 @@ class main_ui():
         deals_store = self.builder.get_object("deals_store")
         self._flush_store(deals_store)
         self._prepare_filter()
-        for (did,) in self.database.connection.execute("select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where d.parent_deal_id is null {1} {0}".format(self.pick_up_filter_condition(), self.deals_order_by)):
+        q = "select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where d.parent_deal_id is null {0} {1}".format(self.pick_up_filter_condition(), self.deals_order_by)
+        for (did,) in self.database.connection.execute(q):
             self._insert_deal_to_store(deals_store, None, did)
 
     def pick_up_filter_condition(self):
@@ -396,6 +397,22 @@ class main_ui():
         if price_to:
             ret += " and d.price <= {0}".format(price_to)
             print(price_to)
+
+        count_from = self.deals_filter.count_range.get_from_integer()
+        if count_from:
+            ret += " and quantity >= {0}".format(count_from)
+
+        count_to = self.deals_filter.count_range.get_to_integer()
+        if count_to:
+            ret += " and quantity <= {0}".format(count_to)
+
+        comm_from = self.deals_filter.commission.get_from_integer()
+        if comm_from:
+            ret += " and (broker_comm + stock_comm) >= {0}".format(comm_from)
+
+        comm_to = self.deals_filter.commission.get_to_integer()
+        if comm_to:
+            ret += " and (broker_comm + stock_comm) <= {0}".format(comm_to)
 
         return ret
 
