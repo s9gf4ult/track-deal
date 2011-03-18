@@ -363,6 +363,7 @@ class main_ui():
             return
         deals_store = self.builder.get_object("deals_store")
         self._flush_store(deals_store)
+        self._prepare_filter()
         for (did,) in self.database.connection.execute("select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where d.parent_deal_id is null {1} {0}".format(self.pick_up_filter_condition(), self.deals_order_by)):
             self._insert_deal_to_store(deals_store, None, did)
 

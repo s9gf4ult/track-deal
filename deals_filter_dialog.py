@@ -36,7 +36,7 @@ class deals_filter_dialog():
         vbox2.pack_start(self.is_position.get_widget(), False)
         self.direction = select_widget(u'Направление сделки', {-1 : u'Покупка', 1 : u'Продажа'}, vertical = False, expand = False, hide = False)
         vbox2.pack_start(self.direction.get_widget(), False)
-        self.price_range = from_to_integer_widget(u'Цена сделки', None, None, vertical = False, expand = False, digits=2, hide = False)
+        self.price_range = from_to_integer_widget(u'Цена сделки', None, None, vertical = False, expand = False, digits=4, hide = False)
         self.price_range.to_hide = True
         vbox2.pack_start(self.price_range.get_widget(), False)
         self.count_range = from_to_integer_widget(u'Количество контрактов', None, None, vertical = False, expand = False, hide = False)
