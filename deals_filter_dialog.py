@@ -35,12 +35,12 @@ class deals_filter_dialog():
         vbox2.pack_start(self.is_position.get_widget(), False)
         self.direction = select_widget(u'Направление сделки', {-1 : u'Покупка', 1 : u'Продажа'}, vertical = False, expand = False, hide = False)
         vbox2.pack_start(self.direction.get_widget(), False)
-        self.price_diap = from_to_integer_widget(u'Цена сделки', None, None, vertical = False, expand = False, digits=2, hide = False)
-        self.price_diap.to_hide = True
-        vbox2.pack_start(self.price_diap.get_widget(), False)
-        self.count_diap = from_to_integer_widget(u'Количество контрактов', None, None, vertical = False, expand = False, hide = False)
-        self.count_diap.to_hide = True
-        vbox2.pack_start(self.count_diap.get_widget(), False)
+        self.price_range = from_to_integer_widget(u'Цена сделки', None, None, vertical = False, expand = False, digits=2, hide = False)
+        self.price_range.to_hide = True
+        vbox2.pack_start(self.price_range.get_widget(), False)
+        self.count_range = from_to_integer_widget(u'Количество контрактов', None, None, vertical = False, expand = False, hide = False)
+        self.count_range.to_hide = True
+        vbox2.pack_start(self.count_range.get_widget(), False)
         self.commission = from_to_integer_widget(u'Коммиссия', None, None, vertical = False, expand = False, digits = 2, hide = False)
         self.commission.to_hide = True
         vbox2.pack_start(self.commission.get_widget(), False)
@@ -53,12 +53,12 @@ class deals_filter_dialog():
         if stock_list:
             self.stock_check.update_widget(stock_list)
 
-        for (min_max, diap, step) in [(min_max_price, self.price_diap, 0.01),
-                                      (min_max_count, self.count_diap, 1),
-                                      (min_max_commission, self.commission, 0.01)]:
+        for (min_max, _range, step) in [(min_max_price, self.price_range, 0.01),
+                                        (min_max_count, self.count_range, 1),
+                                        (min_max_commission, self.commission, 0.01)]:
             if min_max:
-                diap.from_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
-                diap.to_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
+                _range.from_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
+                _range.to_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
 
 
     def close_clicked(self, bt):
