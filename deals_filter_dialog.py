@@ -16,6 +16,7 @@ class deals_filter_dialog():
         self.window.set_border_width(5)
         if parent:
             self.window.set_transient_for(parent)
+            self.window.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
         self.window.set_modal(modal)
         self.close = gtk.Button(stock = gtk.STOCK_CLOSE)
         bbox = gtk.HButtonBox()
@@ -57,8 +58,8 @@ class deals_filter_dialog():
                                         (min_max_count, self.count_range, 1),
                                         (min_max_commission, self.commission, 0.01)]:
             if min_max:
-                _range.from_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
-                _range.to_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
+                _range.from_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step, value = _range.from_entry.get_value()))
+                _range.to_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step, value = _range.to_entry.get_value()))
 
 
     def close_clicked(self, bt):
