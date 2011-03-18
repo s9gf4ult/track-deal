@@ -359,13 +359,28 @@ class main_ui():
         self.show()
 
     def update_deals_tab(self):
+        if not self.databse.connection:
+            return
         deals_store = self.builder.get_object("deals_store")
         self._flush_store(deals_store)
         for (did,) in self.database.connection.execute("select id from deals where parent_deal_id is null {1} {0}".format(self.pick_up_filter_condition(), self.deals_order_by)):
             self._insert_deal_to_store(deals_store, None, did)
 
     def pick_up_filter_condition(self):
-        return ""
+        ret = "";
+        found = False
+        it = self.deals_filter.stock_store.list_store.get_iter_first()
+        while it:
+            if not self.deals_filter.stock_store.list_store.get_value(0, it): # есил нашли не выбранные стоки
+                found = True
+                break
+            it = self.deals_filter.stock_store.list_store.iter_next(it)
+        if found.issubset([False]):
+            self.database.connection.execute("delete from selected_stocks")
+            it = self.deals_filter.stock_store.list_store.iter_next(it)
+            while it:
+                
+            
             
     def show(self):
         win = self.builder.get_object("main_window")
