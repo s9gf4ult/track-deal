@@ -30,7 +30,7 @@ class from_to_integer_widget(hiding_checkbutton):
         else:
             return None
 
-    def get_to_ineger(self):
+    def get_to_integer(self):
         if self.checkbutton.get_active() and self.to_hcheck.checkbutton.get_active():
             return self.to_entry.get_value()
         else:

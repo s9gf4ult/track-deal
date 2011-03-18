@@ -359,29 +359,42 @@ class main_ui():
         self.show()
 
     def update_deals_tab(self):
-        if not self.databse.connection:
+        if not self.database.connection:
             return
         deals_store = self.builder.get_object("deals_store")
         self._flush_store(deals_store)
-        for (did,) in self.database.connection.execute("select id from deals where parent_deal_id is null {1} {0}".format(self.pick_up_filter_condition(), self.deals_order_by)):
+        for (did,) in self.database.connection.execute("select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where d.parent_deal_id is null {1} {0}".format(self.pick_up_filter_condition(), self.deals_order_by)):
             self._insert_deal_to_store(deals_store, None, did)
 
     def pick_up_filter_condition(self):
         ret = "";
-        found = False
-        it = self.deals_filter.stock_store.list_store.get_iter_first()
+        self.database.connection.execute("delete from selected_stocks")
+        it = self.deals_filter.stock_check.list_store.get_iter_first()
         while it:
-            if not self.deals_filter.stock_store.list_store.get_value(0, it): # есил нашли не выбранные стоки
-                found = True
-                break
-            it = self.deals_filter.stock_store.list_store.iter_next(it)
-        if found.issubset([False]):
-            self.database.connection.execute("delete from selected_stocks")
-            it = self.deals_filter.stock_store.list_store.iter_next(it)
-            while it:
-                
-            
-            
+            if self.deals_filter.stock_check.list_store.get_value(it, 0):
+                self.database._insert_from_hash("selected_stocks", {"stock" : self.deals_filter.stock_check.list_store.get_value(it, 1)})
+            it = self.deals_filter.stock_check.list_store.iter_next(it)
+        pos_val = self.deals_filter.is_position.get_selected()
+        if pos_val != None:
+            if pos_val:
+                ret += " and d.position_id is not null"
+            else:
+                ret += " and d.position_id is null"
+
+        dir_val = self.deals_filter.direction.get_selected()
+        if dir_val != None:
+            ret += " and d.deal_sign == {0}".format(dir_val)
+
+        price_from = self.deals_filter.price_range.get_from_integer()
+        if price_from:
+            ret += " and d.price >= {0}".format(price_from)
+
+        price_to = self.deals_filter.price_range.get_to_integer()
+        if price_to:
+            ret += " and d.price <= {0}".format(price_to)
+
+        return ret
+
     def show(self):
         win = self.builder.get_object("main_window")
         win.show_all()
