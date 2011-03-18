@@ -8,6 +8,7 @@ import datetime
 import re
 import traceback
 from deals_filter_dialog import deals_filter_dialog
+import time
 
 class MyTreeViewColumn(gtk.TreeViewColumn):
     def __init__(self, title, renderer, **kargs):
@@ -400,20 +401,30 @@ class main_ui():
 
         count_from = self.deals_filter.count_range.get_from_integer()
         if count_from:
-            ret += " and quantity >= {0}".format(count_from)
+            ret += " and d.quantity >= {0}".format(count_from)
 
         count_to = self.deals_filter.count_range.get_to_integer()
         if count_to:
-            ret += " and quantity <= {0}".format(count_to)
+            ret += " and d.quantity <= {0}".format(count_to)
 
         comm_from = self.deals_filter.commission.get_from_integer()
         if comm_from:
-            ret += " and (broker_comm + stock_comm) >= {0}".format(comm_from)
+            ret += " and (d.broker_comm + d.stock_comm) >= {0}".format(comm_from)
 
         comm_to = self.deals_filter.commission.get_to_integer()
         if comm_to:
-            ret += " and (broker_comm + stock_comm) <= {0}".format(comm_to)
+            ret += " and (d.broker_comm + d.stock_comm) <= {0}".format(comm_to)
 
+        date_from = self.deals_filter.date_selector.get_datetime_from()
+        if date_from:
+            ret += " and d.datetime >= {0}".format(time.mktime(date_from.timetuple()))
+            print(date_from)
+
+        date_to = self.deals_filter.date_selector.get_datetime_to()
+        if date_to:
+            ret += " and d.datetime <= {0}".format(time.mktime(date_to.timetuple()))
+            print(date_to)
+            
         return ret
 
     def show(self):

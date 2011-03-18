@@ -24,7 +24,8 @@ class datetime_widget(hiding_checkbutton):
 
     def get_date(self):
         if self.checkbutton.get_active():
-            return datetime.date(*self.calendar.get_date())
+            date = self.calendar.get_date()
+            return datetime.date(date[0], date[1] + 1, date[2])
         else:
             return None
 
