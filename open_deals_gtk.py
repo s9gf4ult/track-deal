@@ -173,7 +173,9 @@ class main_ui():
     def _prepare_filter(self):
         if self.database.connection:
             sl = map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals").fetchall())
-            self.deals_filter.update_widget(stock_list = sl, min_max_price = self.database.connection.execute("select min(price), max(price) from deals").fetchone())
+            self.deals_filter.update_widget(stock_list = sl, min_max_price = self.database.connection.execute("select min(price), max(price) from deals").fetchone(),
+                                            min_max_count = self.database.connection.execute("select min(quantity), max(quantity) from deals").fetchone(),
+                                            min_max_commission = self.database.connection.execute("select min(broker_comm + stock_comm), max(broker_comm + stock_comm) from deals").fetchone())
 
             
                 

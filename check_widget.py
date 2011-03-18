@@ -60,12 +60,17 @@ class check_widget():
         found = {}
         it = self.list_store.get_iter_first()
         while it:
-            found[self.list_store.get_value(it, 1)] = self.list_store.get_value(it, 0)
+            found[self.list_store.get_value(it, 1).decode("utf-8")] = self.list_store.get_value(it, 0)
             it = self.list_store.iter_next(it)
-        print(len(found))
+        for k in found:
+            print("{0} : {1}".format(k, found[k]))
         self.flush_list()
         for elt in elt_list:
-            self.list_store.append([found.has_key(elt) and found[elt] or True, elt])
+            if found.has_key(elt.decode("utf-8")):
+                bo = found[elt.decode("utf-8")]
+            else:
+                bo = True
+            self.list_store.append([bo, elt])
 
 
 if __name__ == "__main__":

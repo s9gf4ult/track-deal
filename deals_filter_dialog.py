@@ -53,9 +53,13 @@ class deals_filter_dialog():
         if stock_list:
             self.stock_check.update_widget(stock_list)
 
-        if min_max_price:
-            self.price_diap.from_entry.set_adjustment(gtk.Adjustment(lower = min_max_price[0], upper = min_max_price[1], step_incr = 0.01))
-            self.price_diap.to_entry.set_adjustment(gtk.Adjustment(lower = min_max_price[0], upper = min_max_price[1], step_incr = 0.01))
+        for (min_max, diap, step) in [(min_max_price, self.price_diap, 0.01),
+                                      (min_max_count, self.count_diap, 1),
+                                      (min_max_commission, self.commission, 0.01)]:
+            if min_max:
+                diap.from_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
+                diap.to_entry.set_adjustment(gtk.Adjustment(lower = min_max[0], upper = min_max[1], step_incr = step))
+
 
     def close_clicked(self, bt):
         if self.update_action:
