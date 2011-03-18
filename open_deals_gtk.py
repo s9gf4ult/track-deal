@@ -384,14 +384,17 @@ class main_ui():
         dir_val = self.deals_filter.direction.get_selected()
         if dir_val != None:
             ret += " and d.deal_sign == {0}".format(dir_val)
+            print(dir_val)
 
         price_from = self.deals_filter.price_range.get_from_integer()
         if price_from:
             ret += " and d.price >= {0}".format(price_from)
+            print(price_from)
 
         price_to = self.deals_filter.price_range.get_to_integer()
         if price_to:
             ret += " and d.price <= {0}".format(price_to)
+            print(price_to)
 
         return ret
 
