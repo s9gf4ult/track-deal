@@ -13,9 +13,14 @@ class deals_proc():
         self.connection = None
         self.have_changes = False
 
+    def create_temporary_tables(self):
+        self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
+
+
     def open(self, filename):
         self.filename = filename
         self.connection = sqlite3.connect(filename, detect_types = sqlite3.PARSE_DECLTYPES)
+        self.create_temporary_tables()
         self.last_total_changes = self.connection.total_changes
         self.connection.execute("pragma foreign_keys=on")
         self.connection.execute("begin transaction")
@@ -82,8 +87,7 @@ class deals_proc():
         create index deals_security_name on deals(security_name);
         create index deals_quantity on deals(quantity);
         create index deals_deal_sign on deals(deal_sign);""")
-        self.connection.execute("create table selected_stocks (id integer primary key not null, stock text, unique(stock))")
-        
+
         self.connection.commit()
         self.connection.execute("begin transaction")
 

@@ -169,7 +169,7 @@ class main_ui():
 
     def radio_report_toggled(self, wid):
         if wid.get_active():
-            self.update_report(None)
+            self.update_report_buffer()
 
     def _call_filter_clicked(self, bt):
         self.deals_filter.show()
@@ -293,20 +293,7 @@ class main_ui():
         dial.destroy()
         
     def update_report(self, tb):
-        buf = self.builder.get_object("buffer") # буфер отчета
-        pack = self.builder.get_object("stock_buttons")
-
-        if not self.database.connection:
-            buf.set_text("")
-            pack.foreach(pack.remove)
-            return
-        
-        ticks = []
-        pack.foreach(lambda w: w.__class__ == gtk.ToggleButton and w.get_active() and ticks.append(w.get_label()))
-        if self.builder.get_object("radio_segfault").get_active():
-            buf.set_text(self._gen_seg(ticks))
-        elif self.builder.get_object("radio_axce1").get_active():
-            buf.set_text(self._gen_axcel(ticks))
+        self.update_report_buffer()
 
     def _flush_store(self, store):
         it = store.get_iter_first()
@@ -321,46 +308,63 @@ class main_ui():
         for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ?{0}".format(ob and " order by {0}".format(ob) or ""), (deal_id,)):
             self._insert_deal_to_store(store, citer, cid)
 
-    def update_view(self):
+    def update_report_tab(self):
+        self.update_report_buttons()
+        self.update_report_buffer()
+    
+    def update_report_buffer(self):
+        buf = self.builder.get_object("buffer") # буфер отчета
+        if not self.database.connection:
+            buf.set_text("")
+            return
+        
+        pack = self.builder.get_object("stock_buttons")
+        ticks = []
+        pack.foreach(lambda w: w.__class__ == gtk.ToggleButton and w.get_active() and ticks.append(w.get_label()))
+        if self.builder.get_object("radio_segfault").get_active():
+            buf.set_text(self._gen_seg(ticks))
+        elif self.builder.get_object("radio_axce1").get_active():
+            buf.set_text(self._gen_axcel(ticks))
+
+    def update_report_buttons(self):
         stock_pack = self.builder.get_object("stock_buttons")
         stock_pack.foreach(stock_pack.remove)
-        date_store = self.builder.get_object("date_store")
-        stock_store = self.builder.get_object("stock_store")
-        for store in [date_store, stock_store]:
-            self._flush_store(store)
-
-        self.builder.get_object("buffer").set_text("")
-        self.builder.get_object("blog_buffer").set_text("")
-
         if not self.database.connection:
             return
-
         for (ticket,) in self.database.connection.execute("select distinct security_name from deals where not_actual is null and position_id is not null order by security_name"):
             b = gtk.ToggleButton(label = ticket)
             b.set_active(True)
             b.connect("toggled", self.update_report)
             stock_pack.pack_start(b, False, True, 5)
-
         resall = gtk.Button(u'Сбросить все')
         resall.connect("clicked", lambda ww: stock_pack.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(False)))
         stock_pack.pack_end(resall, False, True)
         invall = gtk.Button(u'Реверс все')
         invall.connect("clicked", lambda ww: stock_pack.foreach(lambda wid: wid.__class__ == gtk.ToggleButton and wid.set_active(not wid.get_active())))
         stock_pack.pack_end(invall, False, True)
-        self.update_report(None)
+        self.show()
         
+    def update_blog_tab(self):
+        date_store = self.builder.get_object("date_store")
+        stock_store = self.builder.get_object("stock_store")
+        for store in [date_store, stock_store]:
+            self._flush_store(store)
+        self.builder.get_object("blog_buffer").set_text("")
+        if not self.database.connection:
+            return
         for (ticket,) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
             stock_store.append([ticket])
 
+    def update_view(self):
         self.update_deals_tab()
-        
-        self.show()
+        self.update_report_tab()
+        self.update_blog_tab()
 
     def update_deals_tab(self):
-        if not self.database.connection:
-            return
         deals_store = self.builder.get_object("deals_store")
         self._flush_store(deals_store)
+        if not self.database.connection:
+            return
         for did in self.deals_filter.get_ids(self.deals_order_by()):
             self._insert_deal_to_store(deals_store, None, did)
 
