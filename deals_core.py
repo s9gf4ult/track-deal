@@ -82,7 +82,7 @@ class deals_proc():
         create index deals_security_name on deals(security_name);
         create index deals_quantity on deals(quantity);
         create index deals_deal_sign on deals(deal_sign);""")
-        self.connection.executescript("create table selected_stocks (id integer primary key not null, stock text, unique(stock))")
+        self.connection.execute("create table selected_stocks (id integer primary key not null, stock text, unique(stock))")
         
         self.connection.commit()
         self.connection.execute("begin transaction")

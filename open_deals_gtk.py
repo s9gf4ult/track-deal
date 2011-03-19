@@ -7,7 +7,7 @@ import sqlite3
 import datetime
 import re
 import traceback
-from deals_filter_dialog import deals_filter_dialog
+from deals_filter import deals_filter
 import time
 
 class MyTreeViewColumn(gtk.TreeViewColumn):
@@ -171,12 +171,7 @@ class main_ui():
         if wid.get_active():
             self.update_report(None)
 
-
-            
-                
-
     def _call_filter_clicked(self, bt):
-        self._prepare_filter()
         self.deals_filter.show()
 
     def _update_deals_activated(self, action):
@@ -214,19 +209,19 @@ class main_ui():
         date_view.append_column(gtk.TreeViewColumn(u'Дата закрытия', gtk.CellRendererText(), text = 1))
         date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
         deals_view = self.builder.get_object("deals_view")
-        for dd in [('id', 0, "d.id"),
-                   (u'Дата', 5, "d.datetime"),
-                   (u'Инструмент', 1, "d.security_name"),
-                   (u'Направление', 2, "d.deal_sign"),
-                   (u'Количество', 3, "d.quantity"),
-                   (u'Цена', 4, "d.price")]:
+        for dd in [('id', 0, "id"),
+                   (u'Дата', 5, "datetime"),
+                   (u'Инструмент', 1, "security_name"),
+                   (u'Направление', 2, "deal_sign"),
+                   (u'Количество', 3, "quantity"),
+                   (u'Цена', 4, "price")]:
             col = MyTreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1])
             col.set_clickable(True)
             col.connect("clicked", self.deals_view_column_clicked)
             col.database_column = dd[2]
             deals_view.append_column(col)
 
-        self.deals_filter = deals_filter_dialog(parent = self.builder.get_object("main_window"), update_action = self.builder.get_object("update_deals_tab"))
+        self.deals_filter = deals_filter(self.database, parent = self.builder.get_object("main_window"), update_action = self.builder.get_object("update_deals_tab"))
 
     def deals_view_column_clicked(self, column):
         if not self.database.connection:
@@ -247,8 +242,13 @@ class main_ui():
         self.update_deals_tab()
 
     def deals_order_by(self):
-        if not self.database.connection:
-            return ""
+        for col in self.builder.get_object("deals_view").get_columns():
+            if col.get_sort_indicator():
+                if gtk.SORT_ASCENDING == col.get_sort_order():
+                    return col.database_column
+                else:
+                    return "{0} desc".format(col.database_column)
+        return ""
         
         
         
@@ -317,7 +317,8 @@ class main_ui():
     def _insert_deal_to_store(self, store, parent_iter, deal_id):
         (did, dstock, ddir, dcount, dprice, ddate) = self.database.connection.execute("select id, security_name, deal_sign, quantity, price, datetime from deals where id = ?", (deal_id,)).fetchone()
         citer = store.insert(parent_iter, -1, [did, dstock, ddir == -1 and "B" or "S", dcount, dprice, ddate.isoformat()])
-        for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ? {0}".format(self.deals_order_by), (deal_id,)):
+        ob = self.deals_order_by()
+        for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ?{0}".format(ob and " order by {0}".format(ob) or ""), (deal_id,)):
             self._insert_deal_to_store(store, citer, cid)
 
     def update_view(self):
@@ -360,8 +361,7 @@ class main_ui():
             return
         deals_store = self.builder.get_object("deals_store")
         self._flush_store(deals_store)
-        q = "select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where d.parent_deal_id is null {0} {1}".format(self.pick_up_filter_condition(), self.deals_order_by)
-        for (did,) in self.database.connection.execute(q):
+        for did in self.deals_filter.get_ids(self.deals_order_by()):
             self._insert_deal_to_store(deals_store, None, did)
 
     def show(self):
