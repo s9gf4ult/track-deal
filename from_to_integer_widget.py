@@ -36,6 +36,14 @@ class from_to_integer_widget(hiding_checkbutton):
         else:
             return None
 
+    def update_widget(self, min_max):
+        if min_max:
+            self.from_entry.get_adjustment().set_lower(min_max[0])
+            self.from_entry.get_adjustment().set_upper(min_max[1])
+            self.to_entry.get_adjustment().set_lower(min_max[0])
+            self.to_entry.get_adjustment().set_upper(min_max[1])
+
+
 if __name__ == "__main__":
     w = gtk.Window()
     w.connect("delete-event", gtk.main_quit)

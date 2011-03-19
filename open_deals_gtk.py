@@ -8,7 +8,6 @@ import datetime
 import re
 import traceback
 from deals_filter import deals_filter
-import time
 
 class MyTreeViewColumn(gtk.TreeViewColumn):
     def __init__(self, title, renderer, **kargs):

@@ -1,6 +1,7 @@
 #/bin/env python
 # -*- coding: utf-8 -*-
 from deals_filter_dialog import deals_filter_dialog
+import time
 
 
 class iter_filter():
