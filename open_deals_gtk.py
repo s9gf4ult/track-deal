@@ -200,15 +200,19 @@ class main_ui():
                                       "on_delete_deals_activate" : self.delete_deals_activate,
                                       "on_add_deal_activate" : self.add_deal_activate,
                                       "on_quit_activate" : self.quit})
-        
+
+        # report tab
         self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
 
+        # blog tab
         stock_view = self.builder.get_object("stock_view")
         date_view = self.builder.get_object("date_view")
         stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
         date_view.append_column(gtk.TreeViewColumn(u'Дата открытия', gtk.CellRendererText(), text = 0))
         date_view.append_column(gtk.TreeViewColumn(u'Дата закрытия', gtk.CellRendererText(), text = 1))
         date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
+
+        # deals tab
         deals_view = self.builder.get_object("deals_view")
         for dd in [('id', 0, "id"),
                    (u'Дата', 5, "datetime"),
@@ -223,6 +227,9 @@ class main_ui():
             deals_view.append_column(col)
         deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.deals_filter = deals_filter(self.database, parent = self.builder.get_object("main_window"), update_action = self.builder.get_object("update_deals_tab"))
+        
+
+        
 
     def delete_deals(self):
         if not self.database.connection:
@@ -238,13 +245,15 @@ class main_ui():
             self.update_deals_tab()
         dial.destroy()
             
-        
+    def add_deal(self):
+        pass
 
     def delete_deals_activate(self, action):
         self.delete_deals()
         pass
 
     def add_deal_activate(self, action):
+        self.add_deal()
         pass
 
     def deals_view_column_clicked(self, column):
