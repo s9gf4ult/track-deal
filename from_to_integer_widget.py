@@ -37,7 +37,7 @@ class from_to_integer_widget(hiding_checkbutton):
             return None
 
     def update_widget(self, min_max):
-        if min_max:
+        if min_max and min_max[0] and min_max[1]:
             self.from_entry.get_adjustment().set_lower(min_max[0])
             self.from_entry.get_adjustment().set_upper(min_max[1])
             self.to_entry.get_adjustment().set_lower(min_max[0])

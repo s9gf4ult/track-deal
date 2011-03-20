@@ -25,6 +25,9 @@ class time_widget:
     def get_sec(self):
         return self.sec.get_value_as_int()
 
+    def get_time(self):
+        return datetime.time(self.get_hour(), self.get_min(), self.get_sec())
+
     def set_current_time(self):
         dd = datetime.datetime.fromtimestamp(time.time())
         self.hour.set_value(dd.hour)
