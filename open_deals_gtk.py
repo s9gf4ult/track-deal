@@ -171,7 +171,8 @@ class main_ui():
             self.update_report_buffer()
 
     def _call_filter_clicked(self, bt):
-        self.deals_filter.show()
+        self.deals_filter.run()
+        self.update_deals_tab()
 
     def _update_deals_activated(self, action):
         self.update_deals_tab()
@@ -226,7 +227,7 @@ class main_ui():
             col.database_column = dd[2]
             deals_view.append_column(col)
         deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
-        self.deals_filter = deals_filter(self.database, parent = self.builder.get_object("main_window"), update_action = self.builder.get_object("update_deals_tab"))
+        self.deals_filter = deals_filter(self.database, parent = self.builder.get_object("main_window"))
         
 
         

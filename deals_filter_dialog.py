@@ -10,23 +10,11 @@ from from_to_integer_widget import from_to_integer_widget
 
 class deals_filter_dialog():
 
-    def __init__(self, parent = None, modal = True, update_action = None):
-        self.update_action = update_action
-        self.window = gtk.Window()
-        self.window.set_border_width(5)
-        if parent:
-            self.window.set_transient_for(parent)
-            self.window.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
-        self.window.set_modal(modal)
-        self.close = gtk.Button(stock = gtk.STOCK_CLOSE)
-        bbox = gtk.HButtonBox()
-        bbox.set_layout(gtk.BUTTONBOX_END)
-        bbox.pack_start(self.close, padding = 3)
+    def __init__(self, parent = None, modal = True):
+        self.window = gtk.Dialog(title = u'Фильтр сделок', parent = parent, flags = (modal and gtk.DIALOG_MODAL or 0), buttons = (gtk.STOCK_CLOSE, gtk.RESPONSE_ACCEPT))
         self.notebook = gtk.Notebook()
-        vbox = gtk.VBox()
+        vbox = self.window.get_content_area()
         vbox.pack_start(self.notebook, True)
-        vbox.pack_start(bbox, False, padding = 3)
-        self.window.add(vbox)
         self.date_selector = from_to_datetime_widget(u'Учитывать дату сделки', vertical = False, expand = True, hide = False)
         self.notebook.insert_page(self.date_selector.get_widget(), tab_label= gtk.Label(u'Дата'))
         self.stock_check = check_widget(u'Инструмент')
@@ -47,9 +35,6 @@ class deals_filter_dialog():
         vbox2.pack_start(self.commission.get_widget(), False)
         self.notebook.insert_page(vbox2, tab_label = gtk.Label(u'Другое'))
         
-        self.close.connect("clicked", self.close_clicked)
-        self.window.connect("delete-event", self.window_delete)
-
     def update_widget(self, stock_list = None, min_max_price = None, min_max_count = None, min_max_commission = None):
         if stock_list:
             self.stock_check.update_widget(stock_list)
@@ -60,19 +45,11 @@ class deals_filter_dialog():
             _range.update_widget(min_max)
 
 
-    def close_clicked(self, bt):
-        if self.update_action:
-            self.update_action.activate()
-        self.window.hide()
-
-    def window_delete(self, win, evt):
-        if self.update_action:
-            self.update_action.activate()
-        self.window.hide()
-        return True
-
-    def show(self):
+    def run(self):
         self.window.show_all()
+        ret = self.window.run()
+        self.window.hide()
+        return ret
 
     
 if __name__ == "__main__":

@@ -33,8 +33,8 @@ class empry_iter():
 
 class deals_filter():
 
-    def show(self):
-        self.dialog.show()
+    def run(self):
+        return self.dialog.run()
 
     def get_ids(self, order_by):
         if self.database.connection:
@@ -44,12 +44,12 @@ class deals_filter():
         else:
             return cursor_empty()
     
-    def __init__(self, database, parent = None, modal = True, dialog = None, update_action = None):
+    def __init__(self, database, parent = None, modal = True, dialog = None):
         self.database = database
         if dialog:
             self.dialog = dialog
         else:
-            self.dialog = deals_filter_dialog(parent = parent, modal = modal, update_action = update_action)
+            self.dialog = deals_filter_dialog(parent = parent, modal = modal)
 
     def _prepare_filter(self):
         if self.database.connection:
