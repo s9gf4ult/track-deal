@@ -675,10 +675,12 @@
     <property name="label">&#x414;&#x43E;&#x431;&#x430;&#x432;&#x438;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x443;</property>
     <property name="stock_id">gtk-add</property>
     <property name="always_show_image">True</property>
+    <signal name="activate" handler="on_add_deal_activate"/>
   </object>
   <object class="GtkAction" id="delete_deals">
     <property name="label">&#x423;&#x434;&#x430;&#x43B;&#x438;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
     <property name="stock_id">gtk-remove</property>
     <property name="always_show_image">True</property>
+    <signal name="activate" handler="on_delete_deals_activate"/>
   </object>
 </interface>

@@ -197,6 +197,8 @@ class main_ui():
                                       "on_date_view_cursor_changed" : self._date_cursor_changed,
                                       "on_call_deals_filter_clicked" : self._call_filter_clicked,
                                       "on_update_deals_tab_activate" : self._update_deals_activated,
+                                      "on_delete_deals_activate" : self.delete_deals_activate,
+                                      "on_add_deal_activate" : self.add_deal_activate,
                                       "on_quit_activate" : self.quit})
         
         self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
@@ -221,6 +223,29 @@ class main_ui():
             deals_view.append_column(col)
         deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.deals_filter = deals_filter(self.database, parent = self.builder.get_object("main_window"), update_action = self.builder.get_object("update_deals_tab"))
+
+    def delete_deals(self):
+        if not self.database.connection:
+            return
+        selected = self.builder.get_object("deals_view").get_selection()
+        dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self.builder.get_object("main_window"))
+        dial.props.text = u'Удалить {0} сделок ? В любом случае это действие можно сразу отменить при помощи Rollback'.format(selected.count_selected_rows())
+        if dial.run() == gtk.RESPONSE_YES:
+            (model, it) = selected.get_selected_rows()
+            for ii in it:
+                did = model.get_value(model.get_iter(ii), 0)
+                self.database.connection.execute("delete from deals where id = ?", (did,))
+            self.update_deals_tab()
+        dial.destroy()
+            
+        
+
+    def delete_deals_activate(self, action):
+        self.delete_deals()
+        pass
+
+    def add_deal_activate(self, action):
+        pass
 
     def deals_view_column_clicked(self, column):
         if not self.database.connection:
