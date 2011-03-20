@@ -238,37 +238,89 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkHButtonBox" id="hbuttonbox1">
+                  <object class="GtkHBox" id="hbox5">
                     <property name="visible">True</property>
-                    <property name="spacing">10</property>
-                    <property name="layout_style">start</property>
                     <child>
-                      <object class="GtkButton" id="call_deals_filter">
-                        <property name="label" translatable="yes">_&#x424;&#x438;&#x43B;&#x44C;&#x442;&#x440;</property>
+                      <object class="GtkHButtonBox" id="hbuttonbox1">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="use_underline">True</property>
-                        <signal name="clicked" handler="on_call_deals_filter_clicked"/>
+                        <property name="spacing">10</property>
+                        <property name="layout_style">start</property>
+                        <child>
+                          <object class="GtkButton" id="call_deals_filter">
+                            <property name="label" translatable="yes">_&#x424;&#x438;&#x43B;&#x44C;&#x442;&#x440;</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="use_underline">True</property>
+                            <signal name="clicked" handler="on_call_deals_filter_clicked"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="padding">5</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button2">
+                            <property name="label" translatable="yes">_&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">update_deals_tab</property>
+                            <property name="use_action_appearance">True</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
                         <property name="expand">False</property>
-                        <property name="fill">False</property>
                         <property name="padding">5</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="button2">
+                      <object class="GtkHButtonBox" id="hbuttonbox2">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="related_action">update_deals_tab</property>
-                        <property name="use_action_appearance">True</property>
+                        <property name="spacing">10</property>
+                        <property name="layout_style">end</property>
+                        <child>
+                          <object class="GtkButton" id="button3">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">add_deal</property>
+                            <property name="use_action_appearance">True</property>
+                            <accelerator key="a" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">delete_deals</property>
+                            <property name="use_action_appearance">True</property>
+                            <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -618,5 +670,15 @@
     <property name="label">_&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
     <property name="stock_id">gtk-refresh</property>
     <signal name="activate" handler="on_update_deals_tab_activate"/>
+  </object>
+  <object class="GtkAction" id="add_deal">
+    <property name="label">&#x414;&#x43E;&#x431;&#x430;&#x432;&#x438;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x443;</property>
+    <property name="stock_id">gtk-add</property>
+    <property name="always_show_image">True</property>
+  </object>
+  <object class="GtkAction" id="delete_deals">
+    <property name="label">&#x423;&#x434;&#x430;&#x43B;&#x438;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
+    <property name="stock_id">gtk-remove</property>
+    <property name="always_show_image">True</property>
   </object>
 </interface>

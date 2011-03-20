@@ -219,7 +219,7 @@ class main_ui():
             col.connect("clicked", self.deals_view_column_clicked)
             col.database_column = dd[2]
             deals_view.append_column(col)
-
+        deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.deals_filter = deals_filter(self.database, parent = self.builder.get_object("main_window"), update_action = self.builder.get_object("update_deals_tab"))
 
     def deals_view_column_clicked(self, column):
