@@ -59,7 +59,8 @@ class balance(unittest.TestCase):
             self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is not null").fetchone()[0], 1)
         (mmx,) = self.base.connection.execute("select max(quantity) from deals where not_actual is null").fetchone()
         self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is null").fetchone()[0], mmx + 1)
-        
+
+        self.base.connection.execute("update deals set parent_deal_id = null  where parent_deal_id is not null")
         self.base.connection.execute("delete from deals where not_actual is not null")
 
         try:
