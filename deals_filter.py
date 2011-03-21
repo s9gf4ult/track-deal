@@ -36,10 +36,10 @@ class deals_filter():
     def run(self):
         return self.dialog.run()
 
-    def get_ids(self, order_by):
+    def get_ids(self, order_by, parent = None):
         if self.database.connection:
             self._prepare_filter()
-            q = self.get_ids_query(order_by)
+            q = self.get_ids_query(order_by, parent)
             return cursor_filter(q, self.database.connection)
         else:
             return cursor_empty()
@@ -60,8 +60,8 @@ class deals_filter():
                                       min_max_commission = self.database.connection.execute("select min(broker_comm + stock_comm), max(broker_comm + stock_comm) from deals").fetchone())
 
         
-    def get_ids_query(self, order_by):
-        ret = "select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where d.parent_deal_id is null"
+    def get_ids_query(self, order_by, parent = None):
+        ret = "select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where " + (parent == None and "d.parent_deal_id is null" or "d.parent_deal_id = {0}".format(parent))
         lasttc = self.database.connection.total_changes
         self.database.connection.execute("delete from selected_stocks")
         it = self.dialog.stock_check.list_store.get_iter_first()

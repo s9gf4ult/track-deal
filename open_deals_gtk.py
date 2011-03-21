@@ -246,9 +246,10 @@ class main_ui():
             for ii in it:
                 did = model.get_value(model.get_iter(ii), 0)
                 self.database.connection.execute("delete from deals where id = ?", (did,))
+            self.database.delete_empty_positions()
+            self.database.delete_broken_positions()
             self.update_view()
         dial.destroy()
-        self.database.delete_empty_positions()
             
     def add_deal(self):
         self.deal_adder.run()
@@ -342,7 +343,7 @@ class main_ui():
         (did, dstock, ddir, dcount, dprice, ddate) = self.database.connection.execute("select id, security_name, deal_sign, quantity, price, datetime from deals where id = ?", (deal_id,)).fetchone()
         citer = store.insert(parent_iter, -1, [did, dstock, ddir == -1 and "B" or "S", dcount, dprice, ddate.isoformat()])
         ob = self.deals_order_by()
-        for (cid,) in self.database.connection.execute("select id from deals where parent_deal_id = ?{0}".format(ob and " order by {0}".format(ob) or ""), (deal_id,)):
+        for cid in self.deals_filter.get_ids(self.deals_order_by(), parent = deal_id):
             self._insert_deal_to_store(store, citer, cid)
 
     def update_report_tab(self):

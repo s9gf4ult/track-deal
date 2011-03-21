@@ -94,6 +94,9 @@ class deals_proc():
     def delete_empty_positions(self):
         self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id))")
 
+    def delete_broken_positions(self):
+        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.volume) as volume from positions p inner join deals d on d.position_id = p.id) where abs(volume) > 0.00001)")
+
     def close(self):
         if self.connection:
             if self.last_total_changes < self.connection.total_changes and self.filename != ":memory:":
