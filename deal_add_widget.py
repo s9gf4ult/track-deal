@@ -4,6 +4,7 @@
 import gtk
 from time_widget import time_widget
 import time, datetime
+import vertical_table_pack
 
 class deal_add_widget:
     def __init__(self, parent = None):
@@ -31,13 +32,7 @@ class deal_add_widget:
         self.broker_comm = gtk.SpinButton(adjustment = gtk.Adjustment(lower = 0, upper = 999999999, step_incr = 0.01), climb_rate = 0.01, digits = 4)
         self.stock_comm = gtk.SpinButton(adjustment = gtk.Adjustment(lower = 0, upper = 999999999, step_incr = 0.01), climb_rate = 0.01, digits = 4)
         pack += [(u'Вознаграждение брокера', self.broker_comm), (u'Комиссия биржи', self.stock_comm)]
-        t = gtk.Table(rows = len(pack), columns = 2)
-        t.set_col_spacing(0, 10)
-        for row in xrange(0, len(pack)):
-            t.attach(gtk.Label(pack[row][0]), left_attach = 0, right_attach = 1, top_attach = row, bottom_attach = row + 1, xoptions = gtk.FILL, yoptions = gtk.FILL)
-            t.attach(pack[row][1], left_attach = 1, right_attach = 2, top_attach = row, bottom_attach = row + 1, yoptions = gtk.FILL)
-        
-        
+        t = vertical_table_pack.pack_vertical(map(lambda a: [gtk.Label(a[0])] + list(a[1:]), pack), expandingrow = 0, expandingcol = 1)
                  
         self.window.get_content_area().pack_start(t)
 

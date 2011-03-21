@@ -9,7 +9,7 @@ def pack_vertical(rows_list, expandingrow = None, expandingcol = None):
     t = gtk.Table(rows = rows, columns = cols)
     for rid in xrange(0, len(rows_list)):
         for cid in xrange(0, len(rows_list[rid])):
-            t.attach(rows_list[rid][cid], left_attach = cid, right_attach = cid + 1, top_attach = rid, bottom_attach = rid + 1, xoptions = expandingcol and cid == expandingcol and gtk.FILL | gtk.EXPAND or gtk.FILL, yoptions = expandingrow and rid == expandingrow and gtk.FILL | gtk.EXPAND or gtk.FILL)
+            t.attach(rows_list[rid][cid], left_attach = cid, right_attach = cid + 1, top_attach = rid, bottom_attach = rid + 1, xoptions = expandingcol != None and cid == expandingcol and gtk.FILL | gtk.EXPAND or gtk.FILL, yoptions = expandingrow != None and rid == expandingrow and gtk.FILL | gtk.EXPAND or gtk.FILL)
 
     return t
 
