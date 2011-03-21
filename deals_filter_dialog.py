@@ -54,5 +54,4 @@ class deals_filter_dialog():
     
 if __name__ == "__main__":
     df = deals_filter_dialog()
-    df.show()
-    gtk.main()
+    df.run()

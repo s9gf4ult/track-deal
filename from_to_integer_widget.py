@@ -5,7 +5,7 @@ import gtk
 from hiding_checkbutton import hiding_checkbutton
 
 class from_to_integer_widget(hiding_checkbutton):
-    def __init__(self, name, from_adjustment, to_adjustment, vertical = True, expand = False, digits = 0, hide = True):
+    def __init__(self, name, from_adjustment, to_adjustment, vertical = True, expand = False, digits = 0, hide = False):
         self.from_entry = gtk.SpinButton(adjustment = from_adjustment, climb_rate = 0.1, digits = digits)
         self.to_entry = gtk.SpinButton(adjustment = to_adjustment, climb_rate = 0.1, digits = digits)
         if vertical:
