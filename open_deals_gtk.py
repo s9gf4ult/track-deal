@@ -237,14 +237,18 @@ class main_ui():
             return
         selected = self.builder.get_object("deals_view").get_selection()
         dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self.builder.get_object("main_window"))
-        dial.props.text = u'Удалить {0} сделок ? В любом случае это действие можно сразу отменить при помощи Rollback'.format(selected.count_selected_rows())
+        dcount = selected.count_selected_rows()
+        if dcount == 0:
+            return
+        dial.props.text = u'Удалить {0} сделок ? В любом случае это действие можно сразу отменить при помощи Rollback'.format(dcount)
         if dial.run() == gtk.RESPONSE_YES:
             (model, it) = selected.get_selected_rows()
             for ii in it:
                 did = model.get_value(model.get_iter(ii), 0)
                 self.database.connection.execute("delete from deals where id = ?", (did,))
-            self.update_deals_tab()
+            self.update_view()
         dial.destroy()
+        self.database.delete_empty_positions()
             
     def add_deal(self):
         self.deal_adder.run()

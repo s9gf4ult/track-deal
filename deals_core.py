@@ -77,7 +77,7 @@ class deals_proc():
         stock_comm_nds real,
         position_id integer,
         foreign key (position_id) references positions(id) on delete set null,
-        foreign key (parent_deal_id) references deals(id) on delete set null,
+        foreign key (parent_deal_id) references deals(id) on delete cascade,
         foreign key (group_id) references deal_groups(id) on delete set null,
         unique(sha1)
         )""")
@@ -90,6 +90,9 @@ class deals_proc():
 
         self.connection.commit()
         self.connection.execute("begin transaction")
+
+    def delete_empty_positions(self):
+        self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id))")
 
     def close(self):
         if self.connection:

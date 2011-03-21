@@ -7,8 +7,8 @@ import time, datetime
 import vertical_table_pack
 
 class deal_add_widget:
-    def __init__(self, parent = None):
-        self.window = gtk.Dialog(title = u'Добавить сделку вручную', parent = parent, flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_ADD, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+    def __init__(self, parent = None, stock = gtk.STOCK_ADD):
+        self.window = gtk.Dialog(title = u'Добавить сделку вручную', parent = parent, flags = gtk.DIALOG_MODAL, buttons = (stock, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         self.calendar = gtk.Calendar()
         self.time = time_widget()
         v = gtk.VBox()
