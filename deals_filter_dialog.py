@@ -25,13 +25,10 @@ class deals_filter_dialog():
         self.direction = select_widget(u'Направление сделки', {-1 : u'Покупка', 1 : u'Продажа'}, vertical = False, expand = False, hide = False)
         vbox2.pack_start(self.direction.get_widget(), False)
         self.price_range = from_to_integer_widget(u'Цена сделки', gtk.Adjustment(step_incr = 0.01), gtk.Adjustment(step_incr = 0.01), vertical = False, expand = False, digits=4, hide = False)
-        self.price_range.to_hide = True
         vbox2.pack_start(self.price_range.get_widget(), False)
         self.count_range = from_to_integer_widget(u'Количество контрактов', gtk.Adjustment(step_incr = 1), gtk.Adjustment(step_incr = 1), vertical = False, expand = False, hide = False)
-        self.count_range.to_hide = True
         vbox2.pack_start(self.count_range.get_widget(), False)
         self.commission = from_to_integer_widget(u'Коммиссия', gtk.Adjustment(step_incr = 0.01), gtk.Adjustment(step_incr = 0.01), vertical = False, expand = False, digits = 2, hide = False)
-        self.commission.to_hide = True
         vbox2.pack_start(self.commission.get_widget(), False)
         self.notebook.insert_page(vbox2, tab_label = gtk.Label(u'Другое'))
         

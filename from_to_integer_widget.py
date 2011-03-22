@@ -47,7 +47,7 @@ class from_to_integer_widget(hiding_checkbutton):
 if __name__ == "__main__":
     w = gtk.Window()
     w.connect("delete-event", gtk.main_quit)
-    w.add(from_to_integer_widget("ijij", gtk.Adjustment(lower = 0, upper = 100, step_incr = 1), gtk.Adjustment(lower = 100, upper = 200, step_incr = 1)).get_widget())
+    w.add(from_to_integer_widget("ijij", gtk.Adjustment(lower = 0, upper = 100, step_incr = 1), gtk.Adjustment(lower = 100, upper = 200, step_incr = 1), hide = False).get_widget())
 
     w.show_all()
     gtk.main()
