@@ -1,5 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+import gtk
 
 class number_control:
     def __init__(self, spin_button, checkbutton = None, step_incr = 1):
@@ -16,7 +17,7 @@ class number_control:
     def get_value(self):
         val = self.spin_button.get_value()
         if self.checkbutton != None:
-            self.checkbutton.get_active():
+            if  self.checkbutton.get_active():
                 return val
         else:
             return val
@@ -46,3 +47,27 @@ class number_range_control:
             return self.high_control.get_value()
         return None
         
+if __name__ == "__main__":
+    w = gtk.Dialog(buttons = (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+    p = w.get_content_area()
+    a = gtk.CheckButton("One")
+    b = gtk.CheckButton("Two")
+    c = gtk.CheckButton("Both")
+    aa = gtk.SpinButton()
+    bb = gtk.SpinButton()
+    x = number_control(aa, a)
+    y = number_control(bb, b)
+    n = number_range_control(c, x, y)
+    n.set_lower_limit(0)
+    n.set_upper_limit(100)
+    for wi in [c, a, aa, b, bb]:
+        p.pack_start(wi, False)
+    e = gtk.Entry()
+    b = gtk.Button("push")
+    def clicked(bt):
+        e.set_text("{0} - {1}".format(n.get_lower_value(), n.get_upper_value()))
+    b.connect("clicked", clicked)
+    p.pack_start(e, False)
+    p.pack_start(b)
+    w.show_all()
+    w.run()
