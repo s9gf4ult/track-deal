@@ -40,9 +40,12 @@ class list_view_control:
         
     def column_clicked(self, column, col_id):
         sid = self.treeview.get_model().get_sort_column_id()
-        if sid == col_id:
-            column.get
-        self.treeview.get_model().set_sort_column_id(col_id, gtk.SORT_ASCENDING)
+        order = self.toggle_sort_indicator(col_id)
+        self.treeview.get_model().set_sort_column_id(col_id, order)
+
+    def toggle_sort_indicator(self, col_id):
+        
+        
 
     def update_rows(self, rows):
         m = self.get_new_store()
