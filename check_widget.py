@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 import gtk
 
-class check_widget():
-    def __init__(self, the_name):
+class check_control():
+    def __init__(self, columns):
         self.vbox = gtk.VBox()
         self.list_store = gtk.ListStore(bool, str)
         self.tree_view = gtk.TreeView(self.list_store)
