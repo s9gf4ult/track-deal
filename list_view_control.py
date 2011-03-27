@@ -67,6 +67,16 @@ class list_view_control:
             m.append(row)
         self.treeview.set_model(m)
 
+    def add_rows(self, rows):
+        if not self.treeview.get_model():
+            self.make_model()
+        m = self.treeview.get_model()
+        self.treeview.set_model(None)
+        for row in rows:
+            m.append(row)
+        self.treeview.set_model(m)
+        
+
 if __name__ == "__main__":
     w = gtk.Dialog()
     p = w.get_content_area()
@@ -74,6 +84,7 @@ if __name__ == "__main__":
     p.pack_start(v)
     con = list_view_control(v, [("OK", gtk.CellRendererToggle()), ("Name", gtk.CellRendererText())])
     con.update_rows([(True, "ijij"), (True, "isejfj"), (False, "jeifjjj2")])
+    con.add_rows([(False, "False"), (True, "True"), (True, "is cool"), (False, "is sucks")])
     w.show_all()
     w.run()
     
