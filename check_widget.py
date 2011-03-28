@@ -64,8 +64,18 @@ class check_control():
             it = m.get_iter_first()
 
     def update_rows(self, rows, default_toggle = True):
-        rows = self.list_control.get_rows()
-        
+        def get_subrow_position(row, rws):
+            for l in xrange(0, len(rws)):
+                if row == rws[l][1:]:
+                    return l
+            return None
+        rws = self.list_control.get_rows()
+        upd = []
+        for row in rows:
+            if get_subrow_position(row, rws) == None:
+                upd.append(tuple([default_toggle] + list(row)))
+                
+                
 
 
 if __name__ == "__main__":
