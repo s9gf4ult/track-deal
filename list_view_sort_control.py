@@ -78,6 +78,18 @@ class list_view_sort_control:
 
     def get_model(self):
         return self.treeview.get_model()
+
+    def get_rows(self):
+        ret = []
+        def foreachfunc(model, path, it):
+            l = len(self.treeview.get_columns())
+            p = []
+            for x in xrange(0, l):
+                p.append(model.get_value(it, x))
+            ret.append(tuple(p))
+        self.get_model().foreach(foreachfunc)
+        return ret
+            
         
 
 if __name__ == "__main__":
