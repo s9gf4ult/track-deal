@@ -64,21 +64,25 @@ class check_control():
             it = m.get_iter_first()
 
     def update_rows(self, rows, default_toggle = True):
-        def get_subrow_position(row, rws):
-            for l in xrange(0, len(rws)):
-                if row == rws[l][1:]:
-                    return l
-            return None
         rws = self.list_control.get_rows()
-        upd = []
+        found = {}
+        for rw in rws:
+            found[tuple(map(lambda a: isinstance(a, str) and a.decode("utf-8") or a, rw[1:]))] = rw[0]
+        new = []
         for row in rows:
-            if get_subrow_position(row, rws) == None:
-                upd.append(tuple([default_toggle] + list(row)))
-                
+            x = tuple(map(lambda a: isinstance(a, str) and a.decode("utf-8") or a, row))
+            if found.has_key(x):
+                new.append(tuple([found[x]] + list(x)))
+            else:
+                new.append(tuple([default_toggle] + list(x)))
+        self.list_control.update_rows(new)
                 
 
 
 if __name__ == "__main__":
+    def update_rows(bt, con, rows):
+        con.update_rows(rows)
+        
     w = gtk.Dialog()
     p = w.get_content_area()
     v = gtk.TreeView()
@@ -89,9 +93,13 @@ if __name__ == "__main__":
     dd = gtk.Button("deselect")
     ra = gtk.Button("reverse all")
     rr = gtk.Button("reverse")
-    for wid in [sa, ss, da, dd, ra, rr]:
+    ub = gtk.Button("rows 1")
+    ubb = gtk.Button("rows 2")
+    for wid in [sa, ss, da, dd, ra, rr, ub, ubb]:
         p.pack_start(wid)
-    con = check_control(v, "Yes?", [("Name", gtk.CellRendererText())], select_button = ss, select_all_button = sa, deselect_button = dd, deselect_all_button = da, reverse_button = rr, reverse_all_button = ra)
-    con.list_control.update_rows([(True, "One"), (False, "Two"), (True, "2 + 2 = 4"), (False, "3*5 = 14"), (True, "jojojo")])
+    con = check_control(v, "Yes?", [("Name", gtk.CellRendererText()), ("FUCK YOU", gtk.CellRendererText())], select_button = ss, select_all_button = sa, deselect_button = dd, deselect_all_button = da, reverse_button = rr, reverse_all_button = ra)
+    con.list_control.update_rows([(True, "One", ""), (False, "Two", ""), (True, "2 + 2 = 4", ""), (False, "3*5 = 14", "is false"), (True, "jojojo", "camon camon")])
+    ub.connect("clicked", update_rows, con, [("ROW 1", "hesell"), ("ROW 2", "fjfj"), ("row 3",""), ("row 4","")])
+    ubb.connect("clicked", update_rows, con, [("ROW 1", "haskell"), ("ROW 2", "fjfj"), ("ROW 3","")])
     w.show_all()
     w.run()
