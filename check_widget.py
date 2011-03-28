@@ -1,38 +1,30 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import gtk
+from list_view_sort_control import *
 
 class check_control():
-    def __init__(self, columns):
-        self.vbox = gtk.VBox()
-        self.list_store = gtk.ListStore(bool, str)
-        self.tree_view = gtk.TreeView(self.list_store)
-        self.tree_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
-        tren = gtk.CellRendererToggle()
-        tren.props.activatable = True
-        tren.connect("toggled", self.row_toggled)
-        self.tree_view.append_column(gtk.TreeViewColumn('', tren, active = 0))
-        self.tree_view.append_column(gtk.TreeViewColumn(the_name, gtk.CellRendererText(), text = 1))
-        sw = gtk.ScrolledWindow()
-        sw.add(self.tree_view)
-        self.vbox.pack_start(sw)
-        self.reverse_button = gtk.Button(u'Реверс')
-        self.unset_button = gtk.Button(u'Снять выделение')
-        self.set_button = gtk.Button(u'Установить выделение')
-        self.reverse_button.connect("clicked", self.button_clicked, self.reverse_foreach)
-        self.unset_button.connect("clicked", self.button_clicked, self.unset_foreach)
-        self.set_button.connect("clicked", self.button_clicked, self.set_foreach)
-        self.hbb = gtk.HButtonBox()
-        self.hbb.set_layout(gtk.BUTTONBOX_SPREAD)
-        self.hbb.pack_start(self.reverse_button)
-        self.hbb.pack_start(self.unset_button)
-        self.hbb.pack_start(self.set_button)
-        self.vbox.pack_start(self.hbb, False)
+    
+    def __init__(self, treeview, first_column_name, columns, reverse_button = None, reverse_all_button = None, select_button = None, select_all_button = None, deselect_button = None, deselect_all_button = None):
+        """columns must be a list of pairs with name and CellRenderer objects, but first
+        column will be checkbutton column"""
+        c = gtk.CellRendererToggle()
+        c.props.activatable = True
+        c.connect("toggled", self.row_toggled)
+        self.list_control = list_view_sort_control(treeview, [(first_column_name, c)] + columns)
+        self.treeview = treeview
+        self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        self.reverse_button = reverse_button
+        self.reverse_all_button = reverse_all_button
+        self.select_button = select_button
+        self.select_all_button = select_all_button
+        self.deselect_button = deselect_button
+        self.deselect_all_button = deselect_all_button
 
     def row_toggled(self, renderer, path):
-        it = self.list_store.get_iter(path)
-        val = self.list_store.get_value(it, 0)
-        self.list_store.set_value(it, 0, not val)
+        it = self.treeview.get_model().get_iter(path)
+        val = self.treeview.get_model().get_value(it, 0)
+        self.treeview.get_model().set_value(it, 0, not val)
 
     def reverse_foreach(self, t, p, i):
         val = self.list_store.get_value(i, 0)
@@ -47,8 +39,6 @@ class check_control():
     def button_clicked(self, bt, callme):
         self.tree_view.get_selection().selected_foreach(callme)
 
-    def get_widget(self):
-        return self.vbox
 
     def flush_list(self):
         it = self.list_store.get_iter_first()
@@ -72,11 +62,11 @@ class check_control():
 
 
 if __name__ == "__main__":
-    w = gtk.Window()
-    w.connect("delete-event", gtk.main_quit)
-    cw = check_widget(u'hello')
-    for x in range(1, 100):
-        cw.list_store.append([True, x])
-    w.add(cw.get_widget())
+    w = gtk.Dialog()
+    p = w.get_content_area()
+    v = gtk.TreeView()
+    p.pack_start(v)
+    con = check_control(v, "Yes?", [("Name", gtk.CellRendererText())])
+    con.list_control.update_rows([(True, "ijeij"), (False, "jfjfj")])
     w.show_all()
-    gtk.main()
+    w.run()
