@@ -3,7 +3,7 @@
 
 import gtk
 
-class list_view_control:
+class list_view_sort_control:
     def __init__(self, treeview, columns):
         """columns must be list of tuples with name and renderer, order of tuple in the list
         determines the order of columns in TreeView"""
