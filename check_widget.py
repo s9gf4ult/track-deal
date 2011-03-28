@@ -63,19 +63,9 @@ class check_control():
             m.remove(it)
             it = m.get_iter_first()
 
-    def update_widget(self, elt_list):
-        found = {}
-        it = self.list_store.get_iter_first()
-        while it:
-            found[self.list_store.get_value(it, 1).decode("utf-8")] = self.list_store.get_value(it, 0)
-            it = self.list_store.iter_next(it)
-        self.flush_list()
-        for elt in elt_list:
-            if found.has_key(elt.decode("utf-8")):
-                bo = found[elt.decode("utf-8")]
-            else:
-                bo = True
-            self.list_store.append([bo, elt])
+    def update_rows(self, rows, default_toggle = True):
+        rows = self.list_control.get_rows()
+        
 
 
 if __name__ == "__main__":
