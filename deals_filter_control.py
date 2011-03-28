@@ -2,5 +2,7 @@
 # -*- coding: utf-8 -*-
 
 class deals_filter_control:
-    def __init__(self):
+    def __init__(self, builder):
+        self.builder = builder
+        self.
         
