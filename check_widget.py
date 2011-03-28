@@ -15,36 +15,53 @@ class check_control():
         self.treeview = treeview
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.reverse_button = reverse_button
+        if self.reverse_button:
+            self.reverse_button.connect("clicked", self.selection_button_clicked, self.reverse_foreach)
         self.reverse_all_button = reverse_all_button
+        if self.reverse_all_button:
+            self.reverse_all_button.connect("clicked", self.all_button_clicked, self.reverse_foreach)
         self.select_button = select_button
+        if self.select_button:
+            self.select_button.connect("clicked", self.selection_button_clicked, self.set_foreach)
         self.select_all_button = select_all_button
+        if self.select_all_button:
+            self.select_all_button.connect("clicked", self.all_button_clicked, self.set_foreach)
         self.deselect_button = deselect_button
+        if self.deselect_button:
+            self.deselect_button.connect("clicked", self.selection_button_clicked, self.unset_foreach)
         self.deselect_all_button = deselect_all_button
+        if self.deselect_all_button:
+            self.deselect_all_button.connect("clicked", self.all_button_clicked, self.unset_foreach)
 
     def row_toggled(self, renderer, path):
         it = self.treeview.get_model().get_iter(path)
         val = self.treeview.get_model().get_value(it, 0)
         self.treeview.get_model().set_value(it, 0, not val)
 
-    def reverse_foreach(self, t, p, i):
-        val = self.list_store.get_value(i, 0)
-        self.list_store.set_value(i, 0, not val)
+    def reverse_foreach(self, x, y, i):
+        m = self.treeview.get_model()
+        val = m.get_value(i, 0)
+        m.set_value(i, 0, not val)
 
-    def unset_foreach(self, t, p, i):
-        self.list_store.set_value(i, 0, False)
+    def unset_foreach(self, x, u, i):
+        self.treeview.get_model().set_value(i, 0, False)
 
-    def set_foreach(self, t, p, i):
-        self.list_store.set_value(i, 0, True)
+    def set_foreach(self, x, y, i):
+        self.treeview.get_model().set_value(i, 0, True)
         
-    def button_clicked(self, bt, callme):
-        self.tree_view.get_selection().selected_foreach(callme)
+    def selection_button_clicked(self, bt, callme):
+        self.treeview.get_selection().selected_foreach(callme)
+
+    def all_button_clicked(self, bt, callme):
+        self.treeview.get_model().foreach(callme)
 
 
     def flush_list(self):
-        it = self.list_store.get_iter_first()
+        m = self.treeview.get_model()
+        it = m.get_iter_first()
         while it:
-            self.list_store.remove(it)
-            it = self.list_store.get_iter_first()
+            m.remove(it)
+            it = m.get_iter_first()
 
     def update_widget(self, elt_list):
         found = {}
@@ -66,7 +83,15 @@ if __name__ == "__main__":
     p = w.get_content_area()
     v = gtk.TreeView()
     p.pack_start(v)
-    con = check_control(v, "Yes?", [("Name", gtk.CellRendererText())])
-    con.list_control.update_rows([(True, "ijeij"), (False, "jfjfj")])
+    sa = gtk.Button("select all")
+    ss = gtk.Button("select")
+    da = gtk.Button("deselect all")
+    dd = gtk.Button("deselect")
+    ra = gtk.Button("reverse all")
+    rr = gtk.Button("reverse")
+    for wid in [sa, ss, da, dd, ra, rr]:
+        p.pack_start(wid)
+    con = check_control(v, "Yes?", [("Name", gtk.CellRendererText())], select_button = ss, select_all_button = sa, deselect_button = dd, deselect_all_button = da, reverse_button = rr, reverse_all_button = ra)
+    con.list_control.update_rows([(True, "One"), (False, "Two"), (True, "2 + 2 = 4"), (False, "3*5 = 14"), (True, "jojojo")])
     w.show_all()
     w.run()
