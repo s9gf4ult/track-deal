@@ -702,7 +702,7 @@
                 <property name="visible">True</property>
                 <property name="label_xalign">0</property>
                 <child>
-                  <object class="GtkAlignment" id="alignment1">
+                  <object class="GtkAlignment" id="deals_filter_datetime_range_box">
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
@@ -711,7 +711,7 @@
                         <property name="n_rows">3</property>
                         <property name="n_columns">2</property>
                         <child>
-                          <object class="GtkCheckButton" id="checkbutton2">
+                          <object class="GtkCheckButton" id="deals_filter_datetime_lower_cb">
                             <property name="label" translatable="yes">&gt;=</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -724,7 +724,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkCheckButton" id="checkbutton3">
+                          <object class="GtkCheckButton" id="deals_filter_datetime_upper_cb">
                             <property name="label" translatable="yes">&lt;=</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -739,7 +739,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkCalendar" id="calendar1">
+                          <object class="GtkCalendar" id="deals_filter_calendar_lower">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="year">2011</property>
@@ -752,7 +752,7 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkCalendar" id="calendar2">
+                          <object class="GtkCalendar" id="deals_filter_calendar_upper">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="year">2011</property>
@@ -767,19 +767,19 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkFrame" id="frame2">
+                          <object class="GtkFrame" id="deals_filter_lower_time_box">
                             <property name="visible">True</property>
                             <property name="label_xalign">0</property>
                             <property name="shadow_type">none</property>
                             <child>
-                              <object class="GtkAlignment" id="alignment2">
+                              <object class="GtkAlignment" id="deals_filter_time_lower_box">
                                 <property name="visible">True</property>
                                 <property name="left_padding">12</property>
                                 <child>
-                                  <object class="GtkHBox" id="hbox6">
+                                  <object class="GtkHBox" id="hbox">
                                     <property name="visible">True</property>
                                     <child>
-                                      <object class="GtkSpinButton" id="spinbutton1">
+                                      <object class="GtkSpinButton" id="deals_filter_hour_lower_spin">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">&#x25CF;</property>
@@ -800,7 +800,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton" id="spinbutton2">
+                                      <object class="GtkSpinButton" id="deals_filter_min_lower_spin">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">&#x25CF;</property>
@@ -821,7 +821,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton" id="spinbutton3">
+                                      <object class="GtkSpinButton" id="deals_filter_sec_lower_spin">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">&#x25CF;</property>
@@ -836,7 +836,7 @@
                               </object>
                             </child>
                             <child type="label">
-                              <object class="GtkCheckButton" id="checkbutton4">
+                              <object class="GtkCheckButton" id="deals_filter_time_lower_cb">
                                 <property name="label" translatable="yes">&#x441; &#x443;&#x447;&#x435;&#x442;&#x43E;&#x43C; &#x432;&#x440;&#x435;&#x43C;&#x435;&#x43D;&#x438;</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -852,19 +852,19 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkFrame" id="frame3">
+                          <object class="GtkFrame" id="deals_filter_upper_time_box">
                             <property name="visible">True</property>
                             <property name="label_xalign">0</property>
                             <property name="shadow_type">none</property>
                             <child>
-                              <object class="GtkAlignment" id="alignment3">
+                              <object class="GtkAlignment" id="deals_filter_time_upper_box">
                                 <property name="visible">True</property>
                                 <property name="left_padding">12</property>
                                 <child>
                                   <object class="GtkHBox" id="hbox7">
                                     <property name="visible">True</property>
                                     <child>
-                                      <object class="GtkSpinButton" id="spinbutton4">
+                                      <object class="GtkSpinButton" id="deals_filter_hour_upper_spin">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">&#x25CF;</property>
@@ -885,7 +885,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton" id="spinbutton5">
+                                      <object class="GtkSpinButton" id="deals_filter_min_upper_spin">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">&#x25CF;</property>
@@ -906,7 +906,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton" id="spinbutton6">
+                                      <object class="GtkSpinButton" id="deals_filter_sec_upper_spin">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="invisible_char">&#x25CF;</property>
@@ -921,7 +921,7 @@
                               </object>
                             </child>
                             <child type="label">
-                              <object class="GtkCheckButton" id="checkbutton5">
+                              <object class="GtkCheckButton" id="deals_filter_time_upper_cb">
                                 <property name="label" translatable="yes">&#x441; &#x443;&#x447;&#x435;&#x442;&#x43E;&#x43C; &#x432;&#x440;&#x435;&#x43C;&#x435;&#x43D;&#x438;</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -943,7 +943,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton1">
+                  <object class="GtkCheckButton" id="deals_filter_datetime_range_cb">
                     <property name="label" translatable="yes">&#x423;&#x447;&#x438;&#x442;&#x44B;&#x432;&#x430;&#x442;&#x44C; &#x434;&#x430;&#x442;&#x443;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -1107,7 +1107,6 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
@@ -1167,7 +1166,6 @@
                   <packing>
                     <property name="left_attach">1</property>
                     <property name="right_attach">2</property>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
@@ -1255,7 +1253,6 @@
                   <packing>
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
@@ -1345,7 +1342,6 @@
                     <property name="right_attach">2</property>
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
@@ -1433,7 +1429,6 @@
                   <packing>
                     <property name="top_attach">2</property>
                     <property name="bottom_attach">3</property>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
@@ -1523,7 +1518,6 @@
                     <property name="right_attach">2</property>
                     <property name="top_attach">2</property>
                     <property name="bottom_attach">3</property>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
@@ -1611,7 +1605,6 @@
                   <packing>
                     <property name="top_attach">3</property>
                     <property name="bottom_attach">4</property>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
@@ -1701,7 +1694,6 @@
                     <property name="right_attach">2</property>
                     <property name="top_attach">3</property>
                     <property name="bottom_attach">4</property>
-                    <property name="y_options">GTK_FILL</property>
                     <property name="x_padding">4</property>
                   </packing>
                 </child>
