@@ -19,6 +19,13 @@ class datetime_control(value_returner_control):
     def get_time(self):
         return self.return_value(self.time_control.get_time())
 
+    def get_datetime(self):
+        date = self.get_date()
+        time = self.get_time()
+        if date and time:
+            return datetime.datetime.combine(date, time)
+        return None
+
     def set_current_time(self):
         self.time_control.set_current_time()
 
