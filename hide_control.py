@@ -54,7 +54,14 @@ class all_checked_control:
                 return
         self.parent_checkbutton.set_active(False)
         
-    
+class value_returner_control:
+    def return_value(self, value):
+        if self.checkbutton:
+            if self.checkbutton.get_active():
+                return value
+        else:
+            return value
+        return None
 
 
 if __name__ == "__main__":

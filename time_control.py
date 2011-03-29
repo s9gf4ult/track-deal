@@ -3,8 +3,9 @@
 
 import gtk
 import datetime, time
+import value_returner_control from hide_control
 
-class time_control:
+class time_control(value_returner_control):
     def __init__(self, hour, min, sec, checkbutton = None):
         self.hour = hour
         self.min = min
@@ -29,13 +30,7 @@ class time_control:
         return self.sec.get_value_as_int()
 
     def get_time(self):
-        val = datetime.time(self.get_hour(), self.get_min(), self.get_sec())
-        if self.checkbutton != None:
-            if self.checkbutton.get_active():
-                return val
-        else:
-            return val
-        return None
+        return self.return_value(datetime.time(self.get_hour(), self.get_min(), self.get_sec()))
 
     def set_current_time(self):
         dd = datetime.datetime.fromtimestamp(time.time())
