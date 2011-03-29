@@ -3,7 +3,7 @@
 
 import gtk
 import datetime, time
-import value_returner_control from hide_control
+from hide_control import value_returner_control
 
 class time_control(value_returner_control):
     def __init__(self, hour, min, sec, checkbutton = None):
