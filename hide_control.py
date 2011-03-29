@@ -3,14 +3,27 @@
 import gtk
 
 class hide_control:
-    def __init__(self, checkbutton, hide_widget, hide = False, reverse = False):
+    def __init__(self, checkbutton, hide_widgets, hide = False, reverse = False):
         self.checkbutton = checkbutton
-        self.hide_widget = hide_widget
+        self.hide_widgets = hide_widgets
         self.hide = hide
         self.reverse = reverse
         self.checkbutton.connect("toggled", self.toggled)
-        self.hide_widget.connect("show", self.toggled)
+        for w in self.hide_widgets:
+            w.connect("show", self.toggled)
         self.toggled(None)
+
+    def hide_all(self):
+        for w in self.hide_widgets:
+            w.hide()
+
+    def show_all(self):
+        for w in self.hide_widgets:
+            w.show()
+
+    def set_sensitive_all(self, sens):
+        for w in self.hide_widgets:
+            w.set_sensitive(sens)
 
     def toggled(self, something):
         p = self.checkbutton.get_active()
@@ -18,14 +31,14 @@ class hide_control:
             p = not p
         if p:
             if self.hide:
-                self.hide_widget.show()
+                self.show_all()
             else:
-                self.hide_widget.set_sensitive(True)
+                self.set_sensitive_all(True)
         else:
             if self.hide:
-                self.hide_widget.hide()
+                self.hide_all()
             else:
-                self.hide_widget.set_sensitive(False)
+                self.set_sensitive_all(False)
 
 class all_checked_control:
     def __init__(self, parent_checkbutton, child_checkbuttons):
@@ -51,12 +64,14 @@ if __name__ == "__main__":
     b = gtk.Button("eifjefij")
     p.pack_start(c, False)
     p.pack_start(b)
-    hide_control(c, b)
+    hide_control(c, [b])
     cc = gtk.ToggleButton("yayaya")
     bb = gtk.Label("super yagoo")
+    bbb = gtk.Label("another super")
     p.pack_start(cc)
     p.pack_start(bb, False)
-    hide_control(cc, bb, hide = True)
+    p.pack_start(bbb, False)
+    hide_control(cc, [bb, bbb], hide = True)
     pc = gtk.CheckButton("Dady")
     all_checked_control(pc, [c, cc])
     p.pack_start(pc, False)
