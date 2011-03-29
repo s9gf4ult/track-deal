@@ -1,8 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import gtk
+from hide_control import value_returner_control
 
-class select_control:
+class select_control(value_returner_control):
     def __init__(self, answers, checkbutton = None):
         self.answers = answers
         self.checkbutton = checkbutton
@@ -13,12 +14,7 @@ class select_control:
             if self.answers[k].get_active():
                 ret = k
                 break
-        if self.checkbutton != None:
-            if self.checkbutton.get_active():
-                return ret
-        else:
-            return ret
-        return None
+        return self.return_value(ret)
             
 if __name__ == "__main__":
     w = gtk.Dialog(buttons = (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
