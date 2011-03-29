@@ -1350,7 +1350,7 @@
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment8">
+                      <object class="GtkAlignment" id="deals_filter_brocker_comm_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -1359,7 +1359,7 @@
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton15">
+                              <object class="GtkCheckButton" id="deals_filter_brocker_comm_lower_cb">
                                 <property name="label" translatable="yes">&gt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1372,7 +1372,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton16">
+                              <object class="GtkCheckButton" id="deals_filter_brocker_comm_upper_cb">
                                 <property name="label" translatable="yes">&lt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1387,7 +1387,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton11">
+                              <object class="GtkSpinButton" id="deals_filter_brocker_comm_lower_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1399,7 +1399,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton12">
+                              <object class="GtkSpinButton" id="deals_filter_brocker_comm_upper_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1417,7 +1417,7 @@
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkCheckButton" id="checkbutton14">
+                      <object class="GtkCheckButton" id="deals_filter_brocker_comm_cb">
                         <property name="label" translatable="yes">&#x41A;&#x43E;&#x43C;&#x438;&#x441;&#x441;&#x438;&#x44F; &#x431;&#x440;&#x43E;&#x43A;&#x435;&#x440;&#x430;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1437,7 +1437,7 @@
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment9">
+                      <object class="GtkAlignment" id="deals_filter_stock_comm_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -1446,7 +1446,7 @@
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton18">
+                              <object class="GtkCheckButton" id="deals_filter_stock_comm_lower_cb">
                                 <property name="label" translatable="yes">&gt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1459,7 +1459,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton19">
+                              <object class="GtkCheckButton" id="deals_filter_stock_comm_upper_cb">
                                 <property name="label" translatable="yes">&lt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1474,7 +1474,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton13">
+                              <object class="GtkSpinButton" id="deals_filter_stock_comm_lower_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1486,7 +1486,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton14">
+                              <object class="GtkSpinButton" id="deals_filter_stock_comm_upper_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1504,7 +1504,7 @@
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkCheckButton" id="checkbutton17">
+                      <object class="GtkCheckButton" id="deals_filter_stock_comm_cb">
                         <property name="label" translatable="yes">&#x41A;&#x43E;&#x43C;&#x438;&#x441;&#x441;&#x438;&#x44F; &#x431;&#x438;&#x440;&#x436;&#x438;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1526,7 +1526,7 @@
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment10">
+                      <object class="GtkAlignment" id="deals_filter_comm_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -1535,7 +1535,7 @@
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton21">
+                              <object class="GtkCheckButton" id="deals_filter_comm_lower_cb">
                                 <property name="label" translatable="yes">&gt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1548,7 +1548,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton22">
+                              <object class="GtkCheckButton" id="deals_filter_comm_upper_cb">
                                 <property name="label" translatable="yes">&lt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1563,7 +1563,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton15">
+                              <object class="GtkSpinButton" id="deals_filter_comm_lower_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1575,7 +1575,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton16">
+                              <object class="GtkSpinButton" id="deals_filter_comm_upper_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1593,7 +1593,7 @@
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkCheckButton" id="checkbutton20">
+                      <object class="GtkCheckButton" id="deals_filter_comm_cb">
                         <property name="label" translatable="yes">&#x421;&#x443;&#x43C;&#x43C;&#x430;&#x440;&#x43D;&#x430;&#x44F; &#x43A;&#x43E;&#x43C;&#x43C;&#x438;&#x441;&#x441;&#x438;&#x44F;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
@@ -1613,7 +1613,7 @@
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment11">
+                      <object class="GtkAlignment" id="deals_filter_volume_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -1622,7 +1622,7 @@
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton24">
+                              <object class="GtkCheckButton" id="deals_filter_volume_lower_cb">
                                 <property name="label" translatable="yes">&gt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1635,7 +1635,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton25">
+                              <object class="GtkCheckButton" id="deals_filter_volume_upper_cb">
                                 <property name="label" translatable="yes">&lt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1650,7 +1650,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton17">
+                              <object class="GtkSpinButton" id="deals_filter_volume_lower_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1662,7 +1662,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton18">
+                              <object class="GtkSpinButton" id="deals_filter_volume_upper_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1680,7 +1680,7 @@
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkCheckButton" id="checkbutton23">
+                      <object class="GtkCheckButton" id="deals_filter_volume_cb">
                         <property name="label" translatable="yes">&#x41E;&#x431;&#x44A;&#x435;&#x43C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
