@@ -2,60 +2,30 @@
 # -*- coding: utf-8 -*-
 
 import gtk
-from hiding_checkbutton import hiding_checkbutton
-from datetime_widget import datetime_widget
 import datetime
+from hide_control import value_returner_control
 
-class from_to_datetime_widget(hiding_checkbutton):
-    def __init__(self, name, vertical = True, expand = False, hide = True):
-        if vertical:
-            box = gtk.VBox()
-        else:
-            box = gtk.HBox()
-        self.fromtime = datetime_widget(">=", hide = hide)
-        self.totime = datetime_widget("<=", hide = hide)
-        self.fromtime.checkbutton.connect("toggled", self.child_toggled)
-        self.totime.checkbutton.connect("toggled", self.child_toggled)
-        box.pack_start(self.fromtime.get_widget(), expand)
-        box.pack_start(self.totime.get_widget(), expand)
-        hiding_checkbutton.__init__(self, name, box, hide = hide)
+class datetime_range_control(value_returner_control):
+    def __init__(self, lower_datetime_control, upper_datetime_control, checkbutton = None):
+        self.checkbutton = checkbutton
+        self.lower_datetime_control = lower_datetime_control
+        self.upper_datetime_control = upper_datetime_control
+                 
 
-    def child_toggled(self, tb):
-        if (not self.fromtime.checkbutton.get_active()) and (not self.totime.checkbutton.get_active()):
-            self.checkbutton.set_active(False)
-
-    def get_datetime_from(self):
-        if self.fromtime.checkbutton.get_active() and self.checkbutton.get_active():
-            return datetime.datetime.combine(self.fromtime.get_date(), self.fromtime.get_time() or datetime.time(0, 0, 0))
-        else:
-            return None
-
-    def get_datetime_to(self):
-        if self.totime.checkbutton.get_active() and self.checkbutton.get_active():
-            return datetime.datetime.combine(self.totime.get_date(), self.totime.get_time() or datetime.time(23, 59, 59))
-        else:
-            return None
-
-    
-
-if __name__ == "__main__":
-    def clicked(bt, dt, tb):
-        tb.set_text(u'{0} {1}'.format(dt.get_datetime_from() and dt.get_datetime_from().isoformat() or "", dt.get_datetime_to() and dt.get_datetime_to().isoformat() or ""))
-    w = gtk.Window()
-    w.connect("delete-event", gtk.main_quit)
-    box = gtk.HBox()
-    a = from_to_datetime_widget("get datetime")
-    box.pack_start(a.get_widget(), False)
-    box.pack_start(from_to_datetime_widget("get other datetime", False).get_widget(), False)
-    vb = gtk.VBox()
-    vb.pack_start(box)
-    tw = gtk.TextView()
-    tb = tw.get_buffer()
-    bt = gtk.Button("pushme")
-    vb.pack_start(tw, False)
-    vb.pack_start(bt, False)
-    bt.connect("clicked", clicked, a, tb)
-    w.add(vb)
-    w.show_all()
-    gtk.main()
-        
+    def get_lower_datetime(self):
+        lt = self.lower_datetime_control.get_time()
+        ld = self.lower_datetime_control.get_date()
+        if lt == None:
+            lt = datetime.time.min
+        if ld != None:
+            return self.return_value(datetime.datetime.combine(ld, lt))
+        return None
+            
+    def get_upper_datetime(self):
+        ut = self.upper_datetime_control.get_time()
+        ud = self.upper_datetime_control.get_date()
+        if ut == None:
+            ut = datetime.time.max
+        if ud != None:
+            return self.return_value(datetime.datetime.combine(ud, ut))
+        return None
