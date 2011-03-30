@@ -681,7 +681,7 @@
     <property name="stock_id">gtk-remove</property>
     <signal name="activate" handler="on_delete_deals_activate"/>
   </object>
-  <object class="GtkDialog" id="delas_filter">
+  <object class="GtkDialog" id="deals_filter">
     <property name="border_width">5</property>
     <property name="modal">True</property>
     <property name="window_position">center-on-parent</property>
