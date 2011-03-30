@@ -43,8 +43,29 @@ class deals_filter_control:
                             ("deals_filter_comm_upper_cb", ["deals_filter_comm_upper_spin"]),
                             ("deals_filter_volume_lower_cb", ["deals_filter_volume_lower_spin"]),
                             ("deals_filter_volume_upper_cb", ["deals_filter_volume_upper_spin"])]:
-            print(cb)
             hide_control(self.builder.get_object(cb), map(lambda a: self.builder.get_object(a), boxes))
+
+        ####################
+        # datetime control #
+        ####################
+        dtcontrols = []
+        for (dtcb, dtcal, tcb, h, m, s) in [("deals_filter_datetime_lower_cb", "deals_filter_calendar_lower",
+                                             "deals_filter_time_lower_cb", "deals_filter_hour_lower_spin",
+                                             "deals_filter_min_lower_spin", "deals_filter_sec_lower_spin"),
+                                            ("deals_filter_datetime_upper_cb", "deals_filter_calendar_upper",
+                                             "deals_filter_time_upper_cb", "deals_filter_hour_upper_spin",
+                                             "deals_filter_min_upper_spin", "deals_filter_sec_upper_spin")]:
+            tcon = time_control(self.builder.get_object(h), self.builder.get_object(m), self.builder.get_object(s), self.builder.get_object(tcb))
+            dtcon = datetime_control(self.builder.get_object(dtcal), tcon, self.builder.get_object(dtcb))
+            dtcontrols.append(dtcon)
+        self.datetime_range = datetime_range_control(dtcontrols[0], dtcontrols[1], self.builder.get_object("deals_filter_datetime_range_cb"))
+
+        #############################
+        # check instruments control #
+        #############################
+        
+                                                
+                                                 
             
     def run(self):
         w = self.builder.get_object("deals_filter")
