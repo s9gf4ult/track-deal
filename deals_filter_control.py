@@ -82,9 +82,50 @@ class deals_filter_control:
         sel = self.builder.get_object("deals_filter_select_bt")
         desel = self.builder.get_object("deals_filter_deselect_bt")
         self.instrument_view = check_control(dfv, u'', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
+
+        ###################
+        # select controls #
+        ###################
+        self.position = select_control({self.builder.get_object("deals_filter_position_free_rb") : False,
+                                        self.builder.get_object("deals_filter_position_occpied_rb") : True},
+                                       self.builder.get_object("deals_filter_position_cb"))
+        self.direction = select_control({self.builder.get_object("deals_filter_direction_long_rb") : -1,
+                                         self.builder.get_object("deals_filter_direction_short_rb") : 1},
+                                        self.builder.get_object("deals_filter_direction_cb"))
         
-        
-                                                 
+        ##################
+        # number ranges  #
+        ##################
+        self.count = number_range_control(number_control(self.builder.get_object("deals_filter_count_lower_spin"),
+                                                         self.builder.get_object("deals_filter_count_lower_cb")),
+                                          number_control(self.builder.get_object("deals_filter_count_upper_spin"),
+                                                         self.builder.get_object("deals_filter_count_upper_cb")),
+                                          self.builder.get_object("deals_filter_count_cb"))
+        self.price = number_range_control(number_control(self.builder.get_object("deals_filter_price_lower_spin"),
+                                                         self.builder.get_object("deals_filter_price_lower_cb")),
+                                          number_control(self.builder.get_object("deals_filter_price_upper_spin"),
+                                                         self.builder.get_object("deals_filter_price_upper_cb")),
+                                          self.builder.get_object("deals_filter_price_cb"))
+        self.broker_comm = number_range_control(number_control(self.builder.get_object("deals_filter_broker_comm_lower_spin"),
+                                                               self.builder.get_object("deals_filter_broker_comm_lower_cb")),
+                                                number_control(self.builder.get_object("deals_filter_broker_comm_upper_spin"),
+                                                               self.builder.get_object("deals_filter_broker_comm_upper_cb")),
+                                                self.builder.get_object("deals_filter_broker_comm_cb"))
+        self.stock_comm = number_range_control(number_control(self.builder.get_object("deals_filter_stock_comm_lower_spin"),
+                                                              self.builder.get_object("deals_filter_stock_comm_lower_cb")),
+                                               number_control(self.builder.get_object("deals_filter_stock_comm_upper_spin"),
+                                                              self.builder.get_object("deals_filter_stock_comm_upper_cb")),
+                                               self.builder.get_object("deals_filter_stock_comm_cb"))
+        self.comm = number_range_control(number_control(self.builder.get_object("deals_filter_comm_lower_spin"),
+                                                        self.builder.get_object("deals_filter_comm_lower_cb")),
+                                         number_control(self.builder.get_object("deals_filter_comm_upper_spin"),
+                                                        self.builder.get_object("deals_filter_comm_upper_cb")),
+                                         self.builder.get_object("deals_filter_comm_cb"))
+        self.volume = number_range_control(number_control(self.builder.get_object("deals_filter_volume_lower_spin"),
+                                                          self.builder.get_object("deals_filter_volume_lower_cb")),
+                                           number_control(self.builder.get_object("deals_filter_volume_upper_spin"),
+                                                          self.builder.get_object("deals_filter_volume_upper_cb")),
+                                           self.builder.get_object("deals_filter_volume_cb"))
             
     def run(self):
         w = self.builder.get_object("deals_filter")

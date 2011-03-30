@@ -4,9 +4,10 @@ import gtk
 from hide_control import value_returner_control
 
 class number_control(value_returner_control):
-    def __init__(self, spin_button, checkbutton = None, step_incr = 1):
+    def __init__(self, spin_button, checkbutton = None, step_incr = 1, digits = 0):
         self.checkbutton = checkbutton
         self.spin_button = spin_button
+        self.spin_button.set_digits(digits)
         self.spin_button.get_adjustment().set_step_increment(step_incr)
 
     def set_lower_limit(self, limit):
