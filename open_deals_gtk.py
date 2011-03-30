@@ -310,13 +310,14 @@ class main_ui():
         after_comma = self.builder.get_object("comma_separator").get_value_as_int()
         is_comma = self.builder.get_object("comma_as_splitter").get_active()
         ret = u''
-        for pos in self.database.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume from positions order by close_datetime, open_datetime"):
+        for pos in self.database.connection.execute("select open_datetime, close_datetime, ticket, direction, open_coast, close_coast, count, open_volume, close_volume, broker_comm + stock_comm from positions order by close_datetime, open_datetime"):
             if not pos[2] in ticks:
                 continue
-            vvv = map(lambda a: [u'{0:4}.{1:02}.{2:02}'.format(a.year, a.month, a.day), u'{0:02}:{1:02}:{2:02}'.format(a.hour, a.minute, a.second)], pos[:2])
+            vvv = map(lambda a: [u'{0:02}.{1:02}.{2:04}'.format(a.day, a.month, a.year), u'{0:02}:{1:02}:{2:02}'.format(a.hour, a.minute, a.second)], pos[:2])
             ret += reduce(lambda a, b: u'{0}\t{1}'.format(a, b), vvv[0] + vvv[1])
             ret += u'\t{0}\t{1}'.format(pos[2], -1 == pos[3] and 'L' or 'S')
-            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: after_comma < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, after_comma), pos[4:]))
+            aa = reduce(lambda a, b: u'{0}\t{1}'.format(a, b), map(lambda a: after_comma < 1 and u'{0}'.format(float(a).__trunc__()) or round(a, after_comma), pos[4:-1]))
+            aa += u'\t\t\t\t{0}'.format(after_comma < 1 and u'{0}'.format(float(pos[-1]).__trunc__()) or u'{0}'.format(round(pos[-1], after_comma)))
             if is_comma:
                 aa = aa.replace('.', ',')
             ret += u'\t{0}\n'.format(aa)
