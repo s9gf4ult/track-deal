@@ -1132,6 +1132,7 @@
                                 <property name="draw_indicator">True</property>
                               </object>
                               <packing>
+                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -1146,6 +1147,7 @@
                                 <property name="group">deals_filter_direction_long_rb</property>
                               </object>
                               <packing>
+                                <property name="expand">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -1183,7 +1185,7 @@
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <object class="GtkCheckButton" id="deals_filter_count_lower_ cb">
+                              <object class="GtkCheckButton" id="deals_filter_count_lower_cb">
                                 <property name="label" translatable="yes">&gt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
