@@ -46,6 +46,19 @@ class deals_filter_control:
                             ("deals_filter_volume_upper_cb", ["deals_filter_volume_upper_spin"])]:
             self.hcontrols.append(hide_control(self.builder.get_object(cb), map(lambda a: self.builder.get_object(a), boxes)))
 
+        ##########################
+        # checkbuttons subhiders #
+        ##########################
+        self.subhcontrols = []
+        for (cb, subcbs) in [("deals_filter_datetime_range_cb", ["deals_filter_datetime_lower_cb", "deals_filter_datetime_upper_cb"]),
+                             ("deals_filter_count_cb", ["deals_filter_count_lower_cb", "deals_filter_count_upper_cb"]),
+                             ("deals_filter_price_cb", ["deals_filter_price_lower_cb", "deals_filter_price_upper_cb"]),
+                             ("deals_filter_broker_comm_cb", ["deals_filter_broker_comm_lower_cb", "deals_filter_broker_comm_upper_cb"]),
+                             ("deals_filter_stock_comm_cb", ["deals_filter_stock_comm_lower_cb", "deals_filter_stock_comm_upper_cb"]),
+                             ("deals_filter_comm_cb", ["deals_filter_comm_lower_cb", "deals_filter_comm_upper_cb"]),
+                             ("deals_filter_volume_cb", ["deals_filter_volume_lower_cb", "deals_filter_volume_upper_cb"])]:
+            self.subhcontrols.append(all_checked_control(self.builder.get_object(cb), map(lambda a: self.builder.get_object(a), subcbs)))
+
         ####################
         # datetime control #
         ####################
@@ -68,9 +81,9 @@ class deals_filter_control:
         rev = self.builder.get_object("deals_filter_revers_bt")
         sel = self.builder.get_object("deals_filter_select_bt")
         desel = self.builder.get_object("deals_filter_deselect_bt")
-        self.instrument_view = check_control(dfv, u'Использовать', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
+        self.instrument_view = check_control(dfv, u'', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
         
-                                                
+        
                                                  
             
     def run(self):
