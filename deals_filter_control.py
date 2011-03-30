@@ -63,6 +63,11 @@ class deals_filter_control:
         #############################
         # check instruments control #
         #############################
+        dfv = self.builder.get_object("deals_filter_view")
+        rev = self.builder.get_object("deals_filter_revers_bt")
+        sel = self.builder.get_object("deals_filter_select_bt")
+        desel = self.builder.get_object("deals_filter_deselect_bt")
+        self.instrument_view = check_control(dfv, u'Использовать', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
         
                                                 
                                                  

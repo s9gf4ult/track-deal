@@ -64,6 +64,8 @@ class check_control():
             it = m.get_iter_first()
 
     def update_rows(self, rows, default_toggle = True):
+        if not self.list_control.get_model():
+            self.list_control.make_model()
         rws = self.list_control.get_rows()
         found = {}
         for rw in rws:
