@@ -96,7 +96,7 @@ if __name__ == "__main__":
     ub = gtk.Button("rows 1")
     ubb = gtk.Button("rows 2")
     for wid in [sa, ss, da, dd, ra, rr, ub, ubb]:
-        p.pack_start(wid)
+        p.pack_start(wid, False)
     con = check_control(v, "Yes?", [("Name", gtk.CellRendererText()), ("FUCK YOU", gtk.CellRendererText())], select_button = ss, select_all_button = sa, deselect_button = dd, deselect_all_button = da, reverse_button = rr, reverse_all_button = ra)
     con.list_control.update_rows([(True, "One", ""), (False, "Two", ""), (True, "2 + 2 = 4", ""), (False, "3*5 = 14", "is false"), (True, "jojojo", "camon camon")])
     ub.connect("clicked", update_rows, con, [("ROW 1", "hesell"), ("ROW 2", "fjfj"), ("row 3",""), ("row 4","")])
