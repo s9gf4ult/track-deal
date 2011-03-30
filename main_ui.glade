@@ -1350,7 +1350,7 @@
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="deals_filter_brocker_comm_box">
+                      <object class="GtkAlignment" id="deals_filter_broker_comm_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -1359,7 +1359,7 @@
                             <property name="n_rows">2</property>
                             <property name="n_columns">2</property>
                             <child>
-                              <object class="GtkCheckButton" id="deals_filter_brocker_comm_lower_cb">
+                              <object class="GtkCheckButton" id="deals_filter_broker_comm_lower_cb">
                                 <property name="label" translatable="yes">&gt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1372,7 +1372,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="deals_filter_brocker_comm_upper_cb">
+                              <object class="GtkCheckButton" id="deals_filter_broker_comm_upper_cb">
                                 <property name="label" translatable="yes">&lt;=</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -1387,7 +1387,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="deals_filter_brocker_comm_lower_spin">
+                              <object class="GtkSpinButton" id="deals_filter_broker_comm_lower_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1399,7 +1399,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="deals_filter_brocker_comm_upper_spin">
+                              <object class="GtkSpinButton" id="deals_filter_broker_comm_upper_spin">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1417,7 +1417,7 @@
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkCheckButton" id="deals_filter_brocker_comm_cb">
+                      <object class="GtkCheckButton" id="deals_filter_broker_comm_cb">
                         <property name="label" translatable="yes">&#x41A;&#x43E;&#x43C;&#x438;&#x441;&#x441;&#x438;&#x44F; &#x431;&#x440;&#x43E;&#x43A;&#x435;&#x440;&#x430;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
