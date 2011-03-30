@@ -18,6 +18,7 @@ class deals_filter_control:
         ######################
         # hide controls init #
         ######################
+        self.hcontrols = []
         for (cb, boxes) in [("deals_filter_datetime_range_cb", ["deals_filter_datetime_range_box"]),
                             ("deals_filter_datetime_lower_cb", ["deals_filter_calendar_lower", "deals_filter_lower_time_box"]),
                             ("deals_filter_datetime_upper_cb", ["deals_filter_calendar_upper", "deals_filter_upper_time_box"]),
@@ -43,7 +44,7 @@ class deals_filter_control:
                             ("deals_filter_comm_upper_cb", ["deals_filter_comm_upper_spin"]),
                             ("deals_filter_volume_lower_cb", ["deals_filter_volume_lower_spin"]),
                             ("deals_filter_volume_upper_cb", ["deals_filter_volume_upper_spin"])]:
-            hide_control(self.builder.get_object(cb), map(lambda a: self.builder.get_object(a), boxes))
+            self.hcontrols.append(hide_control(self.builder.get_object(cb), map(lambda a: self.builder.get_object(a), boxes)))
 
         ####################
         # datetime control #
@@ -83,4 +84,3 @@ if __name__ == "__main__":
     b.add_from_file('main_ui.glade')
     d = deals_filter_control(b, 10)
     d.run()
-    
