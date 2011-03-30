@@ -5,13 +5,13 @@ from list_view_sort_control import *
 
 class check_control():
     
-    def __init__(self, treeview, first_column_name, columns, reverse_button = None, reverse_all_button = None, select_button = None, select_all_button = None, deselect_button = None, deselect_all_button = None):
+    def __init__(self, treeview, first_column_name, columns, reverse_button = None, reverse_all_button = None, select_button = None, select_all_button = None, deselect_button = None, deselect_all_button = None, list_view_control_class = list_view_sort_control):
         """columns must be a list of pairs with name and CellRenderer objects, but first
         column will be checkbutton column"""
         c = gtk.CellRendererToggle()
         c.props.activatable = True
         c.connect("toggled", self.row_toggled)
-        self.list_control = list_view_sort_control(treeview, [(first_column_name, c)] + columns)
+        self.list_control = list_view_control_class(treeview, [(first_column_name, c)] + columns)
         self.treeview = treeview
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.reverse_button = reverse_button
