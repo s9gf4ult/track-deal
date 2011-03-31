@@ -64,6 +64,7 @@ class check_control():
             it = m.get_iter_first()
 
     def update_rows(self, rows, default_toggle = True):
+        """rows must be the list of tupples with row values except first column of each row"""
         if not self.list_control.get_model():
             self.list_control.make_model()
         rws = self.list_control.get_rows()

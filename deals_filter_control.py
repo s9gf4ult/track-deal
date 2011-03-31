@@ -11,10 +11,9 @@ from select_control import *
 from number_range_control import *
 
 class deals_filter_control:
-    def __init__(self, builder, database):
+    def __init__(self, builder):
         self.builder = builder
-        self.database = database
-
+        
         ######################
         # hide controls init #
         ######################
@@ -81,7 +80,7 @@ class deals_filter_control:
         rev = self.builder.get_object("deals_filter_revers_bt")
         sel = self.builder.get_object("deals_filter_select_bt")
         desel = self.builder.get_object("deals_filter_deselect_bt")
-        self.instrument_view = check_control(dfv, u'', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
+        self.instruments = check_control(dfv, u'', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
 
         ###################
         # select controls #
@@ -102,39 +101,55 @@ class deals_filter_control:
                                                          self.builder.get_object("deals_filter_count_upper_cb")),
                                           self.builder.get_object("deals_filter_count_cb"))
         self.price = number_range_control(number_control(self.builder.get_object("deals_filter_price_lower_spin"),
-                                                         self.builder.get_object("deals_filter_price_lower_cb")),
+                                                         self.builder.get_object("deals_filter_price_lower_cb"), step_incr = 0.01, digits = 4),
                                           number_control(self.builder.get_object("deals_filter_price_upper_spin"),
-                                                         self.builder.get_object("deals_filter_price_upper_cb")),
+                                                         self.builder.get_object("deals_filter_price_upper_cb"), step_incr = 0.01, digits = 4),
                                           self.builder.get_object("deals_filter_price_cb"))
         self.broker_comm = number_range_control(number_control(self.builder.get_object("deals_filter_broker_comm_lower_spin"),
-                                                               self.builder.get_object("deals_filter_broker_comm_lower_cb")),
+                                                               self.builder.get_object("deals_filter_broker_comm_lower_cb"), step_incr = 0.01, digits = 4),
                                                 number_control(self.builder.get_object("deals_filter_broker_comm_upper_spin"),
-                                                               self.builder.get_object("deals_filter_broker_comm_upper_cb")),
+                                                               self.builder.get_object("deals_filter_broker_comm_upper_cb"), step_incr = 0.01, digits = 4),
                                                 self.builder.get_object("deals_filter_broker_comm_cb"))
         self.stock_comm = number_range_control(number_control(self.builder.get_object("deals_filter_stock_comm_lower_spin"),
-                                                              self.builder.get_object("deals_filter_stock_comm_lower_cb")),
+                                                              self.builder.get_object("deals_filter_stock_comm_lower_cb"), step_incr = 0.01, digits = 4),
                                                number_control(self.builder.get_object("deals_filter_stock_comm_upper_spin"),
-                                                              self.builder.get_object("deals_filter_stock_comm_upper_cb")),
+                                                              self.builder.get_object("deals_filter_stock_comm_upper_cb"), step_incr = 0.01, digits = 4),
                                                self.builder.get_object("deals_filter_stock_comm_cb"))
         self.comm = number_range_control(number_control(self.builder.get_object("deals_filter_comm_lower_spin"),
-                                                        self.builder.get_object("deals_filter_comm_lower_cb")),
+                                                        self.builder.get_object("deals_filter_comm_lower_cb"), step_incr = 0.01, digits = 4),
                                          number_control(self.builder.get_object("deals_filter_comm_upper_spin"),
-                                                        self.builder.get_object("deals_filter_comm_upper_cb")),
+                                                        self.builder.get_object("deals_filter_comm_upper_cb"), step_incr = 0.01, digits = 4),
                                          self.builder.get_object("deals_filter_comm_cb"))
         self.volume = number_range_control(number_control(self.builder.get_object("deals_filter_volume_lower_spin"),
-                                                          self.builder.get_object("deals_filter_volume_lower_cb")),
+                                                          self.builder.get_object("deals_filter_volume_lower_cb"), digits = 4),
                                            number_control(self.builder.get_object("deals_filter_volume_upper_spin"),
-                                                          self.builder.get_object("deals_filter_volume_upper_cb")),
+                                                          self.builder.get_object("deals_filter_volume_upper_cb"),  digits = 4),
                                            self.builder.get_object("deals_filter_volume_cb"))
             
     def run(self):
         w = self.builder.get_object("deals_filter")
         w.show_all()
         w.run()
+
+    def update_widget(self, count_range = None, price_range = None, broker_comm_range = None, stock_comm_range = None,
+                      comm_range = None, volume_range = None, stock_list = None):
+        for (control, rval) in [(self.count, count_range),
+                                (self.price, price_range),
+                                (self.broker_comm, broker_comm_range),
+                                (self.stock_comm, stock_comm_range),
+                                (self.comm, comm_range),
+                                (self.volume, volume_range)]:
+            if rval != None:
+                control.set_lower_limit(rval[0])
+                control.set_upper_limit(rval[1])
+        if stock_list != None:
+            self.instruments.update_rows(map(lambda a: (a,), stock_list))
+    
                             
                             
 if __name__ == "__main__":
     b = gtk.Builder()
     b.add_from_file('main_ui.glade')
-    d = deals_filter_control(b, 10)
+    d = deals_filter_control(b)
+    d.update_widget(count_range = [0, 100], price_range = [10, 200], broker_comm_range = [0.1, 3], stock_comm_range = [0.01, 0.4], comm_range = [0.5, 0.6], volume_range = [100, 1000], stock_list = [u'Газик', u'Сберик', u'Полиметальчик'])
     d.run()
