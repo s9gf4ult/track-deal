@@ -20,15 +20,11 @@ class cursor_filter():
         return iter_filter(self.connection.execute(self.query))
 
 class cursor_empty():
-    def __init__(self):
-        pass
     def __iter__(self):
         return empty_iter()
 
 class empry_iter():
-    def __init__(self):
-        pass
-    def next():
+    def next(self):
         raise StopIteration()
 
 class deals_filter():
@@ -44,16 +40,14 @@ class deals_filter():
         else:
             return cursor_empty()
     
-    def __init__(self, database, parent = None, modal = True, dialog = None):
+    def __init__(self, builder, database):
+        self.builder = builder
         self.database = database
-        if dialog:
-            self.dialog = dialog
-        else:
-            self.dialog = deals_filter_dialog(parent = parent, modal = modal)
+        self.dialog = deals_filter_control(builder)
 
     def _prepare_filter(self):
         if self.database.connection:
-            sl = map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals").fetchall())
+            sl = map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals"))
             self.dialog.update_widget(stock_list = sl,
                                       min_max_price = self.database.connection.execute("select min(price), max(price) from deals").fetchone(),
                                       min_max_count = self.database.connection.execute("select min(quantity), max(quantity) from deals").fetchone(),

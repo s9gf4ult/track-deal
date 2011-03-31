@@ -146,7 +146,6 @@ class deals_filter_control:
             self.instruments.update_rows(map(lambda a: (a,), stock_list))
     
                             
-                            
 if __name__ == "__main__":
     b = gtk.Builder()
     b.add_from_file('main_ui.glade')
