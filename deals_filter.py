@@ -30,11 +30,11 @@ class empry_iter():
 class deals_filter():
 
     def run(self):
+        self._prepare_filter()
         return self.dialog.run()
 
     def get_ids(self, order_by, parent = None):
         if self.database.connection:
-            self._prepare_filter()
             q = self.get_ids_query(order_by, parent)
             return cursor_filter(q, self.database.connection)
         else:
@@ -48,10 +48,16 @@ class deals_filter():
     def _prepare_filter(self):
         if self.database.connection:
             sl = map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals"))
-            self.dialog.update_widget(stock_list = sl,
-                                      min_max_price = self.database.connection.execute("select min(price), max(price) from deals").fetchone(),
-                                      min_max_count = self.database.connection.execute("select min(quantity), max(quantity) from deals").fetchone(),
-                                      min_max_commission = self.database.connection.execute("select min(broker_comm + stock_comm), max(broker_comm + stock_comm) from deals").fetchone())
+            also = {}
+            for (key, val) in [("count_range", "quantity"),
+                               ("price_range", "price"),
+                               ("broker_comm_range", "broker_comm"),
+                               ("stock_comm_range", "stock_comm"),
+                               ("comm_range", "broker_comm + stock_comm"),
+                               ("volume_range", "volume")]:
+                also[key] = self.database.connection.execute("select min({0}), max({0}) from deals".format(val))
+            also["stock_list"] = sl
+            self.dialog.update_widget(**also)
 
         
     def get_ids_query(self, order_by, parent = None):

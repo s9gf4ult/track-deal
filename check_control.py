@@ -79,7 +79,18 @@ class check_control():
             else:
                 new.append(tuple([default_toggle] + list(x)))
         self.list_control.update_rows(new)
-                
+
+    def get_checked_rows(self):
+        def get_checked(model, path, it):
+            if model.get_value(it, 0):
+                p = []
+                l = model.get_n_columns()
+                for x in xrange(1, l):
+                    p.append(model.get_value(it, x))
+                return tuple(p)
+            else:
+                return None
+        return filter(lambda a: a != None, self.list_control._get_rows_with_filter(get_checked))
 
 
 if __name__ == "__main__":
@@ -98,11 +109,16 @@ if __name__ == "__main__":
     rr = gtk.Button("reverse")
     ub = gtk.Button("rows 1")
     ubb = gtk.Button("rows 2")
-    for wid in [sa, ss, da, dd, ra, rr, ub, ubb]:
+    t = gtk.Entry()
+    bbt = gtk.Button("show checked")
+    for wid in [sa, ss, da, dd, ra, rr, ub, ubb, t, bbt]:
         p.pack_start(wid, False)
     con = check_control(v, "Yes?", [("Name", gtk.CellRendererText()), ("FUCK YOU", gtk.CellRendererText())], select_button = ss, select_all_button = sa, deselect_button = dd, deselect_all_button = da, reverse_button = rr, reverse_all_button = ra)
     con.list_control.update_rows([(True, "One", ""), (False, "Two", ""), (True, "2 + 2 = 4", ""), (False, "3*5 = 14", "is false"), (True, "jojojo", "camon camon")])
     ub.connect("clicked", update_rows, con, [("ROW 1", "hesell"), ("ROW 2", "fjfj"), ("row 3",""), ("row 4","")])
     ubb.connect("clicked", update_rows, con, [("ROW 1", "haskell"), ("ROW 2", "fjfj"), ("ROW 3","")])
+    def bbtclicked(bt):
+        t.set_text("{0}".format(con.get_checked_rows()))
+    bbt.connect("clicked", bbtclicked)
     w.show_all()
     w.run()

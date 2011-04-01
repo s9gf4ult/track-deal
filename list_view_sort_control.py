@@ -79,16 +79,21 @@ class list_view_sort_control:
     def get_model(self):
         return self.treeview.get_model()
 
-    def get_rows(self):
+    def _get_rows_with_filter(self, filterfunc):
         ret = []
         def foreachfunc(model, path, it):
-            l = len(self.treeview.get_columns())
+            ret.append(filterfunc(model, path, it))
+        self.get_model().foreach(foreachfunc)
+        return ret
+
+    def get_rows(self):
+        def all_columns(model, path, it):
+            l = model.get_n_columns()
             p = []
             for x in xrange(0, l):
                 p.append(model.get_value(it, x))
-            ret.append(tuple(p))
-        self.get_model().foreach(foreachfunc)
-        return ret
+            return tuple(p)
+        return self._get_rows_with_filter(all_columns)
             
         
 
@@ -97,9 +102,16 @@ if __name__ == "__main__":
     p = w.get_content_area()
     v = gtk.TreeView()
     p.pack_start(v)
-    con = list_view_control(v, [("OK", gtk.CellRendererToggle()), ("Name", gtk.CellRendererText())])
+    con = list_view_sort_control(v, [("OK", gtk.CellRendererToggle()), ("Name", gtk.CellRendererText())])
     con.update_rows([(True, "ijij"), (True, "isejfj"), (False, "jeifjjj2")])
     con.add_rows([(False, "False"), (True, "True"), (True, "is cool"), (False, "is sucks")])
+    t = gtk.TextView()
+    b = gtk.Button("push")
+    def pushed(bt):
+        t.get_buffer().set_text("{0}".format(con.get_rows()))
+    b.connect("clicked", pushed)
+    p.pack_start(t, False)
+    p.pack_start(b, False)
     w.show_all()
     w.run()
     
