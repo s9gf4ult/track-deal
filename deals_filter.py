@@ -39,6 +39,9 @@ class deals_filter():
             return cursor_filter(q, self.database.connection)
         else:
             return cursor_empty()
+
+    def fill_model(self, model, sort_field):
+        self._prepare_filter()          # это чтобы стоки попали в фильтр
     
     def __init__(self, builder, database):
         self.builder = builder
@@ -55,60 +58,65 @@ class deals_filter():
                                ("stock_comm_range", "stock_comm"),
                                ("comm_range", "broker_comm + stock_comm"),
                                ("volume_range", "volume")]:
-                also[key] = self.database.connection.execute("select min({0}), max({0}) from deals".format(val))
+                also[key] = self.database.connection.execute("select min({0}), max({0}) from deals".format(val)).fetchone()
             also["stock_list"] = sl
             self.dialog.update_widget(**also)
 
+    def _gen_bounadary_conditions(self, deals_alias):
+        conds = []
         
-    def get_ids_query(self, order_by, parent = None):
-        ret = "select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where " + (parent == None and "d.parent_deal_id is null" or "d.parent_deal_id = {0}".format(parent))
-        lasttc = self.database.connection.total_changes
-        self.database.connection.execute("delete from selected_stocks")
-        it = self.dialog.stock_check.list_store.get_iter_first()
-        while it:
-            if self.dialog.stock_check.list_store.get_value(it, 0):
-                self.database._insert_from_hash("selected_stocks", {"stock" : self.dialog.stock_check.list_store.get_value(it, 1)})
-            it = self.dialog.stock_check.list_store.iter_next(it)
-        self.database.last_total_changes += self.database.connection.total_changes - lasttc
-        
-        pos_val = self.dialog.is_position.get_selected()
-        if pos_val != None:
-            if pos_val:
-                ret += " and d.position_id is not null"
+        def aliased(field_name):
+            if deals_alias != None and len(deals_alias) > 0:
+                return u'{0}.{1}'.format(deals_alias, field_name)
             else:
-                ret += " and d.position_id is null"
+                return field_name
 
-        dir_val = self.dialog.direction.get_selected()
-        if dir_val != None:
-            ret += " and d.deal_sign == {0}".format(dir_val)
-            print(dir_val)
-            
-        date_from = self.dialog.date_selector.get_datetime_from()
-        date_to = self.dialog.date_selector.get_datetime_to()
-
-        for (ifrom, ito, field) in [(self.dialog.price_range.get_from_integer(),
-                                     self.dialog.price_range.get_to_integer(), "d.price"),
-                                    (self.dialog.count_range.get_from_integer(),
-                                     self.dialog.count_range.get_to_integer(), "d.quantity"),
-                                    (self.dialog.commission.get_from_integer(),
-                                     self.dialog.commission.get_to_integer(), "(d.broker_comm + d.stock_comm)"),
-                                    (date_from and time.mktime(date_from.timetuple()),
-                                     date_to and time.mktime(date_to.timetuple()), "d.datetime")]:
-            if ifrom and ito:
-                if ifrom < ito:
-                    ret += " and {0} between {1} and {2}".format(field, ifrom, ito)
-                elif ifrom > ito:
-                    ret += " and ({0} >= {1} or {0} <= {2})".format(field, ifrom, ito)
+        def lower_upper(field_name, l, h):
+            if l and h:
+                if l < h:
+                    conds.append(u'({0} between {1} and {2})'.format(field_name, l, h))
+                elif l > h:
+                    conds.append(u'({0} >= {1} or {0} <= {2}'.format(field_name, l, h))
                 else:
-                    ret += " and {0} = {1}".format(field, ifrom)
-            elif ifrom:
-                ret += " and {0} >= {1}".format(field, ifrom)
-            elif ito:
-                ret += " and {0} <= {1}".format(field, ito)
+                    conds.append(u'{0} = {1}'.format(field_name, l))
+            elif l:
+                conds.append(u'{0} >= {1}'.format(field_name, l))
+            elif h:
+                conds.append(u'{0} <= {1}'.format(field_name, h))
+            
+        #################
+        # number ranges #
+        #################
+        for (control, field_name) in [(self.dialog.count, aliased("quantity")),
+                                      (self.dialog.price, aliased("price")),
+                                      (self.dialog.broker_comm, aliased("broker_com")),
+                                      (self.dialog.stock_comm, aliased("stock_comm")),
+                                      (self.dialog.comm, u'{0} + {1}'.format(aliased("broker_comm"), aliased("stock_comm"))),
+                                      (self.dialog.volume, aliased("volume"))]:
+            lower_upper(field_name, control.get_lower_value(), control.get_upper_value())
 
-        if order_by and order_by != "":
-            ret += " order by d.{0}".format(order_by)
-                             
-        return ret
+        #################
+        # date controls #
+        #################
+        ld = self.dialog.datetime_range.get_lower_datetime()
+        hd = self.dialog.datetime_range.get_upper_datetime()
+        lower_upper("datetime", ld, hd)
 
+        ####################
+        # select controls  #
+        ####################
+        pp = self.dialog.position.get_value()
+        if pp != None:
+            if pp:
+                conds.append(u'position_id is not null')
+            else:
+                conds.append(u'position_id is null')
+
+        dd = self.dialog.direction.get_value()
+        if dd != None:
+            conds.append(u'deal_sign = {0}'.format(dd))
+
+        return reduce(lambda a, b: u'{0} and {1}'.format(a, b), conds)
+            
+        
 
