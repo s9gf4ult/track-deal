@@ -8,7 +8,7 @@ import datetime
 import re
 import traceback
 from deals_filter import deals_filter
-from deal_adder import deal_adder
+#from deal_adder import deal_adder
 
 class MyTreeViewColumn(gtk.TreeViewColumn):
     def __init__(self, title, renderer, **kargs):
@@ -228,8 +228,8 @@ class main_ui():
             col.database_column = dd[2]
             deals_view.append_column(col)
         deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
-        self.deals_filter = deals_filter(self.database, parent = self.builder.get_object("main_window"))
-        self.deal_adder = deal_adder(self.database, parent = self.builder.get_object("main_window"))
+        self.deals_filter = deals_filter(self.builder, self.database)
+        #self.deal_adder = deal_adder(self.database, parent = self.builder.get_object("main_window"))
         
 
     def delete_deals(self):
@@ -252,7 +252,7 @@ class main_ui():
         dial.destroy()
             
     def add_deal(self):
-        self.deal_adder.run()
+        #self.deal_adder.run()
         self.update_deals_tab()
 
     def delete_deals_activate(self, action):
@@ -286,7 +286,7 @@ class main_ui():
                     return col.database_column
                 else:
                     return "{0} desc".format(col.database_column)
-        return ""
+        return None
         
         
         
@@ -404,6 +404,9 @@ class main_ui():
         self._flush_store(deals_store)
         if not self.database.connection:
             return
+        self.deals_filter._prepare_filter() # если поменялся набор стоков обновяем его в списке
+        self.deals_filter._regen_selected() # по причинам производительности таблицу выделенных стоков генерим заранее
+        self.deals_filter._regen_boundary() # тоже по причинам производительности
         for did in self.deals_filter.get_ids(self.deals_order_by()):
             self._insert_deal_to_store(deals_store, None, did)
 

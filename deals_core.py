@@ -30,6 +30,14 @@ class deals_proc():
         if 3 != self.connection.execute("select count(*) from sqlite_master where type = 'table' and (name = 'positions' or name = 'deals' or name = 'deal_groups')").fetchone()[0]:
             raise Exception(u'Эта sqlite3 база скорее всего не является базой созданной open-deals')
 
+    def set_selected_stocks(self, stocks):
+        ll = self.connection.total_changes
+        self.connection.execute("delete from selected_stocks")
+        if stocks and len(stocks) > 0:
+            self.connection.executemany("insert into selected_stocks(stock) values (?)", map(lambda a: (a,), stocks))
+        self.last_total_changes += self.connection.total_changes - ll
+            
+
     def create_new(self, filename):
         self.open(filename)
         self.connection.execute("""create table positions(

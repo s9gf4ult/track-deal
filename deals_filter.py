@@ -1,6 +1,6 @@
 #/bin/env python
 # -*- coding: utf-8 -*-
-from deals_filter_dialog import deals_filter_dialog
+from deals_filter_control import deals_filter_control
 import time
 
 
@@ -13,6 +13,7 @@ class iter_filter():
 
 class cursor_filter():
     def __init__(self, query, connection):
+        # print(query)
         self.query = query
         self.connection = connection
 
@@ -31,17 +32,36 @@ class deals_filter():
 
     def run(self):
         self._prepare_filter()
-        return self.dialog.run()
+        ret = self.dialog.run()
+        self._regen_selected()
+        self._regen_boundary()
+        return ret
+    
 
     def get_ids(self, order_by, parent = None):
-        if self.database.connection:
-            q = self.get_ids_query(order_by, parent)
-            return cursor_filter(q, self.database.connection)
-        else:
+        if not self.database.connection:
             return cursor_empty()
+        conds = self.boundary
+        q = "select d.id from deals d inner join selected_stocks s on d.security_name = s.stock where "
+        if parent:
+            q += "d.parent_deal_id = {0}".format(parent)
+        else:
+            q += "d.parent_deal_id is null"
+        if conds and len(conds) > 0:
+            q += " and {0}".format(conds)
+        if order_by and len(order_by) > 0:
+            q += " order by d.{0}".format(order_by)
+        
+        return cursor_filter(q, self.database.connection)
+        
+    def _regen_selected(self):
+        if not self.database.connection:
+            return
+        self.database.set_selected_stocks(map(lambda a: a[0], self.dialog.instruments.get_checked_rows()))
 
-    def fill_model(self, model, sort_field):
-        self._prepare_filter()          # это чтобы стоки попали в фильтр
+    def _regen_boundary(self):
+        self.boundary = self._gen_bounadary_conditions("d")
+        
     
     def __init__(self, builder, database):
         self.builder = builder
@@ -89,7 +109,7 @@ class deals_filter():
         #################
         for (control, field_name) in [(self.dialog.count, aliased("quantity")),
                                       (self.dialog.price, aliased("price")),
-                                      (self.dialog.broker_comm, aliased("broker_com")),
+                                      (self.dialog.broker_comm, aliased("broker_comm")),
                                       (self.dialog.stock_comm, aliased("stock_comm")),
                                       (self.dialog.comm, u'{0} + {1}'.format(aliased("broker_comm"), aliased("stock_comm"))),
                                       (self.dialog.volume, aliased("volume"))]:
@@ -100,7 +120,7 @@ class deals_filter():
         #################
         ld = self.dialog.datetime_range.get_lower_datetime()
         hd = self.dialog.datetime_range.get_upper_datetime()
-        lower_upper("datetime", ld, hd)
+        lower_upper("datetime", ld and time.mktime(ld.timetuple()), hd and time.mktime(hd.timetuple()))
 
         ####################
         # select controls  #
@@ -116,7 +136,7 @@ class deals_filter():
         if dd != None:
             conds.append(u'deal_sign = {0}'.format(dd))
 
-        return reduce(lambda a, b: u'{0} and {1}'.format(a, b), conds)
+        return len(conds) > 0 and reduce(lambda a, b: u'{0} and {1}'.format(a, b), conds) or ''
             
         
 

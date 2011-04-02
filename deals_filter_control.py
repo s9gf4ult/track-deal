@@ -13,7 +13,8 @@ from number_range_control import *
 class deals_filter_control:
     def __init__(self, builder):
         self.builder = builder
-        
+        w = self.builder.get_object("deals_filter")
+        w.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_ACCEPT)
         ######################
         # hide controls init #
         ######################
@@ -85,11 +86,11 @@ class deals_filter_control:
         ###################
         # select controls #
         ###################
-        self.position = select_control({self.builder.get_object("deals_filter_position_free_rb") : False,
-                                        self.builder.get_object("deals_filter_position_occpied_rb") : True},
+        self.position = select_control({False : self.builder.get_object("deals_filter_position_free_rb"),
+                                        True : self.builder.get_object("deals_filter_position_occpied_rb")},
                                        self.builder.get_object("deals_filter_position_cb"))
-        self.direction = select_control({self.builder.get_object("deals_filter_direction_long_rb") : -1,
-                                         self.builder.get_object("deals_filter_direction_short_rb") : 1},
+        self.direction = select_control({-1 : self.builder.get_object("deals_filter_direction_long_rb"),
+                                         1 : self.builder.get_object("deals_filter_direction_short_rb")},
                                         self.builder.get_object("deals_filter_direction_cb"))
         
         ##################
@@ -130,6 +131,7 @@ class deals_filter_control:
         w = self.builder.get_object("deals_filter")
         w.show_all()
         w.run()
+        w.hide()
 
     def update_widget(self, count_range = None, price_range = None, broker_comm_range = None, stock_comm_range = None,
                       comm_range = None, volume_range = None, stock_list = None):
