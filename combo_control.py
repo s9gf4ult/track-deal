@@ -18,6 +18,14 @@ class combo_control:
         if isinstance(self.combobox, gtk.ComboBoxEntry):
             self.combobox.set_text_column(0)
 
+    def get_value(self):
+        if isinstance(self.combobox, gtk.ComboBoxEntry):
+            return self.combobox.get_text()
+        elif isinstance(self.combobox, gtk.ComboBoxText):
+            return self.combobox.get_active_text()
+        else:
+            return self.combobox.get_model().get_value(self.combobox.get_active_iter(), 0)
+
 if __name__ == "__main__":
     w = gtk.Dialog()
     p = w.get_content_area()
