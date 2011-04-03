@@ -1736,7 +1736,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkDialog" id="dialog1">
+  <object class="GtkDialog" id="deal_adder">
     <property name="border_width">5</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
@@ -1762,7 +1762,7 @@
                         <property name="visible">True</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkCalendar" id="calendar1">
+                          <object class="GtkCalendar" id="deal_adder_calendar">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="year">2011</property>
@@ -1777,7 +1777,7 @@
                           <object class="GtkHBox" id="hbox6">
                             <property name="visible">True</property>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton1">
+                              <object class="GtkSpinButton" id="deal_adder_hour">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1798,7 +1798,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton2">
+                              <object class="GtkSpinButton" id="deal_adder_min">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1819,7 +1819,7 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkSpinButton" id="spinbutton3">
+                              <object class="GtkSpinButton" id="deal_adder_sec">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="invisible_char">&#x25CF;</property>
@@ -1859,7 +1859,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkComboBoxEntry" id="comboboxentry1">
+                      <object class="GtkComboBoxEntry" id="deal_adder_stock">
                         <property name="visible">True</property>
                       </object>
                     </child>
@@ -1888,7 +1888,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkComboBoxEntry" id="comboboxentry2">
+                      <object class="GtkComboBoxEntry" id="deal_adder_market">
                         <property name="visible">True</property>
                       </object>
                     </child>
@@ -1919,7 +1919,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton4">
+                      <object class="GtkSpinButton" id="deal_adder_price">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
@@ -1950,7 +1950,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton5">
+                      <object class="GtkSpinButton" id="deal_adder_count">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
@@ -1986,7 +1986,7 @@
                       <object class="GtkHBox" id="hbox8">
                         <property name="visible">True</property>
                         <child>
-                          <object class="GtkRadioButton" id="radiobutton1">
+                          <object class="GtkRadioButton" id="deal_adder_buy_rb">
                             <property name="label" translatable="yes">&#x41A;&#x443;&#x43F;&#x438;&#x442;&#x44C;</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -2000,14 +2000,14 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkRadioButton" id="radiobutton2">
+                          <object class="GtkRadioButton" id="deal_adder_sell_rb">
                             <property name="label" translatable="yes">&#x41F;&#x440;&#x43E;&#x434;&#x430;&#x442;&#x44C;</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
-                            <property name="group">radiobutton1</property>
+                            <property name="group">deal_adder_buy_rb</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -2042,7 +2042,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton6">
+                      <object class="GtkSpinButton" id="deal_adder_broker_comm">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
@@ -2073,7 +2073,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkSpinButton" id="spinbutton7">
+                      <object class="GtkSpinButton" id="deal_adder_stock_comm">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">&#x25CF;</property>
