@@ -20,7 +20,7 @@ class combo_control:
 
     def get_value(self):
         if isinstance(self.combobox, gtk.ComboBoxEntry):
-            return self.combobox.get_text()
+            return self.combobox.child.get_text()
         elif isinstance(self.combobox, gtk.ComboBoxText):
             return self.combobox.get_active_text()
         else:
