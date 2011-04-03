@@ -51,7 +51,6 @@ class deals_filter():
             q += " and {0}".format(conds)
         if order_by and len(order_by) > 0:
             q += " order by d.{0}".format(order_by)
-        
         return cursor_filter(q, self.database.connection)
         
     def _regen_selected(self):
@@ -96,7 +95,7 @@ class deals_filter():
                 if l < h:
                     conds.append(u'({0} between {1} and {2})'.format(field_name, l, h))
                 elif l > h:
-                    conds.append(u'({0} >= {1} or {0} <= {2}'.format(field_name, l, h))
+                    conds.append(u'({0} >= {1} or {0} <= {2})'.format(field_name, l, h))
                 else:
                     conds.append(u'{0} = {1}'.format(field_name, l))
             elif l:
