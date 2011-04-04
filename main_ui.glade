@@ -1738,7 +1738,10 @@
   </object>
   <object class="GtkDialog" id="deal_adder">
     <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="type_hint">normal</property>
+    <property name="transient_for">main_window</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox2">
         <property name="visible">True</property>

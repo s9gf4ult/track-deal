@@ -8,7 +8,7 @@ import datetime
 import re
 import traceback
 from deals_filter import deals_filter
-#from deal_adder import deal_adder
+from deal_adder_control import deal_adder_control
 
 class MyTreeViewColumn(gtk.TreeViewColumn):
     def __init__(self, title, renderer, **kargs):
@@ -229,7 +229,7 @@ class main_ui():
             deals_view.append_column(col)
         deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.deals_filter = deals_filter(self.builder, self.database)
-        self.deal_adder = deal_adder(self.builder)
+        self.deal_adder = deal_adder_control(self.builder)
         
 
     def delete_deals(self):
@@ -254,8 +254,8 @@ class main_ui():
     def add_deal(self):
         ret = self.deal_adder.run()
         if ret != None:
-            self.database.
-        self.update_deals_tab()
+            self.database.get_from_list([ret])
+            self.update_deals_tab()
 
     def delete_deals_activate(self, action):
         self.delete_deals()
