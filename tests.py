@@ -146,8 +146,34 @@ class balance4(balance):
         self.coats = sources.xml_parser('tests/test_report4.xml')
         self.accute = 14
 
+class sources_xml_parser(unittest.TestCase):
+    def setUp(self):
+        self.s = self.open_file()
+        self.ss = self.open_file()
+        self.s.check_file()
+        self.ss.check_file()
+
+    def open_file(self):
+        return sources.xml_parser('tests/test_report1.xml')
+
+    def test_check_sha1(self):
+        for (c, cc) in map(lambda a, b: (a, b), self.s.common_deals, self.ss.common_deals):
+            self.assertEqual(c, cc)
+
+class sources_xml_parser2(sources_xml_parser):
+    def open_file(self):
+        return sources.xml_parser('tests/test_report2.xml')
+    
+class sources_xml_parser3(sources_xml_parser):
+    def open_file(self):
+        return sources.xml_parser('tests/test_report3.xml')
         
+class sources_xml_parser4(sources_xml_parser):
+    def open_file(self):
+        return sources.xml_parser('tests/test_report4.xml')
+    
 if __name__ == "__main__":
-    for utest in [balance, balance2, balance3, balance4]:
+    for utest in [balance, balance2, balance3, balance4, sources_xml_parser,
+                  sources_xml_parser2, sources_xml_parser3, sources_xml_parser4]:
         suite = unittest.TestLoader().loadTestsFromTestCase(utest)
         unittest.TextTestRunner(verbosity=4).run(suite)
