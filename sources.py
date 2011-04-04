@@ -34,15 +34,16 @@ class xml_parser():
                 deal[cc] = at.has_key(cc) and float(at[cc].value) or 0
             if deal['volume'] == 0:
                 deal['volume'] = deal['price'] * deal['quantity']
-            deal['sha1'] = hashlib.sha1(reduce(lambda a, b: u'{0}{1}'.format(a, b), [deal['security_name'],
-                                                                                     deal['security_type'],
-                                                                                     deal['datetime'].isoformat(),
-                                                                                     deal['price'],
-                                                                                     deal['quantity'],
-                                                                                     deal['volume'],
-                                                                                     deal['deal_sign'],
-                                                                                     at['order_number'],
-                                                                                     at['deal_number']]).encode('utf-8')).hexdigest()
+            rdata = reduce(lambda a, b: u'{0}{1}'.format(a, b), [deal['security_name'],
+                                                                 deal['security_type'],
+                                                                 deal['datetime'].isoformat(),
+                                                                 deal['price'],
+                                                                 deal['quantity'],
+                                                                 deal['volume'],
+                                                                 deal['deal_sign'],
+                                                                 at['order_number'].value,
+                                                                 at['deal_number'].value]).encode('utf-8')
+            deal['sha1'] = hashlib.sha1(rdata).hexdigest()
             self.common_deals.append(deal)
             
         if self.report.attributes['board_list'].value.find('FORTS') >= 0: # если в атрибуте тега report присутствует слово FORTS то расписываем суммарную коммисию поровну по всем сделкам пропрорционально объему
