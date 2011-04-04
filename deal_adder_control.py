@@ -57,7 +57,8 @@ class deal_adder_control:
                 "quantity" : self.count.get_value(),
                 "deal_sign" : self.direction.get_value(),
                 "broker_comm" : self.broker_comm.get_value(),
-                "stock_comm" : self.stock_comm.get_value()}
+                "stock_comm" : self.stock_comm.get_value(),
+                "volume" : self.count.get_value() * self.price.get_value()}
 
     def check_correctness(self):
         def notempty(str):
@@ -79,6 +80,10 @@ class deal_adder_control:
             return False
         else:
             return True
+
+    def update_widget(self, security_names, security_types):
+        self.instrument.update_widget(security_names)
+        self.market.update_widget(security_types)
             
 if __name__ == "__main__":
     b = gtk.Builder()

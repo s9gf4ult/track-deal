@@ -11,10 +11,12 @@ class number_control(value_returner_control):
         self.spin_button.get_adjustment().set_step_increment(step_incr)
 
     def set_lower_limit(self, limit):
-        self.spin_button.get_adjustment().set_lower(limit)
+        if limit:
+            self.spin_button.get_adjustment().set_lower(limit)
 
     def set_upper_limit(self, limit):
-        self.spin_button.get_adjustment().set_upper(limit)
+        if limit:
+            self.spin_button.get_adjustment().set_upper(float(limit))
 
     def get_value(self):
         return self.return_value(self.spin_button.get_value())

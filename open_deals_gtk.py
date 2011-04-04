@@ -172,6 +172,8 @@ class main_ui():
             self.update_report_buffer()
 
     def _call_filter_clicked(self, bt):
+        if not self.database.connection:
+            return
         self.deals_filter.run()
         self.update_deals_tab()
 
@@ -252,6 +254,10 @@ class main_ui():
         dial.destroy()
             
     def add_deal(self):
+        if not self.database.connection:
+            return
+        self.deal_adder.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals order by security_name")),
+                                      map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals order by security_type")))
         ret = self.deal_adder.run()
         if ret != None:
             self.database.get_from_list([ret])
