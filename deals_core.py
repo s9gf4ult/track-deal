@@ -115,8 +115,8 @@ class deals_proc():
                 self.have_changes = False
                 self.filename = None
 
-    def get_from_source(self, coats):
-        for coat in coats.common_deals:
+    def get_from_list(self, coats):
+        for coat in coats:
             try:
                 coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
                 self._insert_from_hash('deals', coat)
@@ -124,6 +124,9 @@ class deals_proc():
                 continue
             except Exception as e:
                 raise e
+
+    def get_from_source(self, source):
+        self.get_from_list(source.get_deals_list())
         
     def commit(self):
         self.connection.commit()

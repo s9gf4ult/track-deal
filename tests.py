@@ -157,7 +157,10 @@ class sources_xml_parser(unittest.TestCase):
         return sources.xml_parser('tests/test_report1.xml')
 
     def test_check_sha1(self):
-        for (c, cc) in map(lambda a, b: (a, b), self.s.common_deals, self.ss.common_deals):
+        d = self.s.get_deals_list()
+        dd = self.ss.get_deals_list()
+        self.assertEqual(len(d), len(dd))
+        for (c, cc) in map(lambda a, b: (a, b), d, dd):
             self.assertEqual(c, cc)
 
 class sources_xml_parser2(sources_xml_parser):

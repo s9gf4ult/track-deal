@@ -10,6 +10,9 @@ class xml_parser():
         self.xml = parse(filename)
         self.checked = False
 
+    def get_deals_list(self):
+        return self.common_deals
+
     def check_file(self):
         if not (self.xml.childNodes.length == 1 and self.xml.childNodes[0].nodeName == "report"):
             raise Exception(u'Нет тега report')

@@ -229,7 +229,7 @@ class main_ui():
             deals_view.append_column(col)
         deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.deals_filter = deals_filter(self.builder, self.database)
-        #self.deal_adder = deal_adder(self.database, parent = self.builder.get_object("main_window"))
+        self.deal_adder = deal_adder(self.builder)
         
 
     def delete_deals(self):
@@ -252,7 +252,9 @@ class main_ui():
         dial.destroy()
             
     def add_deal(self):
-        #self.deal_adder.run()
+        ret = self.deal_adder.run()
+        if ret != None:
+            self.database.
         self.update_deals_tab()
 
     def delete_deals_activate(self, action):
