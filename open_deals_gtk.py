@@ -9,6 +9,7 @@ import re
 import traceback
 from deals_filter import deals_filter
 from deal_adder_control import deal_adder_control
+from deals_tab_controller import deals_tab_controller
 
 class MyTreeViewColumn(gtk.TreeViewColumn):
     def __init__(self, title, renderer, **kargs):
@@ -152,7 +153,7 @@ class main_ui():
                 print(traceback.format_exc())
         diag.destroy()
         fl.destroy()
-        self.update_view()
+        self.updat1e_view()
 
 
     def check_if_database_open(self):
@@ -191,7 +192,7 @@ class main_ui():
                                       "on_close_database_activate" : self.close,
                                       "on_transaction_commit_activate" : self.commit,
                                       "on_transaction_rollback_activate" : self.rollback,
-                                      "on_deals_load_open_ru_activate" : self.load_open_ru,
+                                      # "on_deals_load_open_ru_activate" : self.load_open_ru,
                                       "on_positions_make_activate" : self.make_positions,
                                       "on_radio_segfault_toggled" : self.radio_report_toggled,
                                       "on_radio_axce1_toggled" : self.radio_report_toggled,
@@ -199,10 +200,10 @@ class main_ui():
                                       "on_comma_separator_value_changed" : self.update_report,
                                       "on_stock_view_cursor_changed" : self._stock_cursor_changed,
                                       "on_date_view_cursor_changed" : self._date_cursor_changed,
-                                      "on_call_deals_filter_clicked" : self._call_filter_clicked,
-                                      "on_update_deals_tab_activate" : self._update_deals_activated,
-                                      "on_delete_deals_activate" : self.delete_deals_activate,
-                                      "on_add_deal_activate" : self.add_deal_activate,
+                                      # "on_call_deals_filter_clicked" : self._call_filter_clicked,
+                                      # "on_update_deals_tab_activate" : self._update_deals_activated,
+                                      # "on_delete_deals_activate" : self.delete_deals_activate,
+                                      # "on_add_deal_activate" : self.add_deal_activate,
                                       "on_quit_activate" : self.quit})
 
         # report tab
@@ -217,21 +218,10 @@ class main_ui():
         date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
 
         # deals tab
-        deals_view = self.builder.get_object("deals_view")
-        for dd in [('id', 0, "id"),
-                   (u'Дата', 5, "datetime"),
-                   (u'Инструмент', 1, "security_name"),
-                   (u'Направление', 2, "deal_sign"),
-                   (u'Количество', 3, "quantity"),
-                   (u'Цена', 4, "price")]:
-            col = MyTreeViewColumn(dd[0], gtk.CellRendererText(), text = dd[1])
-            col.set_clickable(True)
-            col.connect("clicked", self.deals_view_column_clicked)
-            col.database_column = dd[2]
-            deals_view.append_column(col)
-        deals_view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.deals_filter = deals_filter(self.builder, self.database)
         self.deal_adder = deal_adder_control(self.builder)
+        self.deals_tab = deals_tab_controller(self.database, self.builder, None, self.deals_filter, self.deal_adder)
+        
         
 
     def delete_deals(self):

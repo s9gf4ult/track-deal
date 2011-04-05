@@ -3,6 +3,7 @@
 from list_view_sort_control import list_view_sort_control
 import gtk
 from common_methods import *
+import sources
 
 class deals_tab_controller:
     def __init__(self, database, builder, update_callback, filter_control, adder_control):
@@ -61,7 +62,7 @@ class deals_tab_controller:
                 xs.check_file()
                 self.database.get_from_source(xs)
             except Exception as e:
-                self.show_error(e.__str__())
+                show_error(e.__str__(), win)
                 print(traceback.format_exc())
         diag.destroy()
         fl.destroy()
@@ -80,13 +81,17 @@ class deals_tab_controller:
     def update_widget(self):
         if not self.database.connection:
             return
+        self.filter._prepare_filter()
+        self.filter._regen_selected()
+        self.filter._regen_boundary()
         l = []
         for x in self.filter.get_ids(None, fields = ["id", "datetime", "security_name", "security_type", "deal_sign", "price", "quantity", "volume", "broker_comm", "stock_comm"]):
+            r = list(x)
             if x[4] < 0:
-                x[4] = "B"
+                r[4] = "B"
             else:
-                x[4] = "S"
-            l.append(x)
+                r[4] = "S"
+            l.append(tuple(r))
         self.deals_view.update_rows(l)
                 
         

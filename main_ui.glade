@@ -20,22 +20,6 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkTreeStore" id="deals_store">
-    <columns>
-      <!-- column-name id -->
-      <column type="gint"/>
-      <!-- column-name stock -->
-      <column type="gchararray"/>
-      <!-- column-name direction -->
-      <column type="gchararray"/>
-      <!-- column-name count -->
-      <column type="gint"/>
-      <!-- column-name price -->
-      <column type="gfloat"/>
-      <!-- column-name date -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
   <object class="GtkWindow" id="main_window">
     <property name="border_width">5</property>
     <property name="role">open_deals_main_window</property>
@@ -228,7 +212,6 @@
                       <object class="GtkTreeView" id="deals_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="model">deals_store</property>
                         <property name="rubber_banding">True</property>
                       </object>
                     </child>
@@ -247,12 +230,12 @@
                         <property name="layout_style">start</property>
                         <child>
                           <object class="GtkButton" id="call_deals_filter">
-                            <property name="label" translatable="yes">_&#x424;&#x438;&#x43B;&#x44C;&#x442;&#x440;</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
+                            <property name="related_action">call_filter</property>
+                            <property name="use_action_appearance">True</property>
                             <property name="use_underline">True</property>
-                            <signal name="clicked" handler="on_call_deals_filter_clicked"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -655,7 +638,6 @@
   </object>
   <object class="GtkAction" id="deals_load_open_ru">
     <property name="label">&#x417;&#x430;&#x433;&#x440;&#x443;&#x437;&#x438;&#x442;&#x44C; &#x438;&#x437; &#x43E;&#x442;&#x447;&#x435;&#x442;&#x430; "&#x41E;&#x442;&#x43A;&#x440;&#x44B;&#x442;&#x438;&#x435;"</property>
-    <signal name="activate" handler="on_deals_load_open_ru_activate"/>
   </object>
   <object class="GtkAction" id="positions_make">
     <property name="label">&#x420;&#x430;&#x441;&#x43F;&#x438;&#x441;&#x430;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
@@ -669,17 +651,14 @@
   <object class="GtkAction" id="update_deals_tab">
     <property name="label">_&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
     <property name="stock_id">gtk-refresh</property>
-    <signal name="activate" handler="on_update_deals_tab_activate"/>
   </object>
   <object class="GtkAction" id="add_deal">
     <property name="label">&#x414;&#x43E;&#x431;&#x430;&#x432;&#x438;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x443;</property>
     <property name="stock_id">gtk-add</property>
-    <signal name="activate" handler="on_add_deal_activate"/>
   </object>
   <object class="GtkAction" id="delete_deals">
     <property name="label">&#x423;&#x434;&#x430;&#x43B;&#x438;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
     <property name="stock_id">gtk-remove</property>
-    <signal name="activate" handler="on_delete_deals_activate"/>
   </object>
   <object class="GtkDialog" id="deals_filter">
     <property name="border_width">5</property>
@@ -2121,5 +2100,8 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkAction" id="call_filter">
+    <property name="label">&#x424;&#x438;&#x43B;&#x44C;&#x442;&#x440;</property>
   </object>
 </interface>
