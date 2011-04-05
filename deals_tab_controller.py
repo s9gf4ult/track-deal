@@ -23,16 +23,16 @@ class deals_tab_controller:
         # make columns in the view #
         ############################
         self.deals_view = list_view_sort_control(self.builder.get_object("deals_view"),
-                                                 [(u"id", gtk.CellRendererText()),
+                                                 [(u"id", gtk.CellRendererSpin(), int),
                                                   (u'Время', gtk.CellRendererText()),
                                                   (u'Инструмент', gtk.CellRendererText()),
                                                   (u'Биржа', gtk.CellRendererText()),
                                                   (u'Направление', gtk.CellRendererText()),
                                                   (u'Цена', gtk.CellRendererSpin()),
-                                                  (u'Количество', gtk.CellRendererText()),
-                                                  (u'Объем', gtk.CellRendererText()),
-                                                  (u'Комиссия брокера', gtk.CellRendererText()),
-                                                  (u'Комиссия биржи', gtk.CellRendererText())])
+                                                  (u'Количество', gtk.CellRendererSpin(), int),
+                                                  (u'Объем', gtk.CellRendererSpin()),
+                                                  (u'Комиссия брокера', gtk.CellRendererSpin()),
+                                                  (u'Комиссия биржи', gtk.CellRendererSpin())])
 
     def delete_deals_activate(self, action):
         pass
