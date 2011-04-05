@@ -60,7 +60,7 @@ class list_view_sort_control:
     def column_clicked(self, column, col_id):
         order = self.toggle_sort_indicator(col_id)
         if order != None:
-            if self.self_sorting:
+            if not self.self_sorting:
                 if self.sort_callback != None:
                     self.sort_callback(column, order, self.column_params[column])
             else:
