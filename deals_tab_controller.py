@@ -28,7 +28,7 @@ class deals_tab_controller:
                                                   (u'Инструмент', gtk.CellRendererText()),
                                                   (u'Биржа', gtk.CellRendererText()),
                                                   (u'Направление', gtk.CellRendererText()),
-                                                  (u'Цена', gtk.CellRendererText()),
+                                                  (u'Цена', gtk.CellRendererSpin()),
                                                   (u'Количество', gtk.CellRendererText()),
                                                   (u'Объем', gtk.CellRendererText()),
                                                   (u'Комиссия брокера', gtk.CellRendererText()),

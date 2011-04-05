@@ -4,28 +4,46 @@
 import gtk
 
 class list_view_sort_control:
-    def __init__(self, treeview, columns):
-        """columns must be list of tuples with name and renderer, order of tuple in the list
+    def __init__(self, treeview, columns, self_sorting = True, sort_callback = None):
+        """columns must be list of tuples with name, renderer, optionally type,
+        and optionally other data assigned to column order of tuple in the list
         determines the order of columns in TreeView"""
+        def get3ordefault(tpl, default):
+            if len(tpl) < 3:
+                return default
+            else:
+                if tpl[2] != None:
+                    return tpl[2]
+                else:
+                    return default
+                
+        def getparams(tpl):
+            if len(tpl) > 3:
+                return tpl[3:]
+            else:
+                return None
+            
         self.treeview = treeview
         self.model_columns = []
+        self.column_params = {}
         for k in xrange(0, len(columns)):
             prop = {}
             if isinstance(columns[k][1], gtk.CellRendererText):
                 prop["text"] = k
                 if isinstance(columns[k][1], gtk.CellRendererSpin):
-                    self.model_columns.append(float)
+                    self.model_columns.append(get3ordefault(columns[k], float))
                 else:
-                    self.model_columns.append(str)
+                    self.model_columns.append(get3ordefault(columns[k], str))
             elif isinstance(columns[k][1], gtk.CellRendererProgress):
                 prop["value"] = k
-                self.model_columns.append(float)
+                self.model_columns.append(get3ordefault(columns[k], float))
             elif isinstance(columns[k][1], gtk.CellRendererToggle):
                 prop["active"] = k
-                self.model_columns.append(bool)
+                self.model_columns.append(get3ordefault(columns[k], bool))
             elif isinstance(columns[k][1], gtk.CellRendererPixbuf):
                 prop["pixbuf"] = k
-                self.model_columns.append(gtk.gdk.Pixbuf)
+                self.model_columns.append(get3ordefault(columns[k], gtk.gdk.Pixbuf))
+            self.column_params[columns[k][1]] = getparams(columns[k])
             c = gtk.TreeViewColumn(columns[k][0], columns[k][1], **prop)
             c.set_clickable(True)
             c.connect("clicked", self.column_clicked, k)
