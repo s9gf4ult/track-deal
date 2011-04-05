@@ -22,7 +22,8 @@ class list_view_sort_control:
                 return tpl[3:]
             else:
                 return None
-            
+        self.self_sorting = self_sorting
+        self.sort_callback = sort_callback
         self.treeview = treeview
         self.model_columns = []
         self.column_params = {}
@@ -59,7 +60,11 @@ class list_view_sort_control:
     def column_clicked(self, column, col_id):
         order = self.toggle_sort_indicator(col_id)
         if order != None:
-            self.treeview.get_model().set_sort_column_id(col_id, order)
+            if self.self_sorting:
+                if self.sort_callback != None:
+                    self.sort_callback(column, order, self.column_params[column])
+            else:
+                self.treeview.get_model().set_sort_column_id(col_id, order)
 
     def toggle_sort_indicator(self, col_id):
         for col in xrange(0, len(self.treeview.get_columns())):
