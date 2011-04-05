@@ -26,7 +26,6 @@ class list_view_sort_control:
         self.sort_callback = sort_callback
         self.treeview = treeview
         self.model_columns = []
-        self.column_params = {}
         for k in xrange(0, len(columns)):
             prop = {}
             if isinstance(columns[k][1], gtk.CellRendererText):
@@ -44,10 +43,9 @@ class list_view_sort_control:
             elif isinstance(columns[k][1], gtk.CellRendererPixbuf):
                 prop["pixbuf"] = k
                 self.model_columns.append(get3ordefault(columns[k], gtk.gdk.Pixbuf))
-            self.column_params[columns[k][1]] = getparams(columns[k])
             c = gtk.TreeViewColumn(columns[k][0], columns[k][1], **prop)
             c.set_clickable(True)
-            c.connect("clicked", self.column_clicked, k)
+            c.connect("clicked", self.column_clicked, k, getparams(columns[k]))
             self.treeview.append_column(c)
             
     def make_model(self):
@@ -57,12 +55,12 @@ class list_view_sort_control:
     def get_new_store(self):
         return gtk.ListStore(*self.model_columns)
         
-    def column_clicked(self, column, col_id):
+    def column_clicked(self, column, col_id, params):
         order = self.toggle_sort_indicator(col_id)
         if order != None:
             if not self.self_sorting:
                 if self.sort_callback != None:
-                    self.sort_callback(column, order, self.column_params[column])
+                    self.sort_callback(column, order, params)
             else:
                 self.treeview.get_model().set_sort_column_id(col_id, order)
 

@@ -23,16 +23,19 @@ class deals_tab_controller:
         # make columns in the view #
         ############################
         self.deals_view = list_view_sort_control(self.builder.get_object("deals_view"),
-                                                 [(u"id", gtk.CellRendererSpin(), int),
-                                                  (u'Время', gtk.CellRendererText()),
-                                                  (u'Инструмент', gtk.CellRendererText()),
-                                                  (u'Биржа', gtk.CellRendererText()),
-                                                  (u'Направление', gtk.CellRendererText()),
-                                                  (u'Цена', gtk.CellRendererSpin()),
-                                                  (u'Количество', gtk.CellRendererSpin(), int),
-                                                  (u'Объем', gtk.CellRendererSpin()),
-                                                  (u'Комиссия брокера', gtk.CellRendererSpin()),
-                                                  (u'Комиссия биржи', gtk.CellRendererSpin())])
+                                                 [(u"id", gtk.CellRendererSpin(), int, "id"),
+                                                  (u'Время', gtk.CellRendererText(), str, "datetime"),
+                                                  (u'Инструмент', gtk.CellRendererText(), str, "security_name"),
+                                                  (u'Биржа', gtk.CellRendererText(), str, "security_type"),
+                                                  (u'Направление', gtk.CellRendererText(), str, "deal_sign"),
+                                                  (u'Цена', gtk.CellRendererSpin(), float, "price"),
+                                                  (u'Количество', gtk.CellRendererSpin(), int, "quantity"),
+                                                  (u'Объем', gtk.CellRendererSpin(), float, "volume"),
+                                                  (u'Комиссия брокера', gtk.CellRendererSpin(), float, "broker_comm"),
+                                                  (u'Комиссия биржи', gtk.CellRendererSpin(), float, "stock_comm")],
+                                                 self_sorting = False,
+                                                 sort_callback = self.sorted_callback)
+        self.sort_order = "id"
 
     def delete_deals_activate(self, action):
         pass
@@ -45,6 +48,11 @@ class deals_tab_controller:
 
     def deals_load_open_ru_activate(self, action):
         self.load_open_ru()
+
+    def sorted_callback(self, column, order, params):
+        self.sort_order = params[0] + (order == gtk.SORT_DESCENDING and " desc" or "")
+        self.update_widget()
+        
 
     def load_open_ru(self):
         if not self.database.connection:
@@ -85,7 +93,7 @@ class deals_tab_controller:
         self.filter._regen_selected()
         self.filter._regen_boundary()
         l = []
-        for x in self.filter.get_ids(None, fields = ["id", "datetime", "security_name", "security_type", "deal_sign", "price", "quantity", "volume", "broker_comm", "stock_comm"]):
+        for x in self.filter.get_ids(self.sort_order, fields = ["id", "datetime", "security_name", "security_type", "deal_sign", "price", "quantity", "volume", "broker_comm", "stock_comm"]):
             r = list(x)
             if x[4] < 0:
                 r[4] = "B"
