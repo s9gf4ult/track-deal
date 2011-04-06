@@ -58,6 +58,8 @@ class deals_tab_controller:
             self.database.delete_empty_positions()
             self.database.delete_broken_positions()
             self.update_widget()
+            if self.update_callback:
+                self.update_callback()
         dial.destroy()
 
 
@@ -73,6 +75,8 @@ class deals_tab_controller:
         if ret != None:
             self.database.get_from_list([ret])
             self.update_widget()
+            if self.update_callback:
+                self.update_callback()
 
 
     def update_deals_tab_activate(self, action):
@@ -115,8 +119,6 @@ class deals_tab_controller:
     def call_filter(self):
         self.filter.run()
         self.update_widget()
-        if self.update_callback:
-            self.update_callback()
 
     def update_widget(self):
         if not self.database.connection:
