@@ -73,6 +73,7 @@ class main_ui():
             self.close(None)
         if not self.database.connection:
             self.database.create_new(":memory:")
+            self.update_view()
 
     def create_in_file(self, wid):
         if self.database.connection:
@@ -85,6 +86,7 @@ class main_ui():
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self.database.create_new(diag.get_filename())
+                    self.update_view()
                 except Exception as e:
                     self.show_error(e.__str__())
                     print(traceback.format_exc())
@@ -104,12 +106,12 @@ class main_ui():
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self.database.open_existing(diag.get_filename())
+                    self.update_view()
                 except Exception as e:
                     self.show_error(e.__str__())
                     print(traceback.format_exc())
             diag.destroy()
             fl.destroy()
-            self.update_view()
             
     def close(self, wid):
         try:
@@ -193,7 +195,7 @@ class main_ui():
         # deals tab
         self.deals_filter = deals_filter(self.builder, self.database)
         self.deal_adder = deal_adder_control(self.builder)
-        self.deals_tab = deals_tab_controller(self.database, self.builder, None, self.deals_filter, self.deal_adder)
+        self.deals_tab = deals_tab_controller(self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder)
         
     def _gen_seg(self, ticks):
         ret = u''
@@ -244,13 +246,6 @@ class main_ui():
             store.remove(it)
             it = store.get_iter_first()
 
-    def _insert_deal_to_store(self, store, parent_iter, deal_id):
-        (did, dstock, ddir, dcount, dprice, ddate) = self.database.connection.execute("select id, security_name, deal_sign, quantity, price, datetime from deals where id = ?", (deal_id,)).fetchone()
-        citer = store.insert(parent_iter, -1, [did, dstock, ddir == -1 and "B" or "S", dcount, dprice, ddate.isoformat()])
-        ob = self.deals_order_by()
-        for cid in self.deals_filter.get_ids(self.deals_order_by(), parent = deal_id):
-            self._insert_deal_to_store(store, citer, cid)
-
     def update_report_tab(self):
         self.update_report_buttons()
         self.update_report_buffer()
@@ -299,20 +294,9 @@ class main_ui():
             stock_store.append([ticket])
 
     def update_view(self):
-        self.update_deals_tab()
+        self.deals_tab.update_widget()
         self.update_report_tab()
         self.update_blog_tab()
-
-    def update_deals_tab(self):
-        deals_store = self.builder.get_object("deals_store")
-        self._flush_store(deals_store)
-        if not self.database.connection:
-            return
-        self.deals_filter._prepare_filter() # если поменялся набор стоков обновяем его в списке
-        self.deals_filter._regen_selected() # по причинам производительности таблицу выделенных стоков генерим заранее
-        self.deals_filter._regen_boundary() # тоже по причинам производительности
-        for did in self.deals_filter.get_ids(self.deals_order_by()):
-            self._insert_deal_to_store(deals_store, None, did)
 
     def show(self):
         win = self.builder.get_object("main_window")
