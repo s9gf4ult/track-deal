@@ -57,9 +57,7 @@ class deals_tab_controller:
                 self.database.connection.execute("delete from deals where id = ?", (did,))
             self.database.delete_empty_positions()
             self.database.delete_broken_positions()
-            self.update_widget()
-            if self.update_callback:
-                self.update_callback()
+            self.call_update_callback()
         dial.destroy()
 
 
@@ -74,9 +72,7 @@ class deals_tab_controller:
         ret = self.adder.run()
         if ret != None:
             self.database.get_from_list([ret])
-            self.update_widget()
-            if self.update_callback:
-                self.update_callback()
+            self.call_update_callback()
 
 
     def update_deals_tab_activate(self, action):
@@ -105,13 +101,18 @@ class deals_tab_controller:
                 xs = sources.xml_parser(diag.get_filename())
                 xs.check_file()
                 self.database.get_from_source(xs)
+                self.call_update_callback()
             except Exception as e:
                 show_error(e.__str__(), win)
                 print(traceback.format_exc())
         diag.destroy()
         fl.destroy()
-        self.update_widget()
 
+    def call_update_callback(self):
+        if self.update_callback:
+            self.update_callback()
+        else:
+            self.update_widget()
 
     def call_filter_activate(self, action):
         self.call_filter()
