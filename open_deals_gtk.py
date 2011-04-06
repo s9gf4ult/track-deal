@@ -11,11 +11,6 @@ from deals_filter import deals_filter
 from deal_adder_control import deal_adder_control
 from deals_tab_controller import deals_tab_controller
 
-class MyTreeViewColumn(gtk.TreeViewColumn):
-    def __init__(self, title, renderer, **kargs):
-        super(MyTreeViewColumn, self).__init__(title, renderer, **kargs)
-        self.database_column = ''
-
 class main_ui():
     def _stock_cursor_changed(self, tw):
         path = tw.get_cursor()[0]
@@ -133,28 +128,6 @@ class main_ui():
             self.database.rollback()
             self.update_view()
 
-    def load_open_ru(self, wid):
-        if not self.check_if_database_open():
-            return
-        win = self.builder.get_object("main_window")
-        diag = gtk.FileChooserDialog(title = u'Открыть отчет "Открытие"', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
-        diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
-        fl = gtk.FileFilter()
-        fl.add_mime_type('application/xml')
-        diag.set_filter(fl)
-        if diag.run() == gtk.RESPONSE_ACCEPT:
-            try:
-                xs = sources.xml_parser(diag.get_filename())
-                xs.check_file()
-                self.database.get_from_source(xs)
-            except Exception as e:
-                self.show_error(e.__str__())
-                print(traceback.format_exc())
-        diag.destroy()
-        fl.destroy()
-        self.updat1e_view()
-
 
     def check_if_database_open(self):
         if self.database.connection:
@@ -222,73 +195,6 @@ class main_ui():
         self.deal_adder = deal_adder_control(self.builder)
         self.deals_tab = deals_tab_controller(self.database, self.builder, None, self.deals_filter, self.deal_adder)
         
-        
-
-    def delete_deals(self):
-        if not self.database.connection:
-            return
-        selected = self.builder.get_object("deals_view").get_selection()
-        dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self.builder.get_object("main_window"))
-        dcount = selected.count_selected_rows()
-        if dcount == 0:
-            return
-        dial.props.text = u'Удалить {0} сделок ? В любом случае это действие можно сразу отменить при помощи Rollback'.format(dcount)
-        if dial.run() == gtk.RESPONSE_YES:
-            (model, it) = selected.get_selected_rows()
-            for ii in it:
-                did = model.get_value(model.get_iter(ii), 0)
-                self.database.connection.execute("delete from deals where id = ?", (did,))
-            self.database.delete_empty_positions()
-            self.database.delete_broken_positions()
-            self.update_view()
-        dial.destroy()
-            
-    def add_deal(self):
-        if not self.database.connection:
-            return
-        self.deal_adder.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals order by security_name")),
-                                      map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals order by security_type")))
-        ret = self.deal_adder.run()
-        if ret != None:
-            self.database.get_from_list([ret])
-            self.update_deals_tab()
-
-    def delete_deals_activate(self, action):
-        self.delete_deals()
-
-    def add_deal_activate(self, action):
-        self.add_deal()
-
-    def deals_view_column_clicked(self, column):
-        if not self.database.connection:
-            return
-        tw = column.get_tree_view()
-        for col in tw.get_columns():
-            if col != column:
-                col.set_sort_indicator(False)
-        
-        if not column.get_sort_indicator():
-            column.set_sort_indicator(True)
-            column.set_sort_order(gtk.SORT_ASCENDING)
-        else:
-            if gtk.SORT_ASCENDING == column.get_sort_order():
-                column.set_sort_order(gtk.SORT_DESCENDING)
-            else:
-                column.set_sort_indicator(False)
-        self.update_deals_tab()
-
-    def deals_order_by(self):
-        for col in self.builder.get_object("deals_view").get_columns():
-            if col.get_sort_indicator():
-                if gtk.SORT_ASCENDING == col.get_sort_order():
-                    return col.database_column
-                else:
-                    return "{0} desc".format(col.database_column)
-        return None
-        
-        
-        
-                                
     def _gen_seg(self, ticks):
         ret = u''
         is_comma = self.builder.get_object("comma_as_splitter").get_active()
