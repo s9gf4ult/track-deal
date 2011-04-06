@@ -10,6 +10,7 @@ import traceback
 from deals_filter import deals_filter
 from deal_adder_control import deal_adder_control
 from deals_tab_controller import deals_tab_controller
+from report_tab_control import report_tab_control
 
 class main_ui():
     def _stock_cursor_changed(self, tw):
@@ -182,7 +183,7 @@ class main_ui():
                                       "on_quit_activate" : self.quit})
 
         # report tab
-        self.builder.get_object("comma_separator").configure(gtk.Adjustment(value=2, lower=0, upper=8, step_incr=1), 1, 0)
+        self.report = report_tab_control(self.database, self.builder, self.update_view)
 
         # blog tab
         stock_view = self.builder.get_object("stock_view")
@@ -295,7 +296,7 @@ class main_ui():
 
     def update_view(self):
         self.deals_tab.update_widget()
-        self.update_report_tab()
+        self.report_tab.update_widget()
         self.update_blog_tab()
 
     def show(self):
