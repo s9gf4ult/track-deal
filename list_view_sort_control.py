@@ -63,6 +63,10 @@ class list_view_sort_control:
                     self.sort_callback(column, order, params)
             else:
                 self.treeview.get_model().set_sort_column_id(col_id, order)
+            column.set_sort_indicator(True)
+            column.set_sort_order(order)
+        else:
+            column.set_sort_indicator(False)
 
     def toggle_sort_indicator(self, col_id):
         for col in xrange(0, len(self.treeview.get_columns())):
@@ -71,14 +75,10 @@ class list_view_sort_control:
         c = self.treeview.get_column(col_id)
         if c.get_sort_indicator():
             if c.get_sort_order() == gtk.SORT_ASCENDING:
-                c.set_sort_order(gtk.SORT_DESCENDING)
                 return gtk.SORT_DESCENDING
             else:
-                c.set_sort_indicator(False)
                 return None
         else:
-            c.set_sort_indicator(True)
-            c.set_sort_order(gtk.SORT_ASCENDING)
             return gtk.SORT_ASCENDING
                 
 
