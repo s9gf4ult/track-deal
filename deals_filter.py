@@ -38,15 +38,17 @@ class deals_filter():
         return ret
     
 
-    def get_ids(self, order_by, parent = None, fields = ["id"]):
+    def get_ids(self, order_by, parent = False, fields = ["id"]):
         if not self.database.connection:
             return cursor_empty()
         conds = self.boundary
-        q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock where ".format(reduce(lambda a, b:u'{0}, {1}'.format(a, b), map(lambda c: 'd.{0}'.format(c), fields)))
-        if parent:
-            q += "d.parent_deal_id = {0}".format(parent)
-        else:
-            q += "d.parent_deal_id is null"
+        q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock where d.not_actual is null ".format(reduce(lambda a, b:u'{0}, {1}'.format(a, b), map(lambda c: 'd.{0}'.format(c), fields)))
+        if parent != None and parent != False:
+            q += "and d.parent_deal_id = {0}".format(parent)
+        elif parent == False:
+            pass
+        elif parent == None:
+            q += "and d.parent_deal_id is null"
         if conds and len(conds) > 0:
             q += " and {0}".format(conds)
         if order_by and len(order_by) > 0:

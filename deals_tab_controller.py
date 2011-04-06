@@ -41,7 +41,18 @@ class deals_tab_controller:
         pass
 
     def add_deal_activate(self, action):
-        pass
+        self.add_deal()
+
+    def add_deal(self):
+        if not self.database.connection:
+            return
+        self.adder.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals order by security_name")),
+                                      map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals order by security_type")))
+        ret = self.adder.run()
+        if ret != None:
+            self.database.get_from_list([ret])
+            self.update_widget()
+
 
     def update_deals_tab_activate(self, action):
         self.update_widget()
