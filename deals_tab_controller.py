@@ -35,10 +35,31 @@ class deals_tab_controller:
                                                   (u'Комиссия биржи', gtk.CellRendererSpin(), float, "stock_comm")],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
+        self.builder.get_object("deals_view").get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.sort_order = "id"
 
     def delete_deals_activate(self, action):
-        pass
+        self.delete_deals()
+
+    def delete_deals(self):
+        if not self.database.connection:
+            return
+        selected = self.builder.get_object("deals_view").get_selection()
+        dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self.builder.get_object("main_window"))
+        dcount = selected.count_selected_rows()
+        if dcount == 0:
+            return
+        dial.props.text = u'Удалить {0} сделок ? В любом случае это действие можно сразу отменить при помощи Rollback'.format(dcount)
+        if dial.run() == gtk.RESPONSE_YES:
+            (model, it) = selected.get_selected_rows()
+            for ii in it:
+                did = model.get_value(model.get_iter(ii), 0)
+                self.database.connection.execute("delete from deals where id = ?", (did,))
+            self.database.delete_empty_positions()
+            self.database.delete_broken_positions()
+            self.update_widget()
+        dial.destroy()
+
 
     def add_deal_activate(self, action):
         self.add_deal()
