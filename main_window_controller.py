@@ -1,7 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+import traceback
+import gtk
 
-class main_windows_controller:
+class main_window_controller:
     def __init__(self, database, builder, update_callback):
         self.database = database
         self.builder = builder
@@ -14,3 +16,27 @@ class main_windows_controller:
         shorter("transaction_commit", "activate", self.transaction_commit_activate)
         shorter("transaction_rollback", "activate", self.transaction_rollback_activate)
         shorter("close_database", "activate", self.close_activate)
+        shorter("create_database_in_memory", "activate", self.create_database_in_memory_activate)
+        shorter("main_window", "delete-event", self.main_window_quit)
+
+
+    def quit(self):
+        """returns True if you can quit"""
+        try:
+            self.database.close()
+        except Exception as e:
+            self.show_error(e.__str__())
+            print(traceback.format_exc())
+            return False
+        return True
+
+    def quit_activate(self, action):
+        if self.quit():
+            gtk.main_quit()
+
+    def main_window_quit(self, window, evt):
+        if self.quit():
+            return False
+        return True
+        
+
