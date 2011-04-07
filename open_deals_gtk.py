@@ -156,8 +156,8 @@ class main_ui():
                                       "on_transaction_commit_activate" : self.commit,
                                       "on_transaction_rollback_activate" : self.rollback,
                                       "on_positions_make_activate" : self.make_positions,
-                                      "on_stock_view_cursor_changed" : self._stock_cursor_changed,
-                                      "on_date_view_cursor_changed" : self._date_cursor_changed,
+                                     # "on_stock_view_cursor_changed" : self._stock_cursor_changed,
+                                     # "on_date_view_cursor_changed" : self._date_cursor_changed,
                                       "on_quit_activate" : self.quit})
 
         # report tab

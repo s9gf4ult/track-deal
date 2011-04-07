@@ -496,7 +496,6 @@
                         <property name="can_focus">True</property>
                         <property name="model">stock_store</property>
                         <property name="search_column">0</property>
-                        <signal name="cursor_changed" handler="on_stock_view_cursor_changed"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -555,7 +554,7 @@
                     <property name="hscrollbar_policy">automatic</property>
                     <property name="vscrollbar_policy">automatic</property>
                     <child>
-                      <object class="GtkTextView" id="textview1">
+                      <object class="GtkTextView" id="blog_text_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="buffer">blog_buffer</property>
