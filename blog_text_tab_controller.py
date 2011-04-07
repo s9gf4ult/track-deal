@@ -1,5 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+import gtk
 from list_view_sort_control import list_view_sort_control
 
 class blog_text_tab_controller:
@@ -16,7 +17,7 @@ class blog_text_tab_controller:
         self.date_view = self.builder.get_object("date_view")
         self.date_view_control = list_view_sort_control(self.date_view, [("id", gtk.CellRendererSpin(), int, "id"), (u'Открытие', gtk.CellRendererText(), str, "open_datetime"), (u'Закрытие', gtk.CellRendererText(), str, "close_datetime"), (u'Направление', gtk.CellRendererText(), str, "direction"),  (u'Количество', gtk.CellRendererSpin(), int, "count")], self_sorting = False, sort_callback = self.resort_date_view)
         self.stock_view_control = list_view_sort_control(self.stock_view, [(u'Инструмент', gtk.CellRendererText(), str, "ticket")], self_sorting = False, sort_callback = self.resort_stock_view)
-        self.stocks_sort_val = "ticked"
+        self.stocks_sort_val = "ticket"
         self.datetime_sort_val = "close_datetime"
         
 
@@ -24,7 +25,7 @@ class blog_text_tab_controller:
         self.draw_stocks()
 
     def stock_cursor_changed(self, treeview):
-        self.draw_stocks()
+        self.draw_dates()
 
     def date_cursor_changed(self, treeview):
         self.update_blog_text()
@@ -36,7 +37,7 @@ class blog_text_tab_controller:
         if path != None:
             m = self.date_view.get_model()
             it = m.get_iter(path)
-            self.blog_text.set_text(self._get_text_for_blog(m.get_value(it, 0)))
+            self.blog_text.get_buffer().set_text(self._get_text_for_blog(m.get_value(it, 0)))
 
     def _get_text_for_blog(self, pid):
         (ticket, direction, open_date, close_date, open_coast, close_coast, count, com, pl_net) = self.database.connection.execute("select ticket, direction, open_datetime, close_datetime, open_coast, close_coast, count, broker_comm + stock_comm, pl_net from positions where id = ?", (pid,)).fetchone()
@@ -74,9 +75,23 @@ class blog_text_tab_controller:
             def one(a):
                 ret = list(a)
                 if a[3] < 0:
-                    a[3] == "B"
+                    ret[3] == "B"
                 elif a[3] > 0:
-                    a[3] == "S"
+                    ret[3] == "S"
                 return tuple(ret)
-            x = map(one, self.database.connection.execute("select id, open_datetime, close_datetime, direction, count from positions where ticket = ?", (ticket, )))
-            self.date_view_control.update_widget(x)
+            x = map(one, self.database.connection.execute("select id, open_datetime, close_datetime, direction, count from positions where ticket = ? order by {0}".format(self.datetime_sort_val), (ticket, )))
+            self.date_view_control.update_rows(x)
+
+    def resort_stock_view(self, col, order, params):
+        if order == gtk.SORT_ASCENDING:
+            self.stocks_sort_val = params[0]
+        elif order == gtk.SORT_DESCENDING:
+            self.stocks_sort_val = params[0] + " desc"
+        self.draw_stocks()
+
+    def resort_date_view(self, col, order, params):
+        if order == gtk.SORT_ASCENDING:
+            self.datetime_sort_val = params[0]
+        elif order == gtk.SORT_DESCENDING:
+            self.datetime_sort_val = params[0] + " desc"    
+        self.draw_dates()

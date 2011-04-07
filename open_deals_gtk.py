@@ -11,6 +11,7 @@ from deals_filter import deals_filter
 from deal_adder_control import deal_adder_control
 from deals_tab_controller import deals_tab_controller
 from report_tab_control import report_tab_control
+from blog_text_tab_controller import blog_text_tab_controller
 
 class main_ui():
     def _stock_cursor_changed(self, tw):
@@ -162,7 +163,7 @@ class main_ui():
         self.report_tab = report_tab_control(self.database, self.builder)
 
         # blog tab
-        self.blog_tab = blog_text_tab_controller(self.databse, self.builder)
+        self.blog_tab = blog_text_tab_controller(self.database, self.builder)
 
         # deals tab
         self.deals_filter = deals_filter(self.builder, self.database)
