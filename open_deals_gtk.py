@@ -9,6 +9,7 @@ from deal_adder_control import deal_adder_control
 from deals_tab_controller import deals_tab_controller
 from report_tab_control import report_tab_control
 from blog_text_tab_controller import blog_text_tab_controller
+from main_window_controller import main_window_controller
 
 class main_ui():
 
@@ -104,15 +105,16 @@ class main_ui():
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
-        self.builder.connect_signals({"on_main_window_delete_event" : self.window_quit,
-                                      "on_create_database_in_memory_activate" : self.create_in_memory,
-                                      "on_create_database_activate" : self.create_in_file,
-                                      "on_open_database_activate" : self.open_existing,
-                                      "on_close_database_activate" : self.close,
-                                      "on_transaction_commit_activate" : self.commit,
-                                      "on_transaction_rollback_activate" : self.rollback,
-                                      "on_positions_make_activate" : self.make_positions,
-                                      "on_quit_activate" : self.quit})
+        # self.builder.connect_signals({"on_main_window_delete_event" : self.window_quit,
+        #                               "on_create_database_in_memory_activate" : self.create_in_memory,
+        #                               "on_create_database_activate" : self.create_in_file,
+        #                               "on_open_database_activate" : self.open_existing,
+        #                               "on_close_database_activate" : self.close,
+        #                               "on_transaction_commit_activate" : self.commit,
+        #                               "on_transaction_rollback_activate" : self.rollback,
+        #                               "on_positions_make_activate" : self.make_positions,
+        #                               "on_quit_activate" : self.quit})
+        self.main_window = main_window_controller(self.database, self.builder, self.update_view)
 
         # report tab
         self.report_tab = report_tab_control(self.database, self.builder)
@@ -136,6 +138,7 @@ class main_ui():
         self.deals_tab.update_widget()
         self.report_tab.update_widget()
         self.blog_tab.update_widget()
+        self.main_window.update_widget()
 
     def show(self):
         win = self.builder.get_object("main_window")
