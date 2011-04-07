@@ -155,18 +155,9 @@ class main_ui():
                                       "on_close_database_activate" : self.close,
                                       "on_transaction_commit_activate" : self.commit,
                                       "on_transaction_rollback_activate" : self.rollback,
-                                      # "on_deals_load_open_ru_activate" : self.load_open_ru,
                                       "on_positions_make_activate" : self.make_positions,
-                                      # "on_radio_segfault_toggled" : self.radio_report_toggled,
-                                      # "on_radio_axce1_toggled" : self.radio_report_toggled,
-                                      # "on_comma_as_splitter_toggled" : self.update_report,
-                                      # "on_comma_separator_value_changed" : self.update_report,
                                       "on_stock_view_cursor_changed" : self._stock_cursor_changed,
                                       "on_date_view_cursor_changed" : self._date_cursor_changed,
-                                      # "on_call_deals_filter_clicked" : self._call_filter_clicked,
-                                      # "on_update_deals_tab_activate" : self._update_deals_activated,
-                                      # "on_delete_deals_activate" : self.delete_deals_activate,
-                                      # "on_add_deal_activate" : self.add_deal_activate,
                                       "on_quit_activate" : self.quit})
 
         # report tab
