@@ -126,6 +126,7 @@ class main_ui():
         self.deals_filter = deals_filter(self.builder, self.database)
         self.deal_adder = deal_adder_control(self.builder)
         self.deals_tab = deals_tab_controller(self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder)
+        self.update_view()
         
     def show_error(self, text):
         win = self.builder.get_object("main_window")

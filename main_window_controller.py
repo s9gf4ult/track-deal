@@ -3,6 +3,7 @@
 import traceback
 import gtk
 from modifying_tab_control import modifying_tab_control
+from common_methods import *
 
 class main_window_controller(modifying_tab_control):
     def __init__(self, database, builder, update_callback):
@@ -42,6 +43,7 @@ class main_window_controller(modifying_tab_control):
     def close(self):
         if self.quit():
             self.set_main_title("Open Delas")
+            self.call_update_callback()
 
     def open_database_activate(self, action):
         self.open_database()
@@ -58,7 +60,6 @@ class main_window_controller(modifying_tab_control):
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self.database.open_existing(diag.get_filename())
-                    self.set_main_title(diag.get_filename())
                     self.call_update_callback()
                 except Exception as e:
                     self.show_error(e.__str__())
@@ -74,7 +75,7 @@ class main_window_controller(modifying_tab_control):
         try:
             self.database.close()
         except Exception as e:
-            self.show_error(e.__str__())
+            show_error(e.__str__(), self.builder.get_object("main_window"))
             print(traceback.format_exc())
             return False
         return True
@@ -95,7 +96,6 @@ class main_window_controller(modifying_tab_control):
     def create_database_in_memory(self):
         if self.quit():
             self.database.create_new(":memory:")
-            self.set_main_title(u'База данных в памяти')
             self.call_update_callback()
         
     def create_database_in_file(self):
@@ -107,7 +107,6 @@ class main_window_controller(modifying_tab_control):
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self.database.create_new(diag.get_filename())
-                    self.set_main_title(diag.get_filename())
                     self.call_update_callback()
                 except Exception as e:
                     self.show_error(e.__str__())
@@ -118,5 +117,11 @@ class main_window_controller(modifying_tab_control):
         self.create_database_in_file()
 
     def update_widget(self):
-        pass
-    
+        if self.database.connection:
+            if self.database.filename == ":memory:":
+                self.set_main_title(u'База данных в памяти')
+            else:
+                self.set_main_title(self.database.filename)
+        else:
+            self.set_main_title("Open Deals")
+            
