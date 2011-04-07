@@ -381,7 +381,6 @@
                                 <property name="invisible_char">&#x25CF;</property>
                                 <property name="primary_icon_stock">gtk-zoom-100</property>
                                 <property name="wrap">True</property>
-                                <signal name="value_changed" handler="on_comma_separator_value_changed"/>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -413,7 +412,6 @@
                             <property name="receives_default">False</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_comma_as_splitter_toggled"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -437,7 +435,6 @@
                             <property name="receives_default">False</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_radio_segfault_toggled"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -453,7 +450,6 @@
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radio_segfault</property>
-                            <signal name="toggled" handler="on_radio_axce1_toggled"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
