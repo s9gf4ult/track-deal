@@ -16,5 +16,7 @@ class positions_tab_controller(modifying_tab_control):
         self.make_positions()
 
     def make_positions(self):
-        
+        if self.database.connection:
+            self.database.make_positions()
+            self.call_update_callback()
     
