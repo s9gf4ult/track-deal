@@ -183,7 +183,7 @@ class main_ui():
                                       "on_quit_activate" : self.quit})
 
         # report tab
-        self.report = report_tab_control(self.database, self.builder, self.update_view)
+        self.report_tab = report_tab_control(self.database, self.builder)
 
         # blog tab
         stock_view = self.builder.get_object("stock_view")

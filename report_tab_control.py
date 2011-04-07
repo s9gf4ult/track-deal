@@ -3,10 +3,14 @@
 import gtk
 
 class report_tab_control:
-    def __init__(self, database, builder, update_callback):
+    def __init__(self, database, builder):
         def shorter(name, action, *method):
             self.builder.get_object(name).connect(action, *method)
 
+        self.builder = builder
+        self.database = database
+        sp = self.builder.get_object("comma_separator")
+        sp.get_adjustment().set_all(value = 2, lower = 0, upper = 8, step_increment = 1)
         shorter("comma_separator", "value-changed", self.comma_separator_changed)
         shorter("comma_as_splitter", "toggled", self.comma_as_splitter_changed)
         shorter("radio_segfault", "toggled", self.radio_button_changed)
@@ -20,11 +24,13 @@ class report_tab_control:
     def comma_as_splitter_changed(self, cb):
         self.update_textview()
 
-    def radio_button_changed(self, rb, call_me):
+    def radio_button_changed(self, rb):
         if rb.get_active():
             self.update_textview()
 
     def update_textview(self):
+        if not self.database.connection:
+            return
         m = gtk.TextBuffer()
         if self.builder.get_object("radio_segfault").get_active():
             ticks = self.get_ticks()
@@ -44,13 +50,13 @@ class report_tab_control:
         return ret
 
     def remake_buttons(self):
-        if not self.database.connect:
+        if not self.database.connection:
             return
         
         for w in self.stock_buttons.get_children():
             self.stock_buttons.remove(w)
         
-        for (name) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
+        for (name, ) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
             tb = gtk.ToggleButton(name)
             tb.connect("toggled", self.tb_clicked)
             tb.set_active(True)
