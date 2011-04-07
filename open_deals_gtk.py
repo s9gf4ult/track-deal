@@ -3,9 +3,6 @@
 import sources
 import deals_core
 import gtk
-import sqlite3
-import datetime
-import re
 import traceback
 from deals_filter import deals_filter
 from deal_adder_control import deal_adder_control
@@ -14,48 +11,6 @@ from report_tab_control import report_tab_control
 from blog_text_tab_controller import blog_text_tab_controller
 
 class main_ui():
-    def _stock_cursor_changed(self, tw):
-        path = tw.get_cursor()[0]
-        stock_store = self.builder.get_object("stock_store")
-        date_store = self.builder.get_object("date_store")
-        stock = stock_store.get_value(stock_store.get_iter(path), 0)
-        
-        ii = date_store.get_iter_first()
-        while ii:
-            date_store.remove(ii)
-            ii = date_store.get_iter_first()
-            
-        for (pid, pcount, bdate, edate) in self.database.connection.execute("select id, count, open_datetime, close_datetime from positions where ticket = ? order by close_datetime, open_datetime, count", (stock,)):
-            ins = map(lambda a: a.isoformat(), [bdate, edate])
-            date_store.append(ins + [pcount, pid])
-
-    def _get_text_for_blog(self, pid):
-        (ticket, direction, open_date, close_date, open_coast, close_coast, count, com, pl_net) = self.database.connection.execute("select ticket, direction, open_datetime, close_datetime, open_coast, close_coast, count, broker_comm + stock_comm, pl_net from positions where id = ?", (pid,)).fetchone()
-        isprof = pl_net > 0
-        ret = u'''{0} {1} позиция по {2} инструмента {3}.
-Цена открытия {4} в {5}.
-Цена закрытия {6} в {7}.
-Движение составило {8}.
-{9}.
-{10}
-'''.format(direction == -1 and u'Длинная' or u'Короткая',
-           pl_net > 0 and u'прибыльная' or u'убыточная',
-           count == 1 and u'1 контракту' or u'{0} контрактам'.format(count),
-           ticket,
-           open_coast, open_date.isoformat(),
-           close_coast, close_date.isoformat(),
-           abs(open_coast - close_coast),
-           pl_net > 0 and u'Прибыль составила {0}'.format(pl_net) or u'Убыток составил {0}'.format(-pl_net),
-           com > 0 and u'Комиссия составила {0}.\n'.format(com) or '')
-        return ret
-
-    def _date_cursor_changed(self, tw):
-        path = tw.get_cursor()[0]
-        date_store = self.builder.get_object("date_store")
-        blog_buffer = self.builder.get_object("blog_buffer")
-        pid = date_store.get_value(date_store.get_iter(path), 3)
-        blog_buffer.set_text(self._get_text_for_blog(pid))
-        
 
     def quit(self, wid):
         try:
@@ -177,23 +132,6 @@ class main_ui():
         dial.run()
         dial.destroy()
         
-    def _flush_store(self, store):
-        it = store.get_iter_first()
-        while it:
-            store.remove(it)
-            it = store.get_iter_first()
-
-    def update_blog_tab(self):
-        date_store = self.builder.get_object("date_store")
-        stock_store = self.builder.get_object("stock_store")
-        for store in [date_store, stock_store]:
-            self._flush_store(store)
-        self.builder.get_object("blog_buffer").set_text("")
-        if not self.database.connection:
-            return
-        for (ticket,) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
-            stock_store.append([ticket])
-
     def update_view(self):
         self.deals_tab.update_widget()
         self.report_tab.update_widget()

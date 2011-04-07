@@ -75,9 +75,9 @@ class blog_text_tab_controller:
             def one(a):
                 ret = list(a)
                 if a[3] < 0:
-                    ret[3] == "B"
+                    ret[3] = "LONG"
                 elif a[3] > 0:
-                    ret[3] == "S"
+                    ret[3] = "SHORT"
                 return tuple(ret)
             x = map(one, self.database.connection.execute("select id, open_datetime, close_datetime, direction, count from positions where ticket = ? order by {0}".format(self.datetime_sort_val), (ticket, )))
             self.date_view_control.update_rows(x)

@@ -317,9 +317,9 @@
               </object>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="label4">
+              <object class="GtkLabel" id="label2">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&#x421;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
+                <property name="label" translatable="yes">&#x414;&#x43B;&#x44F; &#x431;&#x43B;&#x43E;&#x433;&#x430;</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -484,8 +484,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkHBox" id="hbox2">
+              <object class="GtkHPaned" id="hpaned1">
                 <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="position">200</property>
                 <child>
                   <object class="GtkVBox" id="vbox2">
                     <property name="visible">True</property>
@@ -512,10 +514,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkScrolledWindow" id="scrolledwindow2">
+                      <object class="GtkScrolledWindow" id="scrolledwindow6">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">never</property>
+                        <property name="hscrollbar_policy">automatic</property>
                         <property name="vscrollbar_policy">automatic</property>
                         <child>
                           <object class="GtkTreeView" id="date_view">
@@ -532,18 +534,8 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkVSeparator" id="vseparator1">
-                    <property name="visible">True</property>
-                    <property name="orientation">vertical</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="position">1</property>
+                    <property name="resize">False</property>
+                    <property name="shrink">True</property>
                   </packing>
                 </child>
                 <child>
@@ -561,7 +553,8 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="position">2</property>
+                    <property name="resize">True</property>
+                    <property name="shrink">True</property>
                   </packing>
                 </child>
               </object>
@@ -570,9 +563,9 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="label2">
+              <object class="GtkLabel" id="label4">
                 <property name="visible">True</property>
-                <property name="label" translatable="yes">&#x414;&#x43B;&#x44F; &#x431;&#x43B;&#x43E;&#x433;&#x430;</property>
+                <property name="label" translatable="yes">&#x421;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
               </object>
               <packing>
                 <property name="position">2</property>
