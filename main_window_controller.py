@@ -40,9 +40,8 @@ class main_window_controller(modifying_tab_control):
         self.close()
 
     def close(self):
-        if self.database.connection:
-            if self.quit():
-                self.set_main_title("Open Delas")
+        if self.quit():
+            self.set_main_title("Open Delas")
 
     def open_database_activate(self, action):
         self.open_database()

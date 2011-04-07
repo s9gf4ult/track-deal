@@ -118,6 +118,7 @@ class deals_tab_controller(modifying_tab_control):
 
     def update_widget(self):
         if not self.database.connection:
+            self.deals_view.update_rows([])
             return
         self.filter._prepare_filter()
         self.filter._regen_selected()
