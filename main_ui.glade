@@ -523,7 +523,6 @@
                             <property name="can_focus">True</property>
                             <property name="model">date_store</property>
                             <property name="search_column">0</property>
-                            <signal name="cursor_changed" handler="on_date_view_cursor_changed"/>
                           </object>
                         </child>
                       </object>

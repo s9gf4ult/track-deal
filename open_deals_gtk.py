@@ -156,20 +156,13 @@ class main_ui():
                                       "on_transaction_commit_activate" : self.commit,
                                       "on_transaction_rollback_activate" : self.rollback,
                                       "on_positions_make_activate" : self.make_positions,
-                                     # "on_stock_view_cursor_changed" : self._stock_cursor_changed,
-                                     # "on_date_view_cursor_changed" : self._date_cursor_changed,
                                       "on_quit_activate" : self.quit})
 
         # report tab
         self.report_tab = report_tab_control(self.database, self.builder)
 
         # blog tab
-        stock_view = self.builder.get_object("stock_view")
-        date_view = self.builder.get_object("date_view")
-        stock_view.append_column(gtk.TreeViewColumn(u'Сток',gtk.CellRendererText(), text = 0))
-        date_view.append_column(gtk.TreeViewColumn(u'Дата открытия', gtk.CellRendererText(), text = 0))
-        date_view.append_column(gtk.TreeViewColumn(u'Дата закрытия', gtk.CellRendererText(), text = 1))
-        date_view.append_column(gtk.TreeViewColumn(u'Количество', gtk.CellRendererText(), text = 2))
+        self.blog_tab = blog_text_tab_controller(self.databse, self.builder)
 
         # deals tab
         self.deals_filter = deals_filter(self.builder, self.database)
@@ -203,7 +196,7 @@ class main_ui():
     def update_view(self):
         self.deals_tab.update_widget()
         self.report_tab.update_widget()
-        self.update_blog_tab()
+        self.blog_tab.update_widget()
 
     def show(self):
         win = self.builder.get_object("main_window")

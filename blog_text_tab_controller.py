@@ -21,16 +21,43 @@ class blog_text_tab_controller:
         
 
     def update_widget(self):
-        pass
+        self.draw_stocks()
 
     def stock_cursor_changed(self, treeview):
-        pass
+        self.draw_stocks()
 
     def date_cursor_changed(self, treeview):
-        pass
+        self.update_blog_text()
 
     def update_blog_text(self):
-        pass
+        if not self.database.connection:
+            return
+        (path, col) = self.date_view.get_cursor()
+        if path != None:
+            m = self.date_view.get_model()
+            it = m.get_iter(path)
+            self.blog_text.set_text(self._get_text_for_blog(m.get_value(it, 0)))
+
+    def _get_text_for_blog(self, pid):
+        (ticket, direction, open_date, close_date, open_coast, close_coast, count, com, pl_net) = self.database.connection.execute("select ticket, direction, open_datetime, close_datetime, open_coast, close_coast, count, broker_comm + stock_comm, pl_net from positions where id = ?", (pid,)).fetchone()
+        isprof = pl_net > 0
+        ret = u'''{0} {1} позиция по {2} инструмента {3}.
+Цена открытия {4} в {5}.
+Цена закрытия {6} в {7}.
+Движение составило {8}.
+{9}.
+{10}
+'''.format(direction == -1 and u'Длинная' or u'Короткая',
+           pl_net > 0 and u'прибыльная' or u'убыточная',
+           count == 1 and u'1 контракту' or u'{0} контрактам'.format(count),
+           ticket,
+           open_coast, open_date.isoformat(),
+           close_coast, close_date.isoformat(),
+           abs(open_coast - close_coast),
+           pl_net > 0 and u'Прибыль составила {0}'.format(pl_net) or u'Убыток составил {0}'.format(-pl_net),
+           com > 0 and u'Комиссия составила {0}.\n'.format(com) or '')
+        return ret
+        
     
     def draw_stocks(self):
         if not self.database.connection:
@@ -42,6 +69,14 @@ class blog_text_tab_controller:
             return
         (path, col) = self.stock_view.get_cursor()
         if path != None:
-            self.date_view_control.update_rows(self.database.connection.execute("select id, open_datetime, close_datetime, count 
-            
-        
+            m = self.stock_view.get_model()
+            ticket = m.get_value(m.get_iter(path), 0)
+            def one(a):
+                ret = list(a)
+                if a[3] < 0:
+                    a[3] == "B"
+                elif a[3] > 0:
+                    a[3] == "S"
+                return tuple(ret)
+            x = map(one, self.database.connection.execute("select id, open_datetime, close_datetime, direction, count from positions where ticket = ?", (ticket, )))
+            self.date_view_control.update_widget(x)
