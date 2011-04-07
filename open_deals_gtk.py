@@ -10,6 +10,7 @@ from deals_tab_controller import deals_tab_controller
 from report_tab_control import report_tab_control
 from blog_text_tab_controller import blog_text_tab_controller
 from main_window_controller import main_window_controller
+from positions_tab_controller import positions_tab_controller
 
 class main_ui():
 
@@ -29,6 +30,8 @@ class main_ui():
         self.deals_filter = deals_filter(self.builder, self.database)
         self.deal_adder = deal_adder_control(self.builder)
         self.deals_tab = deals_tab_controller(self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder)
+        # positions tab
+        self.positions_tab = positions_tab_controller(self.database, self.builder, self.update_view)
         self.update_view()
         
     def show(self):
