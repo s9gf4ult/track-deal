@@ -71,6 +71,7 @@ class deals_filter_control:
                                              "deals_filter_min_upper_spin", "deals_filter_sec_upper_spin")]:
             tcon = time_control(self.builder.get_object(h), self.builder.get_object(m), self.builder.get_object(s), self.builder.get_object(tcb))
             dtcon = datetime_control(self.builder.get_object(dtcal), tcon, self.builder.get_object(dtcb))
+            dtcon.set_current_datetime()
             dtcontrols.append(dtcon)
         self.datetime_range = datetime_range_control(dtcontrols[0], dtcontrols[1], self.builder.get_object("deals_filter_datetime_range_cb"))
 

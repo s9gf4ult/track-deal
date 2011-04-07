@@ -113,6 +113,8 @@ class deals_tab_controller(modifying_tab_control):
         self.call_filter()
 
     def call_filter(self):
+        if not self.database.connection:
+            return
         self.filter.run()
         self.update_widget()
 
