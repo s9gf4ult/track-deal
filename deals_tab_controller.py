@@ -4,8 +4,9 @@ from list_view_sort_control import list_view_sort_control
 import gtk
 from common_methods import *
 import sources
+from modifying_tab_control import modifying_tab_control
 
-class deals_tab_controller:
+class deals_tab_controller(modifying_tab_control):
     def __init__(self, database, builder, update_callback, filter_control, adder_control):
         self.builder = builder
         self.database = database
@@ -107,12 +108,6 @@ class deals_tab_controller:
                 print(traceback.format_exc())
         diag.destroy()
         fl.destroy()
-
-    def call_update_callback(self):
-        if self.update_callback:
-            self.update_callback()
-        else:
-            self.update_widget()
 
     def call_filter_activate(self, action):
         self.call_filter()

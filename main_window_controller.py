@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 import traceback
 import gtk
+from modifying_tab_control import modifying_tab_control
 
-class main_window_controller:
+class main_window_controller(modifying_tab_control):
     def __init__(self, database, builder, update_callback):
         self.database = database
         self.builder = builder
@@ -39,4 +40,11 @@ class main_window_controller:
             return False
         return True
         
+    def create_database_in_memory_activate(self, action):
+        self.create_database_in_memory()
 
+    def create_database_in_memory(self):
+        if self.quit():
+            self.database.create_new(":memory:")
+            self.update_callback()
+        
