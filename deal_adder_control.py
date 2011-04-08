@@ -58,6 +58,8 @@ class deal_adder_control:
                 "deal_sign" : self.direction.get_value(),
                 "broker_comm" : self.broker_comm.get_value(),
                 "stock_comm" : self.stock_comm.get_value(),
+                "broker_comm_nds" : 0,
+                "stock_comm_nds" : 0,
                 "volume" : self.count.get_value() * self.price.get_value()}
 
     def check_correctness(self):
