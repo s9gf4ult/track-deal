@@ -11,6 +11,7 @@ from report_tab_control import report_tab_control
 from blog_text_tab_controller import blog_text_tab_controller
 from main_window_controller import main_window_controller
 from positions_tab_controller import positions_tab_controller
+from accounts_tab_controller import accounts_tab_controller
 
 class main_ui():
 
@@ -18,6 +19,8 @@ class main_ui():
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
+        
+        # main window
         self.main_window = main_window_controller(self.database, self.builder, self.update_view)
 
         # report tab
@@ -32,6 +35,9 @@ class main_ui():
         self.deals_tab = deals_tab_controller(self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder)
         # positions tab
         self.positions_tab = positions_tab_controller(self.database, self.builder, self.update_view)
+
+        # accounts tab
+        self.accounts_tab = 
         self.update_view()
         
     def show(self):
