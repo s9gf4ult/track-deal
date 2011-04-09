@@ -111,11 +111,6 @@ class deals_proc():
         self.connection.commit()
         self.connection.execute("begin transaction")
 
-    def bind_deal_account(deal_id, account_id):
-        (c, ) = self.connection.execute("select count(*) from account_deal where account = ? and deal = ?", (account_id, deal_id)).fetchone()
-        if c == 0:
-            self._insert_from_hash("account_deal", {"account" : account_id,
-                                                    "deal" :deal_id})
 
     def delete_empty_positions(self):
         self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id))")
@@ -186,6 +181,11 @@ class deals_proc():
             second_id = [second_id]
         (oticks,) = self.connection.execute("select count(*) from (select distinct security_name from deals where {0})".format(roll_id_or(first_id))).fetchone()
         (cticks,) = self.connection.execute("select count(*) from (select distinct security_name from deals where {0})".format(roll_id_or(second_id))).fetchone()
+        (accs, ) = self.connection.execute("select count(*) from (select distinct account_id from deals where {0})".format(roll_id_or(first_id + second_id))).fetchone() or (None, )
+        if accs == None:
+            raise Exception(u'Сделки не привязаны ни к одному счету')
+        elif accs > 1:
+            raise Exception(u'Сделки привяаны более чем к одному счету')
         if 1 != oticks:
             raise Exception(u'Чето косяк: сделки на открытие позиции идут по {0} разным тикерам'.format(oticks))
         if 1 != cticks:
@@ -238,10 +238,14 @@ class deals_proc():
         self.make_position(map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.not_actual is null and d.group_id = ?", (opos,)).fetchall()), map(lambda a:a[0], self.connection.execute("select d.id from deals d where d.position_id is null and d.not_actual is null and d.group_id = ?", (cpos,)).fetchall()))
 
     def make_groups(self, ticket):
+        for (account,) in self.connection.execute("select id from accounts"):
+            self.make_groups_in_account(account, ticket)
+
+    def make_groups_in_account(self, account, ticket):
         for sign in [-1, 1]:
             opened_signed = []
-            for (deal_id, deal_datetime) in self.connection.execute("select id, datetime from deals where position_id is null and not_actual is null and  security_name = ? and deal_sign = ? order by datetime", (ticket, sign)):
-                (group_id,) = self.connection.execute("select id from (select max(d.datetime) as datetime, g.id as id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null group by g.id) where datetime <= ? and ? - datetime <= 5 order by datetime desc", (ticket, sign, deal_datetime, deal_datetime)).fetchone() or (None, )
+            for (deal_id, deal_datetime) in self.connection.execute("select id, datetime from deals where position_id is null and not_actual is null and group_id is null and security_name = ? and deal_sign = ? and account_id = ? order by datetime", (ticket, sign, account)):
+                (group_id,) = self.connection.execute("select id from (select max(d.datetime) as datetime, g.id as id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null and d.account_id = ? group by g.id) where datetime <= ? and ? - datetime <= 5 order by datetime desc", (ticket, sign, account, deal_datetime, deal_datetime)).fetchone() or (None, )
                 if group_id:
                     self.connection.execute("update deals set group_id = ? where id = ?", (group_id, deal_id))
                 else:
@@ -306,11 +310,15 @@ class deals_proc():
             
             
     def make_positions(self):
+        for (account, ) in self.connection.execute("select id from accounts"):
+            self.make_positions_in_account(account)
+
+    def make_positions_in_account(self, account):
         
         def fetch_one_pair_and_close(self, ticket):
-            (ogid, osign, oquant, odate) = self.connection.execute("select * from (select g.id as id, g.deal_sign as sign, sum(d.quantity) as quantity, max(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and d.position_id is null and g.ticket = ? group by g.id) where quantity > 0 order by datetime", (ticket,)).fetchone() or (None, None, None, None)
+            (ogid, osign, oquant, odate) = self.connection.execute("select * from (select g.id as id, g.deal_sign as sign, sum(d.quantity) as quantity, max(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and d.position_id is null and d.account_id = ? and g.ticket = ? group by g.id) where quantity > 0 order by datetime", (account, ticket)).fetchone() or (None, None, None, None)
             if ogid:
-                (cgid, cquant) = self.connection.execute("select id, quantity from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and d.position_id is null and g.ticket = ? and g.deal_sign = ? group by g.id) where quantity > 0 and datetime >= ? order by datetime", (ticket, -osign, odate)).fetchone() or (None, None)
+                (cgid, cquant) = self.connection.execute("select id, quantity from (select g.id as id, sum(d.quantity) as quantity, min(d.datetime) as datetime from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and d.position_id is null and d.account_id = ? and g.ticket = ? and g.deal_sign = ? group by g.id) where quantity > 0 and datetime >= ? order by datetime", (account, ticket, -osign, odate)).fetchone() or (None, None)
                 if cgid:
                     if oquant < cquant:
                         cgid = self.split_deal_group(cgid, oquant)[0]
@@ -321,7 +329,7 @@ class deals_proc():
             return False
             
         for (ticket,) in self.connection.execute("select distinct security_name from deals where position_id is null and not_actual is null"):
-            self.make_groups(ticket)
+            self.make_groups_in_account(account, ticket)
             
         for (ticket,) in self.connection.execute("select distinct security_name from deals"):
             while fetch_one_pair_and_close(self, ticket):
