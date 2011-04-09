@@ -58,6 +58,14 @@ class deals_proc():
         pl_gross real not null,
         pl_net real not null)""")
         self.connection.execute("create index positions_ticket on positions(ticket)")
+        
+        self.connection.execute("""
+        create table accounts(
+        id integer primary key not null,
+        name text not null,
+        first_money float not null,
+        currency text,
+        unique(name))""")
 
         self.connection.execute("create table deal_groups (id integer primary key not null, deal_sign integer not null, ticket text not null)")
         self.connection.executescript("""
@@ -70,6 +78,7 @@ class deals_proc():
         parent_deal_id integer,
         not_actual integer,
         group_id integer,
+        account_id integer,
         datetime datetime not null,
         datetime_day text,
         security_type text,
@@ -87,6 +96,7 @@ class deals_proc():
         foreign key (position_id) references positions(id) on delete set null,
         foreign key (parent_deal_id) references deals(id) on delete cascade,
         foreign key (group_id) references deal_groups(id) on delete set null,
+        foreign key (account_id) references accounts(id) on delete set null,
         unique(sha1)
         )""")
         self.connection.executescript("""
@@ -96,30 +106,20 @@ class deals_proc():
         create index deals_quantity on deals(quantity);
         create index deals_deal_sign on deals(deal_sign);""")
 
-        self.connection.execute("""
-        create table accounts(
-        id integer primary key not null,
-        name text not null,
-        first_money float not null,
-        currency text,
-        unique(name))""")
 
-        self.connection.execute("""
-        create table account_deal(
-        id integer primary key not null,
-        account integer not null,
-        deal integer not null,
-        unique(account, deal),
-        foreign key (account) references accounts(id) on delete cascade,
-        foreign key (deal) references deals(id) on delete cascade)""")
-        
-        
 
         self.connection.commit()
         self.connection.execute("begin transaction")
 
+    def bind_deal_account(deal_id, account_id):
+        (c, ) = self.connection.execute("select count(*) from account_deal where account = ? and deal = ?", (account_id, deal_id)).fetchone()
+        if c == 0:
+            self._insert_from_hash("account_deal", {"account" : account_id,
+                                                    "deal" :deal_id})
+
     def delete_empty_positions(self):
         self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id))")
+
 
     def delete_broken_positions(self):
         self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id) where abs(count) > 0.00001)")
