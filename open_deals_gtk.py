@@ -45,6 +45,7 @@ class main_ui():
         win.show_all()
 
     def update_view(self):
+        self.accounts_tab.update_widget()
         self.deals_tab.update_widget()
         self.report_tab.update_widget()
         self.blog_tab.update_widget()

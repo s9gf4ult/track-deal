@@ -96,6 +96,25 @@ class deals_proc():
         create index deals_quantity on deals(quantity);
         create index deals_deal_sign on deals(deal_sign);""")
 
+        self.connection.execute("""
+        create table accounts(
+        id integer primary key not null,
+        name text not null,
+        first_money float not null,
+        currency text,
+        unique(name))""")
+
+        self.connection.execute("""
+        create table account_deal(
+        id integer primary key not null,
+        account integer not null,
+        deal integer not null,
+        unique(account, deal),
+        foreign key (account) references accounts(id) on delete cascade,
+        foreign key (deal) references deals(id) on delete cascade)""")
+        
+        
+
         self.connection.commit()
         self.connection.execute("begin transaction")
 
