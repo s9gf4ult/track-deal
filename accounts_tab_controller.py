@@ -8,5 +8,6 @@ class accounts_tab_controller(modifying_tab_control):
         self.database = database
         self.update_callback = update_callback
 
-        
+    def update_widget(self):
+        pass
     

@@ -37,7 +37,7 @@ class main_ui():
         self.positions_tab = positions_tab_controller(self.database, self.builder, self.update_view)
 
         # accounts tab
-        self.accounts_tab = 
+        self.accounts_tab = accounts_tab_controller(self.database, self.builder, self.update_view)
         self.update_view()
         
     def show(self):
