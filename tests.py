@@ -12,7 +12,10 @@ class balance(unittest.TestCase):
         self.coats.check_file()
         self.base = deals_core.deals_proc()
         self.base.create_new(':memory:')
-        self.base.get_from_source(self.coats)
+        self.ac1 = self.base.make_account("first_account", 100500, "RUB")
+        self.ac2 = self.base.make_account("second_account", 9000, "RUB")
+        self.base.get_from_source(self.ac1, self.coats)
+        self.base.get_from_source(self.ac2, self.coats)
 
     def pre_setup(self):
         self.coats = sources.xml_parser('tests/test_report1.xml')

@@ -113,11 +113,13 @@ class deals_proc():
 
 
     def delete_empty_positions(self):
+        """deletes positions which has no one deal assigned to"""
         self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id))")
 
 
     def delete_broken_positions(self):
-        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id) where abs(count) > 0.00001)")
+        """deletes positions which has unbalanced set of deals assigned to"""
+        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id group by p.id) where abs(count) > 0.00001)")
 
     def close(self):
         if self.connection:
@@ -143,7 +145,11 @@ class deals_proc():
         (count, ) = self.connection.execute("select count(*) from accounts where id = ?", (account,)).fetchone()
         if count != 1:
             raise Exception(u'Счета с id {0} не существует или есть более чем 1'.format(account))
-        self.get_from_list(map(lambda a: a["account_id"] = account, coats))
+        def one(a):
+            ret = a
+            ret["account_id"] = account
+            return ret
+        self.get_from_list(map(one, coats))
             
     def get_from_source_in_account(self, account, source):
         self.get_from_list_in_account(account, source.get_deals_list())
@@ -260,12 +266,18 @@ class deals_proc():
         for sign in [-1, 1]:
             opened_signed = []
             for (deal_id, deal_datetime) in self.connection.execute("select id, datetime from deals where position_id is null and not_actual is null and group_id is null and security_name = ? and deal_sign = ? and account_id = ? order by datetime", (ticket, sign, account)):
-                (group_id,) = self.connection.execute("select id from (select max(d.datetime) as datetime, g.id as id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null and d.account_id = ? group by g.id) where datetime <= ? and ? - datetime <= 5 order by datetime desc", (ticket, sign, account, deal_datetime, deal_datetime)).fetchone() or (None, )
+                (group_id,) = self.connection.execute("select g.id from deals d inner join deal_groups g on d.group_id = g.id where g.ticket = ? and g.deal_sign = ? and d.position_id is null and d.account_id = ? and d.datetime <= ? and ? - d.datetime <= 5 order by d.datetime desc", (ticket, sign, account, deal_datetime, deal_datetime)).fetchone() or (None, )
                 if group_id:
                     self.connection.execute("update deals set group_id = ? where id = ?", (group_id, deal_id))
                 else:
                     new_group_id = self._insert_into("deal_groups", ["deal_sign", "ticket"], [sign, ticket]).lastrowid
                     self.connection.execute("update deals set group_id = ? where id = ?", (new_group_id, deal_id))
+
+    def delete_groups_in_account(self, account, ticket):
+        self.connection.execute("delete from deal_groups where id in (select distinct g.id from deals_groups g inner join deals d on d.group_id = g.id where d.accaaount_id = ? and d.security_name = ?)", (account, ticket))
+
+    def delete_positions_in_account(self, account, ticket):
+        self.connection.execute("delete from positions where id in (select p.id from positions p inner join deals d on d.position_id = p.id where d.account_id = ? and d.security_name = ?)", (account, ticket))
         
     def split_deal(self, deal_id, needed_quantity):
         (quant,) = self.connection.execute("select quantity from deals where id = ?", (deal_id,)).fetchone() or (None,)

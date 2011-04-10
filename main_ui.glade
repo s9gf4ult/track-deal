@@ -2230,7 +2230,7 @@
         <child>
           <object class="GtkTable" id="table10">
             <property name="visible">True</property>
-            <property name="n_rows">4</property>
+            <property name="n_rows">3</property>
             <property name="n_columns">2</property>
             <child>
               <object class="GtkLabel" id="label23">
@@ -2253,12 +2253,6 @@
                 <property name="right_attach">2</property>
                 <property name="y_options">GTK_FILL</property>
               </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
             <child>
               <object class="GtkLabel" id="label24">
