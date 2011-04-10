@@ -84,6 +84,7 @@ class balance(unittest.TestCase):
         self.assertEqual(before, self.base.connection.execute("select sum(quantity) from deals").fetchone()[0]) # баланс сделок до и после разбиения
 
     def test_make_groups(self):
+        """checking correctness of making groups"""
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
             self.base.make_groups(ticket)
         self.assertEqual(self.accute * 2, self.base.connection.execute("select count(*) from deal_groups").fetchone()[0]) # отчет сгенерирован так специально
@@ -104,11 +105,12 @@ class balance(unittest.TestCase):
             self.assertEqual(self.base.connection.execute("select security_name from deals where group_id = ?", (gid,)).fetchone()[0], self.base.connection.execute("select ticket from deal_groups where id = ?", (gid,)).fetchone()[0]) # ticket of group must be equal to ticket of deals
             
     def test_split_deal_group(self):
+        """degradation tests of splitting deal groups"""
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
             self.base.make_groups(ticket)
 
         for (gid, quant) in self.base.connection.execute("select * from (select g.id as id, sum(d.quantity) as quantity from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null group by g.id) where quantity > 1"):
-            self.assertEqual(quant, self.base.connection.execute("select sum(quantity) from deals where ({0}) and not_actual is null".format(reduce(lambda a, b: u'{0} or {1}'.format(a,b), map(lambda a: u'group_id = {0}'.format(a), self.base.split_deal_group(gid, random.choice(range(1, quant))))))).fetchone()[0])
+            self.assertEqual(quant, self.base.connection.execute("select sum(quantity) from deals where ({0}) and not_actual is null".format(reduce(lambda a, b: u'{0} or {1}'.format(a,b), map(lambda a: u'group_id = {0}'.format(a), self.base.split_deal_group(gid, random.choice(range(1, quant))))))).fetchone()[0]) # quantity of splited groups is equal to quantity of original group
 
         def split_them_all(self):
             (gid, gquant) = self.base.connection.execute("select * from (select g.id as id , sum(d.quantity) as quantity from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null group by g.id) where quantity > 1").fetchone() or (None, None)
@@ -120,26 +122,29 @@ class balance(unittest.TestCase):
         while split_them_all(self):
             pass
 
-        self.assertEqual(self.base.connection.execute("select sum(quantity) from deals where not_actual is null").fetchone()[0], self.base.connection.execute("select count(*) from deal_groups").fetchone()[0])
+        self.assertEqual(self.base.connection.execute("select sum(quantity) from deals where not_actual is null").fetchone()[0], self.base.connection.execute("select count(*) from deal_groups").fetchone()[0]) # count of groups is equal to sum(quantiry) of all deals assigned to
         self.assertEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is null").fetchone())
 
     def test_make_positions(self):
+        """test of positions volumes"""
         self.base.make_positions()
-        self.assertAlmostEqual(self.base.connection.execute("select sum(deal_sign * volume) from deals where not_actual is null and position_id is not null").fetchone()[0], self.base.connection.execute("select sum(direction * (open_volume - close_volume)) from positions").fetchone()[0])
+        self.assertAlmostEqual(self.base.connection.execute("select sum(deal_sign * volume) from deals where not_actual is null and position_id is not null").fetchone()[0], self.base.connection.execute("select sum(direction * (open_volume - close_volume)) from positions").fetchone()[0]) # balance of deals and positions volumes
 
     def test_pl_net_value(self):
+        """testing of pl_net correctness"""
         self.base.make_positions()
         (sm,) = self.base.connection.execute("select sum((deal_sign * volume) - broker_comm - stock_comm) from deals where not_actual is null and position_id is not null").fetchone()
         (spm,) = self.base.connection.execute("select sum(pl_net) from positions").fetchone()
-        self.assertAlmostEqual(sm, spm)
+        self.assertAlmostEqual(sm, spm) # balance between pl_net and volume differences in positions
 
     def test_volumes(self):
+        """checking volumes of deals and positions"""
         self.base.make_positions()
         for (vol, price ,quant, ticket) in self.base.connection.execute("select volume, price, quantity, security_name from deals where not_actual is null and position_id is not null"):
-            self.assertAlmostEqual(float(vol), float(price * quant), 5, u'{0}::: vol={1}, price={2}, quantity={3}'.format(ticket, vol, price, quant))
+            self.assertAlmostEqual(float(vol), float(price * quant), 5, u'{0}::: vol={1}, price={2}, quantity={3}'.format(ticket, vol, price, quant)) # checking deals volumes correctness
         (osv, csv) = self.base.connection.execute("select sum(open_volume), sum(close_volume) from positions").fetchone()
         (oov, cov) = self.base.connection.execute("select sum(open_coast * count), sum(close_coast * count) from positions").fetchone()
-        self.assertAlmostEqual(osv, oov)
+        self.assertAlmostEqual(osv, oov) # checking of positions correctness 
         self.assertAlmostEqual(csv, cov)
 
 class balance2(balance):
@@ -168,6 +173,7 @@ class sources_xml_parser(unittest.TestCase):
         return sources.xml_parser('tests/test_report1.xml')
 
     def test_check_sha1(self):
+        """open.ru report parser gets equal sha1 every time"""
         d = self.s.get_deals_list()
         dd = self.ss.get_deals_list()
         self.assertEqual(len(d), len(dd))
