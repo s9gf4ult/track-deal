@@ -139,6 +139,15 @@ class deals_proc():
             except Exception as e:
                 raise e
 
+    def get_from_list_in_account(self, account, coats):
+        (count, ) = self.connection.execute("select count(*) from accounts where id = ?", (account,)).fetchone()
+        if count != 1:
+            raise Exception(u'Счета с id {0} не существует или есть более чем 1'.format(account))
+        self.get_from_list(map(lambda a: a["account_id"] = account, coats))
+            
+    def get_from_source_in_account(self, account, source):
+        self.get_from_list_in_account(account, source.get_deals_list())
+
     def get_from_source(self, source):
         self.get_from_list(source.get_deals_list())
         
@@ -240,6 +249,12 @@ class deals_proc():
     def make_groups(self, ticket):
         for (account,) in self.connection.execute("select id from accounts"):
             self.make_groups_in_account(account, ticket)
+
+    def make_account(self, name, first_money, currency):
+        """makes new account and returns it's id"""
+        return self._insert_from_hash("accounts", {"name" : name,
+                                                   "first_money" : first_money,
+                                                   "currency" : currency}).lastrowid
 
     def make_groups_in_account(self, account, ticket):
         for sign in [-1, 1]:
