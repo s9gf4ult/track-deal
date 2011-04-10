@@ -97,7 +97,7 @@ class deals_proc():
         foreign key (parent_deal_id) references deals(id) on delete cascade,
         foreign key (group_id) references deal_groups(id) on delete set null,
         foreign key (account_id) references accounts(id) on delete set null,
-        unique(sha1)
+        unique(sha1, account_id)
         )""")
         self.connection.executescript("""
         create index delas_not_actual on deals(not_actual);
@@ -133,6 +133,10 @@ class deals_proc():
 
     def get_from_list(self, coats):
         for coat in coats:
+            if (coat.has_key('sha1') and coat['sha1'] != None) and ((not coat.has_key('account_id')) or coat['account_id'] == None):
+                (c, ) = self.connection.execute("select count(*) from deals where sha1 = ? and account_id is null", (coat['sha1'],)).fetchone()
+                if c >= 1:
+                    continue
             try:
                 coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
                 self._insert_from_hash('deals', coat)
@@ -177,11 +181,12 @@ class deals_proc():
         return self._insert_into(tablename, fields, values)
 
     def check_balance(self):
-        for (ticket,) in self.connection.execute("select distinct security_name from deals"):
-            buy = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ?", (-1, ticket)).fetchall()[0][0] or 0
-            sell = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ?", (1, ticket)).fetchall()[0][0] or 0
-            if buy != sell:
-                raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
+        for (account,) in self.connection.execute("select distinct id from accounts"):
+            for (ticket,) in self.connection.execute("select distinct security_name from deals"):
+                (buy, ) = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ? and account_id = ?", (-1, ticket, account)).fetchone()
+                (sell, ) = self.connection.execute("select sum(quantity) from deals where deal_sign = ? and security_name = ? and account_id = ?", (1, ticket, account)).fetchone()
+                if buy != sell:
+                    raise Exception(u'В отчете несбалансированноый набор сделок по бумаге {0}. Куплено - продано = {1}'.format(ticket, buy - sell))
 
     def make_position(self, first_id, second_id):
         #print((first_id, second_id))

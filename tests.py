@@ -14,21 +14,24 @@ class balance(unittest.TestCase):
         self.base.create_new(':memory:')
         self.ac1 = self.base.make_account("first_account", 100500, "RUB")
         self.ac2 = self.base.make_account("second_account", 9000, "RUB")
-        self.base.get_from_source(self.ac1, self.coats)
-        self.base.get_from_source(self.ac2, self.coats)
+        self.base.get_from_source_in_account(self.ac1, self.coats)
+        self.base.get_from_source_in_account(self.ac2, self.coats)
 
     def pre_setup(self):
         self.coats = sources.xml_parser('tests/test_report1.xml')
         self.accute = 4
 
     def test_check_splitted_comm(self):
+        """test if commissions in report and commissions in loaded database is equal"""
         if self.coats.report.attributes['board_list'].value.find('FORTS') >= 0:
             broker_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Вознаграждение Брокера', self.coats.total_account)[0].attributes['total_value'].value))
             stock_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Биржевой сбор', self.coats.total_account)[0].attributes['total_value'].value))
-            self.assertAlmostEqual(broker_comm, self.base.connection.execute("select sum(broker_comm) from deals").fetchone()[0])
-            self.assertAlmostEqual(stock_comm, self.base.connection.execute("select sum(stock_comm) from deals").fetchone()[0])
+            for ac in [self.ac1, self.ac2]:
+                self.assertAlmostEqual(broker_comm, self.base.connection.execute("select sum(broker_comm) from deals where account_id = ?", (ac, )).fetchone()[0])
+                self.assertAlmostEqual(stock_comm, self.base.connection.execute("select sum(stock_comm) from deals where account_id = ?", (ac, )).fetchone()[0])
 
     def test_balanced(self):
+        """test if check_balance going on without errors, as expected"""
         try:
             self.base.check_balance()
         except:
@@ -37,10 +40,12 @@ class balance(unittest.TestCase):
             self.assertTrue(True)
 
     def test_unbalanced(self):
+        """test if check_balance faults on unbalanced deals"""
         self.base.connection.execute("delete from deals where id = ?",(self.base.connection.execute("select id from deals").fetchone()[0],))
         self.assertRaises(Exception, self.base.check_balance)
 
     def test_split_deals_balance(self):
+        """reduction tests for deals spliting"""
         before = self.base.connection.execute("select sum(quantity) from deals").fetchone()[0]
         before_vol = self.base.connection.execute("select sum(volume) from deals").fetchone()[0]
         
@@ -54,9 +59,9 @@ class balance(unittest.TestCase):
         while split_them_all(self):
             pass
 
-        self.assertAlmostEqual(self.base.connection.execute("select sum(volume) from deals where not_actual is null").fetchone()[0], before_vol)
-        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity > 1 and not_actual is null").fetchone()[0])
-        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity = 1 and not_actual is not null").fetchone()[0])
+        self.assertAlmostEqual(self.base.connection.execute("select sum(volume) from deals where not_actual is null").fetchone()[0], before_vol) # volume before totoal split is equal to sum of volumes of all splited deals
+        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity > 1 and not_actual is null").fetchone()[0]) # there is no deals unsplited
+        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where quantity = 1 and not_actual is not null").fetchone()[0]) # there is no deals with quantity 1 and not actual
         self.assertNotEqual((1, 1), self.base.connection.execute("select min(quantity), max(quantity) from deals where not_actual is not null").fetchone())
         if self.base.connection.execute("select count(*) from deals where not_actual is not null").fetchone()[0] > 0:
             self.assertRaises(Exception, self.base.split_deal, self.base.connection.execute("select id from deals where not_actual is not null").fetchone()[0], 1)
@@ -81,19 +86,22 @@ class balance(unittest.TestCase):
     def test_make_groups(self):
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
             self.base.make_groups(ticket)
-        self.assertEqual(self.accute, self.base.connection.execute("select count(*) from deal_groups").fetchone()[0]) # отчет сгенерирован так специально
-        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where group_id is null").fetchone()[0])
-        
-        for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
-            (bquan,) = self.base.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and g.ticket = ? and g.deal_sign = -1", (ticket,)).fetchone()
-            (squan,) = self.base.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and g.ticket = ? and g.deal_sign = 1", (ticket,)).fetchone()
-            self.assertEqual(bquan, squan)
+        self.assertEqual(self.accute * 2, self.base.connection.execute("select count(*) from deal_groups").fetchone()[0]) # отчет сгенерирован так специально
+        for ac in [self.ac1, self.ac2]:
+            self.assertEqual(self.accute, self.base.connection.execute("select count(*) from (select distinct g.id from deal_groups g inner join deals d on d.group_id = g.id where d.account_id = ?)",(ac, )).fetchone()[0])
+        self.assertEqual(0, self.base.connection.execute("select count(*) from deals where group_id is null").fetchone()[0]) # all deals must be grouped
+        for ac in [self.ac1, self.ac2]:
+            for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
+                (bquan,) = self.base.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and g.ticket = ? and g.deal_sign = -1 and d.account_id = ?", (ticket, ac)).fetchone()
+                (squan,) = self.base.connection.execute("select sum(d.quantity) from deals d inner join deal_groups g on d.group_id = g.id where d.not_actual is null and g.ticket = ? and g.deal_sign = 1 and d.account_id = ?", (ticket, ac)).fetchone()
+                self.assertEqual(bquan, squan)
 
         for (gid, ) in self.base.connection.execute("select id from deal_groups"):
-            self.assertEqual(1, self.base.connection.execute("select count(*) from (select distinct security_name from deals where group_id = ?)", (gid,)).fetchone()[0])
-            self.assertEqual(1, self.base.connection.execute("select count(*) from (select distinct deal_sign from deals where group_id = ?)", (gid,)).fetchone()[0])
-            self.assertEqual(self.base.connection.execute("select deal_sign from deals where group_id = ?", (gid,)).fetchone()[0], self.base.connection.execute("select deal_sign from deal_groups where id = ?", (gid,)).fetchone()[0])
-            self.assertEqual(self.base.connection.execute("select security_name from deals where group_id = ?", (gid,)).fetchone()[0], self.base.connection.execute("select ticket from deal_groups where id = ?", (gid,)).fetchone()[0])
+            self.assertEqual(1, self.base.connection.execute("select count(*) from (select distinct security_name from deals where group_id = ?)", (gid,)).fetchone()[0]) # each group must have deals just for one ticket assigned to
+            self.assertEqual(1, self.base.connection.execute("select count(*) from (select distinct deal_sign from deals where group_id = ?)", (gid,)).fetchone()[0]) # all deals assigned to group must be in one sign
+            self.assertEqual(1, self.base.connection.execute("select count(*) from (select distinct account_id from deals where group_id = ?)", (gid,)).fetchone()[0]) # all delas assigned to group must be assigned to one account
+            self.assertEqual(self.base.connection.execute("select deal_sign from deals where group_id = ?", (gid,)).fetchone()[0], self.base.connection.execute("select deal_sign from deal_groups where id = ?", (gid,)).fetchone()[0]) # sign of deals must be equal to sign of group
+            self.assertEqual(self.base.connection.execute("select security_name from deals where group_id = ?", (gid,)).fetchone()[0], self.base.connection.execute("select ticket from deal_groups where id = ?", (gid,)).fetchone()[0]) # ticket of group must be equal to ticket of deals
             
     def test_split_deal_group(self):
         for (ticket,) in self.base.connection.execute("select distinct security_name from deals"):
