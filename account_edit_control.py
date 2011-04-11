@@ -28,7 +28,9 @@ class account_edit_control:
             if not self.check_correctness():
                 ret = self.window.run()
             else:
+                self.window.hide()
                 return self.get_data()
+        self.window.hide()
         return None
             
     def check_correctness(self):

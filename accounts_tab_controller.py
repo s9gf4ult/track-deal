@@ -3,11 +3,14 @@
 from modifying_tab_control import modifying_tab_control
 from list_view_sort_control import list_view_sort_control
 import gtk
+from common_methods import *
+import sqlite3
 
 class accounts_tab_controller(modifying_tab_control):
-    def __init__(self, database, builder, update_callback):
+    def __init__(self, database, builder, update_callback, account_edit):
         self.builder = builder
         self.database = database
+        self.account_edit = account_edit
         self.update_callback = update_callback
         def shorter(name, *method):
             self.builder.get_object(name).connect("activate", *method)
@@ -39,7 +42,20 @@ class accounts_tab_controller(modifying_tab_control):
 
     def add_account(self):
         """runs account adder dialog and adds account to the database"""
-        pass
+        if self.database.connection:
+            self.account_edit.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct currency from accounts order by currency")))
+            ret = self.account_edit.run()
+            if ret != None:
+                try:
+                    self.database.make_account(ret['name'], ret['first_money'], ret['currency'])
+                    self.update_accounts_list()
+                except sqlite3.IntegrityError:
+                    show_error(u'Счет с таким именем уже существует', self.builder.get_object("main_window"))
+                except Exception as e:
+                    show_error(e.__str__(), self.builder.get_object("main_window"))
+                    print(traceback.format_exc())
+                    
+                    
 
     def delete_account_activate(self, action):
         self.delete_account()
