@@ -16,6 +16,7 @@ class accounts_tab_controller(modifying_tab_control):
         shorter("modify_account", self.modify_account_activate)
         self.accounts_list = list_view_sort_control(self.builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText())])
         self.account_list = list_view_sort_control(self.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
+        self.builder.get_object("accounts_view").connect("cursor-changed", self.account_cursor_changed)
         
 
     def update_widget(self):
@@ -48,5 +49,12 @@ class accounts_tab_controller(modifying_tab_control):
         pass
 
     def modify_account_activate(self, action):
+        self.modify_account()
+
+    def modify_account(self):
+        """runs account dialog and modifies selected account"""
         pass
-    
+
+    def account_cursor_changed(self, tw):
+        self.update_account_list()
+            
