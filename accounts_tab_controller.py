@@ -20,8 +20,14 @@ class accounts_tab_controller(modifying_tab_control):
 
     def update_widget(self):
         self.update_accounts_list()
+        self.update_account_list()
+
+    def update_account_list(self):
+        """update list of properties and statistics of selected account"""
+        pass
 
     def update_accounts_list(self):
+        """update list of accounts"""
         if self.database.connection:
             u = self.database.connection.execute("select a.name, a.first_money, (a.first_money + sum(d.deal_sign * d.volume)), a.currency from accounts a inner join deals d on d.account_id = a.id where d.not_actual is null group by a.name").fetchall()
             u += self.database.connection.execute("select a.name, a.first_money, a.first_money, a.currency from accounts a where not exists(select * from deals where account_id = a.id and not_actual is null)").fetchall()
@@ -30,7 +36,15 @@ class accounts_tab_controller(modifying_tab_control):
     def add_account_activate(self, action):
         self.add_account()
 
+    def add_account(self):
+        """runs account adder dialog and adds account to the database"""
+        pass
+
     def delete_account_activate(self, action):
+        self.delete_account()
+
+    def delete_account(self):
+        """delete selected account"""
         pass
 
     def modify_account_activate(self, action):
