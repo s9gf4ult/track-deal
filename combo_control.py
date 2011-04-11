@@ -3,6 +3,8 @@
 import gtk
 
 class combo_control:
+    """controls combobox and comboedit with one interface
+    you can easly update rows in combobox with update_widget"""
     def __init__(self, combobox):
         self.combobox = combobox
         if not isinstance(self.combobox, gtk.ComboBoxEntry):
