@@ -23,5 +23,37 @@ class account_edit_control:
         self.currency_combo.update_widget(currencies)
 
     def run(self):
+        ret = self.window.run()
+        while ret == gtk.RESPONSE_ACCEPT:
+            if not self.check_correctness():
+                ret = self.window.run()
+            else:
+                return self.get_data()
+        return None
+            
+    def check_correctness(self):
+        errs = []
+        if len(self.name.get_text()) <= 0:
+            errs.append(u'Необходимо указать имя счета')
+        if self.first_money.get_value() <= 0:
+            errs.append(u'Нужно указать не нулевой начальный счет')
+        vv = self.currency_combo.get_value()
+        if vv == None or len(vv) <= 0:
+            errs.append(u'Нужно указать название валюты')
+        if len(errs) > 0:
+            show_error(reduce(lambda a, b:u'{0}\n{1}'.format(a, b), errs), self.window)
+            return False
+        return True
+
+    def get_data(self):
+        ret = {'name' : self.name.get_text(),
+               'first_money' : self.first_money.get_value(),
+               'currency' : self.currency_combo.get_value()}
+        return ret
         
-        
+if __name__ == "__main__":
+    b = gtk.Builder()
+    b.add_from_file('main_ui.glade')
+    con = account_edit_control(b)
+    con.update_widget(['RUB', 'EURO', 'DOLLAR'])
+    print(con.run())
