@@ -62,7 +62,7 @@ class main_window_controller(modifying_tab_control):
                     self.database.open_existing(diag.get_filename())
                     self.call_update_callback()
                 except Exception as e:
-                    self.show_error(e.__str__())
+                    show_error(e.__str__(), self.builder.get_object("main_window"))
                     print(traceback.format_exc())
             diag.destroy()
             fl.destroy()
@@ -109,7 +109,7 @@ class main_window_controller(modifying_tab_control):
                     self.database.create_new(diag.get_filename())
                     self.call_update_callback()
                 except Exception as e:
-                    self.show_error(e.__str__())
+                    show_error(e.__str__(), self.builder.get_object("main_window"))
                     print(traceback.format_exc())
             diag.destroy()
 
