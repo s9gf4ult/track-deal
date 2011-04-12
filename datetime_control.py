@@ -29,14 +29,24 @@ class datetime_control(value_returner_control):
     def set_current_time(self):
         self.time_control.set_current_time()
 
+    def set_time(self, time):
+        self.time_control.set_time(time)
+
     def set_current_date(self):
         dd = datetime.datetime.fromtimestamp(time.time())
-        self.calendar.select_month((dd.month - 1), dd.year)
-        self.calendar.select_day(dd.day)
+        self.set_date(dd)
+
+    def set_date(date):
+        self.calendar.select_month((date.month - 1), date.year)
+        self.calendar.select_day(date.day)
 
     def set_current_datetime(self):
         self.set_current_time()
         self.set_current_date()
+
+    def set_datetime(self, dd):
+        self.set_date(dd.date())
+        self.set_time(dd.time())
 
 if __name__ == "__main__":
     from time_control import *

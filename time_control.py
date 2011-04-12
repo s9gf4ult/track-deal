@@ -34,9 +34,12 @@ class time_control(value_returner_control):
 
     def set_current_time(self):
         dd = datetime.datetime.fromtimestamp(time.time())
-        self.hour.set_value(dd.hour)
-        self.min.set_value(dd.minute)
-        self.sec.set_value(dd.second)
+        self.set_time(dd)
+
+    def set_time(self, time):
+        self.hour.set_value(time.hour)
+        self.min.set_value(time.minute)
+        self.sec.set_value(time.second)
 
 if __name__ == "__main__":
     w = gtk.Dialog()
