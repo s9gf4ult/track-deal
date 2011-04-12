@@ -2189,7 +2189,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkComboBox" id="combobox1">
+                      <object class="GtkComboBox" id="deal_adder_account">
                         <property name="visible">True</property>
                       </object>
                     </child>

@@ -5,6 +5,7 @@ from combo_control import *
 from number_range_control import number_control
 from time_control import *
 from select_control import *
+from combo_select_control import *
 import sys
 
 class deal_adder_control:
@@ -18,6 +19,7 @@ class deal_adder_control:
                                          time_control(shorter("hour"),
                                                       shorter("min"),
                                                       shorter("sec")))
+        self.account = combo_select_control(shorter("deal_adder_account"))
         self.instrument = combo_control(shorter("stock"))
         self.market = combo_control(shorter("market"))
         self.price = number_control(shorter("price"), step_incr = 0.1, digits = 4)
