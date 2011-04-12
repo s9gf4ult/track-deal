@@ -28,6 +28,11 @@ class combo_control:
         else:
             return self.combobox.get_model().get_value(self.combobox.get_active_iter(), 0)
 
+    def set_value(self, data):
+        if isinstance(self.combobox, gtk.ComboBoxEntry):
+            self.combobox.child.set_text(data)
+            
+
 if __name__ == "__main__":
     w = gtk.Dialog()
     p = w.get_content_area()

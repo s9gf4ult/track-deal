@@ -86,7 +86,21 @@ class accounts_tab_controller(modifying_tab_control):
 
     def modify_account(self):
         """runs account dialog and modifies selected account"""
-        pass
+        if self.database.connection:
+            c = self.builder.get_object("accounts_view")
+            (mod, it) =  c.get_selection().get_selected()
+            if it != None:
+                acname = mod.get_value(it, 0)
+                (id, name, first_money, currency) = self.database.connection.execute("select id, name, first_money, currency from accounts where name = ?", (acname, )).fetchone() or (None, None, None, None)
+                if name != None:
+                    self.account_edit.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct currency from accounts order by currency")))
+                    self.account_edit.load_to_widget({"name" : name,
+                                                      "first_money" : first_money,
+                                                      "currency" : currency})
+                    ret = self.account_edit.run()
+                    if ret != None:
+                        self.database.connection.execute("update accounts set name = ?, first_money = ?, currency = ? where id = ?", (ret['name'], ret['first_money'], ret['currency'], id))
+                        self.call_update_callback()
 
     def account_cursor_changed(self, tw):
         self.update_account_list()

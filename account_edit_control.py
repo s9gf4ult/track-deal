@@ -52,6 +52,17 @@ class account_edit_control:
                'first_money' : self.first_money.get_value(),
                'currency' : self.currency_combo.get_value()}
         return ret
+
+    def load_to_widget(self, data):
+        if data.has_key("name"):
+            self.name.set_text(data['name'])
+
+        if data.has_key("first_money"):
+            self.first_money.set_value(data['first_money'])
+
+        if data.has_key('currency'):
+            self.currency_combo.set_value(data['currency'])
+        
         
 if __name__ == "__main__":
     b = gtk.Builder()
