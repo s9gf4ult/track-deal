@@ -71,6 +71,7 @@ class deals_tab_controller(modifying_tab_control):
             return
         self.adder.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals order by security_name")),
                                       map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals order by security_type")))
+        self.adder.set_current_datetime()
         ret = self.adder.run()
         if ret != None:
             self.database.get_from_list([ret])

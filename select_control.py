@@ -15,6 +15,9 @@ class select_control(value_returner_control):
                 ret = k
                 break
         return self.return_value(ret)
+
+    def set_value(self, val):
+        self.answers[val].set_active(True)
             
 if __name__ == "__main__":
     w = gtk.Dialog(buttons = (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))

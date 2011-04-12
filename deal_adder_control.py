@@ -38,7 +38,6 @@ class deal_adder_control:
     def run(self):
         w = self.builder.get_object("deal_adder")
         w.show_all()
-        self.datetime.set_current_datetime()
         ret = w.run()
         while ret == gtk.RESPONSE_ACCEPT:
             if not self.check_correctness():
@@ -86,6 +85,21 @@ class deal_adder_control:
     def update_widget(self, security_names, security_types):
         self.instrument.update_widget(security_names)
         self.market.update_widget(security_types)
+
+    def set_current_datetime(self):
+        self.datetime.set_current_datetime()
+
+    def load_to_widget(self, data):
+        for (callset, key) in [(self.datetime.set_datetime, "datetime"),
+                               (self.instrument.set_value, "security_name"),
+                               (self.market.set_value, "security_type"),
+                               (self.price.set_value, "price"),
+                               (self.count.set_value, "quantity"),
+                               (self.direction.set_value, "deal_sign"),
+                               (self.broker_comm.set_value, "broker_comm"),
+                               (self.stock_comm.set_value, "stock_comm")]:
+            if data.has_key(key):
+                callset(data[key])
             
 if __name__ == "__main__":
     b = gtk.Builder()
@@ -93,4 +107,6 @@ if __name__ == "__main__":
     con = deal_adder_control(b)
     con.instrument.update_widget(["aaa", "bbbb", "ccc"])
     con.market.update_widget(["mark1", "mark10", "supermark"])
+    con.load_to_widget({"datetime" : datetime.datetime(2010, 10, 10, 20, 10, 15),
+                        "quantity" : 100})
     print(con.run())

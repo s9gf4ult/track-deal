@@ -21,6 +21,9 @@ class number_control(value_returner_control):
     def get_value(self):
         return self.return_value(self.spin_button.get_value())
 
+    def set_value(self, val):
+        self.spin_button.set_value(val)
+
 class number_range_control(value_returner_control):
     def __init__(self, low_control, high_control, checkbutton = None):
         self.checkbutton = checkbutton

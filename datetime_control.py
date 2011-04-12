@@ -36,7 +36,7 @@ class datetime_control(value_returner_control):
         dd = datetime.datetime.fromtimestamp(time.time())
         self.set_date(dd)
 
-    def set_date(date):
+    def set_date(self, date):
         self.calendar.select_month((date.month - 1), date.year)
         self.calendar.select_day(date.day)
 
