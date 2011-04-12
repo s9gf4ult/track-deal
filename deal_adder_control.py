@@ -19,7 +19,7 @@ class deal_adder_control:
                                          time_control(shorter("hour"),
                                                       shorter("min"),
                                                       shorter("sec")))
-        self.account = combo_select_control(shorter("deal_adder_account"))
+        self.account = combo_select_control(shorter("account"))
         self.instrument = combo_control(shorter("stock"))
         self.market = combo_control(shorter("market"))
         self.price = number_control(shorter("price"), step_incr = 0.1, digits = 4)
@@ -61,6 +61,7 @@ class deal_adder_control:
                 "stock_comm" : self.stock_comm.get_value(),
                 "broker_comm_nds" : 0,
                 "stock_comm_nds" : 0,
+                "account_id" : self.account.get_value(),
                 "volume" : self.count.get_value() * self.price.get_value()}
 
     def check_correctness(self):
@@ -84,9 +85,10 @@ class deal_adder_control:
         else:
             return True
 
-    def update_widget(self, security_names, security_types):
+    def update_widget(self, security_names, security_types, accounts = None):
         self.instrument.update_widget(security_names)
         self.market.update_widget(security_types)
+        self.account.update_widget(accounts, none_answer = -1)
 
     def set_current_datetime(self):
         self.datetime.set_current_datetime()
