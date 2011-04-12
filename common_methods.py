@@ -10,3 +10,8 @@ def show_error(message, parent):
     dial.run()
     dial.destroy()
 
+def find_in_list(findfunc, flist):
+    for x in xrange(0, len(flist)):
+        if findfunc(flist[x]):
+            return x
+    return -1
