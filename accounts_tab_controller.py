@@ -7,10 +7,11 @@ from common_methods import *
 import sqlite3
 
 class accounts_tab_controller(modifying_tab_control):
-    def __init__(self, database, builder, update_callback, account_edit):
+    def __init__(self, global_data, database, builder, update_callback, account_edit):
         self.builder = builder
         self.database = database
         self.account_edit = account_edit
+        self.global_data = global_data
         self.update_callback = update_callback
         def shorter(name, *method):
             self.builder.get_object(name).connect("activate", *method)
@@ -104,4 +105,7 @@ class accounts_tab_controller(modifying_tab_control):
 
     def account_cursor_changed(self, tw):
         self.update_account_list()
+        (mod, it) = tw.get_selection().get_selected()
+        if it != None and self.database.connection != None:
+            (self.global_data["current_account"], ) = self.database.connection.execute("select id from accounts where name = ?", (tw.get_model.get_value(it, 0), )).fetchone() or (None)
             

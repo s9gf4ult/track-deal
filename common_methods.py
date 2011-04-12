@@ -15,3 +15,9 @@ def find_in_list(findfunc, flist):
         if findfunc(flist[x]):
             return x
     return None
+
+def gethash(fhash, key):
+    if fhash.has_key(key):
+        return fhash[key]
+    else:
+        return None

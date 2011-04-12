@@ -20,6 +20,7 @@ class main_ui():
         self.database = deals_core.deals_proc()
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
+        self.global_data = {}
         
         # main window
         self.main_window = main_window_controller(self.database, self.builder, self.update_view)
@@ -39,7 +40,7 @@ class main_ui():
 
         # accounts tab
         self.account_edit = account_edit_control(self.builder)
-        self.accounts_tab = accounts_tab_controller(self.database, self.builder, self.update_view, self.account_edit)
+        self.accounts_tab = accounts_tab_controller(self.global_data, self.database, self.builder, self.update_view, self.account_edit)
         self.update_view()
         
     def show(self):
