@@ -81,6 +81,7 @@ class deals_filter():
                                ("volume_range", "volume")]:
                 also[key] = self.database.connection.execute("select min({0}), max({0}) from deals".format(val)).fetchone()
             also["stock_list"] = sl
+            also["accounts_list"] = map(lambda a: a[0], self.database.connection.execute("select distinct name from accounts order by name"))
             self.dialog.update_widget(**also)
 
     def _gen_bounadary_conditions(self, deals_alias):

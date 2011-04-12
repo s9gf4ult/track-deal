@@ -85,6 +85,16 @@ class deals_filter_control:
         desel = self.builder.get_object("deals_filter_deselect_bt")
         self.instruments = check_control(dfv, u'', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
 
+        ##########################
+        # check accounts control #
+        ##########################
+        acv = self.builder.get_object("deals_filter_account_view")
+        acr = self.builder.get_object("deals_filter_account_reverse")
+        acset = self.builder.get_object("deals_filter_account_set")
+        acunset = self.builder.get_object("deals_filter_account_unset")
+        self.accounts = check_control(acv, u'', [(u'Счет', gtk.CellRendererText())], reverse_button = acr, select_button = acset, deselect_button = acunset)
+            
+
         ###################
         # select controls #
         ###################
@@ -94,6 +104,8 @@ class deals_filter_control:
         self.direction = select_control({-1 : self.builder.get_object("deals_filter_direction_long_rb"),
                                          1 : self.builder.get_object("deals_filter_direction_short_rb")},
                                         self.builder.get_object("deals_filter_direction_cb"))
+        self.account_current = select_control({True : self.builder.get_object("deals_filter_account_current"),
+                                               False : self.builder.get_object("deals_filter_account_select")})
         
         ##################
         # number ranges  #
@@ -136,7 +148,7 @@ class deals_filter_control:
         w.hide()
 
     def update_widget(self, count_range = None, price_range = None, broker_comm_range = None, stock_comm_range = None,
-                      comm_range = None, volume_range = None, stock_list = None):
+                      comm_range = None, volume_range = None, stock_list = None, accounts_list = None):
         for (control, rval) in [(self.count, count_range),
                                 (self.price, price_range),
                                 (self.broker_comm, broker_comm_range),
@@ -148,6 +160,8 @@ class deals_filter_control:
                 control.set_upper_limit(rval[1])
         if stock_list != None:
             self.instruments.update_rows(map(lambda a: (a,), stock_list))
+        if accounts_list != None:
+            self.accounts.update_rows(map(lambda a: (a,), accounts_list))
     
                             
 if __name__ == "__main__":
