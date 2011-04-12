@@ -24,7 +24,6 @@ class accounts_tab_controller(modifying_tab_control):
         
 
     def update_widget(self):
-        self.update_accounts_list()
         self.update_account_list()
 
     def update_account_list(self):
@@ -104,8 +103,12 @@ class accounts_tab_controller(modifying_tab_control):
                         self.call_update_callback()
 
     def account_cursor_changed(self, tw):
-        self.update_account_list()
+        self.set_current_account()
+        self.call_update_callback()
+
+    def set_current_account(self):
+        tw = self.builder.get_object("accounts_view")
         (mod, it) = tw.get_selection().get_selected()
         if it != None and self.database.connection != None:
-            (self.global_data["current_account"], ) = self.database.connection.execute("select id from accounts where name = ?", (tw.get_model.get_value(it, 0), )).fetchone() or (None)
+            (self.global_data["current_account"], ) = self.database.connection.execute("select id from accounts where name = ?", (tw.get_model().get_value(it, 0), )).fetchone() or (None, )
             
