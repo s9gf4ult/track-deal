@@ -62,7 +62,24 @@ class accounts_tab_controller(modifying_tab_control):
 
     def delete_account(self):
         """delete selected account"""
-        pass
+        if self.database.connection:
+            c = self.builder.get_object("accounts_view")
+            (mod, it) = c.get_selection().get_selected()
+            if it != None:
+                acname = mod.get_value(it, 0)
+                if self.database.connection.execute("select count(d.id) from deals d inner join accounts a on d.account_id = a.id where a.name = ?", (acname, )).fetchone()[0] > 0:
+                    dial = gtk.Dialog(title = u'Удалить счет', parent = self.builder.get_object("main_window"), flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+                    dial.get_content_area().pack_start(gtk.Label(u'Удалить сделки привязанные к данному счету ?'))
+                    dial.show_all()
+                    ret = dial.run()
+                    dial.destroy()
+                    if ret != gtk.RESPONSE_NO and ret != gtk.RESPONSE_YES:
+                        return
+                    if  ret == gtk.RESPONSE_YES:
+                        self.database.connection.execute("delete from deals where account_id in (select id from accounts where name = ?)", (acname, ))
+                self.database.connection.execute("delete from accounts where name = ?", (acname, ))
+                self.call_update_callback()
+                
 
     def modify_account_activate(self, action):
         self.modify_account()
