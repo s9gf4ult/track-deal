@@ -64,9 +64,10 @@ class deals_filter():
         self.boundary = self._gen_bounadary_conditions("d")
         
     
-    def __init__(self, builder, database):
+    def __init__(self, global_data, builder, database):
         self.builder = builder
         self.database = database
+        self.global_data = global_data
         self.dialog = deals_filter_control(builder)
 
     def _prepare_filter(self):

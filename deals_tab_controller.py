@@ -8,11 +8,12 @@ from modifying_tab_control import modifying_tab_control
 import traceback
 
 class deals_tab_controller(modifying_tab_control):
-    def __init__(self, database, builder, update_callback, filter_control, adder_control):
+    def __init__(self, global_data, database, builder, update_callback, filter_control, adder_control):
         self.builder = builder
         self.database = database
         self.filter = filter_control
         self.adder = adder_control
+        self.global_data = global_data
         self.update_callback = update_callback
         def shorter(objname, signal, method):
             self.builder.get_object(objname).connect(signal, method)

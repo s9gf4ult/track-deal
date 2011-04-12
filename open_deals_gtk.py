@@ -32,9 +32,9 @@ class main_ui():
         self.blog_tab = blog_text_tab_controller(self.database, self.builder)
 
         # deals tab
-        self.deals_filter = deals_filter(self.builder, self.database)
+        self.deals_filter = deals_filter(self.global_data, self.builder, self.database)
         self.deal_adder = deal_adder_control(self.builder)
-        self.deals_tab = deals_tab_controller(self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder)
+        self.deals_tab = deals_tab_controller(self.global_data, self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder)
         # positions tab
         self.positions_tab = positions_tab_controller(self.database, self.builder, self.update_view)
 

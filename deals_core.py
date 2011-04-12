@@ -15,6 +15,7 @@ class deals_proc():
 
     def create_temporary_tables(self):
         self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
+        self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
 
 
     def open(self, filename):
@@ -35,6 +36,13 @@ class deals_proc():
         self.connection.execute("delete from selected_stocks")
         if stocks and len(stocks) > 0:
             self.connection.executemany("insert into selected_stocks(stock) values (?)", map(lambda a: (a,), stocks))
+        self.last_total_changes += self.connection.total_changes - ll
+
+    def set_selected_accounts(self, accounts):
+        ll = self.connection.total_changes
+        self.connection.execute("delete from selected_accounts")
+        if accounts and len(accounts) > 0:
+            self.connection.executemany("insert into selected_accounts(account_id) select id from accounts where name = ?", map(lambda a: (a,), accounts))
         self.last_total_changes += self.connection.total_changes - ll
             
 
