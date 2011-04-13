@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import gtk
 from hide_control import *
+import sys
 
 class deal_editor_control:
     def __init__(self, builder):
@@ -23,6 +24,8 @@ class deal_editor_control:
             cb = self.builder.get_object(hcb)
             bb = self.builder.get_object(box)
             self.hiders.append(hide_control(cb, [bb]))
+
+        
 
     def run(self):
         self.builder.get_object("deal_editor").run()
