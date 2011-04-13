@@ -39,8 +39,7 @@ class accounts_tab_controller(modifying_tab_control):
     def update_account_label(self):
         if self.database.connection != None:
             (acname, ) = self.database.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"),)).fetchone() or (None, )
-            if acname != None:
-                self.builder.get_object("current_account_name_label").set_text(acname)
+            self.builder.get_object("current_account_name_label").set_text(acname != None and acname or "")
 
     def update_account_list(self):
         """update list of properties and statistics of selected account"""
@@ -94,6 +93,7 @@ class accounts_tab_controller(modifying_tab_control):
                     if  ret == gtk.RESPONSE_YES:
                         self.database.connection.execute("delete from deals where account_id in (select id from accounts where name = ?)", (acname, ))
                 self.database.connection.execute("delete from accounts where name = ?", (acname, ))
+                self.set_current_account()
                 self.call_update_callback()
                 
 
