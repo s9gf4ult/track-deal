@@ -2565,7 +2565,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkVBox" id="vbox12">
+                      <object class="GtkVBox" id="deal_editor_datetime_box">
                         <property name="visible">True</property>
                         <property name="orientation">vertical</property>
                         <child>
@@ -2868,7 +2868,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkHBox" id="hbox9">
+                      <object class="GtkHBox" id="deal_editor_direction_box">
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkRadioButton" id="deal_adder_buy_rb1">
