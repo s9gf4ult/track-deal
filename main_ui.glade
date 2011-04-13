@@ -2646,7 +2646,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton1">
+                  <object class="GtkCheckButton" id="deal_editor_change_datetime">
                     <property name="label" translatable="yes">&#x421;&#x43C;&#x435;&#x43D;&#x438;&#x442;&#x44C; &#x434;&#x430;&#x442;&#x443; &#x438; &#x432;&#x440;&#x435;&#x43C;&#x44F;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2675,7 +2675,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton4">
+                  <object class="GtkCheckButton" id="deal_editor_change_instrument">
                     <property name="label" translatable="yes">&#x421;&#x43C;&#x435;&#x43D;&#x438;&#x442;&#x44C; &#x438;&#x43D;&#x441;&#x442;&#x440;&#x443;&#x43C;&#x435;&#x43D;&#x442;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2706,7 +2706,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton5">
+                  <object class="GtkCheckButton" id="deal_editor_cnahge_stock">
                     <property name="label" translatable="yes">&#x421;&#x43C;&#x435;&#x43D;&#x438;&#x442;&#x44C; &#x431;&#x438;&#x440;&#x436;&#x443;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2741,7 +2741,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton6">
+                  <object class="GtkCheckButton" id="deal_editor_change_price">
                     <property name="label" translatable="yes">&#x412;&#x44B;&#x441;&#x442;&#x430;&#x432;&#x438;&#x442;&#x44C; &#x446;&#x435;&#x43D;&#x443;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2774,7 +2774,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton7">
+                  <object class="GtkCheckButton" id="deal_editor_change_count">
                     <property name="label" translatable="yes">&#x41A;&#x43E;&#x43B;&#x438;&#x447;&#x435;&#x441;&#x442;&#x432;&#x43E; &#x43A;&#x43E;&#x43D;&#x442;&#x440;&#x430;&#x43A;&#x442;&#x43E;&#x432;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2809,7 +2809,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton8">
+                  <object class="GtkCheckButton" id="deal_editor_change_broker_comm">
                     <property name="label" translatable="yes">&#x421;&#x43C;&#x435;&#x43D;&#x438;&#x442;&#x44C; &#x43A;&#x43E;&#x43C;&#x438;&#x441;&#x441;&#x438;&#x44E; &#x431;&#x440;&#x43E;&#x43A;&#x435;&#x440;&#x430;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2842,7 +2842,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton9">
+                  <object class="GtkCheckButton" id="deal_editor_change_stock_comm">
                     <property name="label" translatable="yes">&#x421;&#x43C;&#x435;&#x43D;&#x438;&#x442;&#x44C; &#x43A;&#x43E;&#x43C;&#x438;&#x441;&#x441;&#x438;&#x44E; &#x431;&#x438;&#x440;&#x436;&#x438;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2903,7 +2903,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton2">
+                  <object class="GtkCheckButton" id="deal_editor_change_direction">
                     <property name="label" translatable="yes">&#x421;&#x43C;&#x435;&#x43D;&#x438;&#x442;&#x44C; &#x43D;&#x430;&#x43F;&#x440;&#x430;&#x432;&#x43B;&#x435;&#x43D;&#x438;&#x435;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -2934,7 +2934,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="checkbutton3">
+                  <object class="GtkCheckButton" id="deal_editor_change_account">
                     <property name="label" translatable="yes">&#x41F;&#x440;&#x438;&#x43F;&#x438;&#x441;&#x430;&#x442;&#x44C; &#x43A; &#x441;&#x447;&#x435;&#x442;&#x443;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
