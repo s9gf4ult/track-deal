@@ -18,13 +18,29 @@ class accounts_tab_controller(modifying_tab_control):
         shorter("add_account", self.add_account_activate)
         shorter("delete_account", self.delete_account_activate)
         shorter("modify_account", self.modify_account_activate)
+        shorter("set_current_account", self.set_current_account_activate)
         self.accounts_list = list_view_sort_control(self.builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText())])
         self.account_list = list_view_sort_control(self.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
-        self.builder.get_object("accounts_view").connect("cursor-changed", self.account_cursor_changed)
-        
+        self.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
+
+    def accounts_view_row_activated(self, tw, path, col):
+        self.set_current_account()
+        self.call_update_callback()
+
+    def set_current_account_activate(self, action):
+        self.set_current_account()
+        self.call_update_callback()
 
     def update_widget(self):
+        self.update_accounts_list()
+        self.update_account_label()
         self.update_account_list()
+
+    def update_account_label(self):
+        if self.database.connection != None:
+            (acname, ) = self.database.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"),)).fetchone() or (None, )
+            if acname != None:
+                self.builder.get_object("current_account_name_label").set_text(acname)
 
     def update_account_list(self):
         """update list of properties and statistics of selected account"""
@@ -101,10 +117,6 @@ class accounts_tab_controller(modifying_tab_control):
                     if ret != None:
                         self.database.connection.execute("update accounts set name = ?, first_money = ?, currency = ? where id = ?", (ret['name'], ret['first_money'], ret['currency'], id))
                         self.call_update_callback()
-
-    def account_cursor_changed(self, tw):
-        self.set_current_account()
-        self.call_update_callback()
 
     def set_current_account(self):
         tw = self.builder.get_object("accounts_view")

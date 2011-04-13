@@ -202,7 +202,7 @@
               <object class="GtkHPaned" id="hpaned2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="position">300</property>
+                <property name="position">350</property>
                 <child>
                   <object class="GtkVBox" id="vbox9">
                     <property name="visible">True</property>
@@ -225,9 +225,10 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkHButtonBox" id="hbuttonbox4">
+                      <object class="GtkTable" id="table11">
                         <property name="visible">True</property>
-                        <property name="layout_style">spread</property>
+                        <property name="n_rows">2</property>
+                        <property name="n_columns">3</property>
                         <child>
                           <object class="GtkButton" id="button4">
                             <property name="visible">True</property>
@@ -237,9 +238,8 @@
                             <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">0</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
@@ -251,9 +251,10 @@
                             <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
                           </packing>
                         </child>
                         <child>
@@ -265,9 +266,54 @@
                             <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button7">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">set_current_account</property>
+                            <property name="use_action_appearance">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="current_account_name_label">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">
+</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label29">
+                            <property name="visible">True</property>
+                            <property name="label" translatable="yes">&#x422;&#x435;&#x43A;&#x443;&#x449;&#x438;&#x439; &#x441;&#x447;&#x435;&#x442;:</property>
+                            <property name="ellipsize">start</property>
+                            <attributes>
+                              <attribute name="scale" value="1.000000"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
                           </packing>
                         </child>
                       </object>
@@ -2490,5 +2536,8 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkAction" id="set_current_account">
+    <property name="label">&#x422;&#x435;&#x43A;&#x443;&#x449;&#x438;&#x439;</property>
   </object>
 </interface>
