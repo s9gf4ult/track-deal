@@ -2742,7 +2742,7 @@
                 </child>
                 <child type="label">
                   <object class="GtkCheckButton" id="deal_editor_change_price">
-                    <property name="label" translatable="yes">&#x412;&#x44B;&#x441;&#x442;&#x430;&#x432;&#x438;&#x442;&#x44C; &#x446;&#x435;&#x43D;&#x443;</property>
+                    <property name="label" translatable="yes">&#x421;&#x43C;&#x435;&#x43D;&#x438;&#x442;&#x44C; &#x446;&#x435;&#x43D;&#x443; &#x43A;&#x43E;&#x43D;&#x442;&#x440;&#x430;&#x43A;&#x442;&#x430;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>

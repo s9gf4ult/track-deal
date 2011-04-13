@@ -3,11 +3,17 @@
 import gtk
 from hide_control import *
 import sys
+from datetime_control import datetime_control
+from time_control import time_control
+from select_control import select_control
+from combo_control import combo_control
 
 class deal_editor_control:
     def __init__(self, builder):
         self.builder = builder
-
+        def shorter(name):
+            return self.builder.get_object(name)
+        
         ##########
         # hiders #
         ##########
@@ -25,6 +31,22 @@ class deal_editor_control:
             bb = self.builder.get_object(box)
             self.hiders.append(hide_control(cb, [bb]))
 
+        ####################
+        # datetime control #
+        ####################
+        self.datetime = datetime_control(shorter("deal_adder_calendar1"),
+                                         time_control(shorter("deal_adder_hour1"),
+                                                      shorter("deal_adder_min1"),
+                                                      shorter("deal_adder_sec1"))
+                                         shorter("deal_editor_change_datetime"))
+
+        self.instrument = combo_control(shorter("deal_adder_stock1"),
+                                        shorter("deal_editor_change_instrument"))
+
+        self.stock = combo_control(shorter("deal_adder_market1"),
+                                   shorter("deal_editor_cnahge_stock"))
+        
+                                   
         
 
     def run(self):

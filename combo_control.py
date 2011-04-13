@@ -1,12 +1,14 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import gtk
+from hide_control import value_returner_control
 
-class combo_control:
+class combo_control(value_returner_control):
     """controls combobox and comboedit with one interface
     you can easly update rows in combobox with update_widget"""
-    def __init__(self, combobox):
+    def __init__(self, combobox, checkbutton = None):
         self.combobox = combobox
+        self.checkbutton = checkbutton
         if not isinstance(self.combobox, gtk.ComboBoxEntry):
             cell = gtk.CellRendererText()
             self.combobox.pack_start(cell)
@@ -22,11 +24,11 @@ class combo_control:
 
     def get_value(self):
         if isinstance(self.combobox, gtk.ComboBoxEntry):
-            return self.combobox.child.get_text()
+            return self.return_value(self.combobox.child.get_text())
         elif isinstance(self.combobox, gtk.ComboBoxText):
-            return self.combobox.get_active_text()
+            return self.return_value(self.combobox.get_active_text())
         else:
-            return self.combobox.get_model().get_value(self.combobox.get_active_iter(), 0)
+            return self.return_value(self.combobox.get_model().get_value(self.combobox.get_active_iter(), 0))
 
     def set_value(self, data):
         if isinstance(self.combobox, gtk.ComboBoxEntry):
