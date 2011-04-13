@@ -22,6 +22,7 @@ class deals_tab_controller(modifying_tab_control):
         shorter("add_deal", "activate", self.add_deal_activate)
         shorter("update_deals_tab", "activate", self.update_deals_tab_activate)
         shorter("deals_load_open_ru", "activate", self.deals_load_open_ru_activate)
+        shorter("change_deals", "activate", self.change_deals_activate)
         ############################
         # make columns in the view #
         ############################
@@ -40,6 +41,12 @@ class deals_tab_controller(modifying_tab_control):
                                                  sort_callback = self.sorted_callback)
         self.builder.get_object("deals_view").get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.sort_order = "id"
+
+    def change_deals_activate(self, action):
+        self.change_deals()
+
+    def change_deals(self):
+        pass
 
     def delete_deals_activate(self, action):
         self.delete_deals()
