@@ -39,7 +39,7 @@ class deal_editor_control:
         self.datetime = datetime_control(shorter("deal_adder_calendar1"),
                                          time_control(shorter("deal_adder_hour1"),
                                                       shorter("deal_adder_min1"),
-                                                      shorter("deal_adder_sec1"))
+                                                      shorter("deal_adder_sec1")),
                                          shorter("deal_editor_change_datetime"))
 
         self.instrument = combo_control(shorter("deal_adder_stock1"),
@@ -73,17 +73,30 @@ class deal_editor_control:
         for (setfunc, key) in [(self.datetime.set_datetime, "datetime"),
                                (self.direction.set_value, "deal_sign"),
                                (self.account.set_value, "account_id"),
+                               (self.instrument.set_value, "security_name"),
+                               (self.market.set_value, "security_type"),
+                               (self.price.set_value, "price"),
+                               (self.count.set_value, "quantity"),
+                               (self.broker_comm.set_value, "broker_comm")
+                               (self.stock_comm.set_value, "stock_comm")]:
+            m = gethash(data, key)
+            if m != None:
+                setfunc(m)
                                
         
 
     def run(self):
-        self.builder.get_object("deal_editor").run()
+        win = self.builder.get_object("deal_editor")
+        win.show_all()
+        win.run()
+        win.hide()
 
 
 if __name__ == "__main__":
     b = gtk.Builder()
     b.add_from_file('main_ui.glade')
     con = deal_editor_control(b)
+    con.update_accounts([(1, "jfjfj"), (2, "ejfije")])
     con.run()
                                
         
