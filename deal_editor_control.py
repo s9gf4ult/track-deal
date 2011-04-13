@@ -8,6 +8,7 @@ from time_control import time_control
 from select_control import select_control
 from combo_control import combo_control
 from number_range_control import number_control
+from combo_select_control import combo_select_control
 
 class deal_editor_control:
     def __init__(self, builder):
@@ -44,15 +45,35 @@ class deal_editor_control:
         self.instrument = combo_control(shorter("deal_adder_stock1"),
                                         shorter("deal_editor_change_instrument"))
 
-        self.mark = combo_control(shorter("deal_adder_market1"),
-                                  shorter("deal_editor_cnahge_stock"))
+        self.market = combo_control(shorter("deal_adder_market1"),
+                                    shorter("deal_editor_cnahge_stock"))
 
         self.price = number_control(shorter("deal_adder_price1"), shorter("deal_editor_change_price"))
         self.count = number_control(shorter("deal_adder_count1"), shorter("deal_editor_change_count"))
         self.broker_comm = number_control(shorter("deal_adder_broker_comm1"), shorter("deal_editor_change_broker_comm"))
         self.stock_comm = number_control(shorter("deal_adder_stock_comm1"), shorter("deal_editor_change_stock_comm"))
-        
-                                   
+        self.change_account = shorter("deal_editor_change_account")
+        self.account = combo_select_control(shorter("deal_adder_account1"))
+        self.direction = select_control({-1 : shorter("deal_adder_buy_rb1"),
+                                         1 : shorter("deal_adder_sell_rb1")}, shorter("deal_editor_change_direction"))
+
+
+    def update_accounts(self, accounts):
+        """accounts must be the list of tupples like this (account_id, account_name)"""
+        self.account.update_widget(answers = accounts, none_answer = -1)
+
+    def update_instruments(self, instruments):
+        """instruments is a list of strings"""
+        self.instrument.update_widget(instruments)
+
+    def update_markets(self, markets):
+        self.market.update_widget(markets)
+
+    def update_widget(self, data):
+        for (setfunc, key) in [(self.datetime.set_datetime, "datetime"),
+                               (self.direction.set_value, "deal_sign"),
+                               (self.account.set_value, "account_id"),
+                               
         
 
     def run(self):

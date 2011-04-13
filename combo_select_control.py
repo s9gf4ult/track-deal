@@ -27,7 +27,14 @@ class combo_select_control:
             fnd = find_in_list(lambda a: a[0] == val, answers)
             if fnd != None:
                 self.combobox.set_active(fnd)
-            
+
+    def set_value(self, val):
+        m = self.combobox.get_model()
+        if m != None:
+            itt = find_in_model(m, lambda mod, it: mod.get_value(it, 0) == val)
+            if itt != None:
+                self.combobox.set_active_iter(itt)
+                                 
 
     def get_value(self):
         if self.combobox.get_model() == None:
@@ -52,6 +59,11 @@ if __name__ == "__main__":
     def push(bt):
         con.update_widget([(20, "eeje"), (200, "200"), (300, "300"), (100, "100")], none_answer = -1)
     bt.connect("clicked", push)
+    btt = gtk.Button("push this")
+    def btt_push(bt):
+        con.set_value(200)
+    btt.connect("clicked", btt_push)
+    p.pack_start(btt)
     w.show_all()
     w.run()
     print(con.get_value())

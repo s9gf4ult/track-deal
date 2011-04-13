@@ -21,3 +21,12 @@ def gethash(fhash, key):
         return fhash[key]
     else:
         return None
+
+def find_in_model(tmodel, findfunc):
+    """returns path of found row in model"""
+    it = tmodel.get_iter_first()
+    while it != None:
+        if findfunc(tmodel, it):
+            return it
+        it = tmodel.iter_next(it)
+    return None
