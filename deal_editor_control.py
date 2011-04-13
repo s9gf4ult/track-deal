@@ -48,10 +48,13 @@ class deal_editor_control:
         self.market = combo_control(shorter("deal_adder_market1"),
                                     shorter("deal_editor_cnahge_stock"))
 
-        self.price = number_control(shorter("deal_adder_price1"), shorter("deal_editor_change_price"))
+        self.price = number_control(shorter("deal_adder_price1"), shorter("deal_editor_change_price"), step_incr = 0.1, digits = 4)
         self.count = number_control(shorter("deal_adder_count1"), shorter("deal_editor_change_count"))
-        self.broker_comm = number_control(shorter("deal_adder_broker_comm1"), shorter("deal_editor_change_broker_comm"))
-        self.stock_comm = number_control(shorter("deal_adder_stock_comm1"), shorter("deal_editor_change_stock_comm"))
+        self.broker_comm = number_control(shorter("deal_adder_broker_comm1"), shorter("deal_editor_change_broker_comm"), step_incr = 0.1, digits = 4)
+        self.stock_comm = number_control(shorter("deal_adder_stock_comm1"), shorter("deal_editor_change_stock_comm"), step_incr = 0.1, digits = 4)
+        for name in ["deal_adder_price1", "deal_adder_count1", "deal_adder_broker_comm1", "deal_adder_stock_comm1"]:
+            m = shorter(name)
+            m.get_adjustment().set_all(lower = 0, upper = sys.float_info.max)
         self.change_account = shorter("deal_editor_change_account")
         self.account = combo_select_control(shorter("deal_adder_account1"))
         self.direction = select_control({-1 : shorter("deal_adder_buy_rb1"),
@@ -82,7 +85,23 @@ class deal_editor_control:
             m = gethash(data, key)
             if m != None:
                 setfunc(m)
-                               
+
+    def get_updating_hash(self):
+        ret = {}
+        for (getter, key) in [(self.datetime.get_datetime, "datetime"),
+                              (self.direction.get_value, "deal_sign"),
+                              (self.instrument.get_value, "security_name"),
+                              (self.market.get_value, "security_type"),
+                              (self.price.get_value, "price"),
+                              (self.count.get_value, "quantity"),
+                              (self.broker_comm.get_value, "broker_comm"),
+                              (self.stock_comm.get_value, "stock_comm")]:
+            m = getter()
+            if m != None:
+                ret[key] = m
+        if self.change_account.get_active():
+            ret["account_id"] = self.account.get_value()
+        return ret
         
 
     def run(self):
@@ -98,5 +117,6 @@ if __name__ == "__main__":
     con = deal_editor_control(b)
     con.update_accounts([(1, "jfjfj"), (2, "ejfije")])
     con.run()
+    print(con.get_updating_hash())
                                
         
