@@ -7,6 +7,7 @@ from datetime_control import datetime_control
 from time_control import time_control
 from select_control import select_control
 from combo_control import combo_control
+from number_range_control import number_control
 
 class deal_editor_control:
     def __init__(self, builder):
@@ -43,8 +44,13 @@ class deal_editor_control:
         self.instrument = combo_control(shorter("deal_adder_stock1"),
                                         shorter("deal_editor_change_instrument"))
 
-        self.stock = combo_control(shorter("deal_adder_market1"),
-                                   shorter("deal_editor_cnahge_stock"))
+        self.mark = combo_control(shorter("deal_adder_market1"),
+                                  shorter("deal_editor_cnahge_stock"))
+
+        self.price = number_control(shorter("deal_adder_price1"), shorter("deal_editor_change_price"))
+        self.count = number_control(shorter("deal_adder_count1"), shorter("deal_editor_change_count"))
+        self.broker_comm = number_control(shorter("deal_adder_broker_comm1"), shorter("deal_editor_change_broker_comm"))
+        self.stock_comm = number_control(shorter("deal_adder_stock_comm1"), shorter("deal_editor_change_stock_comm"))
         
                                    
         
