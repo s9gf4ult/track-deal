@@ -6,6 +6,7 @@ from number_range_control import number_control
 from time_control import *
 from select_control import *
 from combo_select_control import *
+from common_methods import *
 import sys
 
 class deal_adder_control:
@@ -63,6 +64,21 @@ class deal_adder_control:
                 "stock_comm_nds" : 0,
                 "account_id" : self.account.get_value(),
                 "volume" : self.count.get_value() * self.price.get_value()}
+
+    def load_from_hash(self, data):
+        for (setter, key) in [(self.datetime.set_datetime, "datetime"),
+                              (self.direction.set_value, "deal_sign"),
+                              (self.account.set_value, "account_id"),
+                              (self.instrument.set_value, "security_name"),
+                              (self.market.set_value, "security_type"),
+                              (self.price.set_value, "price"),
+                              (self.count.set_value, "quantity"),
+                              (self.broker_comm.set_value, "broker_comm")
+                              (self.stock_comm.set_value, "stock_comm")]:
+            m = gethash(data, key)
+            if m != None:
+                setter(m)
+        
 
     def check_correctness(self):
         def notempty(str):

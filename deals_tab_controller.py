@@ -46,7 +46,29 @@ class deals_tab_controller(modifying_tab_control):
         self.change_deals()
 
     def change_deals(self):
+        d = self.builder.get_object("deals_view")
+        if d.get_selection().count_selected_rows() > 1:
+            self.change_multiple_deals()
+        elif d.get_selection().count_selected_rows() == 1:
+            self.change_one_deal()
+
+    def change_multiple_deals(self):
         pass
+
+    def change_one_deal(self):
+        d = self.builder.get_object("deals_view")
+        (mod, it) = d.get_selection.get_selected()
+        if it != None:
+            dh = {}
+            did = mod.get_value(it, 0)
+            for (val, key) in map(lambda a, b: (a, b),
+                                  self.database.connection.execute("select datetime, deal_sign, account_id, security_name, security_type, price, count, broker_comm, stock_comm from deals where id = ?", (did, )).fetchone(),
+                                  ["datetime", "deal_sign", "account_id", "security_name", "security_type", "price", "count", "broker_comm", "stock_comm"]):
+                dh[key] = val
+            self.adder.load_from_hash(dh)
+            ret = self.adder.run()
+            if ret != None:
+                
 
     def delete_deals_activate(self, action):
         self.delete_deals()
