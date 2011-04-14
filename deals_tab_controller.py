@@ -143,7 +143,9 @@ class deals_tab_controller(modifying_tab_control):
             ret = self.report_importer.run()
             if ret != None:
                 rt = self.report_importer.get_report_type()
+                print(rt)
                 if gethash(sources.classes, rt) != None:
+                    print(sources.classes[rt])
                     if sources.classes[rt] == sources.xml_parser:
                         self.load_open_ru(self.report_importer.get_account_id(), self.report_importer.get_file_name())
                 

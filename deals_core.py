@@ -11,8 +11,9 @@ class deals_proc():
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
         self.connection = None
-        self.have_changes = False
+        self.last_total_changes = 0
 
+        
     def create_temporary_tables(self):
         self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
         self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")

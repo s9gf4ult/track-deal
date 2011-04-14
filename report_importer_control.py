@@ -16,9 +16,9 @@ class report_importer_control:
         self.account = combo_select_control(self.account_widget)
 
     def update_widget(self, accounts = None, report_types = None):
-        if accounts != None:
+        if accounts != None and len(accounts) > 0:
             self.account.update_widget(accounts, none_answer = -1)
-        if report_types != None:
+        if report_types != None and len(report_types) > 0:
             self.report.update_widget(report_types)
             if len(report_types) > 0:
                 self.report.set_value(report_types[0][0])
@@ -37,11 +37,27 @@ class report_importer_control:
         w = self.builder.get_object("report_importer")
         w.show_all()
         ret = w.run()
+        while ret == gtk.RESPONSE_ACCEPT:
+            if self.check_correctness():
+                w.hide()
+                return True
+            ret = w.run()
         w.hide()
-        if ret == gtk.RESPONSE_ACCEPT and self.file.get_filename() != None and self.report.get_value() != None:
-            return True
-        else:
-            return None
+        return None
+
+    def check_correctness(self):
+        errs = []
+        if self.get_file_name() == None:
+            errs += u'Нужно указать имя файла для загрузки'
+        if self.get_report_type() == None:
+            errs += u'Нужно указать тип файла для загрузки'
+
+        if len(errs) > 0:
+            sh = reduce(lambda a, b: u'{0}\n{1}'.format(a, b), errs)
+            show_error(sh, self.builder.get_object("report_importer"))
+            return False
+        return True
+            
 
 if __name__ == "__main__":
     b = gtk.Builder()
