@@ -143,9 +143,9 @@ class deals_tab_controller(modifying_tab_control):
             ret = self.report_importer.run()
             if ret != None:
                 rt = self.report_importer.get_report_type()
-                print(rt)
+                if isinstance(rt, str):
+                    rt = rt.decode('utf-8')
                 if gethash(sources.classes, rt) != None:
-                    print(sources.classes[rt])
                     if sources.classes[rt] == sources.xml_parser:
                         self.load_open_ru(self.report_importer.get_account_id(), self.report_importer.get_file_name())
                 
@@ -161,13 +161,11 @@ class deals_tab_controller(modifying_tab_control):
         try:
             xs = sources.xml_parser(filename)
             xs.check_file()
-            self.database.get_from_source_in_account(account, filename)
+            self.database.get_from_source_in_account(account, xs)
             self.call_update_callback()
         except Exception as e:
-            show_error(e.__str__(), win)
+            show_error(e.__str__(), self.builder.get_object("main_window"))
             print(traceback.format_exc())
-        diag.destroy()
-        fl.destroy()
 
     def call_filter_activate(self, action):
         self.call_filter()

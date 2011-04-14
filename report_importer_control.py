@@ -3,6 +3,7 @@
 
 import gtk
 from combo_select_control import combo_select_control
+from common_methods import *
 
 class report_importer_control:
     def __init__(self, builder):
@@ -48,9 +49,9 @@ class report_importer_control:
     def check_correctness(self):
         errs = []
         if self.get_file_name() == None:
-            errs += u'Нужно указать имя файла для загрузки'
+            errs.append(u'Нужно указать имя файла для загрузки')
         if self.get_report_type() == None:
-            errs += u'Нужно указать тип файла для загрузки'
+            errs.append(u'Нужно указать тип файла для загрузки')
 
         if len(errs) > 0:
             sh = reduce(lambda a, b: u'{0}\n{1}'.format(a, b), errs)

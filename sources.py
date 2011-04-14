@@ -61,4 +61,4 @@ class xml_parser():
         self.checked=True
 
         
-classes = {"fjfj" : xml_parser}
+classes = {u'Отчет брокерского дома "Открытие"' : xml_parser}
