@@ -7,6 +7,7 @@ import re
 
 class deals_proc():
     def __init__(self):
+        self.current_user_version = 1
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
@@ -29,8 +30,26 @@ class deals_proc():
 
     def open_existing(self, filename):
         self.open(filename)
-        if 3 != self.connection.execute("select count(*) from sqlite_master where type = 'table' and (name = 'positions' or name = 'deals' or name = 'deal_groups')").fetchone()[0]:
-            raise Exception(u'Эта sqlite3 база скорее всего не является базой созданной open-deals')
+        (cuv, ) = self.connection.execute("pragma user_version").fetchone()
+        if cuv != self.current_user_version:
+            raise Exception(u'Не совпадает версия базы, должна быть {0}, а в базе {1}'.format(self.current_user_version, cuv))
+        self.check_database_version_1()
+
+    def check_tables_existance(self, tables):
+        etables = map(lambda a: a[0].decode('utf-8'), self.connection.execute("select name from sqlite_master where type = 'table'"))
+        if set(etables) != set(tables):
+            raise Exception(u'Должны существовать такие таблицы {0}, а существуют такие {1}'.format(etables, tables))
+
+    def check_table_structure(self, table, fields):
+        """`fields' is a list of tuples [(name_field, type_field, not_nullable, is_primary_key)]"""
+        efields = map(lambda a: (a[1].decode('utf-8'), a[2].decode('utf-8'), a[3].decode('utf-8'), a[5].decode('utf-8')), self.connection.execute("pragma table_info(?)", table))
+        ffields = map(lambda a: tuple(map(lambda x: x.decode('utf-8'), a)), fields)
+        if set(efields) != set(ffields):
+            raise Exception(u'В таблице {0} должны существовать поля {1} в реале существуют такие {2}'.format(table, ffields, efields))
+        
+    def check_database_version_1(self):
+        self.check_tables_existance([u'deals', u'positions', u'deal_groups', u'accounts'])
+            
 
     def set_selected_stocks(self, stocks):
         ll = self.connection.total_changes
@@ -50,7 +69,7 @@ class deals_proc():
 
     def create_new(self, filename):
         self.open(filename)
-        self.connection.execute("pragma user_version = 1")
+        self.connection.execute("pragma user_version = {0}".format(self.current_user_version))
         self.connection.execute("""create table positions(
         id integer primary key not null,
         ticket text not null,
