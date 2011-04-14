@@ -5,6 +5,7 @@ import datetime
 import hashlib
 
 
+
 class xml_parser():
     def __init__(self, filename):
         self.xml = parse(filename)
@@ -58,3 +59,6 @@ class xml_parser():
                 deal['stock_comm'] = stock_comm / summ_volume * deal['volume']
                 
         self.checked=True
+
+        
+classes = {u'Отчет брокерского дома "Открытие"' : xml_parser}

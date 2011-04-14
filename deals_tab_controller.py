@@ -6,14 +6,16 @@ from common_methods import *
 import sources
 from modifying_tab_control import modifying_tab_control
 import traceback
+import sources
 
 class deals_tab_controller(modifying_tab_control):
-    def __init__(self, global_data, database, builder, update_callback, filter_control, adder_control, deal_editor):
+    def __init__(self, global_data, database, builder, update_callback, filter_control, adder_control, deal_editor, report_importer):
         self.builder = builder
         self.database = database
         self.filter = filter_control
         self.adder = adder_control
         self.deal_editor = deal_editor
+        self.report_importer = report_importer
         self.global_data = global_data
         self.update_callback = update_callback
         def shorter(objname, signal, method):
@@ -134,7 +136,13 @@ class deals_tab_controller(modifying_tab_control):
         self.update_widget()
 
     def deals_load_open_ru_activate(self, action):
-        self.load_open_ru()
+        if self.database.connection != None:
+            a = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys())
+            print(a[0][0].__class__)
+            self.report_importer.update_widget(accounts = self.database.connection.execute("select id, name from accounts").fetchall(),
+                                               report_types = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys()))
+            ret = self.report_importer.run()
+                
 
     def sorted_callback(self, column, order, params):
         self.sort_order = params[0] + (order == gtk.SORT_DESCENDING and " desc" or "")
