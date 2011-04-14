@@ -50,6 +50,7 @@ class deals_proc():
 
     def create_new(self, filename):
         self.open(filename)
+        self.connection.execute("pragma user_version = 1")
         self.connection.execute("""create table positions(
         id integer primary key not null,
         ticket text not null,

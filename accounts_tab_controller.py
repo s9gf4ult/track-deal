@@ -48,7 +48,7 @@ class accounts_tab_controller(modifying_tab_control):
     def update_accounts_list(self):
         """update list of accounts"""
         if self.database.connection:
-            u = self.database.connection.execute("select a.name, a.first_money, (a.first_money + sum(d.deal_sign * d.price * d.quantity) - sum(d.stock_comm) - sum(d.broker_comm) - sum(d.broker_comm_nds) - sum(d.stock_comm_nds)), a.currency from accounts a inner join deals d on d.account_id = a.id where d.not_actual is null group by a.name").fetchall()
+            u = self.database.connection.execute("select a.name, a.first_money, (a.first_money + sum(d.deal_sign * d.volume) - sum(d.stock_comm) - sum(d.broker_comm)), a.currency from accounts a inner join deals d on d.account_id = a.id where d.not_actual is null group by a.name").fetchall()
             u += self.database.connection.execute("select a.name, a.first_money, a.first_money, a.currency from accounts a where not exists(select * from deals where account_id = a.id and not_actual is null)").fetchall()
             self.accounts_list.update_rows(u)
             
