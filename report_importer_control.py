@@ -48,4 +48,3 @@ if __name__ == "__main__":
     con = report_importer_control(b)
     con.update_widget([(0, "ak1"), (1, "ak2")], [(0, "type1"), (1, "type2")])
     con.run()
-    
