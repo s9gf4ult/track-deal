@@ -14,6 +14,7 @@ from positions_tab_controller import positions_tab_controller
 from accounts_tab_controller import accounts_tab_controller
 from account_edit_control import account_edit_control
 from deal_editor_control import deal_editor_control
+from report_importer_control import report_importer_control
 
 class main_ui():
 
@@ -36,7 +37,8 @@ class main_ui():
         self.deals_filter = deals_filter(self.global_data, self.builder, self.database)
         self.deal_adder = deal_adder_control(self.builder)
         self.deal_editor = deal_editor_control(self.builder)
-        self.deals_tab = deals_tab_controller(self.global_data, self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder, self.deal_editor)
+        self.report_importer = report_importer_control(self.builder)
+        self.deals_tab = deals_tab_controller(self.global_data, self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder, self.deal_editor, self.report_importer)
         # positions tab
         self.positions_tab = positions_tab_controller(self.database, self.builder, self.update_view)
 
