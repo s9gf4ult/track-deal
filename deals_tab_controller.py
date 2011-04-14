@@ -138,7 +138,6 @@ class deals_tab_controller(modifying_tab_control):
     def deals_load_open_ru_activate(self, action):
         if self.database.connection != None:
             a = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys())
-            print(a[0][0].__class__)
             self.report_importer.update_widget(accounts = self.database.connection.execute("select id, name from accounts").fetchall(),
                                                report_types = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys()))
             ret = self.report_importer.run()

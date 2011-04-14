@@ -38,7 +38,7 @@ class report_importer_control:
         w.show_all()
         ret = w.run()
         w.hide()
-        if ret == gtk.RESPONSE_ACCEPT:
+        if ret == gtk.RESPONSE_ACCEPT and self.file.get_filename() != None and self.report.get_value() != None:
             return True
         else:
             return None
