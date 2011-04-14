@@ -8,11 +8,12 @@ from modifying_tab_control import modifying_tab_control
 import traceback
 
 class deals_tab_controller(modifying_tab_control):
-    def __init__(self, global_data, database, builder, update_callback, filter_control, adder_control):
+    def __init__(self, global_data, database, builder, update_callback, filter_control, adder_control, deal_editor):
         self.builder = builder
         self.database = database
         self.filter = filter_control
         self.adder = adder_control
+        self.deal_editor = deal_editor
         self.global_data = global_data
         self.update_callback = update_callback
         def shorter(objname, signal, method):
@@ -53,12 +54,16 @@ class deals_tab_controller(modifying_tab_control):
     def change_deals(self):
         d = self.builder.get_object("deals_view").get_selection().count_selected_rows()
         if d > 1:
-            self.change_multiple_deals()
+            self.change_multiple_deals()m
         elif d == 1:
             self.change_one_deal()
 
     def change_multiple_deals(self):
-        pass
+        d = self.builder.get_object("deals_view")
+        (mod, paths) = d.get_selection().get_selected_rows()
+        if paths != None and len(paths) > 1:
+            
+            
 
     def change_one_deal(self):
         d = self.builder.get_object("deals_view")
