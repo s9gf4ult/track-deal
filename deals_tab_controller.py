@@ -141,6 +141,11 @@ class deals_tab_controller(modifying_tab_control):
             self.report_importer.update_widget(accounts = self.database.connection.execute("select id, name from accounts").fetchall(),
                                                report_types = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys()))
             ret = self.report_importer.run()
+            if ret != None:
+                rt = self.report_importer.get_report_type()
+                if gethash(sources.classes, rt) != None:
+                    if sources.classes[rt] == sources.xml_parser:
+                        self.load_open_ru(self.report_importer.get_account_id(), self.report_importer.get_file_name())
                 
 
     def sorted_callback(self, column, order, params):
@@ -148,25 +153,17 @@ class deals_tab_controller(modifying_tab_control):
         self.update_widget()
         
 
-    def load_open_ru(self):
+    def load_open_ru(self, account, filename):
         if not self.database.connection:
             return
-        win = self.builder.get_object("main_window")
-        diag = gtk.FileChooserDialog(title = u'Открыть отчет "Открытие"', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
-        diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
-        fl = gtk.FileFilter()
-        fl.add_mime_type('application/xml')
-        diag.set_filter(fl)
-        if diag.run() == gtk.RESPONSE_ACCEPT:
-            try:
-                xs = sources.xml_parser(diag.get_filename())
-                xs.check_file()
-                self.database.get_from_source(xs)
-                self.call_update_callback()
-            except Exception as e:
-                show_error(e.__str__(), win)
-                print(traceback.format_exc())
+        try:
+            xs = sources.xml_parser(filename)
+            xs.check_file()
+            self.database.get_from_source_in_account(account, filename)
+            self.call_update_callback()
+        except Exception as e:
+            show_error(e.__str__(), win)
+            print(traceback.format_exc())
         diag.destroy()
         fl.destroy()
 
