@@ -1894,6 +1894,21 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkRadioButton" id="radiobutton1">
+                    <property name="label" translatable="yes">&#x412;&#x441;&#x435; &#x43F;&#x43E;&#x434;&#x440;&#x44F;&#x434;</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">deals_filter_account_current</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkRadioButton" id="deals_filter_account_select">
                     <property name="label" translatable="yes">&#x412;&#x44B;&#x431;&#x440;&#x430;&#x442;&#x44C;</property>
                     <property name="visible">True</property>
@@ -1905,7 +1920,7 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">2</property>
+                    <property name="position">3</property>
                   </packing>
                 </child>
                 <child>
@@ -1986,7 +2001,7 @@
                     </child>
                   </object>
                   <packing>
-                    <property name="position">3</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>
