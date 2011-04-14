@@ -15,6 +15,8 @@ class deal_editor_control:
         self.builder = builder
         def shorter(name):
             return self.builder.get_object(name)
+        w = self.builder.get_object("deal_editor")
+        w.add_buttons(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         
         ##########
         # hiders #
@@ -107,8 +109,9 @@ class deal_editor_control:
     def run(self):
         win = self.builder.get_object("deal_editor")
         win.show_all()
-        win.run()
+        ret = win.run()
         win.hide()
+        return ret
 
 
 if __name__ == "__main__":

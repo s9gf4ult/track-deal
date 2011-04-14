@@ -54,7 +54,7 @@ class deals_tab_controller(modifying_tab_control):
     def change_deals(self):
         d = self.builder.get_object("deals_view").get_selection().count_selected_rows()
         if d > 1:
-            self.change_multiple_deals()m
+            self.change_multiple_deals()
         elif d == 1:
             self.change_one_deal()
 
@@ -62,6 +62,15 @@ class deals_tab_controller(modifying_tab_control):
         d = self.builder.get_object("deals_view")
         (mod, paths) = d.get_selection().get_selected_rows()
         if paths != None and len(paths) > 1:
+            dids = map(lambda it: mod.get_value(it, 0), map(lambda p: mod.get_iter(p), paths))
+            self.deal_editor.update_accounts(self.database.connection.execute("select id, name from accounts").fetchall())
+            
+            ret = self.deal_editor.run()
+            if ret != None:
+                dhash = self.deal_editor.get_updating_hash()
+                for did in dids:
+                    self.database._update_from_hash("deals", did, dhash)
+                self.call_update_callback()
             
             
 
