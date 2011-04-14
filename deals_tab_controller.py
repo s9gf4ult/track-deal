@@ -64,7 +64,8 @@ class deals_tab_controller(modifying_tab_control):
         if paths != None and len(paths) > 1:
             dids = map(lambda it: mod.get_value(it, 0), map(lambda p: mod.get_iter(p), paths))
             self.deal_editor.update_accounts(self.database.connection.execute("select id, name from accounts").fetchall())
-            
+            self.deal_editor.update_instruments(map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals").fetchall()))
+            self.deal_editor.update_markets(map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals").fetchall()))
             ret = self.deal_editor.run()
             if ret != None:
                 dhash = self.deal_editor.get_updating_hash()

@@ -111,7 +111,10 @@ class deal_editor_control:
         win.show_all()
         ret = win.run()
         win.hide()
-        return ret
+        if ret == gtk.RESPONSE_ACCEPT:
+            return True
+        else:
+            return None
 
 
 if __name__ == "__main__":
