@@ -23,6 +23,15 @@ class report_importer_control:
                 self.report.set_value(report_types[0][0])
         self.file.unselect_all()
 
+    def get_file_name(self):
+        return self.file.get_filename()
+
+    def get_report_type(self):
+        return self.report.get_value()
+
+    def get_account_id(self):
+        return self.account.get_value()
+
     def run(self):
         w = self.builder.get_object("report_importer")
         w.show_all()
