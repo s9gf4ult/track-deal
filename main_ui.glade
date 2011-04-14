@@ -1894,7 +1894,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkRadioButton" id="radiobutton1">
+                  <object class="GtkRadioButton" id="deals_filter_acount_all">
                     <property name="label" translatable="yes">&#x412;&#x441;&#x435; &#x43F;&#x43E;&#x434;&#x440;&#x44F;&#x434;</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

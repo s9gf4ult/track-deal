@@ -104,8 +104,10 @@ class deals_filter_control:
         self.direction = select_control({-1 : self.builder.get_object("deals_filter_direction_long_rb"),
                                          1 : self.builder.get_object("deals_filter_direction_short_rb")},
                                         self.builder.get_object("deals_filter_direction_cb"))
-        self.account_current = select_control({True : self.builder.get_object("deals_filter_account_current"),
-                                               False : self.builder.get_object("deals_filter_account_select")})
+        self.account_current = select_control({"current" : self.builder.get_object("deals_filter_account_current"),
+                                               "select" : self.builder.get_object("deals_filter_account_select"),
+                                               "none" : self.builder.get_object("deals_filter_account_none"),
+                                               "all" : self.builder.get_object("deals_filter_acount_all")})
         
         ##################
         # number ranges  #

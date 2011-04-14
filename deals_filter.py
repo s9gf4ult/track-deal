@@ -43,7 +43,16 @@ class deals_filter():
         if not self.database.connection:
             return cursor_empty()
         conds = self.boundary
-        q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock inner join selected_accounts a on d.account_id = a.account_id where d.not_actual is null ".format(reduce(lambda a, b:u'{0}, {1}'.format(a, b), map(lambda c: 'd.{0}'.format(c), fields)))
+        ff = reduce(lambda a, b:u'{0}, {1}'.format(a, b), map(lambda c: 'd.{0}'.format(c), fields))
+        q = ""
+        acval = self.dialog.account_current.get_value()
+        curac = gethash(self.global_data, "current_account")
+        if (acval == "current" and curac == None) or acval == "none":
+            q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock where d.not_actual is null and account_id is null".format(ff)
+        elif acval == "current" or acval == "select":
+            q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock inner join selected_accounts a on d.account_id = a.account_id where d.not_actual is null ".format(ff)
+        elif acval == "all":
+            q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock where d.not_actual is null ".format(ff)
         if parent != None and parent != False:
             q += "and d.parent_deal_id = {0}".format(parent)
         elif parent == False:
@@ -60,10 +69,10 @@ class deals_filter():
         if not self.database.connection:
             return
         self.database.set_selected_stocks(map(lambda a: a[0], self.dialog.instruments.get_checked_rows()))
-        if self.dialog.account_current.get_value():
+        if self.dialog.account_current.get_value() == "current":
             (name, ) = self.database.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"), )).fetchone() or (None, )
             self.database.set_selected_accounts(name != None and [name] or None)
-        else:
+        elif self.dialog.account_current.get_value() == "select":
             self.database.set_selected_accounts(map(lambda a: a[0], self.dialog.accounts.get_checked_rows()))
 
     def _regen_boundary(self):
