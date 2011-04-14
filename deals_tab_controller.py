@@ -39,17 +39,22 @@ class deals_tab_controller(modifying_tab_control):
                                                   (u'Комиссия биржи', gtk.CellRendererSpin(), float, "stock_comm")],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
-        self.builder.get_object("deals_view").get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        dd = self.builder.get_object("deals_view")
+        dd.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        dd.connect("row-activated", self.deals_view_row_activated)
         self.sort_order = "id"
 
     def change_deals_activate(self, action):
         self.change_deals()
 
+    def deals_view_row_activated(self, treeview, path, column):
+        self.change_deals()
+
     def change_deals(self):
-        d = self.builder.get_object("deals_view")
-        if d.get_selection().count_selected_rows() > 1:
+        d = self.builder.get_object("deals_view").get_selection().count_selected_rows()
+        if d > 1:
             self.change_multiple_deals()
-        elif d.get_selection().count_selected_rows() == 1:
+        elif d == 1:
             self.change_one_deal()
 
     def change_multiple_deals(self):
