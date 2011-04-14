@@ -44,7 +44,8 @@ class deals_proc():
         if accounts and len(accounts) > 0:
             self.connection.executemany("insert into selected_accounts(account_id) select id from accounts where name = ?", map(lambda a: (a,), accounts))
         self.last_total_changes += self.connection.total_changes - ll
-            
+
+        
 
     def create_new(self, filename):
         self.open(filename)
@@ -187,6 +188,13 @@ class deals_proc():
             fields.append(key)
             values.append(hashtable[key])
         return self._insert_into(tablename, fields, values)
+
+    def _update_from_hash(self, tablename, recid, hashtable):
+        keys = hashtable.keys()
+        vals = map(lambda key: hashtable[key], keys)
+        setfields = reduce(lambda a, b:u'{0}, {1}'.format(a, b), map(lambda key:u'{0} = ?'.format(key), keys))
+        q = u'update {table} set {sets} where id = ?'.format(table = tablename, sets = setfields)
+        self.connection.execute(q, vals + [recid])
 
     def check_balance(self):
         for (account,) in self.connection.execute("select distinct id from accounts"):

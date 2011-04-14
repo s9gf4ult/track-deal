@@ -57,18 +57,19 @@ class deals_tab_controller(modifying_tab_control):
 
     def change_one_deal(self):
         d = self.builder.get_object("deals_view")
-        (mod, it) = d.get_selection.get_selected()
-        if it != None:
+        (mod, it) = d.get_selection().get_selected_rows()
+        if it != None and len(it) == 1:
             dh = {}
-            did = mod.get_value(it, 0)
+            did = mod.get_value(mod.get_iter(it[0]), 0)
             for (val, key) in map(lambda a, b: (a, b),
-                                  self.database.connection.execute("select datetime, deal_sign, account_id, security_name, security_type, price, count, broker_comm, stock_comm from deals where id = ?", (did, )).fetchone(),
-                                  ["datetime", "deal_sign", "account_id", "security_name", "security_type", "price", "count", "broker_comm", "stock_comm"]):
+                                  self.database.connection.execute("select datetime, deal_sign, account_id, security_name, security_type, price, quantity, broker_comm, stock_comm from deals where id = ?", (did, )).fetchone(),
+                                  ["datetime", "deal_sign", "account_id", "security_name", "security_type", "price", "quantity", "broker_comm", "stock_comm"]):
                 dh[key] = val
             self.adder.load_from_hash(dh)
             ret = self.adder.run()
             if ret != None:
-                
+                self.database._update_from_hash("deals", did, ret)
+                self.call_update_callback()
 
     def delete_deals_activate(self, action):
         self.delete_deals()

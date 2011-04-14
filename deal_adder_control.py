@@ -73,7 +73,7 @@ class deal_adder_control:
                               (self.market.set_value, "security_type"),
                               (self.price.set_value, "price"),
                               (self.count.set_value, "quantity"),
-                              (self.broker_comm.set_value, "broker_comm")
+                              (self.broker_comm.set_value, "broker_comm"),
                               (self.stock_comm.set_value, "stock_comm")]:
             m = gethash(data, key)
             if m != None:
