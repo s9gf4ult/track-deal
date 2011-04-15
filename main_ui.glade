@@ -117,6 +117,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">call_filter</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -125,6 +126,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">add_deal</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -133,6 +135,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">update_deals_tab</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -162,6 +165,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">call_positions_filter</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -170,6 +174,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">add_position</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -178,6 +183,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">update_positions</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -449,22 +455,6 @@
                             <property name="fill">False</property>
                             <property name="padding">5</property>
                             <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkButton" id="button2">
-                            <property name="label" translatable="yes">_&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
-                            <property name="related_action">update_deals_tab</property>
-                            <property name="use_underline">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">1</property>
                           </packing>
                         </child>
                       </object>
