@@ -3456,11 +3456,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="frame28">
+                  <object class="GtkFrame" id="pfilter_open_datetime_lower_superbox">
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment20">
+                      <object class="GtkAlignment" id="pfilter_open_datetime_lower_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -3489,7 +3489,7 @@
                                     <property name="visible">True</property>
                                     <property name="left_padding">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="hbox10">
+                                      <object class="GtkHBox" id="pfilter_open_datetime_lower_time_box">
                                         <property name="visible">True</property>
                                         <child>
                                           <object class="GtkSpinButton" id="pfilter_open_datetime_lower_hour">
@@ -3583,11 +3583,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="frame29">
+                  <object class="GtkFrame" id="pfilter_open_datetime_upper_superbox">
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment21">
+                      <object class="GtkAlignment" id="pfilter_open_datetime_upper_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -3616,7 +3616,7 @@
                                     <property name="visible">True</property>
                                     <property name="left_padding">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="hbox11">
+                                      <object class="GtkHBox" id="pfilter_open_datetime_upper_time_box">
                                         <property name="visible">True</property>
                                         <child>
                                           <object class="GtkSpinButton" id="pfilter_open_datetime_upper_hour">
@@ -3742,11 +3742,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="frame31">
+                  <object class="GtkFrame" id="pfilter_close_datetime_lower_superbox">
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment23">
+                      <object class="GtkAlignment" id="pfilter_close_datetime_lower_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -3775,7 +3775,7 @@
                                     <property name="visible">True</property>
                                     <property name="left_padding">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="hbox12">
+                                      <object class="GtkHBox" id="pfilter_close_datetime_lower_time_box">
                                         <property name="visible">True</property>
                                         <child>
                                           <object class="GtkSpinButton" id="pfilter_close_datetime_lower_hour">
@@ -3869,11 +3869,11 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="frame34">
+                  <object class="GtkFrame" id="pfilter_close_datetime_upper_superbox">
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment26">
+                      <object class="GtkAlignment" id="pfilter_close_datetime_upper_box">
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
@@ -3902,7 +3902,7 @@
                                     <property name="visible">True</property>
                                     <property name="left_padding">12</property>
                                     <child>
-                                      <object class="GtkHBox" id="hbox13">
+                                      <object class="GtkHBox" id="pfilter_close_datetime_upper_time_box">
                                         <property name="visible">True</property>
                                         <child>
                                           <object class="GtkSpinButton" id="pfilter_close_datetime_upper_hour">
@@ -4128,7 +4128,7 @@
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
-                          <object class="GtkVBox" id="vbox18">
+                          <object class="GtkVBox" id="pfilter_deal_direction_box">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
