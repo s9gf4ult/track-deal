@@ -71,6 +71,8 @@ class deals_tab_controller(modifying_tab_control):
             ret = self.deal_editor.run()
             if ret != None:
                 dhash = self.deal_editor.get_updating_hash()
+                if len(dhash) == 0:
+                    return
                 for did in dids:
                     self.database._update_from_hash("deals", did, dhash)
                 self.call_update_callback()
