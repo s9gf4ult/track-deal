@@ -800,7 +800,7 @@
     <signal name="activate" handler="on_close_database_activate"/>
   </object>
   <object class="GtkAction" id="deals_load_open_ru">
-    <property name="label">&#x417;&#x430;&#x433;&#x440;&#x443;&#x437;&#x438;&#x442;&#x44C; &#x438;&#x437; &#x43E;&#x442;&#x447;&#x435;&#x442;&#x430; "&#x41E;&#x442;&#x43A;&#x440;&#x44B;&#x442;&#x438;&#x435;"</property>
+    <property name="label">&#x417;&#x430;&#x433;&#x440;&#x443;&#x437;&#x438;&#x442;&#x44C; &#x438;&#x437; &#x444;&#x430;&#x439;&#x43B;&#x430; &#x441; &#x43E;&#x442;&#x447;&#x435;&#x442;&#x43E;&#x43C;</property>
   </object>
   <object class="GtkAction" id="positions_make">
     <property name="label">&#x420;&#x430;&#x441;&#x43F;&#x438;&#x441;&#x430;&#x442;&#x44C; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
