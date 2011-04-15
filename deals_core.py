@@ -186,7 +186,10 @@ class deals_proc():
         self.get_from_list(map(one, coats))
             
     def get_from_source_in_account(self, account, source):
-        self.get_from_list_in_account(account, source.get_deals_list())
+        if account != None:
+            self.get_from_list_in_account(account, source.get_deals_list())
+        else:
+            self.get_from_list(source.get_deals_list())
 
     def get_from_source(self, source):
         self.get_from_list(source.get_deals_list())
