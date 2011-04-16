@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-from hide_control import hide_control
+from hide_control import *
 from number_range_control import *
 
 class hiding_number_range_control(number_range_control):
@@ -12,7 +12,7 @@ class hiding_number_range_control(number_range_control):
                           (upper_chbt, upper_spin)]:
             if bt != None and box != None:
                 self.hiders.append(hide_control(bt, [box]))
-        subhide = filter(lambda a: a != None, [lower_chbt, upper_bhbt])
+        subhide = filter(lambda a: a != None, [lower_chbt, upper_chbt])
         if len(subhide) > 0 and global_chbt != None:
             self.subhiders = all_checked_control(global_chbt, subhide)
         lower = number_control(lower_spin, lower_chbt, step_incr, digits)
