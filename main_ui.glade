@@ -4242,7 +4242,7 @@
                     </child>
                     <child type="label">
                       <object class="GtkCheckButton" id="pfilter_count">
-                        <property name="label" translatable="yes">&#x41A;&#x43E;&#x43B;&#x438;&#x447;&#x435;&#x441;&#x442;&#x432;&#x43E; &#x43A;&#x43E;&#x43D;&#x442;&#x440;&#x430;&#x43A;&#x442;&#x43E;&#x432;</property>
+                        <property name="label" translatable="yes">&#x41A;&#x43E;&#x43B;&#x438;&#x447;&#x435;&#x441;&#x442;&#x432;&#x43E; &#x431;&#x443;&#x43C;&#x430;&#x433;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
