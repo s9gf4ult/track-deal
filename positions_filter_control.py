@@ -4,7 +4,7 @@
 import gtk
 from hiding_number_range_control import hiding_number_range_control
 from hiding_select_control import hiding_select_control
-from hiding_datetime_range_control import hiding_number_range_control
+from hiding_datetime_range_control import hiding_datetime_range_control
 
 class positions_filter_control:
     def __init__(self, builder):

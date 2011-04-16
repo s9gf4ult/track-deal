@@ -8,9 +8,9 @@ from hide_control import *
 from common_methods import *
 
 class hiding_datetime_range_control(datetime_range_control):
-    def __init__(self, lower, upper, box = None, checkbutton = None):
+    def __init__(self, lower, upper, box = [], checkbutton = None):
         self.hiders = []
-        for (bt, boxes) in [(checkbutton, [box])] + reduce(lambda a, b: a + b, map(lambda h: [(gethash(h, "time_chbt"), [gethath(h, "time_box")]),
+        for (bt, boxes) in [(checkbutton, box)] + reduce(lambda a, b: a + b, map(lambda h: [(gethash(h, "time_chbt"), [gethash(h, "time_box")]),
                                                                                               (gethash(h, "chbt"), [gethash(h, "box")])],
                                                                                    [lower, upper])):
             rbox = filter(lambda a: a != None, boxes)
@@ -25,7 +25,7 @@ class hiding_datetime_range_control(datetime_range_control):
                      map(lambda a: gethash(a, "calendar"), [lower, upper]),
                      times,
                      map(lambda a: gethash(a, "chbt"), [lower, upper]))
-        datetime_range_control.__init__(self, *dtimes, checkbutton = checkbutton)
+        datetime_range_control.__init__(self, *(dtimes + [checkbutton]))
         
 
 

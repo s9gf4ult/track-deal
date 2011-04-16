@@ -3476,6 +3476,7 @@
                                 <property name="day">15</property>
                               </object>
                               <packing>
+                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -3580,6 +3581,7 @@
                   <packing>
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
+                    <property name="y_options">GTK_FILL</property>
                   </packing>
                 </child>
                 <child>
@@ -3603,6 +3605,7 @@
                                 <property name="day">15</property>
                               </object>
                               <packing>
+                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -3709,6 +3712,7 @@
                     <property name="right_attach">2</property>
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
+                    <property name="y_options">GTK_FILL</property>
                   </packing>
                 </child>
               </object>
@@ -3749,6 +3753,7 @@
                                 <property name="day">15</property>
                               </object>
                               <packing>
+                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -3855,6 +3860,7 @@
                     <property name="right_attach">2</property>
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
+                    <property name="y_options">GTK_FILL</property>
                   </packing>
                 </child>
                 <child>
@@ -3878,6 +3884,7 @@
                                 <property name="day">15</property>
                               </object>
                               <packing>
+                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
@@ -3982,6 +3989,7 @@
                   <packing>
                     <property name="top_attach">1</property>
                     <property name="bottom_attach">2</property>
+                    <property name="y_options">GTK_FILL</property>
                   </packing>
                 </child>
                 <child>
@@ -4113,7 +4121,7 @@
                         <property name="visible">True</property>
                         <property name="left_padding">12</property>
                         <child>
-                          <object class="GtkVBox" id="pfilter_deal_direction_box">
+                          <object class="GtkVBox" id="pfilter_direction_box">
                             <property name="visible">True</property>
                             <property name="orientation">vertical</property>
                             <child>
@@ -4150,7 +4158,7 @@
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkCheckButton" id="pfilter_deal_direction">
+                      <object class="GtkCheckButton" id="pfilter_direction">
                         <property name="label" translatable="yes">&#x422;&#x438;&#x43F; &#x441;&#x434;&#x435;&#x43B;&#x43A;&#x438;</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
