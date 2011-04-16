@@ -19,7 +19,13 @@ class hiding_datetime_range_control(datetime_range_control):
         subhide = filter(lambda a: a != None, map(lambda b: gethash(b, "chbt"), [lower, upper]))
         if len(subhide) > 0 and checkbutton != None:
             self.subhide = all_checked_control(checkbutton, subhide)
-        
+        times = map(lambda h: time_control( *map(lambda k: gethash(h, k), ["hour", "min", "sec", "time_chbt"])),
+                    [lower, upper])
+        dtimes = map(lambda cal, time, chbt: datetime_control(cal, time, chbt),
+                     map(lambda a: gethash(a, "calendar"), [lower, upper]),
+                     times,
+                     map(lambda a: gethash(a, "chbt"), [lower, upper]))
+        datetime_range_control.__init__(self, *dtimes, checkbutton = checkbutton)
         
 
 
