@@ -33,6 +33,25 @@ class positions_filter_control:
                                                            [shorter("pfilter_open_datetime_lower_superbox"),
                                                             shorter("pfilter_open_datetime_upper_superbox")],
                                                            shorter("pfilter_open_datetime"))
+        self.close_datetime = hiding_datetime_range_control({"chbt" : shorter("pfilter_close_datetime_lower"),
+                                                            "box" : shorter("pfilter_close_datetime_lower_box"),
+                                                            "calendar" : shorter("pfilter_close_datetime_lower_calendar"),
+                                                            "hour" : shorter("pfilter_close_datetime_lower_hour"),
+                                                            "min" : shorter("pfilter_close_datetime_lower_min"),
+                                                            "sec" : shorter("pfilter_close_datetime_lower_sec"),
+                                                            "time_chbt" : shorter("pfilter_close_datetime_lower_time"),
+                                                            "time_box" : shorter("pfilter_close_datetime_lower_time_box")},
+                                                           {"chbt" : shorter("pfilter_close_datetime_upper"),
+                                                            "box" : shorter("pfilter_close_datetime_upper_box"),
+                                                            "calendar" : shorter("pfilter_close_datetime_upper_calendar"),
+                                                            "hour" : shorter("pfilter_close_datetime_upper_hour"),
+                                                            "min" : shorter("pfilter_close_datetime_upper_min"),
+                                                            "sec" : shorter("pfilter_close_datetime_upper_sec"),
+                                                            "time_chbt" : shorter("pfilter_close_datetime_upper_time"),
+                                                            "time_box" : shorter("pfilter_close_datetime_upper_time_box")},
+                                                           [shorter("pfilter_close_datetime_lower_superbox"),
+                                                            shorter("pfilter_close_datetime_upper_superbox")],
+                                                           shorter("pfilter_close_datetime"))
                                                            
 
         self.direction = hiding_select_control({-1 : shorter("pfilter_direction_long"),
