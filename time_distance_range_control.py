@@ -43,7 +43,7 @@ class time_distance_control(value_returner_control):
             self.min.set_value(seconds / 60)
 
 class time_distance_range_control(value_returner_control):
-    def __init__(self, lower_contro, upper_control, checkbutton = None):
+    def __init__(self, lower_control, upper_control, checkbutton = None):
         self.lower = lower_control
         self.upper = upper_control
         self.checkbutton = checkbutton

@@ -5,6 +5,7 @@ import gtk
 from hiding_number_range_control import hiding_number_range_control
 from hiding_select_control import hiding_select_control
 from hiding_datetime_range_control import hiding_datetime_range_control
+from hiding_time_distance_range_control import *
 
 class positions_filter_control:
     def __init__(self, builder):
@@ -64,7 +65,19 @@ class positions_filter_control:
                                                  shorter("pfilter_count"),
                                                  shorter("pfilter_count_lower"),
                                                  shorter("pfilter_count_upper"))
-                                                 
+
+        self.time_distance = hiding_time_distance_range_control({"chbt" : shorter("pfilter_timerange_lower"),
+                                                                 "box" : shorter("pfilter_timerange_lower_box"),
+                                                                 "day" : shorter("pfilter_timerange_lower_day"),
+                                                                 "hour" : shorter("pfilter_timerange_lower_hour"),
+                                                                 "min" : shorter("pfilter_timerange_lower_min")},
+                                                                {"chbt" : shorter("pfilter_timerange_upper"),
+                                                                 "box" : shorter("pfilter_timerange_upper_box"),
+                                                                 "day" : shorter("pfilter_timerange_upper_day"),
+                                                                 "hour" : shorter("pfilter_timerange_upper_hour"),
+                                                                 "min" : shorter("pfilter_timerange_upper_min")},
+                                                                [shorter("pfilter_timerange_lower_superbox"), shorter("pfilter_timerange_upper_superbox")],
+                                                                shorter("pfilter_timerange"))
 
         
     def run(self):
