@@ -89,12 +89,38 @@ class positions_filter_control:
                                                         shorter("pfilter_plnet_volume"),
                                                         shorter("pfilter_plnet_volume_lower"),
                                                         shorter("pfilter_plnet_volume_upper"))
-        self.comm_plgross = hiding_number_range_control(shorter("pfilter_coast_lower_spin"),
-                                                 shorter("pfilter_coast_upper_spin"),
-                                                 shorter("pfilter_coast_box"),
-                                                 shorter("pfilter_coast"),
-                                                 shorter("pfilter_coast_lower"),
-                                                 shorter("pfilter_coast_upper"))
+        self.comm_plgross = hiding_number_range_control(shorter("pfilter_comm_plgross_lower_spin"),
+                                                        shorter("pfilter_comm_plgross_upper_spin"),
+                                                        shorter("pfilter_comm_plgross_box"),
+                                                        shorter("pfilter_comm_plgross"),
+                                                        shorter("pfilter_comm_plgross_lower"),
+                                                        shorter("pfilter_comm_plgross_upper"))
+        self.price_range = hiding_number_range_control(shorter("pfilter_price_range_lower_spin"),
+                                                       shorter("pfilter_price_range_upper_spin"),
+                                                       shorter("pfilter_price_range_box"),
+                                                       shorter("pfilter_price_range"),
+                                                       shorter("pfilter_price_range_lower"),
+                                                       shorter("pfilter_price_range_upper"))
+        self.plgross = hiding_number_range_control(shorter("pfilter_plgross_lower_spin"),
+                                                   shorter("pfilter_plgross_upper_spin"),
+                                                   shorter("pfilter_plgross_box"),
+                                                   shorter("pfilter_plgross"),
+                                                   shorter("pfilter_plgross_lower"),
+                                                   shorter("pfilter_plgross_upper"))
+        self.plnet = hiding_number_range_control(shorter("pfilter_plnet_lower_spin"),
+                                                 shorter("pfilter_plnet_upper_spin"),
+                                                 shorter("pfilter_plnet_box"),
+                                                 shorter("pfilter_plnet"),
+                                                 shorter("pfilter_plnet_lower"),
+                                                 shorter("pfilter_plnet_upper"))
+        self.comm = hiding_number_range_control(shorter("pfilter_comm_lower_spin"),
+                                                shorter("pfilter_comm_upper_spin"),
+                                                shorter("pfilter_comm_box"),
+                                                shorter("pfilter_comm"),
+                                                shorter("pfilter_comm_lower"),
+                                                shorter("pfilter_comm_upper"))
+        
+        
         
 
         
