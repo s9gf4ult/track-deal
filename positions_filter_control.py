@@ -119,6 +119,10 @@ class positions_filter_control:
                                                 shorter("pfilter_comm"),
                                                 shorter("pfilter_comm_lower"),
                                                 shorter("pfilter_comm_upper"))
+        self.direction = hiding_select_control({-1 : shorter("pfilter_profit_prof"),
+                                                1 : shorter("pfilter_profit_loss")},
+                                               shorter("pfilter_profit"),
+                                               shorter("pfilter_profit_box"))
         
         
         
