@@ -65,6 +65,39 @@ class positions_filter_control:
                                                  shorter("pfilter_count"),
                                                  shorter("pfilter_count_lower"),
                                                  shorter("pfilter_count_upper"))
+        self.price = hiding_number_range_control(shorter("pfilter_coast_lower_spin"),
+                                                 shorter("pfilter_coast_upper_spin"),
+                                                 shorter("pfilter_coast_box"),
+                                                 shorter("pfilter_coast"),
+                                                 shorter("pfilter_coast_lower"),
+                                                 shorter("pfilter_coast_upper"))
+        self.volume = hiding_number_range_control(shorter("pfilter_volume_lower_spin"),
+                                                  shorter("pfilter_volume_upper_spin"),
+                                                  shorter("pfilter_volume_box"),
+                                                  shorter("pfilter_volume"),
+                                                  shorter("pfilter_volume_lower"),
+                                                  shorter("pfilter_volume_upper"))
+        self.plnet_acc = hiding_number_range_control(shorter("pfilter_plnet_acc_lower_spin"),
+                                                     shorter("pfilter_plnet_acc_upper_spin"),
+                                                     shorter("pfilter_plnet_acc_box"),
+                                                     shorter("pfilter_plnet_acc"),
+                                                     shorter("pfilter_plnet_acc_lower"),
+                                                     shorter("pfilter_plnet_acc_upper"))
+        self.plnet_volume = hiding_number_range_control(shorter("pfilter_plnet_volume_lower_spin"),
+                                                        shorter("pfilter_plnet_volume_upper_spin"),
+                                                        shorter("pfilter_plnet_volume_box"),
+                                                        shorter("pfilter_plnet_volume"),
+                                                        shorter("pfilter_plnet_volume_lower"),
+                                                        shorter("pfilter_plnet_volume_upper"))
+        self.comm_plgross = hiding_number_range_control(shorter("pfilter_coast_lower_spin"),
+                                                 shorter("pfilter_coast_upper_spin"),
+                                                 shorter("pfilter_coast_box"),
+                                                 shorter("pfilter_coast"),
+                                                 shorter("pfilter_coast_lower"),
+                                                 shorter("pfilter_coast_upper"))
+        
+
+        
 
         self.time_distance = hiding_time_distance_range_control({"chbt" : shorter("pfilter_timerange_lower"),
                                                                  "box" : shorter("pfilter_timerange_lower_box"),
