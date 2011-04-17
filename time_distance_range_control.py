@@ -4,6 +4,7 @@
 from hide_control import value_returner_control
 import sys
 import math
+import gtk
 
 class time_distance_control(value_returner_control):
     def __init__(self, day_spin, hour_spin, min_spin, checkbutton = None):
@@ -17,7 +18,7 @@ class time_distance_control(value_returner_control):
                 spin.set_digits(0)
 
         if self.min != None:
-            self.min.get_adjustment().get_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 5)
+            self.min.get_adjustment().set_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 5)
             self.min.set_digits(2)
 
     def get_hour_value(self):
@@ -40,4 +41,19 @@ class time_distance_control(value_returner_control):
                 seconds = seconds % mulator
         if self.min != None:
             self.min.set_value(seconds / 60)
-                
+
+
+if __name__ == "__main__":
+    dial = gtk.Dialog()
+    p = dial.get_content_area()
+    d = gtk.SpinButton()
+    h = gtk.SpinButton()
+    m = gtk.SpinButton()
+    for w in [d, h, m]:
+        p.pack_start(w, False)
+    con = time_distance_control(d, h, m)
+    con.set_seconds(3600 * 24 * 1 + 3600 * 1 + 1 * 60)
+    dial.show_all()
+    dial.run()
+    print(con.get_seconds())
+    
