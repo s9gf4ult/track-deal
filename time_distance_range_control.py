@@ -32,11 +32,12 @@ class time_distance_control(value_returner_control):
     def get_seconds(self):
         return self.return_value(60 * self.get_min_value() + 3600 * self.get_hour_value() + 3600 * 24 * self.get_day_value())
     
-    set set_seconds(self, seconds):
+    def set_seconds(self, seconds):
         for (spin, mulator) in [(self.day, 3600 * 24),
                                 (self.hour, 3600)]:
             if spin != None:
                 spin.set_value(math.trunc(seconds / mulator))
                 seconds = seconds % mulator
-                
+        if self.min != None:
+            self.min.set_value(seconds / 60)
                 
