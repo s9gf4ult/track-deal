@@ -42,6 +42,22 @@ class time_distance_control(value_returner_control):
         if self.min != None:
             self.min.set_value(seconds / 60)
 
+class time_distance_range_control(value_returner_control):
+    def __init__(self, lower_contro, upper_control, checkbutton = None):
+        self.lower = lower_control
+        self.upper = upper_control
+        self.checkbutton = checkbutton
+
+    def get_lower_seconds(self):
+        return self.return_value(self.lower.get_seconds())
+
+    def get_upper_seconds(self):
+        return self.return_value(self.upper.get_seconds())
+
+    def set_seconds(self, lower_sec, upper_sec):
+        self.lower.set_seconds(lower_sec)
+        self.upper.set_seconds(upper_sec)
+
 
 if __name__ == "__main__":
     dial = gtk.Dialog()
