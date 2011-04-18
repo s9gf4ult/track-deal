@@ -18,7 +18,9 @@ class attributes_control:
 
     def add_clicked(self, bt):
         if len(self.name_entry.get_text()) > 0:
-            self.attributes.add_rows([(self.name_entry.get_text(), self.val_entry.get_text())])
+            has = map(lambda a: a[0].decode('utf-8'), self.attributes.get_rows())
+            if self.name_entry.get_text().decode('utf-8') not in has:
+                self.attributes.add_rows([(self.name_entry.get_text(), self.val_entry.get_text())])
 
     def del_clicked(self, bt):
         (mod, it) = self.treeview.get_selection().get_selected()
@@ -30,5 +32,6 @@ class attributes_control:
         if it != None:
             self.name_entry.set_text(mod.get_value(it, 0))
             self.val_entry.set_text(mod.get_value(it, 1))
+
             
             
