@@ -33,5 +33,10 @@ class attributes_control:
             self.name_entry.set_text(mod.get_value(it, 0))
             self.val_entry.set_text(mod.get_value(it, 1))
 
+    def get_attributes(self):
+        return self.attributes.get_rows()
+
             
-            
+    def set_attributes(self, attributes):
+        self.attributes.update_rows(attributes)
+    
