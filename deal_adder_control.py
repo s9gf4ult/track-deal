@@ -7,6 +7,7 @@ from time_control import *
 from select_control import *
 from combo_select_control import *
 from common_methods import *
+from attributes_control import *
 import sys
 
 class deal_adder_control:
@@ -37,6 +38,7 @@ class deal_adder_control:
         self.stock_comm = number_control(shorter("stock_comm"), step_incr = 0.1, digits = 4)
         self.stock_comm.set_lower_limit(0)
         self.stock_comm.set_upper_limit(sys.float_info.max)
+        self.attributes = attributes_control(shorter("attributes"), shorter("attr_name"), shorter("attr_val"), shorter("attr_add"), shorter("attr_del"))
 
     def run(self):
         w = self.builder.get_object("deal_adder")
@@ -63,7 +65,8 @@ class deal_adder_control:
                 "broker_comm_nds" : 0,
                 "stock_comm_nds" : 0,
                 "account_id" : self.account.get_value(),
-                "volume" : self.count.get_value() * self.price.get_value()}
+                "volume" : self.count.get_value() * self.price.get_value(),
+                "attributes" : self.attributes.get_attributes()}
 
     def load_from_hash(self, data):
         for (setter, key) in [(self.datetime.set_datetime, "datetime"),
@@ -74,10 +77,14 @@ class deal_adder_control:
                               (self.price.set_value, "price"),
                               (self.count.set_value, "quantity"),
                               (self.broker_comm.set_value, "broker_comm"),
-                              (self.stock_comm.set_value, "stock_comm")]:
+                              (self.stock_comm.set_value, "stock_comm"),
+                              (self.attributes.set_attributes, "attributes")]:
             m = gethash(data, key)
             if m != None:
                 setter(m)
+
+    def flush_attributes(self):
+        self.attributes.flush()
         
 
     def check_correctness(self):

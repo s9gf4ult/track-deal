@@ -39,4 +39,7 @@ class attributes_control:
             
     def set_attributes(self, attributes):
         self.attributes.update_rows(attributes)
+
+    def flush(self):
+        self.attributes.update_rows([])
     

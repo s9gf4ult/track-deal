@@ -4,6 +4,8 @@ import sqlite3
 import time
 import datetime
 import re
+from copy import copy
+from common_methods import *
 
 class deals_proc():
     def __init__(self):
@@ -182,7 +184,16 @@ class deals_proc():
                     continue
             try:
                 coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
-                self._insert_from_hash('deals', coat)
+                incoat = copy(coat)
+                attrs = gethash(incoat, "attributes")
+                if attrs != None:
+                    del incoat["attributes"]
+                cid = self._insert_from_hash('deals', incoat).lastrowid
+                if attrs != None and len(attrs) > 0:
+                    self.connection.executemany("insert into deal_attributes(deal_id, name, value) values (?, ?, ?)",
+                                                map(lambda a: tuple([cid] + list(a)), attrs))
+                    
+                
             except sqlite3.IntegrityError:
                 continue
             except Exception as e:

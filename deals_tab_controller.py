@@ -132,6 +132,7 @@ class deals_tab_controller(modifying_tab_control):
                                  map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals order by security_type")),
                                  self.database.connection.execute("select id, name from accounts").fetchall())
         self.adder.set_current_datetime()
+        self.adder.flush_attributes()
         ret = self.adder.run()
         if ret != None:
             self.database.get_from_list([ret])
