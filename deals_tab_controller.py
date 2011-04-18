@@ -89,6 +89,7 @@ class deals_tab_controller(modifying_tab_control):
                                   self.database.connection.execute("select datetime, deal_sign, account_id, security_name, security_type, price, quantity, broker_comm, stock_comm from deals where id = ?", (did, )).fetchone(),
                                   ["datetime", "deal_sign", "account_id", "security_name", "security_type", "price", "quantity", "broker_comm", "stock_comm"]):
                 dh[key] = val
+            dh["attributes"] = self.database.connection.execute("select name, value from deal_attributes where deal_id = ?", (did, )).fetchall()
             self.adder.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals order by security_name")),
                                      map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals order by security_type")),
                                      self.database.connection.execute("select id, name from accounts order by name").fetchall())
