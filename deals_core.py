@@ -142,13 +142,11 @@ class deals_proc():
         create table deal_attributes(
         id integer primary key not null,
         deal_id integer not null,
-        internal integer,
         name text not null,
         value text,
         unique(deal_id, name),
         foreign key (deal_id) references deals(id) on delete cascade)""")
         self.connection.executescript("""
-        create index deal_attributes_internal on deal_attributes(internal);
         create index deal_attributes_name on deal_attributes(name);""")
 
 
