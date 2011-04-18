@@ -33,9 +33,15 @@ class query_gen():
             raise Exception("query not in work generation")
 
     def add_force_joins(self, aliases):
+        self.check_working()
         als = map(lambda a: a[1], self.tables)
         for al in aliases:
             if al not in als:
                 raise Exception("There is no alias {0} to force join".format(al))
         self.force_joins += aliases
+
+    def add_conditions(self, conditions):
+        self.check_working()
+        self.conditions += conditions
+        
 
