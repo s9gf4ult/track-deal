@@ -19,13 +19,13 @@ class query_gen():
     def begin(self):
         self.in_work = True
 
-    def add_returner(self, returners):
+    def add_returners(self, returners):
         """returners is a list of tuples like that [(alias, field)... ], adds to the query field to get from"""
         self.check_working()
         aliases = map(lambda a: a[1], self.tables)
         for rt in returners:
-            if rt not in aliases:
-                raise Exception("There is no alias {0} to return field from".format(rt))
+            if rt[0] not in aliases:
+                raise Exception("There is no alias {0} to return field from".format(rt[0]))
         self.returnings += returners
 
     def check_working(self):
@@ -38,4 +38,4 @@ class query_gen():
             if al not in als:
                 raise Exception("There is no alias {0} to force join".format(al))
         self.force_joins += aliases
-                                
+
