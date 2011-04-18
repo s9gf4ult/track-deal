@@ -288,8 +288,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">add_account</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="x_options">GTK_FILL</property>
@@ -301,8 +301,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">delete_account</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -316,8 +316,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">modify_account</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="top_attach">1</property>
@@ -331,8 +331,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">set_current_account</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -362,7 +362,7 @@
                             <property name="label" translatable="yes">&#x422;&#x435;&#x43A;&#x443;&#x449;&#x438;&#x439; &#x441;&#x447;&#x435;&#x442;:</property>
                             <property name="ellipsize">start</property>
                             <attributes>
-                              <attribute name="scale" value="1,000000"/>
+                              <attribute name="scale" value="1.000000"/>
                             </attributes>
                           </object>
                           <packing>
@@ -446,8 +446,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">call_filter</property>
+                            <property name="use_action_appearance">True</property>
                             <property name="use_underline">True</property>
                           </object>
                           <packing>
@@ -474,8 +474,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">add_deal</property>
+                            <property name="use_action_appearance">True</property>
                             <accelerator key="n" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                           </object>
                           <packing>
@@ -489,8 +489,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">change_deals</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -503,8 +503,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">delete_deals</property>
+                            <property name="use_action_appearance">True</property>
                             <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
                           </object>
                           <packing>
@@ -565,8 +565,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">call_positions_filter</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -589,8 +589,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">positions_make</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -603,8 +603,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">add_position</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -617,8 +617,8 @@
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
-                            <property name="use_action_appearance">True</property>
                             <property name="related_action">delete_positions</property>
+                            <property name="use_action_appearance">True</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -5465,7 +5465,7 @@
                         <property name="visible">True</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkTreeView" id="treeview2">
+                          <object class="GtkTreeView" id="pfilter_accounts_view">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                           </object>
