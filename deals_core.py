@@ -7,7 +7,7 @@ import re
 
 class deals_proc():
     def __init__(self):
-        self.current_user_version = 1
+        self.current_user_version = 2
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
@@ -33,7 +33,7 @@ class deals_proc():
         (cuv, ) = self.connection.execute("pragma user_version").fetchone()
         if cuv != self.current_user_version:
             raise Exception(u'Не совпадает версия базы, должна быть {0}, а в базе {1}'.format(self.current_user_version, cuv))
-        self.check_database_version_1()
+        self.check_database_version_2()
 
     def check_tables_existance(self, tables):
         etables = map(lambda a: a[0].decode('utf-8'), self.connection.execute("select name from sqlite_master where type = 'table'"))
@@ -49,6 +49,9 @@ class deals_proc():
         
     def check_database_version_1(self):
         self.check_tables_existance([u'deals', u'positions', u'deal_groups', u'accounts'])
+        
+    def check_database_version_2(self):
+        self.check_tables_existance([u'deals', u'positions', u'deal_groups', u'accounts', u'deal_attributes'])
             
 
     def set_selected_stocks(self, stocks):
@@ -135,6 +138,18 @@ class deals_proc():
         create index deals_security_name on deals(security_name);
         create index deals_quantity on deals(quantity);
         create index deals_deal_sign on deals(deal_sign);""")
+        self.connection.execute("""
+        create table deal_attributes(
+        id integer primary key not null,
+        deal_id integer not null,
+        internal integer,
+        name text not null,
+        value text,
+        unique(deal_id, name),
+        foreign key (deal_id) references deals(id) on delete cascade)""")
+        self.connection.executescript("""
+        create index deal_attributes_internal on deal_attributes(internal);
+        create index deal_attributes_name on deal_attributes(name);""")
 
 
 
