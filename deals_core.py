@@ -42,6 +42,7 @@ class deals_proc():
     def create_temporary_tables(self):
         self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
         self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
+        self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, (case when sum(d.id) then sum(d.id) else 0 end) as deals_count, (case when sum(d.id) then a.first_money - sum((d.deal_sign * d.volume) - d.broker_comm - d.stock_comm) else a.first_money end) as last_money from accounts a left join deals d on d.account_id = a.id group by a.id")
 
 
     def open(self, filename):
@@ -95,7 +96,6 @@ class deals_proc():
             self.connection.executemany("insert into selected_accounts(account_id) select id from accounts where name = ?", map(lambda a: (a,), accounts))
         self.last_total_changes += self.connection.total_changes - ll
 
-        
 
     def create_new(self, filename):
         self.open(filename)
