@@ -6,7 +6,7 @@ import gtk
 
 class attributes_control:
     def __init__(self, treeview, name_entry, val_entry, add_button, del_button):
-        self.treeview = treeview,
+        self.treeview = treeview
         self.name_entry = name_entry
         self.val_entry = val_entry
         self.add_button = add_button

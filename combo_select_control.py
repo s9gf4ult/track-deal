@@ -15,6 +15,8 @@ class combo_select_control:
             self.update_widget(answers, none_answer)
 
     def update_widget(self, answers, none_answer = None):
+        if answers == None or len(answers) <= 0:
+            return
         self.none_answer = none_answer
         val = self.get_value()
         m = gtk.ListStore(isinstance(answers[0][0], unicode) and str or answers[0][0].__class__, str)

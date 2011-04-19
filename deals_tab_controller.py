@@ -39,7 +39,8 @@ class deals_tab_controller(modifying_tab_control):
                                                   (u'Количество', gtk.CellRendererSpin(), int, "quantity"),
                                                   (u'Объем', gtk.CellRendererSpin(), float, "volume"),
                                                   (u'Комиссия брокера', gtk.CellRendererSpin(), float, "broker_comm"),
-                                                  (u'Комиссия биржи', gtk.CellRendererSpin(), float, "stock_comm")],
+                                                  (u'Комиссия биржи', gtk.CellRendererSpin(), float, "stock_comm"),
+                                                  (u'Тэги', gtk.CellRendererText())],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
         dd = self.builder.get_object("deals_view")
@@ -97,7 +98,8 @@ class deals_tab_controller(modifying_tab_control):
             self.adder.load_from_hash(dh)
             ret = self.adder.run()
             if ret != None:
-                self.database._update_from_hash("deals", did, ret)
+                ret["id"] = did
+                self.database.get_update_deal_from_hash(ret)
                 self.call_update_callback()
 
     def delete_deals_activate(self, action):
@@ -159,8 +161,9 @@ class deals_tab_controller(modifying_tab_control):
                 
 
     def sorted_callback(self, column, order, params):
-        self.sort_order = params[0] + (order == gtk.SORT_DESCENDING and " desc" or "")
-        self.update_widget()
+        if params != None:
+            self.sort_order = params[0] + (order == gtk.SORT_DESCENDING and " desc" or "")
+            self.update_widget()
         
 
     def load_open_ru(self, account, filename):
@@ -193,8 +196,9 @@ class deals_tab_controller(modifying_tab_control):
         self.filter._regen_boundary()
         l = []
         for x in self.filter.get_ids(self.sort_order, fields = ["id", "datetime", "security_name", "security_type", "deal_sign", "price", "quantity", "volume", "broker_comm", "stock_comm"]):
-            r = list(x)
-            if x[4] < 0:
+            r = self.database.connection.execute("select d.id, d.datetime, d.security_name, d.security_type, d.deal_sign, d.price, d.quantity, d.volume, d.broker_comm, d.stock_comm, reduce_string(name_value(a.name, a.value)) from deals d left join deal_attributes a on a.deal_id = d.id where d.id = ? group by d.id", (x[0], )).fetchone()
+            r = list(r)
+            if r[4] < 0:
                 r[4] = "B"
             else:
                 r[4] = "S"

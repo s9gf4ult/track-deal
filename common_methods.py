@@ -30,3 +30,6 @@ def find_in_model(tmodel, findfunc):
             return it
         it = tmodel.iter_next(it)
     return None
+
+def is_null_or_empty(obj):
+    return obj == None or len(obj) == 0

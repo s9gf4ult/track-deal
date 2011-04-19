@@ -7,6 +7,28 @@ import re
 from copy import copy
 from common_methods import *
 
+class string_aggregate:
+    ret = None
+    def step(self, value):
+        if self.ret == None:
+            self.ret = u'{0}'.format(value)
+        else:
+            self.ret = u'{0}; {1}'.format(self.ret, value)
+            
+    def finalize(self):
+        return self.ret
+
+def attr_name_val(name, value):
+    if is_null_or_empty(name) and is_null_or_empty(value):
+        return None
+    elif is_null_or_empty(value):
+        return name
+    elif is_null_or_empty(name):
+        raise Exception("if value is not null name can not be null")
+    else:
+        return u'{0} = {1}'.format(name, value)
+    
+
 class deals_proc():
     def __init__(self):
         self.current_user_version = 2
@@ -29,6 +51,9 @@ class deals_proc():
         self.last_total_changes = self.connection.total_changes
         self.connection.execute("pragma foreign_keys=on")
         self.connection.execute("begin transaction")
+        self.connection.create_aggregate("reduce_string", 1, string_aggregate)
+        self.connection.create_function("name_value", 2, attr_name_val)
+            
 
     def open_existing(self, filename):
         self.open(filename)
@@ -198,6 +223,21 @@ class deals_proc():
                 continue
             except Exception as e:
                 raise e
+
+    def get_update_deal_from_hash(self, dhash):
+        if not isinstance(gethash(dhash, "id"), int):
+            raise Exception("id must be int")
+        dh = copy(dhash)
+        del dh["id"]
+        attrs = gethash(dh, "attributes")
+        if attrs != None:
+            del dh["attributes"]
+        self.connection.execute("delete from deal_attributes where deal_id = ?", (dhash["id"], ))
+        self._update_from_hash("deals", dhash["id"], dh)
+        if attrs != None and len(attrs) > 0:
+            self.connection.executemany("insert into deal_attributes(deal_id, name, value) values (?, ?, ?)",
+                                        map(lambda a: tuple([dhash["id"]] + list(a)), attrs))
+        
 
     def get_from_list_in_account(self, account, coats):
         (count, ) = self.connection.execute("select count(*) from accounts where id = ?", (account,)).fetchone()
