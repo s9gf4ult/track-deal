@@ -11,7 +11,7 @@ class string_aggregate:
     ret = None
     def step(self, value):
         if self.ret == None:
-            self.ret = u'{0}'.format(value)
+            self.ret = value
         else:
             self.ret = u'{0}; {1}'.format(self.ret, value)
             
@@ -27,6 +27,16 @@ def attr_name_val(name, value):
         raise Exception("if value is not null name can not be null")
     else:
         return u'{0} = {1}'.format(name, value)
+
+def get_date(val):
+    dt = datetime.datetime.fromtimestamp(val)
+    date = time.mktime(dt.date().timetuple())
+    return date
+
+def get_time(val):
+    dt = datetime.datetime.fromtimestamp(val)
+    ttt = dt.second + dt.minute * 60 + dt.hour * 3600
+    return ttt
     
 
 class deals_proc():
@@ -43,22 +53,24 @@ class deals_proc():
         self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
         self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
         self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, count(d.id) as deals_count, (case count(d.id) when 0 then a.first_money else a.first_money + sum(d.deal_sign * d.volume) - sum(d.broker_comm + d.stock_comm) end) as last_money from accounts a left join deals d on d.account_id = a.id where d.not_actual is null group by a.id")
-        self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, get_time(d.datetime) as time, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id
+        self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, get_time(d.datetime) as time, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id")
 
 
     def open(self, filename):
         self.filename = filename
         self.connection = sqlite3.connect(filename, detect_types = sqlite3.PARSE_DECLTYPES)
-        self.create_temporary_tables()
         self.last_total_changes = self.connection.total_changes
         self.connection.execute("pragma foreign_keys=on")
         self.connection.execute("begin transaction")
         self.connection.create_aggregate("reduce_string", 1, string_aggregate)
         self.connection.create_function("name_value", 2, attr_name_val)
+        self.connection.create_function("get_date", 1, get_date)
+        self.connection.create_function("get_time", 1, get_time)
             
 
     def open_existing(self, filename):
         self.open(filename)
+        self.create_temporary_tables()
         (cuv, ) = self.connection.execute("pragma user_version").fetchone()
         if cuv != self.current_user_version:
             raise Exception(u'Не совпадает версия базы, должна быть {0}, а в базе {1}'.format(self.current_user_version, cuv))
@@ -177,8 +189,7 @@ class deals_proc():
         self.connection.executescript("""
         create index deal_attributes_name on deal_attributes(name);""")
 
-
-
+        self.create_temporary_tables()
         self.connection.commit()
         self.connection.execute("begin transaction")
 
