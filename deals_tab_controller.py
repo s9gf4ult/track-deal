@@ -31,16 +31,17 @@ class deals_tab_controller(modifying_tab_control):
         ############################
         self.deals_view = list_view_sort_control(self.builder.get_object("deals_view"),
                                                  [(u"id", gtk.CellRendererSpin(), int, "id"),
-                                                  (u'Время', gtk.CellRendererText(), str, "datetime"),
+                                                  (u'Дата', gtk.CellRendererText(), str, "date"),
+                                                  (u'Время', gtk.CellRendererText(), str, "time"),
                                                   (u'Инструмент', gtk.CellRendererText(), str, "security_name"),
-                                                  (u'Биржа', gtk.CellRendererText(), str, "security_type"),
+                                                  (u'Класс', gtk.CellRendererText(), str, "security_type"),
                                                   (u'Направление', gtk.CellRendererText(), str, "deal_sign"),
                                                   (u'Цена', gtk.CellRendererSpin(), float, "price"),
                                                   (u'Количество', gtk.CellRendererSpin(), int, "quantity"),
                                                   (u'Объем', gtk.CellRendererSpin(), float, "volume"),
                                                   (u'Комиссия брокера', gtk.CellRendererSpin(), float, "broker_comm"),
                                                   (u'Комиссия биржи', gtk.CellRendererSpin(), float, "stock_comm"),
-                                                  (u'Тэги', gtk.CellRendererText())],
+                                                  (u'Тэги', gtk.CellRendererText(), str, "attributes")],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
         dd = self.builder.get_object("deals_view")
@@ -194,15 +195,6 @@ class deals_tab_controller(modifying_tab_control):
         self.filter._prepare_filter()
         self.filter._regen_selected()
         self.filter._regen_boundary()
-        l = []
-        for x in self.filter.get_ids(self.sort_order, fields = ["id", "datetime", "security_name", "security_type", "deal_sign", "price", "quantity", "volume", "broker_comm", "stock_comm"]):
-            r = self.database.connection.execute("select d.id, d.datetime, d.security_name, d.security_type, d.deal_sign, d.price, d.quantity, d.volume, d.broker_comm, d.stock_comm, reduce_string(name_value(a.name, a.value)) from deals d left join deal_attributes a on a.deal_id = d.id where d.id = ? group by d.id", (x[0], )).fetchone()
-            r = list(r)
-            if r[4] < 0:
-                r[4] = "B"
-            else:
-                r[4] = "S"
-            l.append(tuple(r))
-        self.deals_view.update_rows(l)
+        self.deals_view.update_rows(self.filter.get_ids(self.sort_order))
                 
         

@@ -43,16 +43,16 @@ class deals_filter():
         if not self.database.connection:
             return cursor_empty()
         conds = self.boundary
-        ff = reduce(lambda a, b:u'{0}, {1}'.format(a, b), map(lambda c: 'd.{0}'.format(c), fields))
+        ff = "d.id, format_date(d.date), format_time(d.time), d.security_name, d.security_type, buy_sell(d.deal_sign), d.price, d.quantity, d.volume, d.broker_comm, d.stock_comm, d.attributes"
         q = ""
         acval = self.dialog.account_current.get_value()
         curac = gethash(self.global_data, "current_account")
         if (acval == "current" and curac == None) or acval == "none":
-            q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock where d.not_actual is null and account_id is null".format(ff)
+            q = "select {0} from deals_view d inner join selected_stocks s on d.security_name = s.stock where d.account_id is null ".format(ff)
         elif acval == "current" or acval == "select":
-            q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock inner join selected_accounts a on d.account_id = a.account_id where d.not_actual is null ".format(ff)
+            q = "select {0} from deals_view d inner join selected_stocks s on d.security_name = s.stock inner join selected_accounts a on d.account_id = a.account_id where 1 = 1 ".format(ff)
         elif acval == "all":
-            q = "select {0} from deals d inner join selected_stocks s on d.security_name = s.stock where d.not_actual is null ".format(ff)
+            q = "select {0} from deals_view d inner join selected_stocks s on d.security_name = s.stock where 1 = 1 ".format(ff)
         if parent != None and parent != False:
             q += "and d.parent_deal_id = {0}".format(parent)
         elif parent == False:
@@ -129,7 +129,7 @@ class deals_filter():
                                       (self.dialog.price, aliased("price")),
                                       (self.dialog.broker_comm, aliased("broker_comm")),
                                       (self.dialog.stock_comm, aliased("stock_comm")),
-                                      (self.dialog.comm, u'{0} + {1}'.format(aliased("broker_comm"), aliased("stock_comm"))),
+                                      (self.dialog.comm, aliased("comm")),
                                       (self.dialog.volume, aliased("volume"))]:
             lower_upper(field_name, control.get_lower_value(), control.get_upper_value())
 
@@ -146,13 +146,13 @@ class deals_filter():
         pp = self.dialog.position.get_value()
         if pp != None:
             if pp:
-                conds.append(u'position_id is not null')
+                conds.append(u'd.position_id is not null')
             else:
-                conds.append(u'position_id is null')
+                conds.append(u'd.position_id is null')
 
         dd = self.dialog.direction.get_value()
         if dd != None:
-            conds.append(u'deal_sign = {0}'.format(dd))
+            conds.append(u'd.deal_sign = {0}'.format(dd))
 
         return len(conds) > 0 and reduce(lambda a, b: u'{0} and {1}'.format(a, b), conds) or ''
             
