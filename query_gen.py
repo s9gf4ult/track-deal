@@ -49,6 +49,7 @@ class query_gen():
         rets = reduce(lambda a, b: u'{0}, {1}'.format(a, b),
                       map(lambda x: u'{0}.{1}'.format(*x), self.returnings))
         jtables = sorted(set(map(lambda a: a[0], self.returnings) + self.force_joins + self.get_tables_from_conditions()))
+        return u'select {0} from {1} where {2}
 
     def get_tables_from_conditions(self):
         return self._get_tables_from_conditions(self.conditions)

@@ -42,7 +42,8 @@ class deals_proc():
     def create_temporary_tables(self):
         self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
         self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
-        self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, (case when sum(d.id) then sum(d.id) else 0 end) as deals_count, (case when sum(d.id) then a.first_money - sum((d.deal_sign * d.volume) - d.broker_comm - d.stock_comm) else a.first_money end) as last_money from accounts a left join deals d on d.account_id = a.id group by a.id")
+        self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, count(d.id) as deals_count, (case count(d.id) when 0 then a.first_money else a.first_money + sum(d.deal_sign * d.volume) - sum(d.broker_comm + d.stock_comm) end) as last_money from accounts a left join deals d on d.account_id = a.id where d.not_actual is null group by a.id")
+        self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, get_time(d.datetime) as time, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id
 
 
     def open(self, filename):
