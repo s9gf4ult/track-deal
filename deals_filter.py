@@ -146,13 +146,13 @@ class deals_filter():
         pp = self.dialog.position.get_value()
         if pp != None:
             if pp:
-                conds.append(u'd.position_id is not null')
+                conds.append(u'{0} is not null'.format(aliased('position_id')))
             else:
-                conds.append(u'd.position_id is null')
+                conds.append(u'{0} is null'.format(aliased('position_id')))
 
         dd = self.dialog.direction.get_value()
         if dd != None:
-            conds.append(u'd.deal_sign = {0}'.format(dd))
+            conds.append(u'{0} = {1}'.format(aliased('deal_sign'), dd))
 
         return len(conds) > 0 and reduce(lambda a, b: u'{0} and {1}'.format(a, b), conds) or ''
             
