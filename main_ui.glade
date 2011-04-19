@@ -2594,7 +2594,7 @@
                     <property name="visible">True</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkHBox" id="hbox9">
+                      <object class="GtkHBox" id="hbox100">
                         <property name="visible">True</property>
                         <child>
                           <object class="GtkScrolledWindow" id="scrolledwindow9">
@@ -2705,7 +2705,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkLabel" id="label34">
+                  <object class="GtkLabel" id="label134">
                     <property name="visible">True</property>
                     <property name="label" translatable="yes">&#x414;&#x43E;&#x43F;&#x43E;&#x43B;&#x43D;&#x438;&#x442;&#x435;&#x43B;&#x44C;&#x43D;&#x44B;&#x435; &#x430;&#x442;&#x440;&#x438;&#x431;&#x443;&#x442;&#x44B;</property>
                     <property name="use_markup">True</property>
@@ -3441,7 +3441,7 @@
             <property name="can_focus">True</property>
             <property name="tab_pos">left</property>
             <child>
-              <object class="GtkTable" id="table14">
+              <object class="GtkTable" id="table114">
                 <property name="visible">True</property>
                 <property name="n_rows">4</property>
                 <property name="n_columns">2</property>
@@ -3996,7 +3996,7 @@
               </object>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="label35">
+              <object class="GtkLabel" id="label135">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">&#x414;&#x430;&#x442;&#x44B; &#x43E;&#x442;&#x43A;&#x440;&#x44B;&#x442;&#x438;&#x44F;</property>
                 <property name="angle">30</property>
@@ -4010,7 +4010,7 @@
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow9">
+                  <object class="GtkScrolledWindow" id="scrolledwindow19">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hscrollbar_policy">automatic</property>
@@ -4156,7 +4156,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="frame28">
+                  <object class="GtkFrame" id="frame128">
                     <property name="visible">True</property>
                     <property name="label_xalign">0</property>
                     <child>
@@ -4264,7 +4264,7 @@
                                 <property name="visible">True</property>
                                 <property name="label_xalign">0</property>
                                 <child>
-                                  <object class="GtkAlignment" id="alignment20">
+                                  <object class="GtkAlignment" id="alignment120">
                                     <property name="visible">True</property>
                                     <property name="left_padding">12</property>
                                     <child>
@@ -5398,7 +5398,7 @@
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="label36">
+              <object class="GtkLabel" id="label136">
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">&#x41F;&#x440;&#x43E;&#x447;&#x435;&#x435;</property>
                 <property name="angle">30</property>
