@@ -59,4 +59,17 @@ class query_gen():
             raise Exception("conditions must start from list")
         if conditions[0] not in ["and", "or"]:
             raise Exception("conditions must start from 'and' or 'or'")
+        def get_tablenames_from_tuple(obj):
+            return reduce(lambda a, b: a + b,
+                          map(lambda x: isinstance(x, tuple) and x[0] or [],
+                              obj))
+        def get_table_names(obj):
+            if isinstance(obj, list):
+                return _get_tables_from_conditions(obj)
+            elif isinstance(obj, tuple):
+                return get_tablenames_from_tuple(obj)
+            else:
+                raise Exception("{0} must be tuple or list at all".format(obj))
+        return reduce(lambda a, b: a + b,
+                      map(get_table_names, conditions[1:]))
         
