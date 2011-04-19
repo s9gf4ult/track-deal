@@ -6,6 +6,7 @@ import datetime
 import re
 from copy import copy
 from common_methods import *
+from math import *
 
 class string_aggregate:
     ret = None
@@ -33,10 +34,27 @@ def get_date(val):
     date = time.mktime(dt.date().timetuple())
     return date
 
+def format_date(val):
+    dt = datetime.datetime.fromtimestamp(val)
+    return dt.date().__str__()
+
 def get_time(val):
     dt = datetime.datetime.fromtimestamp(val)
     ttt = dt.second + dt.minute * 60 + dt.hour * 3600
     return ttt
+
+def format_time(val):
+    hours = trunc(val / 3600)
+    val = val % 3600
+    minutes = trunc(val / 60)
+    seconds = val % 60
+    return u'{0}:{1}:{2}'.format(hours, minutes, seconds)
+
+def get_day_of_week(val):
+    dt = datetime.datetime.fromtimestamp(val)
+    return dt.weekday()
+    
+    
     
 
 class deals_proc():
@@ -44,6 +62,8 @@ class deals_proc():
         self.current_user_version = 2
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
+        sqlite3.register_adapter(datetime.date, lambda a: time.mktime(a.timetuple()))
+        sqlite3.register_adapter(datetime.time, lambda a: a.hour * 3600 + a.minute * 60 + a.second)
         sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
         self.connection = None
         self.last_total_changes = 0
@@ -66,6 +86,8 @@ class deals_proc():
         self.connection.create_function("name_value", 2, attr_name_val)
         self.connection.create_function("get_date", 1, get_date)
         self.connection.create_function("get_time", 1, get_time)
+        self.connection.create_function("format_date", 1, format_date)
+        self.connection.create_function("format_time", 1, format_time)
             
 
     def open_existing(self, filename):
