@@ -53,8 +53,12 @@ def format_time(val):
 def get_day_of_week(val):
     dt = datetime.datetime.fromtimestamp(val)
     return dt.weekday()
-    
-    
+
+def buy_sell(val):
+    return val < 0 and u'B' or 'S'
+
+def short_long(val):
+    return val < 0 and u'LONG' or 'SHORT'
     
 
 class deals_proc():
@@ -73,7 +77,7 @@ class deals_proc():
         self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
         self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
         self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, count(d.id) as deals_count, (case count(d.id) when 0 then a.first_money else a.first_money + sum(d.deal_sign * d.volume) - sum(d.broker_comm + d.stock_comm) end) as last_money from accounts a left join deals d on d.account_id = a.id where d.not_actual is null group by a.id")
-        self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, get_time(d.datetime) as time, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id")
+        self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, get_time(d.datetime) as time, get_day_of_week(d.datetime) as day_of_week, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id")
 
 
     def open(self, filename):
@@ -88,6 +92,9 @@ class deals_proc():
         self.connection.create_function("get_time", 1, get_time)
         self.connection.create_function("format_date", 1, format_date)
         self.connection.create_function("format_time", 1, format_time)
+        self.connection.create_function("get_day_of_week", 1, get_day_of_week)
+        self.connection.create_function("short_long", 1, short_long)
+        self.connection.create_function("buy_sell", 1, buy_sell)
             
 
     def open_existing(self, filename):
