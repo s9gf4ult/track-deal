@@ -194,7 +194,6 @@ class deals_tab_controller(modifying_tab_control):
             return
         self.filter._prepare_filter()
         self.filter._regen_selected()
-        self.filter._regen_boundary()
-        self.deals_view.update_rows(self.filter.get_ids(self.sort_order))
+        self.deals_view.update_rows(self.filter.get_ids(self.sort_order, fields = ["id", "formated_date", "formated_time", "security_name", "security_type", "buy_sell_formated", "price", "quantity", "volume", "broker_comm", "stock_comm", "attributes"]))
                 
         

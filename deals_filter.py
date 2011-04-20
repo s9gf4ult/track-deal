@@ -35,35 +35,39 @@ class deals_filter():
         self._prepare_filter()
         ret = self.dialog.run()
         self._regen_selected()
-        self._regen_boundary()
         return ret
     
 
     def get_ids(self, order_by, parent = False, fields = ["id"]):
         if not self.database.connection:
             return cursor_empty()
-        conds = self.boundary
-        ff = "d.id, format_date(d.date), format_time(d.time), d.security_name, d.security_type, buy_sell(d.deal_sign), d.price, d.quantity, d.volume, d.broker_comm, d.stock_comm, d.attributes"
-        q = ""
-        acval = self.dialog.account_current.get_value()
-        curac = gethash(self.global_data, "current_account")
-        if (acval == "current" and curac == None) or acval == "none":
-            q = "select {0} from deals_view d inner join selected_stocks s on d.security_name = s.stock where d.account_id is null ".format(ff)
-        elif acval == "current" or acval == "select":
-            q = "select {0} from deals_view d inner join selected_stocks s on d.security_name = s.stock inner join selected_accounts a on d.account_id = a.account_id where 1 = 1 ".format(ff)
-        elif acval == "all":
-            q = "select {0} from deals_view d inner join selected_stocks s on d.security_name = s.stock where 1 = 1 ".format(ff)
-        if parent != None and parent != False:
-            q += "and d.parent_deal_id = {0}".format(parent)
-        elif parent == False:
-            pass
-        elif parent == None:
-            q += "and d.parent_deal_id is null"
-        if conds and len(conds) > 0:
-            q += " and {0}".format(conds)
-        if order_by and len(order_by) > 0:
-            q += " order by d.{0}".format(order_by)
-        return self.database.connection.execute(q)
+        self.plus = []
+        fields = reduce_by_string(u', ', map(lambda a: u'd.{0}'.format(a), fields))
+        fromf = self.get_from_part()
+        ret = u'select {0} from {1}'.format(fields, fromf)
+        wheref = self.get_where_part(parent)
+        if not is_null_or_empty(wheref):
+            ret += ' where {0}'.format(wheref)
+        orderf = self.get_order_part(order_by)
+        if not is_null_or_empty(orderf):
+            ret += ' order by {0}'.format(orderf)
+        print(ret)
+        if is_null_or_empty(self.plus):
+            return self.database.connection.execute(ret)
+        else:
+            return self.database.connection.execute(ret, self.plus)
+    
+    def get_from_part(self):
+        ret = "deals_view d inner join selected_stocks s on s.stock = d.security_name"
+        if self.dialog.account_current.get_value() == "select":
+            ret += " inner join selected_accounts a on d.account_id = a.account_id"
+        return ret
+            
+    def get_order_part(self, orderfield):
+        return u'd.{0}'.format(orderfield)
+        
+        
+        
         
     def _regen_selected(self):
         if not self.database.connection:
@@ -75,9 +79,6 @@ class deals_filter():
         elif self.dialog.account_current.get_value() == "select":
             self.database.set_selected_accounts(map(lambda a: a[0], self.dialog.accounts.get_checked_rows()))
 
-    def _regen_boundary(self):
-        self.boundary = self._gen_bounadary_conditions("d")
-        
     
     def __init__(self, global_data, builder, database):
         self.builder = builder
@@ -100,37 +101,36 @@ class deals_filter():
             also["accounts_list"] = map(lambda a: a[0], self.database.connection.execute("select distinct name from accounts order by name"))
             self.dialog.update_widget(**also)
 
-    def _gen_bounadary_conditions(self, deals_alias):
-        conds = []
+    def get_where_part(self, parent):
         
-        def aliased(field_name):
-            if deals_alias != None and len(deals_alias) > 0:
-                return u'{0}.{1}'.format(deals_alias, field_name)
-            else:
-                return field_name
-
+        conds = []
         def lower_upper(field_name, l, h):
             if l and h:
                 if l < h:
-                    conds.append(u'({0} between {1} and {2})'.format(field_name, l, h))
+                    conds.append(u'({0} between ? and ?)'.format(field_name))
+                    self.plus += [l, h]
                 elif l > h:
-                    conds.append(u'({0} >= {1} or {0} <= {2})'.format(field_name, l, h))
+                    conds.append(u'({0} >= ? or {0} <= ?)'.format(field_name))
+                    self.plus += [l, h]
                 else:
-                    conds.append(u'{0} = {1}'.format(field_name, l))
+                    conds.append(u'{0} = ?'.format(field_name))
+                    self.plus.append(l)
             elif l:
-                conds.append(u'{0} >= {1}'.format(field_name, l))
+                conds.append(u'{0} >= ?'.format(field_name))
+                self.plus.append(l)
             elif h:
-                conds.append(u'{0} <= {1}'.format(field_name, h))
+                conds.append(u'{0} <= ?'.format(field_name))
+                self.plus.append(h)
             
         #################
         # number ranges #
         #################
-        for (control, field_name) in [(self.dialog.count, aliased("quantity")),
-                                      (self.dialog.price, aliased("price")),
-                                      (self.dialog.broker_comm, aliased("broker_comm")),
-                                      (self.dialog.stock_comm, aliased("stock_comm")),
-                                      (self.dialog.comm, aliased("comm")),
-                                      (self.dialog.volume, aliased("volume"))]:
+        for (control, field_name) in [(self.dialog.count, "d.quantity"),
+                                      (self.dialog.price, "d.price"),
+                                      (self.dialog.broker_comm, "d.broker_comm"),
+                                      (self.dialog.stock_comm, "d.stock_comm"),
+                                      (self.dialog.comm, "d.comm"),
+                                      (self.dialog.volume, "d.volume")]:
             lower_upper(field_name, control.get_lower_value(), control.get_upper_value())
 
         #################
@@ -138,7 +138,7 @@ class deals_filter():
         #################
         ld = self.dialog.datetime_range.get_lower_datetime()
         hd = self.dialog.datetime_range.get_upper_datetime()
-        lower_upper("datetime", ld and time.mktime(ld.timetuple()), hd and time.mktime(hd.timetuple()))
+        lower_upper("d.datetime", ld, hd)
 
         ####################
         # select controls  #
@@ -146,15 +146,22 @@ class deals_filter():
         pp = self.dialog.position.get_value()
         if pp != None:
             if pp:
-                conds.append(u'{0} is not null'.format(aliased('position_id')))
+                conds.append(u'd.position_id is null')
             else:
-                conds.append(u'{0} is null'.format(aliased('position_id')))
+                conds.append(u'd.position_id is not null')
 
         dd = self.dialog.direction.get_value()
         if dd != None:
-            conds.append(u'{0} = {1}'.format(aliased('deal_sign'), dd))
+            lower_upper("d.deal_sign", dd, dd)
 
-        return len(conds) > 0 and reduce(lambda a, b: u'{0} and {1}'.format(a, b), conds) or ''
+        if (gethash(self.global_data, "current_account") == None and self.dialog.account_current.get_value() == "current") or self.dialog.account_current.get_value() == "none":
+            conds.append("d.account_id is null")
+        elif self.dialog.account_current.get_value() == "current":
+            lower_upper("d.account_id", self.global_data["current_account"], self.global_data["current_account"])
+        if parent != None:
+            lower_upper("d.parent_deal_id", parent, parent)
+
+        return len(conds) > 0 and reduce_by_string(' and ', conds) or None
             
         
 
