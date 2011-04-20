@@ -33,3 +33,7 @@ def find_in_model(tmodel, findfunc):
 
 def is_null_or_empty(obj):
     return obj == None or len(obj) == 0
+
+def reduce_by_string(reductor, seq):
+    return reduce(lambda a, b: u'{0}{1}{2}'.format(a, reductor, b),
+                  seq)
