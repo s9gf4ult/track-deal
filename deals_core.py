@@ -48,7 +48,7 @@ def format_time(val):
     val = val % 3600
     minutes = trunc(val / 60)
     seconds = val % 60
-    return u'{0}:{1}:{2}'.format(hours, minutes, seconds)
+    return u'{0:02}:{1:02}:{2:02}'.format(hours, minutes, seconds)
 
 def get_day_of_week(val):
     dt = datetime.datetime.fromtimestamp(val)

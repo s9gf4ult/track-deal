@@ -31,7 +31,7 @@ class deals_tab_controller(modifying_tab_control):
         ############################
         self.deals_view = list_view_sort_control(self.builder.get_object("deals_view"),
                                                  [(u"id", gtk.CellRendererSpin(), int, "id"),
-                                                  (u'Дата', gtk.CellRendererText(), str, "date"),
+                                                  (u'Дата', gtk.CellRendererText(), str, "datetime"),
                                                   (u'Время', gtk.CellRendererText(), str, "time"),
                                                   (u'Инструмент', gtk.CellRendererText(), str, "security_name"),
                                                   (u'Класс', gtk.CellRendererText(), str, "security_type"),
