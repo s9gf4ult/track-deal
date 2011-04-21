@@ -51,7 +51,6 @@ class deals_filter():
         orderf = self.get_order_part(order_by)
         if not is_null_or_empty(orderf):
             ret += ' order by {0}'.format(orderf)
-        print(ret)
         if is_null_or_empty(self.plus):
             return self.database.connection.execute(ret)
         else:
@@ -139,6 +138,11 @@ class deals_filter():
         ld = self.dialog.datetime_range.get_lower_datetime()
         hd = self.dialog.datetime_range.get_upper_datetime()
         lower_upper("d.datetime", ld, hd)
+
+        ################
+        # time control #
+        ################
+        lower_upper("d.time", self.dialog.time.get_lower_seconds(), self.dialog.time.get_upper_seconds())
 
         ####################
         # select controls  #
