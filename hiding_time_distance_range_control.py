@@ -17,6 +17,6 @@ class hiding_time_distance_range_control(time_distance_range_control):
         subh = filter(lambda a: a != None, [gethash(lower, "chbt"), gethash(upper, "chbt")])
         if len(subh) > 0 and checkbutton != None:
             self.subhider = all_checked_control(checkbutton, subh)
-        ctrls = map(lambda h: time_distance_control( *map(lambda k: gethash(h, k), ["day", "hour", "min", "chbt"]) ),
+        ctrls = map(lambda h: time_distance_control(gethash(h, "day"), gethash(h, "hour"), gethash(h, "min"), checkbutton = gethash(h, "chbt")),
                     [lower, upper])
         time_distance_range_control.__init__(self, *(ctrls + [checkbutton]) )

@@ -7,19 +7,22 @@ import math
 import gtk
 
 class time_distance_control(value_returner_control):
-    def __init__(self, day_spin, hour_spin, min_spin, checkbutton = None):
+    def __init__(self, day_spin, hour_spin, min_spin, sec_spin = None, checkbutton = None):
         self.checkbutton = checkbutton
         self.day = day_spin
         self.hour = hour_spin
         self.min = min_spin
-        for spin in [self.day, self.hour]:
+        self.sec = sec_spin
+        for spin in [self.day, self.hour, self.min, self.sec]:
             if spin != None:
-                spin.get_adjustment().set_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 5)
                 spin.set_digits(0)
 
-        if self.min != None:
-            self.min.get_adjustment().set_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 5)
-            self.min.set_digits(2)
+        for spin in [self.min, self.sec]:
+            if spin != None:
+                spin.get_adjustment().set_all(lower = 0, upper = 59, step_increment = 1, page_increment = 5)
+
+        self.day.get_adjustment().set_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 5)
+        self.hour.get_adjustment().set_all(lower = 0, upper = 23, step_increment = 1, page_increment = 5)
 
     def get_hour_value(self):
         return (self.hour != None and self.hour.get_value() or 0)
@@ -30,17 +33,20 @@ class time_distance_control(value_returner_control):
     def get_min_value(self):
         return (self.min != None and self.min.get_value() or 0)
 
+    def get_sec_value(self):
+        return (self.sec != None and self.sec.get_value() or 0)
+
     def get_seconds(self):
-        return self.return_value(60 * self.get_min_value() + 3600 * self.get_hour_value() + 3600 * 24 * self.get_day_value())
+        return self.return_value(60 * self.get_min_value() + 3600 * self.get_hour_value() + 3600 * 24 * self.get_day_value() + self.get_sec_value())
     
     def set_seconds(self, seconds):
         for (spin, mulator) in [(self.day, 3600 * 24),
-                                (self.hour, 3600)]:
+                                (self.hour, 3600),
+                                (self.min, 60),
+                                (self.sec, 1)]:
             if spin != None:
                 spin.set_value(math.trunc(seconds / mulator))
                 seconds = seconds % mulator
-        if self.min != None:
-            self.min.set_value(seconds / 60)
 
 class time_distance_range_control(value_returner_control):
     def __init__(self, lower_control, upper_control, checkbutton = None):
