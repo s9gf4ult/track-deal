@@ -78,6 +78,17 @@ class deals_proc():
         self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
         self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, count(d.id) as deals_count, (case count(d.id) when 0 then a.first_money else a.first_money + sum(d.deal_sign * d.volume) - sum(d.broker_comm + d.stock_comm) end) as last_money from accounts a left join deals d on d.account_id = a.id where d.not_actual is null group by a.id")
         self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, format_date(get_date(d.datetime)) as formated_date, format_time(get_time(d.datetime)) as formated_time, get_time(d.datetime) as time, get_day_of_week(d.datetime) as day_of_week, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, buy_sell(d.deal_sign) as buy_sell_formated, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes, d.account_id, d.position_id, d.parent_deal_id from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id")
+        self.connection.execute("""
+        create temporary view positions_view as select
+        p.id, p.open_datetime,
+        get_date(p.open_datetime) as open_date, format_date(get_date(p.open_datetime)) as open_date_formated,
+        get_time(p.open_datetime) as open_time, format_time(get_time(p.open_datetime)) as open_time_formated,
+        get_date(p.close_datetime) as close_date, format_date(get_date(p.close_datetime)) as close_date_formated,
+        get_time(p.close_datetime) as close_time, format_time(get_time(p.close_datetime)) as close_time_formated,
+        p.open_coast, p.close_coast, ((p.open_coast + p.close_coast) / 2) as coast,
+        p.open_volume, p.close_volume, ((p.open_volume + p.close_volume) / 2) as volume,
+        """
+        
 
 
     def open(self, filename):

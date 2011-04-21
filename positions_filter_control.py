@@ -6,6 +6,7 @@ from hiding_number_range_control import hiding_number_range_control
 from hiding_select_control import hiding_select_control
 from hiding_datetime_range_control import hiding_datetime_range_control
 from hiding_time_distance_range_control import *
+from common_methods import *
 
 class positions_filter_control:
     def __init__(self, builder):
@@ -148,6 +149,13 @@ class positions_filter_control:
         w.show_all()
         w.run()
         w.hide()
+
+    def _set_limits(control, limits):
+        if not is_null_or_empty(limits):
+            if limits[0] != None:
+                control.set_lower_limit(limits[0])
+            if len(limits) > 1 and limits[1] != None:
+                control.set_upper_limit(limits[1])
 
 
 if __name__ == "__main__":
