@@ -7,7 +7,7 @@ import math
 import gtk
 
 class time_distance_control(value_returner_control):
-    def __init__(self, day_spin, hour_spin, min_spin, sec_spin = None, checkbutton = None):
+    def __init__(self, day_spin = None, hour_spin = None, min_spin = None, sec_spin = None, checkbutton = None):
         self.checkbutton = checkbutton
         self.day = day_spin
         self.hour = hour_spin
@@ -20,9 +20,10 @@ class time_distance_control(value_returner_control):
         for spin in [self.min, self.sec]:
             if spin != None:
                 spin.get_adjustment().set_all(lower = 0, upper = 59, step_increment = 1, page_increment = 5)
-
-        self.day.get_adjustment().set_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 5)
-        self.hour.get_adjustment().set_all(lower = 0, upper = 23, step_increment = 1, page_increment = 5)
+        if self.day != None:
+            self.day.get_adjustment().set_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 5)
+        if self.hour != None:
+            self.hour.get_adjustment().set_all(lower = 0, upper = 23, step_increment = 1, page_increment = 5)
 
     def get_hour_value(self):
         return (self.hour != None and self.hour.get_value() or 0)

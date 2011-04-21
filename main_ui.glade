@@ -1348,7 +1348,7 @@
                                 <property name="visible">True</property>
                                 <property name="label_xalign">0</property>
                                 <child>
-                                  <object class="GtkAlignment" id="deals_filter_use_time_lower_bo">
+                                  <object class="GtkAlignment" id="deals_filter_use_time_upper_box">
                                     <property name="visible">True</property>
                                     <property name="left_padding">12</property>
                                     <child>

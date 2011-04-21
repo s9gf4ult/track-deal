@@ -9,6 +9,7 @@ from time_control import *
 from check_control import *
 from select_control import *
 from number_range_control import *
+from hiding_time_distance_range_control import *
 
 class deals_filter_control:
     def __init__(self, builder):
@@ -142,6 +143,23 @@ class deals_filter_control:
                                            number_control(self.builder.get_object("deals_filter_volume_upper_spin"),
                                                           self.builder.get_object("deals_filter_volume_upper_cb"),  digits = 4),
                                            self.builder.get_object("deals_filter_volume_cb"))
+        
+        self.time = hiding_time_distance_range_control({"chbt" : self.builder.get_object("deals_filter_use_time_lower"),
+                                                        "box" : self.builder.get_object("deals_filter_use_time_lower_box"),
+                                                        "hour" : self.builder.get_object("deals_filter_use_time_lower_hour"),
+                                                        "min" : self.builder.get_object("deals_filter_use_time_lower_min"),
+                                                        "sec" : self.builder.get_object("deals_filter_use_time_lower_sec")},
+                                                       {"chbt" : self.builder.get_object("deals_filter_use_time_upper"),
+                                                        "box" : self.builder.get_object("deals_filter_use_time_upper_box"),
+                                                        "hour" : self.builder.get_object("deals_filter_use_time_upper_hour"),
+                                                        "min" : self.builder.get_object("deals_filter_use_time_upper_min"),
+                                                        "sec" : self.builder.get_object("deals_filter_use_time_upper_sec")},
+                                                       [self.builder.get_object("deals_filter_use_time_box")],
+                                                       self.builder.get_object("deals_filter_use_time"))
+                                                       
+                                                        
+                                                        
+        
             
     def run(self):
         w = self.builder.get_object("deals_filter")
