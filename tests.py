@@ -45,7 +45,7 @@ class balance(unittest.TestCase):
         self.assertRaises(Exception, self.base.check_balance)
 
     def test_split_deals_balance(self):
-        """reduction tests for deals spliting"""
+        """degradation tests for deals spliting"""
         before = self.base.connection.execute("select sum(quantity) from deals").fetchone()[0]
         before_vol = self.base.connection.execute("select sum(volume) from deals").fetchone()[0]
         
@@ -129,11 +129,19 @@ class balance(unittest.TestCase):
         """test of positions volumes"""
         self.base.make_positions()
         self.assertAlmostEqual(self.base.connection.execute("select sum(deal_sign * volume) from deals where not_actual is null and position_id is not null").fetchone()[0], self.base.connection.execute("select sum(direction * (open_volume - close_volume)) from positions").fetchone()[0]) # balance of deals and positions volumes
+        self.assertAlmostEqual(self.base.connection.execute("select sum(broker_comm + stock_comm) from deals where not_actual is null and position_id is not null").fetchone()[0],
+                               self.base.connection.execute("select sum(broker_comm + stock_comm) from positions").fetchone()[0])
 
     def test_positions_view(self):
         self.base.make_positions()
         for (acc_id, ) in self.base.connection.execute("select distinct id from accounts"):
-            self.assertAlmostEqual(self.base.connection.execute("select last_money from accounts_view where id = ?", (acc_id,)).fetchall()[0], self.base.connection.execute("select net_after from positions_view oder by close_datetime desc"))
+            self.base.recalculate_position_attributes(acc_id)
+            self.assertAlmostEqual(self.base.connection.execute("select last_money from accounts_view where id = ? limit 1", (acc_id,)).fetchone()[0],
+                                   self.base.connection.execute("select net_after from positions_view where account_id = ? order by close_datetime desc, open_datetime desc limit 1", (acc_id, )).fetchone()[0])
+            self.assertAlmostEqual(self.base.connection.execute("select sum(d.stock_comm + d.broker_comm) from deals d where d.account_id = ? and d.not_actual is null", (acc_id,)).fetchone()[0],
+                                   self.base.connection.execute("select comm_after from positions_view where account_id = ? order by close_datetime desc, open_datetime desc limit 1", (acc_id,)).fetchone()[0])
+            (net, gross, comm) = self.base.connection.execute("select net_after, gross_after, comm_after from positions_view where account_id = ? order by close_datetime desc, open_datetime desc limit 1", (acc_id,)).fetchone()
+            self.assertAlmostEqual(net, gross - comm)
 
     def test_pl_net_value(self):
         """testing of pl_net correctness"""
