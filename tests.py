@@ -130,6 +130,11 @@ class balance(unittest.TestCase):
         self.base.make_positions()
         self.assertAlmostEqual(self.base.connection.execute("select sum(deal_sign * volume) from deals where not_actual is null and position_id is not null").fetchone()[0], self.base.connection.execute("select sum(direction * (open_volume - close_volume)) from positions").fetchone()[0]) # balance of deals and positions volumes
 
+    def test_positions_view(self):
+        self.base.make_positions()
+        for (acc_id, ) in self.base.connection.execute("select distinct id from accounts"):
+            self.assertAlmostEqual(self.base.connection.execute("select last_money from accounts_view where id = ?", (acc_id,)).fetchall()[0], self.base.connection.execute("select net_after from positions_view oder by close_datetime desc"))
+
     def test_pl_net_value(self):
         """testing of pl_net correctness"""
         self.base.make_positions()

@@ -78,6 +78,21 @@ class deals_proc():
         self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
         self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, count(d.id) as deals_count, (case count(d.id) when 0 then a.first_money else a.first_money + sum(d.deal_sign * d.volume) - sum(d.broker_comm + d.stock_comm) end) as last_money from accounts a left join deals d on d.account_id = a.id where d.not_actual is null group by a.id")
         self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, format_date(get_date(d.datetime)) as formated_date, format_time(get_time(d.datetime)) as formated_time, get_time(d.datetime) as time, get_day_of_week(d.datetime) as day_of_week, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, buy_sell(d.deal_sign) as buy_sell_formated, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes, d.account_id, d.position_id, d.parent_deal_id from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id")
+
+        self.connection.execute("""create temporary table internal_position_attributes
+        (id integer primary key not null,
+        position_id integer not null,
+        account_id integer,
+        net_before float,
+        net_after float,
+        gross_before float,
+        gross_after float,
+        comm_before float,
+        comm_after float,
+        plnet_acc float,
+        foreign key (position_id) references positions(id) on delete cascade,
+        foreign key (account_id) references accounts(id) on delete cascade)""")
+        
         self.connection.execute("""
         create temporary view positions_view as select
         p.id, p.open_datetime,
@@ -87,7 +102,10 @@ class deals_proc():
         get_time(p.close_datetime) as close_time, format_time(get_time(p.close_datetime)) as close_time_formated,
         p.open_coast, p.close_coast, ((p.open_coast + p.close_coast) / 2) as coast,
         p.open_volume, p.close_volume, ((p.open_volume + p.close_volume) / 2) as volume,
-        """
+        (i.plnet_acc) as plnet_acc, (p.pl_net / p.open_volume * 100) as plnet_volume,
+        ((p.stock_comm + p.broker_comm) / p.pl_gross) as comm_pl_gross,
+        abs(p.open_coast - p.close_coast) as coast_range, abs(p.pl_gross) as pl_gross_range,
+        abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (p.close_datetime - p.open_datetime) as duration from positions p left join internal_position_attributes i on i.position_id = p.id""")
         
 
 
@@ -149,6 +167,38 @@ class deals_proc():
             self.connection.executemany("insert into selected_accounts(account_id) select id from accounts where name = ?", map(lambda a: (a,), accounts))
         self.last_total_changes += self.connection.total_changes - ll
 
+    def recalculate_position_attributes(self, account_id):
+        self.delete_position_attributes(account_id)
+        self.generate_position_attributes(account_id)
+
+    def delete_position_attributes(self, account_id):
+        self.connection.execute("delete from internal_position_attributes where position_id in (select distinct p.id from positions p inner join deals d where d.account_id = ?)", (account_id, ))
+
+        
+    def generate_position_attributes(self, account_id):
+        (my_money,) = self.connection.execute("select first_money from accounts where id = ? limit 1", (account_id, ))
+        net = my_money
+        gross = my_money 
+        comm = 0
+        for (pid, ticket, open_datetime, close_datetime, open_coast, close_coast, count, open_volume, close_volume, broker_comm, stock_comm, pl_net, pl_gross) in self.connection.execute("select p.id, p.ticket, p.open_datetime, p.close_datetime, p.open_coast, p.close_coast, p.count, p.open_volume, p.close_volume, p.broker_comm, p.stock_comm, p.pl_net, p.pl_gross from positions p where exists(select d.* from deals d where d.position_id = p.id and d.account_id = ?) and not exists(select d.* from deals d where d.position_id = p.id and d.account_id <> ?) order by p.close_datetime, p.open_datetime", (account_id, account_id)):
+            oldnet = net
+            net += pl_net
+            oldgross = gross
+            gross += pl_gross
+            oldcomm = comm
+            comm += stock_comm + broker_comm
+            self._insert_from_hash("internal_position_attributes", {"position_id" : pid,
+                                                                    "net_before" : oldnet,
+                                                                    "net_after" : net,
+                                                                    "gross_before" : oldgross,
+                                                                    "gross_after" : gross,
+                                                                    "comm_before" : oldcomm,
+                                                                    "comm_after" : comm,
+                                                                    "plnet_acc" : pl_net / oldnet * 100,
+                                                                    "account_id" : account_id})
+                                                                    
+                                                                    
+                                                                    
 
     def create_new(self, filename):
         self.open(filename)
