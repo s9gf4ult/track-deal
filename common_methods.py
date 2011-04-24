@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import gtk
+from math import *
 
 def show_error(message, parent):
     win = parent
@@ -37,3 +38,21 @@ def is_null_or_empty(obj):
 def reduce_by_string(reductor, seq):
     return reduce(lambda a, b: u'{0}{1}{2}'.format(a, reductor, b),
                   seq)
+
+def seconds_to_time_distance(seconds):
+    ret = {}
+    for (key, mlt) in [("days", 24 * 3600),
+                       ("hours", 3600),
+                       ("minutes", 60),
+                       ("seconds", 1)]:
+        ret[key] = trunc(seconds / mlt)
+        seconds = seconds % mlt
+    return ret
+
+def time_distance_to_seconds(tdist):
+    ret = reduce(lambda a, b: a + b,
+                 map(lambda x, y: x * y,
+                     [24 * 3600, 3600, 60, 1],
+                     map(lambda k: gethash(tdist, k) != None and tdist[k] or 0,
+                         ["days", "hours", "minutes", "seconds"])))
+    return ret

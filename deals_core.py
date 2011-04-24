@@ -57,6 +57,16 @@ def get_day_of_week(val):
 def buy_sell(val):
     return val < 0 and u'B' or 'S'
 
+def format_time_distance(val):
+    days = trunc(val / (24 * 3600))
+    val = val % (24 * 3600)
+    ret = ""
+    if days > 0:
+        ret += u'{0}d '.format(days)
+    ret += format_time(val)
+    return ret
+        
+
 def short_long(val):
     return val < 0 and u'LONG' or 'SHORT'
     
@@ -103,7 +113,7 @@ class deals_proc():
         (i.plnet_acc) as plnet_acc, (p.pl_net / p.open_volume * 100) as plnet_volume,
         ((p.stock_comm + p.broker_comm) / p.pl_gross) as comm_pl_gross,
         abs(p.open_coast - p.close_coast) as coast_range, abs(p.pl_gross) as pl_gross_range,
-        abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (p.close_datetime - p.open_datetime) as duration,
+        abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (p.close_datetime - p.open_datetime) as duration, format_time_distance(p.close_datetime - p.open_datetime) as formated_duration,
         i.net_before as net_before, i.net_after as net_after, i.gross_before as gross_before, i.gross_after as gross_after,
         i.comm_before as comm_before, i.comm_after as comm_after, i.account_id as account_id
         from positions p left join internal_position_attributes i on i.position_id = p.id""")
@@ -125,6 +135,7 @@ class deals_proc():
         self.connection.create_function("get_day_of_week", 1, get_day_of_week)
         self.connection.create_function("short_long", 1, short_long)
         self.connection.create_function("buy_sell", 1, buy_sell)
+        self.connection.create_function("format_time_distance", 1, format_time_distance)
             
 
     def open_existing(self, filename):

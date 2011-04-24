@@ -545,7 +545,7 @@
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkTreeView" id="treeview1">
+                  <object class="GtkTreeView" id="positions_view">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </object>
