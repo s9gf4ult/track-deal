@@ -42,7 +42,7 @@ class main_ui():
         self.deals_tab = deals_tab_controller(self.global_data, self.database, self.builder, self.update_view, self.deals_filter, self.deal_adder, self.deal_editor, self.report_importer)
         # positions tab
         self.pfilter = positions_filter(self.global_data, self.builder, self.database)
-        self.positions_tab = positions_tab_controller(self.database, self.builder, self.pfilter, self.update_view)
+        self.positions_tab = positions_tab_controller(self.global_data, self.database, self.builder, self.pfilter, self.update_view)
 
         # accounts tab
         self.account_edit = account_edit_control(self.builder)
@@ -59,6 +59,7 @@ class main_ui():
         self.report_tab.update_widget()
         self.blog_tab.update_widget()
         self.main_window.update_widget()
+        self.positions_tab.update_widget()
         
 if __name__ == "__main__":
     obj = main_ui()

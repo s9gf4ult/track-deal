@@ -7,7 +7,12 @@ class list_view_sort_control:
     def __init__(self, treeview, columns, self_sorting = True, sort_callback = None):
         """columns must be list of tuples with name, renderer, optionally type,
         and optionally other data assigned to column order of tuple in the list
-        determines the order of columns in TreeView"""
+        determines the order of columns in TreeView
+        sort_callback must be like that lambda column, order, parameters:
+                                               column - column which clicked on,
+                                               order - gtk.SORT_ASCENDING or gtk.SORT_DESCENDING
+                                               parameters - columns[n][3:] where n is a number of column clicked on
+        """
         def get3ordefault(tpl, default):
             if len(tpl) < 3:
                 return default

@@ -4,6 +4,7 @@ from common_methods import *
 from positions_filter_control import *
 
 class positions_filter:
+    plus = []
     def __init__(self, global_data, builder, database):
         self.global_data = global_data
         self.builder = builder
@@ -18,11 +19,11 @@ class positions_filter:
 
     def _regen_selected(self):
         if self.database.connection != None:
-            self.database.pset_selected_stocks(map(lambda a: a[0], self.dialog.check_instruments.get_selected_rows()))
+            self.database.pset_selected_stocks(map(lambda a: a[0], self.dialog.check_instruments.get_checked_rows()))
             if self.dialog.account_current.get_value() == "current" and gethash(self.global_data, "current_account") != None:
                 self.database.pset_selected_accounts([self.database.connection.execute("select name from accounts where id = ? limit 1", (self.global_data["current_account"],)).fetchone()[0]])
             elif self.dialog.account_current.get_value() == "select":
-                self.database.pset_selected_accounts(map(lambda a: a[0], self.dialog.check_accounts.get_selected_rows()))
+                self.database.pset_selected_accounts(map(lambda a: a[0], self.dialog.check_accounts.get_checked_rows()))
             
 
     def run(self):
@@ -30,6 +31,11 @@ class positions_filter:
         self.dialog.run()
         
     def get_ids(self, fields, order_by):
+        if self.database.connection == None or (gethash(self.global_data, "current_account") == None and self.dialog.account_current.get_value() == "current"):
+            return cursor_empty()
+        self.plus = []
+        self._prepare_filter()
+        self._regen_selected()
         gets = reduce_by_string(", ", map(lambda a: u'p.{0}'.format(a), fields))
         froms = self._get_from()
         wheres = self._get_where()
@@ -39,16 +45,31 @@ class positions_filter:
             query += u' where {0}'.format(wheres)
         if not is_null_or_empty(orders):
             query += u' order by {0}'.format(orders)
-        return self.database.connection.execute(query)
+        print(query)
+        if is_null_or_empty(self.plus):
+            return self.database.connection.execute(query)
+        else:
+            return self.database.connection.execute(query, self.plus)
 
     def _get_from(self):
-        ret = u'pselected_stocks ss inner join positions_view p on ss.ticket = p.ticket'
+        ret = u'pselected_stocks ss inner join positions_view p on ss.stock = p.ticket'
         if self.dialog.account_current.get_value() == "select" or (self.dialog.account_current.get_value() == "current" and gethash(self.global_data, "current_account") != None):
             ret += u' inner join pselected_accounts sa on sa.account_id = p.account_id'
+        return ret
             
 
     def _get_where(self):
-        return None
+        conds = []
+        def lower_upper(value, low, high):
+            solve_lower_upper(self.plus, conds, value, low, high)
+        for (value, lower, upper) in [(u'p.open_datetime', self.dialog.open_datetime.get_lower_datetime(), self.dialog.open_datetime.get_upper_datetime()),
+                                      (u'p.close_datetime', self.dialog.close_datetime.get_lower_datetime(), self.dialog.close_datetime.get_upper_datetime())]:
+            lower_upper(value, lower, upper)
+        
+        
 
     def _get_order_by(self, order_by):
-        return None
+        if is_null_or_empty(order_by):
+            return None
+        else:
+            return u'p.{0}'.format(order_by)

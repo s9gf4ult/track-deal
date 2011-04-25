@@ -108,7 +108,7 @@ class deals_proc():
         
         self.connection.execute("""
         create temporary view positions_view as select
-        p.id, p.open_datetime, p.close_datetime, p.ticket as ticket,
+        p.id, p.open_datetime, p.close_datetime, p.ticket as ticket, p.count as count, p.direction as direction, short_long(p.direction) as direction_formated,
         get_date(p.open_datetime) as open_date, format_date(get_date(p.open_datetime)) as open_date_formated,
         get_time(p.open_datetime) as open_time, format_time(get_time(p.open_datetime)) as open_time_formated,
         get_date(p.close_datetime) as close_date, format_date(get_date(p.close_datetime)) as close_date_formated,
@@ -171,31 +171,33 @@ class deals_proc():
             
 
     def set_selected_stocks(self, stocks):
-        ll = self.connection.total_changes
+        self.begin_without_changes()
         self.connection.execute("delete from selected_stocks")
         if stocks and len(stocks) > 0:
             self.connection.executemany("insert into selected_stocks(stock) values (?)", map(lambda a: (a,), stocks))
-        self.last_total_changes += self.connection.total_changes - ll
+        self.end_without_changes()
 
     def set_selected_accounts(self, accounts):
-        ll = self.connection.total_changes
+        self.begin_without_changes()
         self.connection.execute("delete from selected_accounts")
         if accounts and len(accounts) > 0:
             self.connection.executemany("insert into selected_accounts(account_id) select id from accounts where name = ?", map(lambda a: (a,), accounts))
-        self.last_total_changes += self.connection.total_changes - ll
+        self.end_without_changes()
 
     def pset_selected_stocks(self, stocks):
         self.begin_without_changes()
         self.connection.execute("delete from pselected_stocks")
         if not is_null_or_empty(stocks):
-            self.connection.executemany("insert into pselected_stocks (ticket) values (?)", stocks)
+            self.connection.executemany("insert into pselected_stocks (stock) values (?)", map(lambda a: (a,), stocks))
         self.end_without_changes()
 
     def pset_selected_accounts(self, accounts):
         self.begin_without_changes()
         self.connection.execute("delete from pselected_accounts")
         if not is_null_or_empty(accounts):
-            self.connection.execute("insert into pselected_accounts (account_id) select id from accounts where name = ?", map(lambda a: (a, ), accounts))
+            self.connection.executemany("insert into pselected_accounts (account_id) select id from accounts where name = ?", map(lambda a: (a, ), accounts))
+            print(self.connection.execute("select account_id from pselected_accounts").fetchall())
+            print(self.connection.execute("select distinct account_id from positions_view").fetchall())
         self.end_without_changes()
 
     def begin_without_changes(self):
@@ -209,8 +211,10 @@ class deals_proc():
 
         
     def recalculate_position_attributes(self, account_id):
-        #self.delete_position_attributes(account_id)
+        self.begin_without_changes()
+        self.delete_position_attributes(account_id)
         self.generate_position_attributes(account_id)
+        self.end_without_changes()
 
     def delete_position_attributes(self, account_id):
         self.connection.execute("delete from internal_position_attributes where position_id in (select distinct p.id from positions p inner join deals d where d.account_id = ?)", (account_id, ))

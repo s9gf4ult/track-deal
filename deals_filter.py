@@ -21,13 +21,6 @@ class cursor_filter():
     def __iter__(self):
         return iter_filter(self.connection.execute(self.query))
 
-class cursor_empty():
-    def __iter__(self):
-        return empty_iter()
-
-class empry_iter():
-    def next(self):
-        raise StopIteration()
 
 class deals_filter():
 
