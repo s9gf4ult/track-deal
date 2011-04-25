@@ -5654,7 +5654,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkAlignment" id="alignment35">
+                  <object class="GtkAlignment" id="pfilter_accounts_box">
                     <property name="visible">True</property>
                     <property name="left_padding">20</property>
                     <child>

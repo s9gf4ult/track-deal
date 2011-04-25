@@ -7,6 +7,9 @@ from hiding_select_control import hiding_select_control
 from hiding_datetime_range_control import hiding_datetime_range_control
 from hiding_time_distance_range_control import *
 from common_methods import *
+from select_control import *
+from check_control import *
+from hide_control import *
 
 class positions_filter_control:
     def __init__(self, builder):
@@ -142,6 +145,21 @@ class positions_filter_control:
                                                                  "min" : shorter("pfilter_timerange_upper_min")},
                                                                 [shorter("pfilter_timerange_lower_superbox"), shorter("pfilter_timerange_upper_superbox")],
                                                                 shorter("pfilter_timerange"))
+        self.account_current = select_control({"current" : shorter("pfilter_account_current"),
+                                               "all" : shorter("pfilter_account_all"),
+                                               "select" : shorter("pfilter_account_select")})
+        self.check_accounts = check_control(shorter("pfilter_accounts_view"), "", [(u'Счет', gtk.CellRendererText())],
+                                            reverse_button = shorter("pfilter_account_reverse"),
+                                            select_button = shorter("pfilter_account_set"),
+                                            deselect_button = shorter("pfilter_account_unset"))
+        self.hiders = []
+        self.hiders.append(hide_control(shorter("pfilter_account_select"),
+                                        [shorter("pfilter_accounts_box")]))
+        self.check_instruments = check_control(shorter("pfilter_instruments"), "", [(u'Инструмент', gtk.CellRendererText())],
+                                               reverse_button = shorter("pfilter_instrument_reverse"),
+                                               select_button = shorter("pfilter_instrument_set"),
+                                               deselect_button = shorter("pfilter_instrument_unset"))
+        
 
         
     def run(self):
@@ -162,5 +180,7 @@ if __name__ == "__main__":
     b = gtk.Builder()
     b.add_from_file('main_ui.glade')
     con = positions_filter_control(b)
+    con.check_instruments.update_rows([(u'абаба',), (u'уоуоуЭ',)])
+    con.check_accounts.update_rows([(u'уоашо',), (u'ejfiaj',)])
     con.run()
     
