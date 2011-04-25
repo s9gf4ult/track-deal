@@ -19,10 +19,15 @@ class positions_tab_controller(modifying_tab_control):
                                                      [(u'Дата Откр.', gtk.CellRendererText(), str, u'open_datetime'),
                                                       (u'время Откр.', gtk.CellRendererText(), str, u'open_time'),
                                                       (u'Дата Закр.', gtk.CellRendererText(), str, u'close_datetime'),
-                                                      (u'Дата Закр.', gtk.CellRendererText(), str, u'close_time'),
+                                                      (u'Время Закр.', gtk.CellRendererText(), str, u'close_time'),
+                                                      (u'В позиции', gtk.CellRendererText(), str, u'duration'),
                                                       (u'Тикер', gtk.CellRendererText(), str, u'ticket'),
                                                       (u'Кол-во', gtk.CellRendererSpin(), int, u'count'),
-                                                      (u'Тип', gtk.CellRendererText(), str, u'direction')],
+                                                      (u'Тип', gtk.CellRendererText(), str, u'direction'),
+                                                      (u'Цена Откр.', gtk.CellRendererSpin(), float, u'open_coast'),
+                                                      (u'Цена Закр.', gtk.CellRendererSpin(), float, u'close_coast'),
+                                                      (u'Ход', gtk.CellRendererSpin(), float, u'coast_range')],
+                                                     
                                                      self_sorting = False,
                                                      sort_callback = self.sort_callback)
                                                      
@@ -49,9 +54,13 @@ class positions_tab_controller(modifying_tab_control):
                                                                        'open_time_formated',
                                                                        'close_date_formated',
                                                                        'close_time_formated',
+                                                                       'formated_duration',
                                                                        'ticket',
                                                                        'count',
-                                                                       'direction_formated'],
+                                                                       'direction_formated',
+                                                                       'open_coast',
+                                                                       'close_coast',
+                                                                       'coast_range'],
                                                              order_by = self.order_by))
 
     def sort_callback(self, column, order, parameters):

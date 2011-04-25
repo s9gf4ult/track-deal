@@ -5,14 +5,6 @@ import gtk
 from math import *
 
 
-class empry_iter():
-    def next(self):
-        raise StopIteration()
-    
-class cursor_empty():
-    def __iter__(self):
-        return empty_iter()
-
 
 def show_error(message, parent):
     win = parent

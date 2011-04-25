@@ -74,57 +74,66 @@ class positions_filter_control:
                                                  shorter("pfilter_coast_box"),
                                                  shorter("pfilter_coast"),
                                                  shorter("pfilter_coast_lower"),
-                                                 shorter("pfilter_coast_upper"))
+                                                 shorter("pfilter_coast_upper"),
+                                                 step_incr = 0.1, digits = 4)
         self.volume = hiding_number_range_control(shorter("pfilter_volume_lower_spin"),
                                                   shorter("pfilter_volume_upper_spin"),
                                                   shorter("pfilter_volume_box"),
                                                   shorter("pfilter_volume"),
                                                   shorter("pfilter_volume_lower"),
-                                                  shorter("pfilter_volume_upper"))
+                                                  shorter("pfilter_volume_upper"),
+                                                  digits = 4)
         self.plnet_acc = hiding_number_range_control(shorter("pfilter_plnet_acc_lower_spin"),
                                                      shorter("pfilter_plnet_acc_upper_spin"),
                                                      shorter("pfilter_plnet_acc_box"),
                                                      shorter("pfilter_plnet_acc"),
                                                      shorter("pfilter_plnet_acc_lower"),
-                                                     shorter("pfilter_plnet_acc_upper"))
+                                                     shorter("pfilter_plnet_acc_upper"),
+                                                     step_incr = 0.1, digits = 4)
         self.plnet_volume = hiding_number_range_control(shorter("pfilter_plnet_volume_lower_spin"),
                                                         shorter("pfilter_plnet_volume_upper_spin"),
                                                         shorter("pfilter_plnet_volume_box"),
                                                         shorter("pfilter_plnet_volume"),
                                                         shorter("pfilter_plnet_volume_lower"),
-                                                        shorter("pfilter_plnet_volume_upper"))
+                                                        shorter("pfilter_plnet_volume_upper"),
+                                                        step_incr = 0.1, digits = 4)
         self.comm_plgross = hiding_number_range_control(shorter("pfilter_comm_plgross_lower_spin"),
                                                         shorter("pfilter_comm_plgross_upper_spin"),
                                                         shorter("pfilter_comm_plgross_box"),
                                                         shorter("pfilter_comm_plgross"),
                                                         shorter("pfilter_comm_plgross_lower"),
-                                                        shorter("pfilter_comm_plgross_upper"))
+                                                        shorter("pfilter_comm_plgross_upper"),
+                                                        step_incr = 0.1, digits = 4)
         self.price_range = hiding_number_range_control(shorter("pfilter_price_range_lower_spin"),
                                                        shorter("pfilter_price_range_upper_spin"),
                                                        shorter("pfilter_price_range_box"),
                                                        shorter("pfilter_price_range"),
                                                        shorter("pfilter_price_range_lower"),
-                                                       shorter("pfilter_price_range_upper"))
+                                                       shorter("pfilter_price_range_upper"),
+                                                       step_incr = 0.1, digits = 4)
         self.plgross = hiding_number_range_control(shorter("pfilter_plgross_lower_spin"),
                                                    shorter("pfilter_plgross_upper_spin"),
                                                    shorter("pfilter_plgross_box"),
                                                    shorter("pfilter_plgross"),
                                                    shorter("pfilter_plgross_lower"),
-                                                   shorter("pfilter_plgross_upper"))
+                                                   shorter("pfilter_plgross_upper"),
+                                                   step_incr = 0.1, digits = 4)
         self.plnet = hiding_number_range_control(shorter("pfilter_plnet_lower_spin"),
                                                  shorter("pfilter_plnet_upper_spin"),
                                                  shorter("pfilter_plnet_box"),
                                                  shorter("pfilter_plnet"),
                                                  shorter("pfilter_plnet_lower"),
-                                                 shorter("pfilter_plnet_upper"))
+                                                 shorter("pfilter_plnet_upper"),
+                                                 step_incr = 0.1, digits = 4)
         self.comm = hiding_number_range_control(shorter("pfilter_comm_lower_spin"),
                                                 shorter("pfilter_comm_upper_spin"),
                                                 shorter("pfilter_comm_box"),
                                                 shorter("pfilter_comm"),
                                                 shorter("pfilter_comm_lower"),
-                                                shorter("pfilter_comm_upper"))
-        self.direction = hiding_select_control({-1 : shorter("pfilter_profit_prof"),
-                                                1 : shorter("pfilter_profit_loss")},
+                                                shorter("pfilter_comm_upper"),
+                                                step_incr = 0.1, digits = 4)
+        self.direction = hiding_select_control({1 : shorter("pfilter_profit_prof"),
+                                                -1 : shorter("pfilter_profit_loss")},
                                                shorter("pfilter_profit"),
                                                shorter("pfilter_profit_box"))
         

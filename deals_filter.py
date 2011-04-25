@@ -32,8 +32,8 @@ class deals_filter():
     
 
     def get_ids(self, order_by, parent = False, fields = ["id"]):
-        if not self.database.connection:
-            return cursor_empty()
+        if self.database.connection == None:
+            return []
         self.plus = []
         fields = reduce_by_string(u', ', map(lambda a: u'd.{0}'.format(a), fields))
         fromf = self.get_from_part()

@@ -47,7 +47,7 @@ def format_time(val):
     hours = trunc(val / 3600)
     val = val % 3600
     minutes = trunc(val / 60)
-    seconds = val % 60
+    seconds = trunc(val % 60)
     return u'{0:02}:{1:02}:{2:02}'.format(hours, minutes, seconds)
 
 def get_day_of_week(val):
@@ -115,10 +115,10 @@ class deals_proc():
         get_time(p.close_datetime) as close_time, format_time(get_time(p.close_datetime)) as close_time_formated,
         p.open_coast, p.close_coast, ((p.open_coast + p.close_coast) / 2) as coast,
         p.open_volume, p.close_volume, ((p.open_volume + p.close_volume) / 2) as volume,
-        (i.plnet_acc) as plnet_acc, (p.pl_net / p.open_volume * 100) as plnet_volume,
-        ((p.stock_comm + p.broker_comm) / p.pl_gross) as comm_pl_gross,
+        (i.plnet_acc) as plnet_acc, abs(p.pl_net / p.open_volume * 100) as plnet_volume,
+        abs((p.stock_comm + p.broker_comm) / p.pl_gross) as comm_pl_gross,
         abs(p.open_coast - p.close_coast) as coast_range, abs(p.pl_gross) as pl_gross_range,
-        abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (p.close_datetime - p.open_datetime) as duration, format_time_distance(p.close_datetime - p.open_datetime) as formated_duration,
+        abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (case when p.pl_net > 0 then 1 else -1 end) as profit, (p.close_datetime - p.open_datetime) as duration, format_time_distance(p.close_datetime - p.open_datetime) as formated_duration,
         i.net_before as net_before, i.net_after as net_after, i.gross_before as gross_before, i.gross_after as gross_after,
         i.comm_before as comm_before, i.comm_after as comm_after, i.account_id as account_id
         from positions p left join internal_position_attributes i on i.position_id = p.id""")
@@ -150,6 +150,12 @@ class deals_proc():
         if cuv != self.current_user_version:
             raise Exception(u'Не совпадает версия базы, должна быть {0}, а в базе {1}'.format(self.current_user_version, cuv))
         self.check_database_version_2()
+        self.recalculate_temporary_attributes()
+
+    def recalculate_temporary_attributes(self):
+        for (acc_id, ) in self.connection.execute("select id from accounts"):
+            self.recalculate_position_attributes(acc_id)
+    
 
     def check_tables_existance(self, tables):
         etables = map(lambda a: a[0].decode('utf-8'), self.connection.execute("select name from sqlite_master where type = 'table'"))
@@ -196,8 +202,6 @@ class deals_proc():
         self.connection.execute("delete from pselected_accounts")
         if not is_null_or_empty(accounts):
             self.connection.executemany("insert into pselected_accounts (account_id) select id from accounts where name = ?", map(lambda a: (a, ), accounts))
-            print(self.connection.execute("select account_id from pselected_accounts").fetchall())
-            print(self.connection.execute("select distinct account_id from positions_view").fetchall())
         self.end_without_changes()
 
     def begin_without_changes(self):
@@ -239,7 +243,7 @@ class deals_proc():
                                                                     "gross_after" : gross,
                                                                     "comm_before" : oldcomm,
                                                                     "comm_after" : comm,
-                                                                    "plnet_acc" : pl_net / oldnet * 100,
+                                                                    "plnet_acc" : abs(pl_net / oldnet * 100),
                                                                     "account_id" : account_id})
                                                                     
                                                                     
