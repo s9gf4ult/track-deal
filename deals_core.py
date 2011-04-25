@@ -72,20 +72,24 @@ def short_long(val):
     
 
 class deals_proc():
+    _total_changes = None
+    last_total_changes = 0
+    connection = None
+    current_user_version = 2
+    
     def __init__(self):
-        self.current_user_version = 2
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_adapter(datetime.date, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_adapter(datetime.time, lambda a: a.hour * 3600 + a.minute * 60 + a.second)
         sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
-        self.connection = None
-        self.last_total_changes = 0
 
         
     def create_temporary_tables(self):
-        self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text, unique(stock))")
-        self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null)")
+        self.connection.execute("create temporary table selected_stocks (id integer primary key not null, stock text not null, unique(stock))")
+        self.connection.execute("create temporary table pselected_stocks (id integer primary key not null, stock text not null, unique(stock))")
+        self.connection.execute("create temporary table selected_accounts (id integer primary key not null, account_id integer not null, unique(account_id))")
+        self.connection.execute("create temporary table pselected_accounts (id integer primary key not null, account_id integer not null, unique(account_id))")
         self.connection.execute("create temporary view accounts_view as select a.id, a.name, a.currency, a.first_money, count(d.id) as deals_count, (case count(d.id) when 0 then a.first_money else a.first_money + sum(d.deal_sign * d.volume) - sum(d.broker_comm + d.stock_comm) end) as last_money from accounts a left join deals d on d.account_id = a.id where d.not_actual is null group by a.id")
         self.connection.execute("create temporary view deals_view as select d.id, d.datetime, get_date(d.datetime) as date, format_date(get_date(d.datetime)) as formated_date, format_time(get_time(d.datetime)) as formated_time, get_time(d.datetime) as time, get_day_of_week(d.datetime) as day_of_week, d.security_name, d.security_type, d.quantity, d.price, d.deal_sign, buy_sell(d.deal_sign) as buy_sell_formated, d.volume, d.broker_comm, d.stock_comm, d.broker_comm + d.stock_comm as comm, reduce_string(name_value(a.name, a.value)) as attributes, d.account_id, d.position_id, d.parent_deal_id from deals d left join deal_attributes a on a.deal_id = d.id where d.not_actual is null group by d.id")
 
@@ -99,11 +103,12 @@ class deals_proc():
         gross_after float,
         comm_before float,
         comm_after float,
-        plnet_acc float)""")
+        plnet_acc float,
+        unique(position_id))""")
         
         self.connection.execute("""
         create temporary view positions_view as select
-        p.id, p.open_datetime, p.close_datetime,
+        p.id, p.open_datetime, p.close_datetime, p.ticket as ticket,
         get_date(p.open_datetime) as open_date, format_date(get_date(p.open_datetime)) as open_date_formated,
         get_time(p.open_datetime) as open_time, format_time(get_time(p.open_datetime)) as open_time_formated,
         get_date(p.close_datetime) as close_date, format_date(get_date(p.close_datetime)) as close_date_formated,
@@ -179,6 +184,30 @@ class deals_proc():
             self.connection.executemany("insert into selected_accounts(account_id) select id from accounts where name = ?", map(lambda a: (a,), accounts))
         self.last_total_changes += self.connection.total_changes - ll
 
+    def pset_selected_stocks(self, stocks):
+        self.begin_without_changes()
+        self.connection.execute("delete from pselected_stocks")
+        if not is_null_or_empty(stocks):
+            self.connection.executemany("insert into pselected_stocks (ticket) values (?)", stocks)
+        self.end_without_changes()
+
+    def pset_selected_accounts(self, accounts):
+        self.begin_without_changes()
+        self.connection.execute("delete from pselected_accounts")
+        if not is_null_or_empty(accounts):
+            self.connection.execute("insert into pselected_accounts (account_id) select id from accounts where name = ?", map(lambda a: (a, ), accounts))
+        self.end_without_changes()
+
+    def begin_without_changes(self):
+        if self._total_changes == None:
+            self._total_changes = self.connection.total_changes
+
+    def end_without_changes(self):
+        if self._total_changes != None:
+            self.last_total_changes += self.connection.total_changes - self._total_changes
+            self._total_changes = None
+
+        
     def recalculate_position_attributes(self, account_id):
         #self.delete_position_attributes(account_id)
         self.generate_position_attributes(account_id)

@@ -19,6 +19,10 @@ class positions_filter:
     def _regen_selected(self):
         if self.database.connection != None:
             self.database.pset_selected_stocks(map(lambda a: a[0], self.dialog.check_instruments.get_selected_rows()))
+            if self.dialog.account_current.get_value() == "current" and gethash(self.global_data, "current_account") != None:
+                self.database.pset_selected_accounts([self.database.connection.execute("select name from accounts where id = ? limit 1", (self.global_data["current_account"],)).fetchone()[0]])
+            elif self.dialog.account_current.get_value() == "select":
+                self.database.pset_selected_accounts(map(lambda a: a[0], self.dialog.check_accounts.get_selected_rows()))
             
             
 
