@@ -128,9 +128,9 @@ class deals_filter():
         pp = self.dialog.position.get_value()
         if pp != None:
             if pp:
-                conds.append(u'd.position_id is null')
-            else:
                 conds.append(u'd.position_id is not null')
+            else:
+                conds.append(u'd.position_id is null')
 
         dd = self.dialog.direction.get_value()
         if dd != None:

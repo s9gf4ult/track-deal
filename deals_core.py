@@ -69,6 +69,12 @@ def format_time_distance(val):
 
 def short_long(val):
     return val < 0 and u'LONG' or 'SHORT'
+
+def minus_brakets(val):
+    if val < 0:
+        return u'({0})'.format(abs(val))
+    else:
+        return u'{0}'.format(val)
     
 
 class deals_proc():
@@ -115,10 +121,10 @@ class deals_proc():
         get_time(p.close_datetime) as close_time, format_time(get_time(p.close_datetime)) as close_time_formated,
         p.open_coast, p.close_coast, ((p.open_coast + p.close_coast) / 2) as coast,
         p.open_volume, p.close_volume, ((p.open_volume + p.close_volume) / 2) as volume,
-        (i.plnet_acc) as plnet_acc, abs(p.pl_net / p.open_volume * 100) as plnet_volume,
+        abs(i.plnet_acc) as plnet_acc, minus_brakets(i.plnet_acc) as plnet_acc_formated, abs(p.pl_net / p.open_volume * 100) as plnet_volume,
         abs((p.stock_comm + p.broker_comm) / p.pl_gross) as comm_pl_gross,
-        abs(p.open_coast - p.close_coast) as coast_range, abs(p.pl_gross) as pl_gross_range,
-        abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (case when p.pl_net > 0 then 1 else -1 end) as profit, (p.close_datetime - p.open_datetime) as duration, format_time_distance(p.close_datetime - p.open_datetime) as formated_duration,
+        abs(p.open_coast - p.close_coast) as coast_range, minus_brakets((p.open_coast - p.close_coast) * p.direction) as coast_range_formated, abs(p.pl_gross) as pl_gross_range, minus_brakets(p.pl_gross) as pl_gross_range_formated, minus_brakets(p.pl_net) as pl_net_range_formated,
+        abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (case when p.pl_net >= 0 then 1 else -1 end) as profit, (p.close_datetime - p.open_datetime) as duration, format_time_distance(p.close_datetime - p.open_datetime) as formated_duration,
         i.net_before as net_before, i.net_after as net_after, i.gross_before as gross_before, i.gross_after as gross_after,
         i.comm_before as comm_before, i.comm_after as comm_after, i.account_id as account_id
         from positions p left join internal_position_attributes i on i.position_id = p.id""")
@@ -141,6 +147,7 @@ class deals_proc():
         self.connection.create_function("short_long", 1, short_long)
         self.connection.create_function("buy_sell", 1, buy_sell)
         self.connection.create_function("format_time_distance", 1, format_time_distance)
+        self.connection.create_function("minus_brakets", 1, minus_brakets)
             
 
     def open_existing(self, filename):
@@ -243,7 +250,7 @@ class deals_proc():
                                                                     "gross_after" : gross,
                                                                     "comm_before" : oldcomm,
                                                                     "comm_after" : comm,
-                                                                    "plnet_acc" : abs(pl_net / oldnet * 100),
+                                                                    "plnet_acc" : (pl_net / oldnet * 100),
                                                                     "account_id" : account_id})
                                                                     
                                                                     

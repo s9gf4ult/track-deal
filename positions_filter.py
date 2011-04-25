@@ -86,6 +86,12 @@ class positions_filter:
                                       (u'p.comm', self.dialog.comm.get_lower_value(), self.dialog.comm.get_upper_value()),
                                       (u'p.duration', self.dialog.time_distance.get_lower_seconds(), self.dialog.time_distance.get_upper_seconds())]:
             lower_upper(value, lower, upper)
+        ls = self.dialog.direction.get_value()
+        if ls != None:
+            lower_upper(u'p.direction', ls, ls)
+        lp = self.dialog.loss_profit.get_value()
+        if lp != None:
+            lower_upper(u'p.profit', lp, lp)
         
 
         if len(conds) > 0:
