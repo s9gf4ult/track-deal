@@ -104,22 +104,7 @@ class deals_filter():
         
         conds = []
         def lower_upper(field_name, l, h):
-            if l and h:
-                if l < h:
-                    conds.append(u'({0} between ? and ?)'.format(field_name))
-                    self.plus += [l, h]
-                elif l > h:
-                    conds.append(u'({0} >= ? or {0} <= ?)'.format(field_name))
-                    self.plus += [l, h]
-                else:
-                    conds.append(u'{0} = ?'.format(field_name))
-                    self.plus.append(l)
-            elif l:
-                conds.append(u'{0} >= ?'.format(field_name))
-                self.plus.append(l)
-            elif h:
-                conds.append(u'{0} <= ?'.format(field_name))
-                self.plus.append(h)
+            solve_lower_upper(self.plus, conds, field_name, l, h)
             
         #################
         # number ranges #

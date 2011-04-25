@@ -56,3 +56,21 @@ def time_distance_to_seconds(tdist):
                      map(lambda k: gethash(tdist, k) != None and tdist[k] or 0,
                          ["days", "hours", "minutes", "seconds"])))
     return ret
+
+def solve_lower_upper(plus, conds, field_name, l, h):
+    if l and h:
+        if l < h:
+            conds.append(u'({0} between ? and ?)'.format(field_name))
+            plus += [l, h]
+        elif l > h:
+            conds.append(u'({0} >= ? or {0} <= ?)'.format(field_name))
+            plus += [l, h]
+        else:
+            conds.append(u'{0} = ?'.format(field_name))
+            plus.append(l)
+    elif l:
+        conds.append(u'{0} >= ?'.format(field_name))
+        plus.append(l)
+    elif h:
+        conds.append(u'{0} <= ?'.format(field_name))
+        plus.append(h)

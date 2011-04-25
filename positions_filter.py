@@ -24,7 +24,6 @@ class positions_filter:
             elif self.dialog.account_current.get_value() == "select":
                 self.database.pset_selected_accounts(map(lambda a: a[0], self.dialog.check_accounts.get_selected_rows()))
             
-            
 
     def run(self):
         self._prepare_filter()
