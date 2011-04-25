@@ -16,6 +16,11 @@ class positions_filter:
                                  (self.dialog.check_instruments, "select distinct security_name from deals")]:
                 wid.update_rows(self.database.connection.execute(query))
 
+    def _regen_selected(self):
+        if self.database.connection != None:
+            self.database.pset_selected_stocks(map(lambda a: a[0], self.dialog.check_instruments.get_selected_rows()))
+            
+            
 
     def run(self):
         self._prepare_filter()
@@ -35,8 +40,8 @@ class positions_filter:
 
     def _get_from(self):
         ret = u'pselected_stocks ss inner join positions_view p on ss.ticket = p.ticket'
-        if self.dialog.account_current.get_value() == "select":
-            ret += u' inner join pselected_accounts sa on sa.ticket = p.ticket'
+        if self.dialog.account_current.get_value() == "select" or (self.dialog.account_current.get_value() == "current" and gethash(self.global_data, "current_account") != None):
+            ret += u' inner join pselected_accounts sa on sa.account_id = p.account_id'
             
 
     def _get_where(self):
