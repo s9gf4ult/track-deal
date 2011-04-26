@@ -54,6 +54,8 @@ class positions_tab_controller(modifying_tab_control):
             try:
                 self.database.delete_positions_by_ids(map(lambda itr: model.get_value(itr, 0), itrs))
                 if gethash(self.global_data, "current_account") != None:
+                    self.database.join_deals_leaves(self.global_data["current_account"])
+                    self.database.delete_empty_deal_groups()
                     self.database.recalculate_position_attributes(self.global_data["current_account"])
                 self.call_update_callback()
             except Exception as e:

@@ -347,10 +347,23 @@ class deals_proc():
         """deletes positions which has no one deal assigned to"""
         self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id))")
 
+    def delete_empty_deal_groups(self):
+        self.connection.execute("delete from deal_groups where id in (select dg.id from deal_groups dg where not exists(select d.id from deals d where d.group_id = dg.id))")
 
-    def delete_broken_positions(self):
+
+    def delete_broken_positions(self, account_id):
         """deletes positions which has unbalanced set of deals assigned to"""
-        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id group by p.id) where abs(count) > 0.00001)")
+        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? group by p.id) where abs(count) > 0.00001)", (account_id, ))
+
+    def join_deals_leaves(self, account_id):
+        """looks for deals which has only deals assigned to and not to any position and delete it's child deals"""
+        try_again = True
+        while try_again:
+            try_again = False
+            for (did, ) in self.connection.execute("select d.id from deals d where exists(select dd.id from deals dd where dd.position_id is null and dd.parent_deal_id = d.id) and not exists(select dd.id from deals dd where dd.position_id is not null and dd.parent_deal_id = d.id) and d.account_id = ?", (account_id, )):
+                self.connection.execute("delete from deals where parent_deal_id = ?", (did, ))
+                self.connection.execute("update deals set not_actual = null where id = ?", (did, ))
+                try_again = True
 
     def close(self):
         if self.connection:

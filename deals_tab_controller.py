@@ -118,8 +118,12 @@ class deals_tab_controller(modifying_tab_control):
         if dial.run() == gtk.RESPONSE_YES:
             (model, it) = selected.get_selected_rows()
             self.database.delete_deals_by_ids(map(lambda pth: model.get_value(model.get_iter(pth), 0), it))
-            self.database.delete_empty_positions()
-            self.database.delete_broken_positions()
+            if gethash(self.global_data, "current_account") != None:
+                self.database.delete_empty_positions()
+                self.database.delete_broken_positions(self.global_data["current_account"])
+                self.database.join_deals_leaves(self.global_data["current_account"])
+                self.database.delete_empty_deal_groups()
+                self.database.recalculate_position_attributes(self.global_data["current_account"])
             self.call_update_callback()
         dial.destroy()
 
