@@ -3,6 +3,7 @@
 
 import gtk
 from math import *
+import traceback
 
 
 
@@ -76,3 +77,7 @@ def solve_lower_upper(plus, conds, field_name, l, h):
     elif h:
         conds.append(u'{0} <= ?'.format(field_name))
         plus.append(h)
+
+def show_and_print_error(error, window):
+    show_error(error.__str__(), window)
+    print(traceback.format_exc())

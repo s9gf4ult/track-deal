@@ -426,6 +426,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="rubber_banding">True</property>
+                        <property name="enable_tree_lines">True</property>
                       </object>
                     </child>
                   </object>
@@ -554,6 +555,8 @@
                       <object class="GtkTreeView" id="positions_view">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="rubber_banding">True</property>
+                        <property name="enable_tree_lines">True</property>
                       </object>
                     </child>
                   </object>

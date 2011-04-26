@@ -16,7 +16,8 @@ class positions_tab_controller(modifying_tab_control):
         def shorter(name, action, *method):
             self.builder.get_object(name).connect(action, *method)
         self.positions_list = list_view_sort_control(self.builder.get_object("positions_view"),
-                                                     [(u'Дата Откр.', gtk.CellRendererText(), str, u'open_datetime'),
+                                                     [(u'id', gtk.CellRendererSpin(), int, u'id'),
+                                                      (u'Дата Откр.', gtk.CellRendererText(), str, u'open_datetime'),
                                                       (u'время Откр.', gtk.CellRendererText(), str, u'open_time'),
                                                       (u'Дата Закр.', gtk.CellRendererText(), str, u'close_datetime'),
                                                       (u'Время Закр.', gtk.CellRendererText(), str, u'close_time'),
@@ -36,9 +37,27 @@ class positions_tab_controller(modifying_tab_control):
                                                       (u'% Изменения', gtk.CellRendererText(), str, u'plnet_acc')],
                                                      self_sorting = False,
                                                      sort_callback = self.sort_callback)
-                                                     
+        self.builder.get_object("positions_view").get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         shorter("positions_make", "activate", self.make_positions_activate)
         shorter("call_positions_filter", "activate", self.filter_activate)
+        shorter("delete_positions", "activate", self.delete_positions_activate)
+
+    def delete_positions_activate(self, action):
+        self.delete_positions()
+
+    def delete_positions(self):
+        if self.database.connection == None:
+            return
+        (model, paths) = self.builder.get_object("positions_view").get_selection().get_selected_rows()
+        if len(paths) > 0:
+            itrs = map(lambda pt: model.get_iter(pt), paths)
+            try:
+                self.database.delete_positions_by_ids(map(lambda itr: model.get_value(itr, 0), itrs))
+                if gethash(self.global_data, "current_account") != None:
+                    self.database.recalculate_position_attributes(self.global_data["current_account"])
+                self.call_update_callback()
+            except Exception as e:
+                show_and_print_error(e, self.builder.get_object("main_window"))
 
     def make_positions_activate(self, action):
         self.make_positions()
@@ -56,7 +75,8 @@ class positions_tab_controller(modifying_tab_control):
     def update_widget(self):
         if self.database.connection == None:
             return
-        self.positions_list.update_rows(self.pfilter.get_ids(fields = ['open_date_formated',
+        self.positions_list.update_rows(self.pfilter.get_ids(fields = ['id',
+                                                                       'open_date_formated',
                                                                        'open_time_formated',
                                                                        'close_date_formated',
                                                                        'close_time_formated',

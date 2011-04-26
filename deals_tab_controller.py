@@ -117,9 +117,7 @@ class deals_tab_controller(modifying_tab_control):
         dial.props.text = u'Удалить {0} сделок ? В любом случае это действие можно сразу отменить при помощи Rollback'.format(dcount)
         if dial.run() == gtk.RESPONSE_YES:
             (model, it) = selected.get_selected_rows()
-            for ii in it:
-                did = model.get_value(model.get_iter(ii), 0)
-                self.database.connection.execute("delete from deals where id = ?", (did,))
+            self.database.delete_deals_by_ids(map(lambda pth: model.get_value(model.get_iter(pth), 0), it))
             self.database.delete_empty_positions()
             self.database.delete_broken_positions()
             self.call_update_callback()

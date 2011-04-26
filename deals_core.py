@@ -158,6 +158,7 @@ class deals_proc():
             raise Exception(u'Не совпадает версия базы, должна быть {0}, а в базе {1}'.format(self.current_user_version, cuv))
         self.check_database_version_2()
         self.recalculate_temporary_attributes()
+        self.commit()
 
     def recalculate_temporary_attributes(self):
         for (acc_id, ) in self.connection.execute("select id from accounts"):
@@ -220,6 +221,8 @@ class deals_proc():
             self.last_total_changes += self.connection.total_changes - self._total_changes
             self._total_changes = None
 
+    def delete_deals_by_ids(self, dids):
+        self.connection.executemany("delete from deals where id = ?", map(lambda did: (did, ), dids))
         
     def recalculate_position_attributes(self, account_id):
         self.begin_without_changes()
@@ -419,10 +422,12 @@ class deals_proc():
     def commit(self):
         self.connection.commit()
         self.last_total_changes = self.connection.total_changes
+        self.connection.execute("begin transaction")
 
     def rollback(self):
         self.connection.rollback()
         self.last_total_changes = self.connection.total_changes
+        self.connection.execute("begin transaction")
 
     def _insert_into(self, tablename, fields, values):
         ret = self.connection.execute(u'insert into {0}({1}) values ({2})'.format(tablename, reduce(lambda a, b: u'{0}, {1}'.format(a, b), fields), reduce(lambda a, b: u'{0}, {1}'.format(a, b), map(lambda a: '?', fields))), values)
@@ -528,6 +533,9 @@ class deals_proc():
         return self._insert_from_hash("accounts", {"name" : name,
                                                    "first_money" : first_money,
                                                    "currency" : currency}).lastrowid
+
+    def delete_positions_by_ids(self, pids):
+        self.connection.executemany("delete from positions where id = ?", map(lambda a: (a, ), pids))
 
     def make_groups_in_account(self, account, ticket):
         for sign in [-1, 1]:
