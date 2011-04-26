@@ -16,6 +16,7 @@ from account_edit_control import account_edit_control
 from deal_editor_control import deal_editor_control
 from report_importer_control import report_importer_control
 from positions_filter import *
+from status_bar_control import *
 
 class main_ui():
 
@@ -47,6 +48,9 @@ class main_ui():
         # accounts tab
         self.account_edit = account_edit_control(self.builder)
         self.accounts_tab = accounts_tab_controller(self.global_data, self.database, self.builder, self.update_view, self.account_edit)
+        # status bar
+        self.statusbar = status_bar_control(self.global_data, self.database, self.builder)
+        
         self.update_view()
         
     def show(self):
@@ -60,6 +64,7 @@ class main_ui():
         self.blog_tab.update_widget()
         self.main_window.update_widget()
         self.positions_tab.update_widget()
+        self.statusbar.update_widget()
         
 if __name__ == "__main__":
     obj = main_ui()
