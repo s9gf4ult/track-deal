@@ -29,10 +29,10 @@ class positions_tab_controller(modifying_tab_control):
                                                       (u'Ход', gtk.CellRendererText(), str, u'coast_range'),
                                                       (u'Gross Bfr.', gtk.CellRendererSpin(), float, u'gross_before'),
                                                       (u'Gross Aftr.', gtk.CellRendererSpin(), float, u'gross_after'),
-                                                      (u'Pl/Gross', gtk.CellRendererText(), str, u'pl_gross_range'),
+                                                      (u'P/L Gross', gtk.CellRendererText(), str, u'pl_gross_range'),
                                                       (u'Net Bfr.', gtk.CellRendererSpin(), float, u'net_before'),
                                                       (u'Net Aftr.', gtk.CellRendererSpin(), float, u'net_after'),
-                                                      (u'Pl/Net', gtk.CellRendererText(), str, u'pl_net_range'),
+                                                      (u'P/L Net', gtk.CellRendererText(), str, u'pl_net_range'),
                                                       (u'% Изменения', gtk.CellRendererText(), str, u'plnet_acc')],
                                                      self_sorting = False,
                                                      sort_callback = self.sort_callback)
