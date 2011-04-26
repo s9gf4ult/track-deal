@@ -27,7 +27,7 @@ class main_ui():
         self.global_data = {}
         
         # main window
-        self.main_window = main_window_controller(self.database, self.builder, self.update_view)
+        self.main_window = main_window_controller(self.global_data, self.database, self.builder, self.update_view)
 
         # report tab
         self.report_tab = report_tab_control(self.database, self.builder)

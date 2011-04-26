@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import gtk
+from common_methods import *
 
 class status_bar_control:
     def __init__(self, global_data, database, builder):
@@ -10,23 +11,25 @@ class status_bar_control:
         self.builder = builder
         def shorter(name):
             return self.builder.get_object(name)
-        self.statusbar = shorter("main_statusbar")
-        self.statusbar.set_homogeneous(False)
-        self.db = gtk.Label()
-        self.cacc = gtk.Label()
-        self.deals = gtk.Label()
-        self.poss = gtk.Label()
-        self.has_unbalance = gtk.Label()
-        for wid in [self.db, self.cacc, self.deals, self.poss]:
-            self.statusbar.pack_start(wid, False)
-        self.statusbar.pack_start(self.has_unbalance)
-        self.statusbar.show_all()
+        self.db = shorter("main_status_db")
+        self.cacc = shorter("main_status_cacc")
+        self.deals = shorter("main_status_deals")
+        self.poss = shorter("main_status_poss")
+        self.unbal = shorter("main_status_unbal")
 
     def update_widget(self):
         if self.database.connection == None:
-            for lbl in [self.db, self.cacc, self.deals, self.poss, self.has_unbalance]:
-                lbl.set_text("")
+            for sb in [self.db, self.cacc, self.deals, self.poss, self.unbal]:
+                sb.set_text("")
         else:
             self.db.set_text(self.database.filename == ":memory:" and u'База данных в памяти' or u'file: {0}'.format(self.database.filename))
+            if gethash(self.global_data, "current_account") != None:
+                for (lbl, text) in [(self.cacc, u'Счет: {0}'.format(self.database.get_account_name_by_id(self.global_data["current_account"]))),
+                                    (self.deals, u'Сделок: {0}'.format(self.database.get_count_deals_in_account(self.global_data["current_account"]))),
+                                    (self.poss, u'Позиций: {0}'.format(self.database.get_count_positions_in_account(self.global_data["current_account"])))]:
+                    lbl.set_text(text)
+            else:
+                for t in [self.cacc, self.deals, self.poss, self.unbal]:
+                    t.set_text("")
             
             

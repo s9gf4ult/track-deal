@@ -6,9 +6,10 @@ from modifying_tab_control import modifying_tab_control
 from common_methods import *
 
 class main_window_controller(modifying_tab_control):
-    def __init__(self, database, builder, update_callback):
+    def __init__(self, global_data, database, builder, update_callback):
         self.database = database
         self.builder = builder
+        self.global_data = global_data
         self.update_callback = update_callback
         def shorter(name, signal, *method):
             self.builder.get_object(name).connect(signal, *method)
@@ -74,6 +75,7 @@ class main_window_controller(modifying_tab_control):
         """returns True if you can quit"""
         try:
             self.database.close()
+            self.global_data["current_account"] = None
         except Exception as e:
             show_error(e.__str__(), self.builder.get_object("main_window"))
             print(traceback.format_exc())

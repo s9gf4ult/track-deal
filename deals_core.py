@@ -129,7 +129,14 @@ class deals_proc():
         i.comm_before as comm_before, i.comm_after as comm_after, i.account_id as account_id
         from positions p left join internal_position_attributes i on i.position_id = p.id""")
         
+    def get_count_deals_in_account(self, account_id):
+        return self.connection.execute("select count(*) from deals where account_id = ? and not_actual is null", (account_id, )).fetchone()[0]
 
+    def get_count_positions_in_account(self, account_id):
+        return self.connection.execute("select count(*) from (select distinct position_id from deals where account_id = ? and not_actual is null)",(account_id, )).fetchone()[0]
+
+    def get_account_name_by_id(self, account_id):
+        return self.connection.execute("select name from accounts where id = ? limit 1", (account_id, )).fetchone()[0]
 
     def open(self, filename):
         self.filename = filename
