@@ -65,14 +65,18 @@ class deals_filter_control:
         # datetime control #
         ####################
         dtcontrols = []
-        for (dtcb, dtcal, tcb, h, m, s) in [("deals_filter_datetime_lower_cb", "deals_filter_calendar_lower",
-                                             "deals_filter_time_lower_cb", "deals_filter_hour_lower_spin",
-                                             "deals_filter_min_lower_spin", "deals_filter_sec_lower_spin"),
-                                            ("deals_filter_datetime_upper_cb", "deals_filter_calendar_upper",
-                                             "deals_filter_time_upper_cb", "deals_filter_hour_upper_spin",
-                                             "deals_filter_min_upper_spin", "deals_filter_sec_upper_spin")]:
+        for (dtcb, dtcal, tcb, h, m, s, year, month, day) in [("deals_filter_datetime_lower_cb", "deals_filter_calendar_lower",
+                                                               "deals_filter_time_lower_cb", "deals_filter_hour_lower_spin",
+                                                               "deals_filter_min_lower_spin", "deals_filter_sec_lower_spin",
+                                                               "deals_filter_lower_year", "deals_filter_lower_month", "deals_filter_lower_day"),
+                                                              ("deals_filter_datetime_upper_cb", "deals_filter_calendar_upper",
+                                                               "deals_filter_time_upper_cb", "deals_filter_hour_upper_spin",
+                                                               "deals_filter_min_upper_spin", "deals_filter_sec_upper_spin",
+                                                               "deals_filter_upper_year", "deals_filter_upper_month", "deals_filter_upper_day")]:
             tcon = time_control(self.builder.get_object(h), self.builder.get_object(m), self.builder.get_object(s), self.builder.get_object(tcb))
-            dtcon = datetime_control(self.builder.get_object(dtcal), tcon, self.builder.get_object(dtcb))
+            dtcon = datetime_control(self.builder.get_object(dtcal), tcon, checkbutton = self.builder.get_object(dtcb),
+                                     year = self.builder.get_object(year), month = self.builder.get_object(month),
+                                     day = self.builder.get_object(day))
             dtcon.set_current_datetime()
             dtcontrols.append(dtcon)
         self.datetime_range = datetime_range_control(dtcontrols[0], dtcontrols[1], self.builder.get_object("deals_filter_datetime_range_cb"))
