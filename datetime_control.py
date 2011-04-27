@@ -6,10 +6,36 @@ import time
 from hide_control import value_returner_control
 
 class datetime_control(value_returner_control):
-    def __init__(self, calendar, time_control, checkbutton = None):
+    def __init__(self, calendar, time_control, checkbutton = None, year = None, month = None, day = None):
         self.calendar = calendar
+        self.year = year
+        self.month = month
+        self.day = day
         self.time_control = time_control
         self.checkbutton = checkbutton
+        for (wid, callb) in [(self.year, self.year_changed),
+                             (self.month, self.month_changed),
+                             (self.day, self.day_changed)]:
+            if wid != None:
+                wid.connect("value-changed", callb)
+        self.calendar.connect("day-selected", self.calendar_day_changed)
+        self.calendar.connect("month-changed", self.calendar_month_changed)
+
+    def year_changed(self, spin):
+        pass
+
+    def month_changed(self, spin):
+        pass
+
+    def day_changed(self, spin):
+        pass
+
+    def calendar_day_changed(self, calendar):
+        pass
+
+    def calendar_month_changed(self, calendar):
+        pass
+            
 
     def get_date(self):
         date = self.calendar.get_date()
