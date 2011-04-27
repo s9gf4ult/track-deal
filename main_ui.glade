@@ -5820,7 +5820,10 @@
   </object>
   <object class="GtkDialog" id="padder">
     <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="type_hint">normal</property>
+    <property name="transient_for">main_window</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox8">
         <property name="visible">True</property>
@@ -5829,7 +5832,7 @@
         <child>
           <object class="GtkTable" id="table15">
             <property name="visible">True</property>
-            <property name="n_rows">13</property>
+            <property name="n_rows">12</property>
             <property name="n_columns">6</property>
             <child>
               <object class="GtkHBox" id="hbox25">
@@ -6634,39 +6637,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkRadioButton" id="padder_long">
-                <property name="label" translatable="yes">&#x414;&#x43B;&#x438;&#x43D;&#x43D;&#x430;&#x44F;</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="right_attach">3</property>
-                <property name="top_attach">11</property>
-                <property name="bottom_attach">12</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkRadioButton" id="padder_short">
-                <property name="label" translatable="yes">&#x41A;&#x43E;&#x440;&#x43E;&#x442;&#x43A;&#x430;&#x44F;</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-                <property name="group">padder_long</property>
-              </object>
-              <packing>
-                <property name="right_attach">3</property>
-                <property name="top_attach">12</property>
-                <property name="bottom_attach">13</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkHBox" id="hbox52">
                 <property name="visible">True</property>
                 <child>
@@ -6704,13 +6674,44 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
+              <object class="GtkHBox" id="hbox53">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkRadioButton" id="padder_long">
+                    <property name="label" translatable="yes">&#x414;&#x43B;&#x438;&#x43D;&#x43D;&#x430;&#x44F;</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRadioButton" id="padder_short">
+                    <property name="label" translatable="yes">&#x41A;&#x43E;&#x440;&#x43E;&#x442;&#x43A;&#x430;&#x44F;</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">padder_long</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="right_attach">3</property>
+                <property name="top_attach">11</property>
+                <property name="bottom_attach">12</property>
+                <property name="y_options">GTK_FILL</property>
+              </packing>
             </child>
           </object>
           <packing>
