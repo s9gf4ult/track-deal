@@ -22,21 +22,23 @@ def no_reaction(func):
 class datetime_control(value_returner_control):
     react = True
     value = datetime.datetime.now()
-    def __init__(self, calendar, time_control, checkbutton = None, year = None, month = None, day = None):
+    def __init__(self, calendar, time_control, checkbutton = None, year = None, month = None, day = None, update_callback = None):
         self.calendar = calendar
         self.year = year
         self.month = month
         self.day = day
         self.time_control = time_control
+        self.time_control.update_callback = self.time_value_changed
         self.checkbutton = checkbutton
+        self.update_callback = update_callback
         for (wid, low, up) in [(self.year, 0, sys.float_info.max),
                                (self.month, 1, 12),
                                (self.day, 1, 31)]:
             if wid != None:
                 wid.get_adjustment().set_all(lower = low, upper = up, step_increment = 1, page_increment = 5)
         for (wid, callb) in [(self.year, self.year_changed),
-                             (self.month, self.month_changed),
-                             (self.day, self.day_changed)]:
+                             (self.month, self.day_month_changed),
+                             (self.day, self.day_month_changed)]:
             if wid != None:
                 wid.connect("value-changed", callb)
         self.calendar.connect("day-selected", self.calendar_day_changed)
@@ -47,18 +49,30 @@ class datetime_control(value_returner_control):
         finally:
             self.react = True
 
+    def time_value_changed(self):
+        self._get_time_from_time_control()
+        self._call_update_callback()
+
     @no_reaction
     def year_changed(self, spin):
         self._set_date(self._value_from_dd())
+        self._get_time_from_time_control()
+        self._call_update_callback()
 
     @no_reaction
-    def month_changed(self, spin):
-        self._set_date(self._value_from_dd())
+    def call_update_callback(self):
+        self._call_update_callback()
+
+    def _call_update_callback(self):
+        if self.update_callback != None:
+            self.update_callback()
 
     @no_reaction
-    def day_changed(self, spin):
+    def day_month_changed(self, spin):
         try:
             self._set_date(self._value_from_dd())
+            self._get_time_from_time_control()
+            self._call_update_callback()
         except ValueError:
             self._restore_from_value()
 
@@ -72,10 +86,18 @@ class datetime_control(value_returner_control):
     @no_reaction
     def calendar_day_changed(self, calendar):
         self._set_date(self._value_from_calendar())
+        self._get_time_from_time_control()
+        self._call_update_callback()
 
     @no_reaction
     def calendar_month_changed(self, calendar):
         self._set_date(self._value_from_calendar())
+        self._get_time_from_time_control()
+        self._call_update_callback()
+
+    def _get_time_from_time_control(self):
+        t = self.value.time()
+        self.value = datetime.datetime.combine(self.value.date(), t != None and t or self.value.time())
 
     def _restore_from_value(self):
         self.react = False
@@ -165,6 +187,9 @@ if __name__ == "__main__":
     dtcon = datetime_control(cal, tcon, checkbutton = cdt, year = year, month = month, day = day)
     dtcon.set_current_datetime()
     dtcon.set_datetime(datetime.datetime(2010, 10, 10, 10, 10, 10))
+    def updated():
+        print(dtcon.get_datetime())
+    dtcon.update_callback = updated
     b = gtk.Button("push")
     l = gtk.Label()
     def clicked(bt):

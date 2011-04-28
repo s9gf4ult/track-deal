@@ -6,7 +6,7 @@ import datetime, time
 from hide_control import value_returner_control
 
 class time_control(value_returner_control):
-    def __init__(self, hour, min, sec, checkbutton = None):
+    def __init__(self, hour, min, sec, checkbutton = None, update_callback = None):
         self.hour = hour
         self.min = min
         self.sec = sec
@@ -14,11 +14,20 @@ class time_control(value_returner_control):
         self.hour.set_range(0, 23)
         self.hour.set_increments(1, 5)
         self.hour.set_digits(0)
+        self.update_callback = update_callback
+        for wid in [self.hour, self.min, self.sec]:
+            wid.connect("value-changed", self.value_changed)
         for w in [self.min, self.sec]:
             w.set_range(0, 59)
             w.set_digits(0)
             w.set_increments(1, 10)
-        
+
+    def value_changed(self, spin):
+        self.call_update_callback()
+
+    def call_update_callback(self):
+        if self.update_callback != None:
+            self.update_callback()
 
     def get_hour(self):
         return self.hour.get_value_as_int()
