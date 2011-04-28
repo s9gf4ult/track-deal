@@ -58,11 +58,9 @@ class datetime_control(value_returner_control):
     @no_reaction
     def day_changed(self, spin):
         try:
-            x = self._value_from_dd()
-        except ValueError:
-            pass
-        finally:
             self.set_date(self._value_from_dd())
+        except ValueError:
+            self._restore_from_value()
 
     def _value_from_dd(self):
         return datetime.date(self.year.get_value_as_int(), self.month.get_value_as_int(), self.day.get_value_as_int())
