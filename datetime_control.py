@@ -49,16 +49,16 @@ class datetime_control(value_returner_control):
 
     @no_reaction
     def year_changed(self, spin):
-        self.set_date(self._value_from_dd())
+        self._set_date(self._value_from_dd())
 
     @no_reaction
     def month_changed(self, spin):
-        self.set_date(self._value_from_dd())
+        self._set_date(self._value_from_dd())
 
     @no_reaction
     def day_changed(self, spin):
         try:
-            self.set_date(self._value_from_dd())
+            self._set_date(self._value_from_dd())
         except ValueError:
             self._restore_from_value()
 
@@ -71,11 +71,11 @@ class datetime_control(value_returner_control):
 
     @no_reaction
     def calendar_day_changed(self, calendar):
-        self.set_date(self._value_from_calendar())
+        self._set_date(self._value_from_calendar())
 
     @no_reaction
     def calendar_month_changed(self, calendar):
-        self.set_date(self._value_from_calendar())
+        self._set_date(self._value_from_calendar())
 
     def _restore_from_value(self):
         self.react = False
@@ -98,26 +98,49 @@ class datetime_control(value_returner_control):
     def get_datetime(self):
         return self.return_value(self.value)
 
+    @no_reaction
     def set_current_time(self):
+        self._set_current_time()
+
+    def _set_current_time(self):
         self.set_time(datetime.datetime.now().time())
 
+    @no_reaction
     def set_time(self, time):
+        self._set_time(time)
+
+    def _set_time(self, time):
         self.value = datetime.datetime.combine(self.value.date(), time)
         self._restore_from_value()
 
+    @no_reaction
     def set_current_date(self):
+        self._set_current_date()
+
+    def _set_current_date(self):
         self.set_date(datetime.datetime.now().date())
 
     @no_reaction
     def set_current_datetime(self):
+        self._set_current_datetime()
+
+    def _set_current_datetime(self):
         self.value = datetime.datetime.now()
         self._restore_from_value()
 
+    @no_reaction
     def set_datetime(self, dd):
+        self._set_datetime(dd)
+
+    def _set_datetime(self, dd):
         self.value = dd
         self._restore_from_value()
-
+        
+    @no_reaction
     def set_date(self, date):
+        self._set_date(date)
+
+    def _set_date(self, date):
         t = self.time_control.get_time()
         tt = self.value.time()
         self.value = datetime.datetime.combine(date, t != None and t or tt)
@@ -139,6 +162,7 @@ if __name__ == "__main__":
     tcon = time_control(h, m, s, ct)
     dtcon = datetime_control(cal, tcon, checkbutton = cdt, year = year, month = month, day = day)
     dtcon.set_current_datetime()
+    dtcon.set_datetime(datetime.datetime(2010, 10, 10, 10, 10, 10))
     b = gtk.Button("push")
     l = gtk.Label()
     def clicked(bt):
