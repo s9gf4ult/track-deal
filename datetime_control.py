@@ -7,6 +7,18 @@ from hide_control import value_returner_control
 import sys
 
 
+def no_reaction(func):
+    def ret(*args, **kargs):
+        if not args[0].react:
+            return
+        try:
+            args[0].react = False
+            func(*args, **kargs)
+        finally:
+            args[0].react = True
+    return ret
+            
+
 class datetime_control(value_returner_control):
     react = True
     value = datetime.datetime.now()
@@ -17,73 +29,73 @@ class datetime_control(value_returner_control):
         self.day = day
         self.time_control = time_control
         self.checkbutton = checkbutton
-        for (wid, callb) in [(self.year, self.year_changed),
-                             (self.month, self.month_changed),
-                             (self.day, self.day_changed)]:
-            if wid != None:
-                wid.connect("value-changed", callb)
         for (wid, low, up) in [(self.year, 0, sys.float_info.max),
                                (self.month, 1, 12),
                                (self.day, 1, 31)]:
             if wid != None:
                 wid.get_adjustment().set_all(lower = low, upper = up, step_increment = 1, page_increment = 5)
-        if self.month != None:
-            self.month.set_wrap(True)
+        for (wid, callb) in [(self.year, self.year_changed),
+                             (self.month, self.month_changed),
+                             (self.day, self.day_changed)]:
+            if wid != None:
+                wid.connect("value-changed", callb)
         self.calendar.connect("day-selected", self.calendar_day_changed)
         self.calendar.connect("month-changed", self.calendar_month_changed)
+        try:
+            self.react = False
+            self._restore_from_value()
+        finally:
+            self.react = True
 
+    @no_reaction
     def year_changed(self, spin):
-        self.value = self._value_from_dd()
-        self._restore_from_value()
-    
+        self.set_date(self._value_from_dd())
+
+    @no_reaction
     def month_changed(self, spin):
-        self.value = self._value_from_dd()
-        self._restore_from_value()
-    
+        self.set_date(self._value_from_dd())
+
+    @no_reaction
     def day_changed(self, spin):
         try:
             x = self._value_from_dd()
-            self.value = x
-        except ValeError:
+        except ValueError:
             pass
-        else:
-            self._restore_from_value()
+        finally:
+            self.set_date(self._value_from_dd())
 
     def _value_from_dd(self):
-        return datetime.datetime(self.year.get_value_as_int(), self.month.get_value_as_int(), self.day.get_value_as_int())
+        return datetime.date(self.year.get_value_as_int(), self.month.get_value_as_int(), self.day.get_value_as_int())
 
     def _value_from_calendar(self):
         dd = self.calendar.get_date()
-        return datetime.datetime(dd[0], dd[1] + 1, dd[2])
-    
+        return datetime.date(dd[0], dd[1] + 1, dd[2])
+
+    @no_reaction
     def calendar_day_changed(self, calendar):
         self.set_date(self._value_from_calendar())
 
+    @no_reaction
     def calendar_month_changed(self, calendar):
         self.set_date(self._value_from_calendar())
 
     def _restore_from_value(self):
-        if not self.react:
-            return
         self.react = False
-        try:
-            self.calendar.select_month(self.value.month - 1, self.value.year)
-            self.calendar.select_day(self.value.day)
-            for (wid, val) in [(self.year, self.value.year),
-                               (self.month, self.value.month),
-                               (self.day, self.value.day)]:
-                if wid != None:
-                    wid.set_value(val)
-            self.time_control.set_time(self.value.time())
-        finally:
-            self.react = True
+        self.calendar.select_month(self.value.month - 1, self.value.year)
+        self.calendar.select_day(self.value.day)
+        for (wid, val) in [(self.year, self.value.year),
+                           (self.month, self.value.month),
+                           (self.day, self.value.day)]:
+            if wid != None:
+                wid.set_value(val)
+        self.time_control.set_time(self.value.time())
         
 
     def get_date(self):
         return self.return_value(self.value.date())
 
     def get_time(self):
-        return self.return_value(self.value.time())
+        return self.return_value(self.time_control.get_time())
 
     def get_datetime(self):
         return self.return_value(self.value)
@@ -107,7 +119,9 @@ class datetime_control(value_returner_control):
         self._restore_from_value()
 
     def set_date(self, date):
-        self.value = datetime.datetime.combine(date, self.value.time())
+        t = self.time_control.get_time()
+        tt = self.value.time()
+        self.value = datetime.datetime.combine(date, t != None and t or tt)
         self._restore_from_value()
 
 if __name__ == "__main__":
@@ -120,8 +134,11 @@ if __name__ == "__main__":
     h = gtk.SpinButton()
     m = gtk.SpinButton()
     s = gtk.SpinButton()
+    year = gtk.SpinButton()
+    month = gtk.SpinButton()
+    day = gtk.SpinButton()
     tcon = time_control(h, m, s, ct)
-    dtcon = datetime_control(cal, tcon, cdt)
+    dtcon = datetime_control(cal, tcon, checkbutton = cdt, year = year, month = month, day = day)
     b = gtk.Button("push")
     l = gtk.Label()
     def clicked(bt):
@@ -129,9 +146,9 @@ if __name__ == "__main__":
     b.connect("clicked", clicked)
     def clickedb(bt):
         dtcon.set_current_datetime()
-    bb = gtk.Button("set curront")
+    bb = gtk.Button("set current")
     bb.connect("clicked", clickedb)
-    for wi in [cdt, cal, ct, h, m, s, b, l, bb]:
+    for wi in [cdt, cal, year, month, day, ct, h, m, s, b, l, bb]:
         p.pack_start(wi)
     w.show_all()
     w.run()
