@@ -5,22 +5,13 @@ import datetime
 import time
 from hide_control import value_returner_control
 import sys
+from common_methods import *
 
 
-def no_reaction(func):
-    def ret(*args, **kargs):
-        if not args[0].react:
-            return
-        try:
-            args[0].react = False
-            func(*args, **kargs)
-        finally:
-            args[0].react = True
-    return ret
             
 
 class datetime_control(value_returner_control):
-    react = True
+    __do_react__ = True
     value = datetime.datetime.now()
     def __init__(self, calendar, time_control, checkbutton = None, year = None, month = None, day = None, update_callback = None):
         self.calendar = calendar
@@ -44,10 +35,10 @@ class datetime_control(value_returner_control):
         self.calendar.connect("day-selected", self.calendar_day_changed)
         self.calendar.connect("month-changed", self.calendar_month_changed)
         try:
-            self.react = False
+            self.__do_react__ = False
             self._restore_from_value()
         finally:
-            self.react = True
+            self.__do_react__ = True
 
     def time_value_changed(self):
         self._get_time_from_time_control()
@@ -64,7 +55,7 @@ class datetime_control(value_returner_control):
         self._call_update_callback()
 
     def _call_update_callback(self):
-        if self.update_callback != None:
+        if (self.checkbutton == None or self.checkbutton.get_active()) and self.update_callback != None:
             self.update_callback()
 
     @no_reaction
@@ -100,7 +91,6 @@ class datetime_control(value_returner_control):
         self.value = datetime.datetime.combine(self.value.date(), t != None and t or self.value.time())
 
     def _restore_from_value(self):
-        self.react = False
         self.calendar.select_month(self.value.month - 1, self.value.year)
         self.calendar.select_day(self.value.day)
         for (wid, val) in [(self.year, self.value.year),

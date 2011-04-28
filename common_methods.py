@@ -81,3 +81,15 @@ def solve_lower_upper(plus, conds, field_name, l, h):
 def show_and_print_error(error, window):
     show_error(error.__str__(), window)
     print(traceback.format_exc())
+
+def no_reaction(func):
+    """decorator which blocks an execution of the method of object which has `react` member, if react is False methid will not executed, before execution of the method `react` sets to False"""
+    def ret(*args, **kargs):
+        if not args[0].__do_react__:
+            return
+        try:
+            args[0].__do_react__ = False
+            func(*args, **kargs)
+        finally:
+            args[0].__do_react__ = True
+    return ret

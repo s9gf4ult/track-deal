@@ -26,7 +26,7 @@ class time_control(value_returner_control):
         self.call_update_callback()
 
     def call_update_callback(self):
-        if self.update_callback != None:
+        if (self.checkbutton == None or self.checkbutton.get_active()) and self.update_callback != None:
             self.update_callback()
 
     def get_hour(self):
