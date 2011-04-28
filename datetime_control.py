@@ -108,6 +108,7 @@ class datetime_control(value_returner_control):
     def set_current_date(self):
         self.set_date(datetime.datetime.now().date())
 
+    @no_reaction
     def set_current_datetime(self):
         self.value = datetime.datetime.now()
         self._restore_from_value()
@@ -137,6 +138,7 @@ if __name__ == "__main__":
     day = gtk.SpinButton()
     tcon = time_control(h, m, s, ct)
     dtcon = datetime_control(cal, tcon, checkbutton = cdt, year = year, month = month, day = day)
+    dtcon.set_current_datetime()
     b = gtk.Button("push")
     l = gtk.Label()
     def clicked(bt):
