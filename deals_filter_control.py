@@ -21,8 +21,10 @@ class deals_filter_control:
         ######################
         self.hcontrols = []
         for (cb, boxes) in [("deals_filter_datetime_range_cb", ["deals_filter_datetime_range_box"]),
-                            ("deals_filter_datetime_lower_cb", ["deals_filter_calendar_lower", "deals_filter_lower_time_box"]),
-                            ("deals_filter_datetime_upper_cb", ["deals_filter_calendar_upper", "deals_filter_upper_time_box"]),
+                            ("deals_filter_datetime_lower_cb", ["deals_filter_calendar_lower", "deals_filter_lower_time_box",
+                                                                "deals_filter_lower_year", "deals_filter_lower_month", "deals_filter_lower_day"]),
+                            ("deals_filter_datetime_upper_cb", ["deals_filter_calendar_upper", "deals_filter_upper_time_box",
+                                                                "deals_filter_upper_year", "deals_filter_upper_month", "deals_filter_upper_day"]),
                             ("deals_filter_time_lower_cb", ["deals_filter_time_lower_box"]),
                             ("deals_filter_time_upper_cb", ["deals_filter_time_upper_box"]),
                             ("deals_filter_position_cb", ["deals_filter_position_box"]),

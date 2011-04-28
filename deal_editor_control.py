@@ -42,7 +42,10 @@ class deal_editor_control:
                                          time_control(shorter("deal_adder_hour1"),
                                                       shorter("deal_adder_min1"),
                                                       shorter("deal_adder_sec1")),
-                                         shorter("deal_editor_change_datetime"))
+                                         checkbutton = shorter("deal_editor_change_datetime"),
+                                         year = shorter("deal_editor_year"),
+                                         month = shorter("deal_editor_month"),
+                                         day = shorter("deal_editor_day"))
 
         self.instrument = combo_control(shorter("deal_adder_stock1"),
                                         shorter("deal_editor_change_instrument"))

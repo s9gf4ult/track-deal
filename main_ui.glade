@@ -2615,56 +2615,127 @@
                           <object class="GtkHBox" id="hbox6">
                             <property name="visible">True</property>
                             <child>
-                              <object class="GtkSpinButton" id="deal_adder_hour">
+                              <object class="GtkHBox" id="hbox57">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="invisible_char">&#x25CF;</property>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_year">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label85">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">/</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_month">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label86">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">/</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_day">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="label13">
+                              <object class="GtkHBox" id="hbox56">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">:</property>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_hour">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label13">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_min">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label14">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_sec">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
+                                <property name="pack_type">end</property>
                                 <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="deal_adder_min">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="invisible_char">&#x25CF;</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="label14">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">:</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="deal_adder_sec">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="invisible_char">&#x25CF;</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="position">4</property>
                               </packing>
                             </child>
                           </object>
@@ -3290,56 +3361,127 @@
                           <object class="GtkHBox" id="hbox2">
                             <property name="visible">True</property>
                             <child>
-                              <object class="GtkSpinButton" id="deal_adder_hour1">
+                              <object class="GtkHBox" id="hbox59">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="invisible_char">&#x25CF;</property>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_editor_year">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label87">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">/</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_editor_month">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label88">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">/</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_editor_day">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="label28">
+                              <object class="GtkHBox" id="hbox58">
                                 <property name="visible">True</property>
-                                <property name="label" translatable="yes">:</property>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_hour1">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label28">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_min1">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkLabel" id="label30">
+                                    <property name="visible">True</property>
+                                    <property name="label" translatable="yes">:</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkSpinButton" id="deal_adder_sec1">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="invisible_char">&#x25CF;</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
+                                <property name="pack_type">end</property>
                                 <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="deal_adder_min1">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="invisible_char">&#x25CF;</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="label30">
-                                <property name="visible">True</property>
-                                <property name="label" translatable="yes">:</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkSpinButton" id="deal_adder_sec1">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="invisible_char">&#x25CF;</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="position">4</property>
                               </packing>
                             </child>
                           </object>

@@ -20,7 +20,10 @@ class deal_adder_control:
         self.datetime = datetime_control(shorter("calendar"),
                                          time_control(shorter("hour"),
                                                       shorter("min"),
-                                                      shorter("sec")))
+                                                      shorter("sec")),
+                                         year = shorter("year"),
+                                         month = shorter("month"),
+                                         day = shorter("day"))
         self.account = combo_select_control(shorter("account"))
         self.instrument = combo_control(shorter("stock"))
         self.market = combo_control(shorter("market"))

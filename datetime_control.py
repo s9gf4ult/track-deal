@@ -96,7 +96,9 @@ class datetime_control(value_returner_control):
         return self.return_value(self.time_control.get_time())
 
     def get_datetime(self):
-        return self.return_value(self.value)
+        t = self.time_control.get_time()
+        tt = datetime.time.min
+        return self.return_value(datetime.datetime.combine(self.value.date(), t != None and t or tt))
 
     @no_reaction
     def set_current_time(self):
