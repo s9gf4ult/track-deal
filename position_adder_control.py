@@ -17,6 +17,8 @@ class position_adder_control:
         self.builder = builder
         def shorter(name):
             return self.builder.get_object(name)
+        w = shorter("padder")
+        w.add_buttons(gtk.STOCK_ADD, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.hiders = [hide_control(shorter("padder_calendars"), [shorter("padder_lower_calendar"), shorter("padder_upper_calendar")], hide = True)]
         self.start_date = datetime_control(shorter("padder_lower_calendar"),
                                            time_control(*map(lambda a: shorter(u'padder_lower_{0}'.format(a)), ["hour", "min", "sec"])),
@@ -53,10 +55,18 @@ class position_adder_control:
         self.count =  number_control(shorter("padder_count"))
         self.count.set_lower_limit(0)
         self.count.set_upper_limit(sys.maxint)
-                                                         
+
+    def update_instruments(self, instruments):
+        self.instrument.update_widget(instruments)
+
+    def update_classes(self, classes):
+        self.instrument_class.update_widget(classes)
+
 
     def run(self):
         w = self.builder.get_object("padder")
+        self.start_date.set_current_datetime()
+        self.end_date.set_current_datetime()
         w.show_all()
         ret = w.run()
         w.hide()

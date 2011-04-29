@@ -7,11 +7,12 @@ from common_methods import *
 
 class positions_tab_controller(modifying_tab_control):
     order_by = None
-    def __init__(self, global_data, database, builder, pfilter, update_callback):
+    def __init__(self, global_data, database, builder, pfilter, position_adder, update_callback):
         self.database = database
         self.builder = builder
         self.pfilter = pfilter
         self.global_data = global_data
+        self.position_adder = position_adder
         self.update_callback = update_callback
         def shorter(name, action, *method):
             self.builder.get_object(name).connect(action, *method)
