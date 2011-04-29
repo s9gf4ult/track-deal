@@ -133,8 +133,8 @@ class deals_proc():
         return self.connection.execute("select count(*) from deals where account_id = ? and not_actual is null", (account_id, )).fetchone()[0]
 
     def get_count_positions_in_account(self, account_id):
-        return self.connection.execute("select count(*) from (select distinct position_id from deals where account_id = ? and not_actual is null)",(account_id, )).fetchone()[0]
-
+        return self.connection.execute("select count(*) from (select distinct position_id from deals where account_id = ? and not_actual is null and position_id is not null)",(account_id, )).fetchone()[0]
+    
     def get_account_name_by_id(self, account_id):
         return self.connection.execute("select name from accounts where id = ? limit 1", (account_id, )).fetchone()[0]
 
@@ -384,7 +384,7 @@ class deals_proc():
 
     def delete_broken_positions(self, account_id):
         """deletes positions which has unbalanced set of deals assigned to"""
-        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? group by p.id) where abs(count) > 0)", (account_id, ))
+        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity * d.deal_sign) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? group by p.id) where abs(count) > 0)", (account_id, ))
 
     def join_deals_leaves(self, account_id):
         """looks for deals which has only deals assigned to and not to any position and delete it's child deals"""
