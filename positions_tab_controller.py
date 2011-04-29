@@ -43,6 +43,17 @@ class positions_tab_controller(modifying_tab_control):
         shorter("call_positions_filter", "activate", self.filter_activate)
         shorter("delete_positions", "activate", self.delete_positions_activate)
         shorter("add_position", "activate", self.add_position_activate)
+        shorter("update_positions", "activate", self.update_positions_activate)
+
+    def update_positions_activate(self, action):
+        self.update_positions()
+
+    def update_positions(self):
+        if self.database.connection == None or gethash(self.global_data, "current_account") == None:
+            return
+        self.database.delete_empty_positions()
+        self.database.delete_broken_positions(self.global_data["current_account"])
+        self.update_widget()
 
     def add_position_activate(self, action):
         self.add_position()
