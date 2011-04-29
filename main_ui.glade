@@ -249,6 +249,73 @@
           </packing>
         </child>
         <child>
+          <object class="GtkHBox" id="hbox60">
+            <property name="visible">True</property>
+            <child>
+              <object class="GtkToolbar" id="toolbar1">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton4">
+                    <property name="visible">True</property>
+                    <property name="related_action">open_database</property>
+                    <property name="use_action_appearance">True</property>
+                    <property name="label" translatable="yes">_&#x41E;&#x442;&#x43A;&#x440;&#x44B;&#x442;&#x44C;</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-open</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolbar" id="toolbar2">
+                <property name="visible">True</property>
+                <property name="show_arrow">False</property>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton1">
+                    <property name="visible">True</property>
+                    <property name="related_action">transaction_commit</property>
+                    <property name="use_action_appearance">True</property>
+                    <property name="label" translatable="yes">toolbutton1</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton2">
+                    <property name="visible">True</property>
+                    <property name="related_action">transaction_rollback</property>
+                    <property name="use_action_appearance">True</property>
+                    <property name="label" translatable="yes">toolbutton2</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkNotebook" id="notebook1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -912,13 +979,13 @@
             </child>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
           <object class="GtkHBox" id="hbox24">
             <property name="visible">True</property>
-            <property name="spacing">15</property>
+            <property name="spacing">20</property>
             <child>
               <object class="GtkLabel" id="main_status_db">
                 <property name="visible">True</property>
@@ -960,13 +1027,23 @@
                 <property name="visible">True</property>
               </object>
               <packing>
+                <property name="expand">False</property>
                 <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="main_status_changes">
+                <property name="visible">True</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+                <property name="position">5</property>
               </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>

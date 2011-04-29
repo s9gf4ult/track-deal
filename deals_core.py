@@ -386,6 +386,9 @@ class deals_proc():
         """deletes positions which has unbalanced set of deals assigned to"""
         self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity * d.deal_sign) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? group by p.id) where abs(count) > 0)", (account_id, ))
 
+    def get_changes(self):
+        return self.connection.total_changes - self.last_total_changes
+
     def join_deals_leaves(self, account_id):
         """looks for deals which has only deals assigned to and not to any position and delete it's child deals"""
         try_again = True
