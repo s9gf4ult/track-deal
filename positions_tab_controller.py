@@ -42,6 +42,33 @@ class positions_tab_controller(modifying_tab_control):
         shorter("positions_make", "activate", self.make_positions_activate)
         shorter("call_positions_filter", "activate", self.filter_activate)
         shorter("delete_positions", "activate", self.delete_positions_activate)
+        shorter("add_position", "activate", self.add_position_activate)
+
+    def add_position_activate(self, action):
+        self.add_position()
+
+    def add_position(self):
+        if self.database.connection == None or gethash(self.global_data, "current_account") == None:
+            return
+        self.position_adder.update_instruments(self.database.get_instruments())
+        self.position_adder.update_classes(self.database.get_classes())
+        ret = self.position_adder.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self.database.add_position(self.global_data["current_account"],
+                                       self.position_adder.instrument.get_value(),
+                                       self.position_adder.instrument_class.get_value(),
+                                       self.position_adder.long_short.get_value(),
+                                       self.position_adder.count.get_value(),
+                                       {"date" : self.position_adder.start_date.get_datetime(),
+                                        "price" : self.position_adder.price.get_lower_value(),
+                                        "broker_comm" : self.position_adder.broker_comm.get_lower_value(),
+                                        "stock_comm" : self.position_adder.stock_comm.get_lower_value()},
+                                       {"date" : self.position_adder.end_date.get_datetime(),
+                                        "price" : self.position_adder.price.get_upper_value(),
+                                        "broker_comm" : self.position_adder.broker_comm.get_upper_value(),
+                                        "stock_comm" : self.position_adder.stock_comm.get_upper_value()})
+            self.database.recalculate_position_attributes(self.global_data["current_account"])
+            self.call_update_callback()
 
     def delete_positions_activate(self, action):
         self.delete_positions()

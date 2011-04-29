@@ -155,7 +155,31 @@ class deals_proc():
         self.connection.create_function("buy_sell", 1, buy_sell)
         self.connection.create_function("format_time_distance", 1, format_time_distance)
         self.connection.create_function("minus_brakets", 1, minus_brakets)
-            
+
+    def get_instruments(self):
+        return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_name from deals"))
+
+    def get_classes(self):
+        return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_type from deals"))
+
+    def add_position(self, account_id, instrument, instrument_class, long_short, count, open_pos, close_pos):
+        dirs = map(lambda a: a * long_short, [1, -1])
+        dls = map(lambda direction, pos_par: self._insert_from_hash("deals", {"security_name" : instrument,
+                                                                              "security_type" : instrument_class,
+                                                                              "quantity" : count,
+                                                                              "deal_sign" : direction,
+                                                                              "datetime" : pos_par["date"],
+                                                                              "account_id" : account_id,
+                                                                              "price" : pos_par["price"],
+                                                                              "volume" : pos_par["price"] * count,
+                                                                              "broker_comm_nds" : 0,
+                                                                              "stock_comm_nds" : 0,
+                                                                              "broker_comm" : pos_par["broker_comm"],
+                                                                              "stock_comm" : pos_par["stock_comm"]}).lastrowid,
+                  dirs,
+                  [open_pos, close_pos])
+        self.make_position(*map(lambda a: [a], dls))
+                                                                              
 
     def open_existing(self, filename):
         self.open(filename)
@@ -238,7 +262,7 @@ class deals_proc():
         self.end_without_changes()
 
     def delete_position_attributes(self, account_id):
-        self.connection.execute("delete from internal_position_attributes where position_id in (select distinct p.id from positions p inner join deals d where d.account_id = ?)", (account_id, ))
+        self.connection.execute("delete from internal_position_attributes where account_id = ?", (account_id,))
 
         
     def generate_position_attributes(self, account_id):
@@ -360,7 +384,7 @@ class deals_proc():
 
     def delete_broken_positions(self, account_id):
         """deletes positions which has unbalanced set of deals assigned to"""
-        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? group by p.id) where abs(count) > 0.00001)", (account_id, ))
+        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? group by p.id) where abs(count) > 0)", (account_id, ))
 
     def join_deals_leaves(self, account_id):
         """looks for deals which has only deals assigned to and not to any position and delete it's child deals"""

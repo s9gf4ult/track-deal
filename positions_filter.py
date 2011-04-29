@@ -58,6 +58,7 @@ class positions_filter:
             query += u' where {0}'.format(wheres)
         if not is_null_or_empty(orders):
             query += u' order by {0}'.format(orders)
+        print(query)
         if is_null_or_empty(self.plus):
             return self.database.connection.execute(query)
         else:
