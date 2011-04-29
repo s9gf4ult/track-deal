@@ -69,8 +69,37 @@ class position_adder_control:
         self.end_date.set_current_datetime()
         w.show_all()
         ret = w.run()
+        while ret == gtk.RESPONSE_ACCEPT:
+            if self.check_correctness():
+                break
+            else:
+                ret = w.run()
         w.hide()
         return ret
+
+    def check_correctness(self):
+        errs = []
+        if not self.price.get_lower_value() > 0:
+            errs.append(u'Необходимо указать цену открытия')
+        if not self.price.get_upper_value() > 0:
+            errs.append(u'Необходимо указать цену закрытия')
+        if self.instrument.get_value() == "":
+            errs.append(u'Необходимо выбрать инструмент')
+        if self.instrument_class.get_value() == "":
+            errs.append(u'Необходимо выбрать класс инструмента')
+        if not self.count.get_value() > 0:
+            errs.append(u'Неоходимо указать количество бумаг в позиции')
+        if len(errs) > 0:
+            show_error(reduce(lambda a, b:u'{0}\n{1}'.format(a, b),
+                              errs),
+                       self.builder.get_object("padder"))
+            return False
+        else:
+            return True
+            
+            
+        
+            
 
 
 if __name__ == "__main__":
