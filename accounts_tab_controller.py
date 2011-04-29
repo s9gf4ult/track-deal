@@ -40,6 +40,8 @@ class accounts_tab_controller(modifying_tab_control):
         if self.database.connection != None:
             (acname, ) = self.database.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"),)).fetchone() or (None, )
             self.builder.get_object("current_account_name_label").set_text(acname != None and acname or "")
+        else:
+            self.builder.get_object("current_account_name_label").set_text("")
 
     def update_account_list(self):
         """update list of properties and statistics of selected account"""
@@ -49,6 +51,8 @@ class accounts_tab_controller(modifying_tab_control):
         """update list of accounts"""
         if self.database.connection:
             self.accounts_list.update_rows(self.database.connection.execute("select name, first_money, last_money, currency, deals_count from accounts_view").fetchall())
+        else:
+            self.accounts_list.update_rows([])
             
     def add_account_activate(self, action):
         self.add_account()
