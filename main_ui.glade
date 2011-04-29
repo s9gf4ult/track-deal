@@ -217,6 +217,14 @@
                         <property name="use_stock">True</property>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem15">
+                        <property name="visible">True</property>
+                        <property name="related_action">import_from_old_database</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -7325,5 +7333,8 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkAction" id="import_from_old_database">
+    <property name="label">&#x417;&#x430;&#x433;&#x440;&#x437;&#x438;&#x442;&#x44C; &#x438;&#x437; &#x434;&#x440;&#x443;&#x433;&#x43E;&#x439; &#x431;&#x430;&#x437;&#x44B;</property>
   </object>
 </interface>

@@ -389,6 +389,9 @@ class deals_proc():
     def get_changes(self):
         return self.connection.total_changes - self.last_total_changes
 
+    def load_from_old_version(self, filename):
+        pass
+
     def join_deals_leaves(self, account_id):
         """looks for deals which has only deals assigned to and not to any position and delete it's child deals"""
         try_again = True

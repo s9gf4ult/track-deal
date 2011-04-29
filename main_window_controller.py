@@ -22,6 +22,28 @@ class main_window_controller(modifying_tab_control):
         shorter("close_database", "activate", self.close_activate)
         shorter("create_database_in_memory", "activate", self.create_database_in_memory_activate)
         shorter("main_window", "delete-event", self.main_window_quit)
+        shorter("import_from_old_database", "activate", self.import_from_old_database_activate)
+
+    def import_from_old_database_activate(self, action):
+        self.import_from_old_database()
+
+    def import_from_old_database(self):
+        if self.database.connection == None:
+            return
+        win = self.builder.get_object("main_window")
+        diag = gtk.FileChooserDialog(title = u'Открыть базу', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
+        diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+        diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
+        fl = gtk.FileFilter()
+        fl.add_mime_type('application/x-sqlite3')
+        diag.set_filter(fl)
+        if diag.run() == gtk.RESPONSE_ACCEPT:
+            try:
+                self.database.load_from_old_version(diag.get_filename())
+            except Exception as e:
+                show_and_print_error(e, win)
+        diag.destroy()
+        fl.destroy()
 
     def transaction_commit_activate(self, action):
         self.transaction_commit()
