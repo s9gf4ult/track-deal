@@ -81,7 +81,7 @@ class deals_proc():
     _total_changes = None
     last_total_changes = 0
     connection = None
-    current_user_version = 2
+    current_user_version = 3
     
     def __init__(self):
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
@@ -187,7 +187,7 @@ class deals_proc():
         (cuv, ) = self.connection.execute("pragma user_version").fetchone()
         if cuv != self.current_user_version:
             raise Exception(u'Не совпадает версия базы, должна быть {0}, а в базе {1}'.format(self.current_user_version, cuv))
-        self.check_database_version_2()
+        self.check_database_version_3()
         self.recalculate_temporary_attributes()
         self.commit()
 
@@ -199,7 +199,7 @@ class deals_proc():
     def check_tables_existance(self, tables):
         etables = map(lambda a: a[0].decode('utf-8'), self.connection.execute("select name from sqlite_master where type = 'table'"))
         if set(etables) != set(tables):
-            raise Exception(u'Должны существовать такие таблицы {0}, а существуют такие {1}'.format(etables, tables))
+            raise Exception(u'Должны существовать такие таблицы {1}, а существуют такие {0}'.format(etables, tables))
 
     def check_table_structure(self, table, fields):
         """`fields' is a list of tuples [(name_field, type_field, not_nullable, is_primary_key)]"""
@@ -213,6 +213,10 @@ class deals_proc():
         
     def check_database_version_2(self):
         self.check_tables_existance([u'deals', u'positions', u'deal_groups', u'accounts', u'deal_attributes'])
+
+    def check_database_version_3(self):
+        self.check_tables_existance([u'deals', u'positions', u'deal_groups', u'accounts', u'deal_attributes', u'points'])
+        
             
 
     def set_selected_stocks(self, stocks):
@@ -293,8 +297,17 @@ class deals_proc():
     def create_new(self, filename):
         self.open(filename)
         self.connection.execute("pragma user_version = {0}".format(self.current_user_version))
+        self.connection.execute("""
+        create table accounts(
+        id integer primary key not null,
+        name text not null,
+        first_money float not null,
+        currency text,
+        unique(name))""")
+        
         self.connection.execute("""create table positions(
         id integer primary key not null,
+        account_id integer not null,
         ticket text not null,
         direction integer not null,
         open_datetime datetime not null,
@@ -304,21 +317,14 @@ class deals_proc():
         count integer not null,
         open_volume real not null,
         close_volume real not null,
-        broker_comm real,
-        broker_comm_nds real,
-        stock_comm real,
-        stock_comm_nds real,
+        broker_comm real default 0,
+        broker_comm_nds real default 0,
+        stock_comm real default 0,
+        stock_comm_nds real default 0,
         pl_gross real not null,
-        pl_net real not null)""")
+        pl_net real not null,
+        foreign key (account_id) references accounts(id) on delete cascade)""")
         self.connection.execute("create index positions_ticket on positions(ticket)")
-        
-        self.connection.execute("""
-        create table accounts(
-        id integer primary key not null,
-        name text not null,
-        first_money float not null,
-        currency text,
-        unique(name))""")
 
         self.connection.execute("create table deal_groups (id integer primary key not null, deal_sign integer not null, ticket text not null)")
         self.connection.executescript("""
@@ -333,18 +339,16 @@ class deals_proc():
         group_id integer,
         account_id integer,
         datetime datetime not null,
-        datetime_day text,
         security_type text,
         security_name text not null,
-        grn_code text,
         price real not null,
         quantity integer not null,
         volume real,
         deal_sign integer not null,
-        broker_comm real,
-        broker_comm_nds real,
-        stock_comm real,
-        stock_comm_nds real,
+        broker_comm real default 0,
+        broker_comm_nds real default 0,
+        stock_comm real default 0,
+        stock_comm_nds real default 0,
         position_id integer,
         foreign key (position_id) references positions(id) on delete set null,
         foreign key (parent_deal_id) references deals(id) on delete cascade,
@@ -356,8 +360,20 @@ class deals_proc():
         create index delas_not_actual on deals(not_actual);
         create index deals_datetime on deals(datetime);
         create index deals_security_name on deals(security_name);
+        create index deals_security_type on deals(security_type);
         create index deals_quantity on deals(quantity);
+        create index deals_price on deals(price);
+        create index deals_volume on deals(volume);
         create index deals_deal_sign on deals(deal_sign);""")
+
+        self.connection.execute("""create table points (
+        id integer primary key not null,
+        security_name text not null,
+        security_type text not null,
+        point float not null,
+        step float not null,
+        unique(security_name, security_type))""")
+        
         self.connection.execute("""
         create table deal_attributes(
         id integer primary key not null,
@@ -371,7 +387,6 @@ class deals_proc():
 
         self.create_temporary_tables()
         self.connection.commit()
-        self.connection.execute("begin transaction")
 
 
     def delete_empty_positions(self):

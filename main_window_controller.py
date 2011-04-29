@@ -1,6 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import traceback
+import shutil
 import gtk
 from modifying_tab_control import modifying_tab_control
 from common_methods import *
@@ -23,6 +24,30 @@ class main_window_controller(modifying_tab_control):
         shorter("create_database_in_memory", "activate", self.create_database_in_memory_activate)
         shorter("main_window", "delete-event", self.main_window_quit)
         shorter("import_from_old_database", "activate", self.import_from_old_database_activate)
+        shorter("save_as", "activate", self.save_as_activate)
+
+    def save_as_activate(self, action):
+        self.save_as()
+
+    def save_as(self):
+        if self.database.connection == None:
+            return
+        win = self.builder.get_object("main_window")
+        ch = self.database.get_changes()
+        if ch > 0:
+            show_error(u'Перед сохранением нужно завершить транзакцию выполните Rollback или Commit', win)
+            return
+        dial = gtk.FileChooserDialog(title = u'Сохранить как', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE, buttons = (gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        if dial.run() == gtk.RESPONSE_ACCEPT:
+            filename = self.database.filename
+            dstfile = dial.get_filename()
+            if self.quit():
+                shutil.copyfile(filename, dstfile)
+                self.database.open_existing(dstfile)
+                self.call_update_callback()
+        dial.destroy()
+                
+                
 
     def import_from_old_database_activate(self, action):
         self.import_from_old_database()
@@ -31,6 +56,10 @@ class main_window_controller(modifying_tab_control):
         if self.database.connection == None:
             return
         win = self.builder.get_object("main_window")
+        ch = self.database.get_changes()
+        if ch > 0:
+            show_error(u'Перед импортом нужно завершить транзакцию выполните Rollback или Commit', win)
+            return
         diag = gtk.FileChooserDialog(title = u'Открыть базу', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
         diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)

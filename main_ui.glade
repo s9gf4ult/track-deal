@@ -69,6 +69,14 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem16">
+                        <property name="visible">True</property>
+                        <property name="related_action">save_as</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem6">
                         <property name="visible">True</property>
                         <property name="related_action">close_database</property>
@@ -7336,5 +7344,9 @@
   </object>
   <object class="GtkAction" id="import_from_old_database">
     <property name="label">&#x417;&#x430;&#x433;&#x440;&#x437;&#x438;&#x442;&#x44C; &#x438;&#x437; &#x434;&#x440;&#x443;&#x433;&#x43E;&#x439; &#x431;&#x430;&#x437;&#x44B;</property>
+  </object>
+  <object class="GtkAction" id="save_as">
+    <property name="label">&#x421;&#x43E;&#x445;&#x440;&#x430;&#x43D;&#x438;&#x442;&#x44C; &#x43A;&#x430;&#x43A;</property>
+    <property name="stock_id">gtk-save-as</property>
   </object>
 </interface>
