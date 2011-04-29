@@ -39,12 +39,16 @@ class main_window_controller(modifying_tab_control):
             return
         dial = gtk.FileChooserDialog(title = u'Сохранить как', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE, buttons = (gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         if dial.run() == gtk.RESPONSE_ACCEPT:
+            dial.hide()
             filename = self.database.filename
             dstfile = dial.get_filename()
             if self.quit():
-                shutil.copyfile(filename, dstfile)
-                self.database.open_existing(dstfile)
-                self.call_update_callback()
+                try:
+                    shutil.copyfile(filename, dstfile)
+                    self.database.open_existing(dstfile)
+                    self.call_update_callback()
+                except Exception as e:
+                    show_and_print_error(e, win)
         dial.destroy()
                 
                 
