@@ -32,7 +32,7 @@ class xml_parser():
             deal = {}
             dt = at.has_key('deal_time') and at['deal_time'].value or at['deal_date'].value
             deal['datetime'] = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
-            for cc in ['security_type', 'security_name', 'grn_code']:
+            for cc in ['security_type', 'security_name']:
                 deal[cc] = at.has_key(cc) and at[cc].value
             for cc in ['price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds']:
                 deal[cc] = at.has_key(cc) and float(at[cc].value) or 0

@@ -102,7 +102,6 @@ class deals_proc():
         self.connection.execute("""create temporary table internal_position_attributes
         (id integer primary key not null,
         position_id integer not null,
-        account_id integer,
         net_before float,
         net_after float,
         gross_before float,
@@ -126,7 +125,7 @@ class deals_proc():
         abs(p.open_coast - p.close_coast) as coast_range, minus_brakets((p.open_coast - p.close_coast) * p.direction) as coast_range_formated, abs(p.pl_gross) as pl_gross_range, minus_brakets(p.pl_gross) as pl_gross_range_formated, minus_brakets(p.pl_net) as pl_net_range_formated,
         abs(p.pl_net) as pl_net_range, (p.stock_comm + p.broker_comm) as comm, (case when p.pl_net > 0 then 'PROFIT' else 'LOSS' end) as profit_loss, (case when p.pl_net >= 0 then 1 else -1 end) as profit, (p.close_datetime - p.open_datetime) as duration, format_time_distance(p.close_datetime - p.open_datetime) as formated_duration,
         i.net_before as net_before, i.net_after as net_after, i.gross_before as gross_before, i.gross_after as gross_after,
-        i.comm_before as comm_before, i.comm_after as comm_after, i.account_id as account_id
+        i.comm_before as comm_before, i.comm_after as comm_after, p.account_id as account_id
         from positions p left join internal_position_attributes i on i.position_id = p.id""")
         
     def get_count_deals_in_account(self, account_id):
@@ -266,7 +265,7 @@ class deals_proc():
         self.end_without_changes()
 
     def delete_position_attributes(self, account_id):
-        self.connection.execute("delete from internal_position_attributes where account_id = ?", (account_id,))
+        self.connection.execute("delete from internal_position_attributes where position_id in (select id from positions where account_id = ?)", (account_id,))
 
         
     def generate_position_attributes(self, account_id):
@@ -274,7 +273,7 @@ class deals_proc():
         net = my_money
         gross = my_money 
         comm = 0
-        for (pid, ticket, open_datetime, close_datetime, open_coast, close_coast, count, open_volume, close_volume, broker_comm, stock_comm, pl_net, pl_gross) in self.connection.execute("select p.id, p.ticket, p.open_datetime, p.close_datetime, p.open_coast, p.close_coast, p.count, p.open_volume, p.close_volume, p.broker_comm, p.stock_comm, p.pl_net, p.pl_gross from positions p where exists(select d.* from deals d where d.position_id = p.id and d.account_id = ?) and not exists(select d.* from deals d where d.position_id = p.id and d.account_id <> ?) order by p.close_datetime, p.open_datetime", (account_id, account_id)):
+        for (pid, ticket, open_datetime, close_datetime, open_coast, close_coast, count, open_volume, close_volume, broker_comm, stock_comm, pl_net, pl_gross) in self.connection.execute("select p.id, p.ticket, p.open_datetime, p.close_datetime, p.open_coast, p.close_coast, p.count, p.open_volume, p.close_volume, p.broker_comm, p.stock_comm, p.pl_net, p.pl_gross from positions p where p.account_id = ? order by p.close_datetime, p.open_datetime", (account_id,)):
             oldnet = net
             net += pl_net
             oldgross = gross
@@ -288,9 +287,7 @@ class deals_proc():
                                                                     "gross_after" : gross,
                                                                     "comm_before" : oldcomm,
                                                                     "comm_after" : comm,
-                                                                    "plnet_acc" : (pl_net / oldnet * 100),
-                                                                    "account_id" : account_id})
-                                                                    
+                                                                    "plnet_acc" : (pl_net / oldnet * 100)})                                                                    
                                                                     
                                                                     
 
@@ -391,15 +388,16 @@ class deals_proc():
 
     def delete_empty_positions(self):
         """deletes positions which has no one deal assigned to"""
-        self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id))")
+        self.connection.execute("delete from positions where id in (select p.id from positions p where not exists(select d.id from deals d where d.position_id = p.id and d.not_actual is null))")
 
     def delete_empty_deal_groups(self):
-        self.connection.execute("delete from deal_groups where id in (select dg.id from deal_groups dg where not exists(select d.id from deals d where d.group_id = dg.id))")
+        self.connection.execute("delete from deal_groups where id in (select dg.id from deal_groups dg where not exists(select d.id from deals d where d.group_id = dg.id and d.not_actual is null))")
 
 
     def delete_broken_positions(self, account_id):
         """deletes positions which has unbalanced set of deals assigned to"""
-        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity * d.deal_sign) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? group by p.id) where abs(count) > 0)", (account_id, ))
+        self.connection.execute("delete from positions where id in (select id from (select p.id as id, sum(d.quantity * d.deal_sign) as count from positions p inner join deals d on d.position_id = p.id where d.account_id = ? and d.not_actual is null group by p.id) where abs(count) > 0)", (account_id, ))
+        self.connection.execute("delete from positions where id in (select p.id from positions p where exists(select d.id from deals d where d.position_id = p.id and d.not_actual is not null and d.account_id = ?))", (account_id, ))
 
     def get_changes(self):
         return self.connection.total_changes - self.last_total_changes
@@ -434,7 +432,6 @@ class deals_proc():
                 if c >= 1:
                     continue
             try:
-                coat['datetime_day'] = datetime.date.fromtimestamp(time.mktime(coat['datetime'].timetuple())).isoformat()
                 incoat = copy(coat)
                 attrs = gethash(incoat, "attributes")
                 if attrs != None:
@@ -536,7 +533,7 @@ class deals_proc():
         (accs, ) = self.connection.execute("select count(*) from (select distinct account_id from deals where {0})".format(roll_id_or(first_id + second_id))).fetchone() or (None, )
         if accs == None:
             raise Exception(u'Сделки не привязаны ни к одному счету')
-        elif accs > 1:
+        elif accs != 1:
             raise Exception(u'Сделки привяаны более чем к одному счету')
         if 1 != oticks:
             raise Exception(u'Чето косяк: сделки на открытие позиции идут по {0} разным тикерам'.format(oticks))
@@ -573,12 +570,13 @@ class deals_proc():
         (ovolume, odatetime, obroker_comm, obroker_comm_nds, ostock_comm, ostock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(first_id))).fetchone()
         (cvolume, cdatetime, cbroker_comm, cbroker_comm_nds, cstock_comm, cstock_comm_nds) = self.connection.execute("select sum(volume), avg(datetime), sum(broker_comm), sum(broker_comm_nds), sum(stock_comm), sum(stock_comm_nds) from deals where {0}".format(roll_id_or(second_id))).fetchone()
         dsign = abs(osign_sum) / osign_sum
+        (account_id, ) = self.connection.execute("select account_id from deals where id = ?", (first_id[0],)).fetchone()
         pos_id = self._insert_into("positions",
-                                   ["ticket", "direction", "count",
+                                   ["account_id", "ticket", "direction", "count",
                                     "open_volume", "close_volume", "open_coast", "close_coast",
                                     "open_datetime", "close_datetime", "broker_comm", "broker_comm_nds",
                                     "stock_comm", "stock_comm_nds", "pl_gross", "pl_net"],
-                                   (otick, dsign, oquant, ovolume, cvolume, oprice, cprice,
+                                   (account_id, otick, dsign, oquant, ovolume, cvolume, oprice, cprice,
                                     odatetime, cdatetime, obroker_comm + cbroker_comm,
                                     obroker_comm_nds + cbroker_comm_nds, ostock_comm + cstock_comm,
                                     ostock_comm_nds + cstock_comm_nds, (ovolume - cvolume) * dsign,
@@ -634,7 +632,7 @@ class deals_proc():
         m2 = [quant - needed_quantity] + map(lambda a: float(quant - needed_quantity) / quant, range(0, 5))
         ret = []
         for mm in [m1, m2]:
-            cid = self.connection.execute("insert into deals (account_id, parent_deal_id, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, quantity, volume, deal_sign, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds, position_id) select account_id, ?, group_id, datetime, datetime_day, security_type, security_name, grn_code, price, ?, volume * ?, deal_sign, broker_comm * ?, broker_comm_nds * ?, stock_comm * ?, stock_comm_nds * ?, position_id from deals where id = ?", [deal_id] + mm + [deal_id]).lastrowid
+            cid = self.connection.execute("insert into deals (account_id, parent_deal_id, group_id, datetime, security_type, security_name, price, quantity, volume, deal_sign, broker_comm, broker_comm_nds, stock_comm, stock_comm_nds, position_id) select account_id, ?, group_id, datetime, security_type, security_name, price, ?, volume * ?, deal_sign, broker_comm * ?, broker_comm_nds * ?, stock_comm * ?, stock_comm_nds * ?, position_id from deals where id = ?", [deal_id] + mm + [deal_id]).lastrowid
             ret.append(cid)
         self.connection.execute("update deals set not_actual = 1 where id = ?", (deal_id,))
         return ret
