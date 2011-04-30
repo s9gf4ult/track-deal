@@ -33,6 +33,8 @@ class combo_control(value_returner_control):
     def set_value(self, data):
         if isinstance(self.combobox, gtk.ComboBoxEntry):
             self.combobox.child.set_text(data)
+        elif isinstance(self.combobox, gtk.ComboBox):
+            pass # выбор по значению
             
 
 if __name__ == "__main__":
