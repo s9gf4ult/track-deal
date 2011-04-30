@@ -73,6 +73,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">save_as</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -230,6 +231,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">import_from_old_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -270,6 +272,8 @@
             <child>
               <object class="GtkToolbar" id="toolbar1">
                 <property name="visible">True</property>
+                <property name="icon_size">1</property>
+                <property name="icon_size_set">True</property>
                 <child>
                   <object class="GtkToolButton" id="toolbutton4">
                     <property name="visible">True</property>
@@ -293,6 +297,8 @@
               <object class="GtkToolbar" id="toolbar2">
                 <property name="visible">True</property>
                 <property name="show_arrow">False</property>
+                <property name="icon_size">1</property>
+                <property name="icon_size_set">True</property>
                 <child>
                   <object class="GtkToolButton" id="toolbutton1">
                     <property name="visible">True</property>
