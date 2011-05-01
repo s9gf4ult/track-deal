@@ -13,6 +13,8 @@ class combo_control(value_returner_control):
             cell = gtk.CellRendererText()
             self.combobox.pack_start(cell)
             self.combobox.add_attribute(cell, 'text', 0)
+        else:
+            self.combobox.child.props.editable = True
 
     def update_widget(self, rows):
         m = gtk.ListStore(str)
@@ -25,8 +27,8 @@ class combo_control(value_returner_control):
     def get_value(self):
         if isinstance(self.combobox, gtk.ComboBoxEntry):
             return self.return_value(self.combobox.child.get_text())
-        elif isinstance(self.combobox, gtk.ComboBoxText):
-            return self.return_value(self.combobox.get_active_text())
+        # elif isinstance(self.combobox, gtk.ComboBoxText):
+        #     return self.return_value(self.combobox.get_active_text())
         else:
             return self.return_value(self.combobox.get_model().get_value(self.combobox.get_active_iter(), 0))
 

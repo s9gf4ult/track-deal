@@ -38,8 +38,6 @@ def format_date(val):
     dt = datetime.datetime.fromtimestamp(val)
     return dt.date().__str__()
 
-def get_points(self):
-    return self.connection.execute("select id, security_type, security_name, point, step from points")
 
 def get_time(val):
     dt = datetime.datetime.fromtimestamp(val)
@@ -163,6 +161,15 @@ class deals_proc():
 
     def get_classes(self):
         return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_type from deals order by security_type"))
+
+    def get_points(self):
+        return self.connection.execute("select id, security_type, security_name, point, step from points")
+
+    def add_point(self, classname, instrument, point, step):
+        return self._insert_from_hash("points", {"security_name" : instrument,
+                                                 "security_type" : classname,
+                                                 "point" : point,
+                                                 "step" : step})
 
     def get_instruments_of_class(self, classname):
         return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_name from deals where security_type = ? order by security_name", (classname, )))
