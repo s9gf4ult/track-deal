@@ -22,6 +22,11 @@ class blog_text_tab_controller:
         
 
     def update_widget(self):
+        if self.database.connection == None:
+            self.stock_view_control.update_rows([])
+            self.date_view_control.update_rows([])
+            self.blog_text.get_buffer().set_text("")
+            return
         self.draw_stocks()
 
     def stock_cursor_changed(self, treeview):
@@ -66,7 +71,7 @@ class blog_text_tab_controller:
         self.stock_view_control.update_rows(self.database.connection.execute("select distinct ticket from positions order by {0}".format(self.stocks_sort_val)))
 
     def draw_dates(self):
-        if not self.database.connection:
+        if self.database.connection == None:
             return
         (path, col) = self.stock_view.get_cursor()
         if path != None:

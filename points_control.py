@@ -87,7 +87,7 @@ class points_control:
     def delete_item(self):
         (mod, it) = self.builder.get_object("points_points").get_selection().get_selected()
         if it != None:
-            mod.remove(it)
+            self.database.delete_point(mod.get_value(it, 0))
 
     @if_database
     def add_item(self):

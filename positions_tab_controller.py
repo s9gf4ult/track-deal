@@ -115,6 +115,7 @@ class positions_tab_controller(modifying_tab_control):
 
     def update_widget(self):
         if self.database.connection == None:
+            self.positions_list.update_rows([])
             return
         self.positions_list.update_rows(self.pfilter.get_ids(fields = ['id',
                                                                        'open_date_formated',

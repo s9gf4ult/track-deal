@@ -14,12 +14,6 @@ class combo_control(value_returner_control):
             cell = gtk.CellRendererText()
             self.combobox.pack_start(cell)
             self.combobox.add_attribute(cell, 'text', 0)
-        else:
-            self.combobox.set_text_column(0)
-            self.combobox.props.editable = True
-            c = self.combobox.child
-            c.props.editable = True
-            c.set_sensitive(True)
 
     def update_widget(self, rows):
         m = gtk.ListStore(str)

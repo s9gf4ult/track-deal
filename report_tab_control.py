@@ -30,6 +30,7 @@ class report_tab_control:
 
     def update_textview(self):
         if not self.database.connection:
+            self.textview.get_buffer().set_text("")
             return
         m = gtk.TextBuffer()
         if self.builder.get_object("radio_segfault").get_active():
@@ -50,11 +51,11 @@ class report_tab_control:
         return ret
 
     def remake_buttons(self):
-        if not self.database.connection:
-            return
-        
         for w in self.stock_buttons.get_children():
             self.stock_buttons.remove(w)
+            
+        if not self.database.connection:
+            return
         
         for (name, ) in self.database.connection.execute("select distinct ticket from positions order by ticket"):
             tb = gtk.ToggleButton(name)

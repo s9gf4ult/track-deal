@@ -206,7 +206,7 @@
                 <property name="can_focus">False</property>
                 <child internal-child="entry">
                   <object class="GtkEntry" id="comboboxentry-entry6">
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="secondary_icon_activatable">False</property>
                     <property name="primary_icon_sensitive">True</property>
@@ -526,7 +526,7 @@
                         <property name="can_focus">False</property>
                         <child internal-child="entry">
                           <object class="GtkEntry" id="comboboxentry-entry">
-                            <property name="can_focus">False</property>
+                            <property name="can_focus">True</property>
                             <property name="progress_pulse_step">0</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
@@ -569,7 +569,7 @@
                         <property name="can_focus">False</property>
                         <child internal-child="entry">
                           <object class="GtkEntry" id="comboboxentry-entry4">
-                            <property name="can_focus">False</property>
+                            <property name="can_focus">True</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
@@ -1291,7 +1291,7 @@
                         <property name="can_focus">False</property>
                         <child internal-child="entry">
                           <object class="GtkEntry" id="comboboxentry-entry8">
-                            <property name="can_focus">False</property>
+                            <property name="can_focus">True</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
@@ -1335,7 +1335,7 @@
                         <property name="can_focus">False</property>
                         <child internal-child="entry">
                           <object class="GtkEntry" id="comboboxentry-entry10">
-                            <property name="can_focus">False</property>
+                            <property name="can_focus">True</property>
                             <property name="primary_icon_activatable">False</property>
                             <property name="secondary_icon_activatable">False</property>
                             <property name="primary_icon_sensitive">True</property>
@@ -5561,7 +5561,7 @@
                 <property name="can_focus">False</property>
                 <child internal-child="entry">
                   <object class="GtkEntry" id="comboboxentry-entry12">
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="secondary_icon_activatable">False</property>
                     <property name="primary_icon_sensitive">True</property>
@@ -5608,7 +5608,7 @@
                 <property name="can_focus">False</property>
                 <child internal-child="entry">
                   <object class="GtkEntry" id="comboboxentry-entry14">
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
                     <property name="primary_icon_activatable">False</property>
                     <property name="secondary_icon_activatable">False</property>
                     <property name="primary_icon_sensitive">True</property>

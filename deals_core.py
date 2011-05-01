@@ -165,6 +165,9 @@ class deals_proc():
     def get_points(self):
         return self.connection.execute("select id, security_type, security_name, point, step from points")
 
+    def delete_point(self, point_id):
+        self.connection.execute("delete from points where id = ?", (point_id, ))
+
     def add_point(self, classname, instrument, point, step):
         return self._insert_from_hash("points", {"security_name" : instrument,
                                                  "security_type" : classname,
