@@ -1,7 +1,10 @@
 #!/bin/env python
-# -*- codign: utf-8 -*-
+# -*- coding: utf-8 -*-
+
 import gtk
 import sys
+import sqlite3
+from common_methods import *
 from combo_control import *
 from number_range_control import number_control
 from list_view_sort_control import *
@@ -36,9 +39,11 @@ class points_control:
 
     def add_clicked(self, bt):
         self.add_item()
+        self.load_points_list()
 
     def delete_clicked(self, bt):
         self.delete_item()
+        self.load_points_list()
 
     def points_cursor_changed(self, tw):
         self.set_item_values()
@@ -46,6 +51,7 @@ class points_control:
     def class_changed(self, combobox):
         self.load_instruments()
 
+    @if_database
     def run(self):
         w = self.builder.get_object("points")
         self.load_classes()
