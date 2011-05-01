@@ -8,7 +8,6 @@ class combo_control(value_returner_control):
     you can easly update rows in combobox with update_widget"""
     def __init__(self, combobox, checkbutton = None):
         self.combobox = combobox
-        print(self.combobox.__class__)
         self.checkbutton = checkbutton
         if not isinstance(self.combobox, gtk.ComboBoxEntry):
             cell = gtk.CellRendererText()

@@ -8,11 +8,13 @@ from common_methods import *
 from combo_control import *
 from number_range_control import number_control
 from list_view_sort_control import *
+from modifying_tab_control import modifying_tab_control
 
-class points_control:
-    def __init__(self, database, builder):
+class points_control(modifying_tab_control):
+    def __init__(self, database, builder, update_callback = None):
         self.builder = builder
         self.database = database
+        self.update_callback = update_callback
         def shorter(name):
             return self.builder.get_object(name)
         w = shorter("points")
@@ -59,6 +61,7 @@ class points_control:
         w.show_all()
         w.run()
         w.hide()
+        self.call_update_callback()
 
     @if_database
     def set_item_values(self):

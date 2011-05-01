@@ -29,7 +29,7 @@ class main_ui():
         self.global_data = {}
         
         # main window
-        self.points_control = points_control(self.database, self.builder)
+        self.points_control = points_control(self.database, self.builder, self.update_view)
         self.main_window = main_window_controller(self.global_data, self.database, self.builder, self.points_control, self.update_view)
 
         # report tab
