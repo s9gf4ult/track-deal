@@ -8,13 +8,18 @@ class combo_control(value_returner_control):
     you can easly update rows in combobox with update_widget"""
     def __init__(self, combobox, checkbutton = None):
         self.combobox = combobox
+        print(self.combobox.__class__)
         self.checkbutton = checkbutton
         if not isinstance(self.combobox, gtk.ComboBoxEntry):
             cell = gtk.CellRendererText()
             self.combobox.pack_start(cell)
             self.combobox.add_attribute(cell, 'text', 0)
         else:
-            self.combobox.child.props.editable = True
+            self.combobox.set_text_column(0)
+            self.combobox.props.editable = True
+            c = self.combobox.child
+            c.props.editable = True
+            c.set_sensitive(True)
 
     def update_widget(self, rows):
         m = gtk.ListStore(str)
