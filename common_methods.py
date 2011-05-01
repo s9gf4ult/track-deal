@@ -93,3 +93,10 @@ def no_reaction(func):
         finally:
             args[0].__do_react__ = True
     return ret
+
+def if_database(func):
+    """decorated method will be executed if self.database.connection != None"""
+    def ret(*args, **kargs):
+        if args[0].database.connection != None:
+            func(*args, **kargs)
+    return ret

@@ -18,6 +18,7 @@ from report_importer_control import report_importer_control
 from positions_filter import *
 from status_bar_control import *
 from position_adder_control import *
+from points_control import *
 
 class main_ui():
 
@@ -28,7 +29,8 @@ class main_ui():
         self.global_data = {}
         
         # main window
-        self.main_window = main_window_controller(self.global_data, self.database, self.builder, self.update_view)
+        self.points_control = points_control(self.database, self.builder)
+        self.main_window = main_window_controller(self.global_data, self.database, self.builder, self.points_control, self.update_view)
 
         # report tab
         self.report_tab = report_tab_control(self.database, self.builder)

@@ -38,6 +38,9 @@ def format_date(val):
     dt = datetime.datetime.fromtimestamp(val)
     return dt.date().__str__()
 
+def get_points(self):
+    return self.connection.execute("select id, security_type, security_name, point, step from points")
+
 def get_time(val):
     dt = datetime.datetime.fromtimestamp(val)
     ttt = dt.second + dt.minute * 60 + dt.hour * 3600
@@ -156,10 +159,13 @@ class deals_proc():
         self.connection.create_function("minus_brakets", 1, minus_brakets)
 
     def get_instruments(self):
-        return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_name from deals"))
+        return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_name from deals order by security_name"))
 
     def get_classes(self):
-        return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_type from deals"))
+        return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_type from deals order by security_type"))
+
+    def get_instruments_of_class(self, classname):
+        return map(lambda a: a[0].decode("utf-8"), self.connection.execute("select distinct security_name from deals where security_type = ? order by security_name", (classname, )))
 
     def add_position(self, account_id, instrument, instrument_class, long_short, count, open_pos, close_pos):
         dirs = map(lambda a: a * long_short, [1, -1])

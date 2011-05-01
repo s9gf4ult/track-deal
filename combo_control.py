@@ -34,7 +34,17 @@ class combo_control(value_returner_control):
         if isinstance(self.combobox, gtk.ComboBoxEntry):
             self.combobox.child.set_text(data)
         elif isinstance(self.combobox, gtk.ComboBox):
-            pass # выбор по значению
+            m = self.combobox.get_model()
+            it = m.get_iter_first()
+            while it != None:
+                if m.get_value(it, 0).decode("utf-8") == data.decode("utf-8"):
+                    self.combobox.set_active_iter(it)
+                    return
+                else:
+                    it = m.iter_next(it)
+            new = m.append((data,))
+            self.combobox.set_active_iter(new)
+                
             
 
 if __name__ == "__main__":
@@ -48,5 +58,10 @@ if __name__ == "__main__":
     p.pack_start(cc)
     ccon = combo_control(cc)
     ccon.update_widget(["cococoar", "ejejr", "eijwiej"])
+    def pushed(bt):
+        con.set_value("new_value")
+    bt = gtk.Button("push")
+    p.pack_start(bt)
+    bt.connect("clicked", pushed)
     w.show_all()
     w.run()

@@ -32,3 +32,65 @@ class points_control:
                                                        (u'Пункт', gtk.CellRendererSpin(), float),
                                                        (u'Шаг', gtk.CellRendererSpin(), float)])
         tw.connect("cursor-changed", self.points_cursor_changed)
+        shorter("points_class").connect("changed", self.class_changed)
+
+    def add_clicked(self, bt):
+        self.add_item()
+
+    def delete_clicked(self, bt):
+        self.delete_item()
+
+    def points_cursor_changed(self, tw):
+        self.set_item_values()
+
+    def class_changed(self, combobox):
+        self.load_instruments()
+
+    def run(self):
+        w = self.builder.get_object("points")
+        self.load_classes()
+        self.load_points_list()
+        w.show_all()
+        w.run()
+        w.hide()
+
+    @if_database
+    def set_item_values(self):
+        (mod, it) = self.builder.get_object("points_points").get_selection().get_selected()
+        if it != None:
+            self.instrument_class.set_value(mod.get_value(it, 1))
+            self.instrument.set_value(mod.get_value(it, 2))
+            self.point.set_value(mod.get_value(it, 3))
+            self.step.set_value(mod.get_value(it, 4))
+
+    @if_database
+    def load_points_list(self):
+        self.points_list.update_rows(self.database.get_points())
+
+    @if_database
+    def load_classes(self):
+        self.instrument_class.update_widget(self.database.get_classes())
+
+    @if_database
+    def load_instruments(self):
+        val = self.instrument_class.get_value()
+        if val != None:
+            self.instrument.update_widget(self.database.get_instruments_of_class(val))
+
+    @if_database
+    def delete_item(self):
+        (mod, it) = self.builder.get_object("points_points").get_selection().get_selected()
+        if it != None:
+            mod.remove(it)
+
+    @if_database
+    def add_item(self):
+        if not is_null_or_empty(self.instrument.get_value()) and not is_null_or_empty(self.instrument_class.get_value()) and self.point.get_value() > 0 and self.step.get_value() > 0:
+            try:
+                self.database.add_point(self.instrument_class.get_value(), self.instrument.get_value(), self.point.get_value(), self.step.get_value())
+            except sqlite3.IntegrityError:
+                pass
+            
+
+            
+

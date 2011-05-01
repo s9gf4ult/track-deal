@@ -55,13 +55,15 @@ class deals_tab_controller(modifying_tab_control):
     def deals_view_row_activated(self, treeview, path, column):
         self.change_deals()
 
+    @if_database
     def change_deals(self):
         d = self.builder.get_object("deals_view").get_selection().count_selected_rows()
         if d > 1:
             self.change_multiple_deals()
         elif d == 1:
             self.change_one_deal()
-
+            
+    @if_database
     def change_multiple_deals(self):
         d = self.builder.get_object("deals_view")
         (mod, paths) = d.get_selection().get_selected_rows()
@@ -81,6 +83,7 @@ class deals_tab_controller(modifying_tab_control):
             
             
 
+    @if_database
     def change_one_deal(self):
         d = self.builder.get_object("deals_view")
         (mod, it) = d.get_selection().get_selected_rows()
@@ -106,9 +109,8 @@ class deals_tab_controller(modifying_tab_control):
     def delete_deals_activate(self, action):
         self.delete_deals()
 
+    @if_database
     def delete_deals(self):
-        if not self.database.connection:
-            return
         selected = self.builder.get_object("deals_view").get_selection()
         dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self.builder.get_object("main_window"))
         dcount = selected.count_selected_rows()
@@ -131,9 +133,8 @@ class deals_tab_controller(modifying_tab_control):
     def add_deal_activate(self, action):
         self.add_deal()
 
+    @if_database
     def add_deal(self):
-        if not self.database.connection:
-            return
         self.adder.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals order by security_name")),
                                  map(lambda a: a[0], self.database.connection.execute("select distinct security_type from deals order by security_type")),
                                  self.database.connection.execute("select id, name from accounts").fetchall())
@@ -148,19 +149,19 @@ class deals_tab_controller(modifying_tab_control):
     def update_deals_tab_activate(self, action):
         self.update_widget()
 
+    @if_database
     def deals_load_open_ru_activate(self, action):
-        if self.database.connection != None:
-            a = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys())
-            self.report_importer.update_widget(accounts = self.database.connection.execute("select id, name from accounts").fetchall(),
-                                               report_types = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys()))
-            ret = self.report_importer.run()
-            if ret != None:
-                rt = self.report_importer.get_report_type()
-                if isinstance(rt, str):
-                    rt = rt.decode('utf-8')
-                if gethash(sources.classes, rt) != None:
-                    if sources.classes[rt] == sources.xml_parser:
-                        self.load_open_ru(self.report_importer.get_account_id(), self.report_importer.get_file_name())
+        a = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys())
+        self.report_importer.update_widget(accounts = self.database.connection.execute("select id, name from accounts").fetchall(),
+                                           report_types = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys()))
+        ret = self.report_importer.run()
+        if ret != None:
+            rt = self.report_importer.get_report_type()
+            if isinstance(rt, str):
+                rt = rt.decode('utf-8')
+            if gethash(sources.classes, rt) != None:
+                if sources.classes[rt] == sources.xml_parser:
+                    self.load_open_ru(self.report_importer.get_account_id(), self.report_importer.get_file_name())
                 
 
     def sorted_callback(self, column, order, params):
@@ -169,9 +170,8 @@ class deals_tab_controller(modifying_tab_control):
             self.update_widget()
         
 
+    @if_database
     def load_open_ru(self, account, filename):
-        if not self.database.connection:
-            return
         try:
             xs = sources.xml_parser(filename)
             xs.check_file()
@@ -184,9 +184,8 @@ class deals_tab_controller(modifying_tab_control):
     def call_filter_activate(self, action):
         self.call_filter()
 
+    @if_database
     def call_filter(self):
-        if not self.database.connection:
-            return
         self.filter.run()
         self.update_widget()
 

@@ -7,11 +7,12 @@ from modifying_tab_control import modifying_tab_control
 from common_methods import *
 
 class main_window_controller(modifying_tab_control):
-    def __init__(self, global_data, database, builder, update_callback):
+    def __init__(self, global_data, database, builder, points, update_callback):
         self.database = database
         self.builder = builder
         self.global_data = global_data
         self.update_callback = update_callback
+        self.points = points
         def shorter(name, signal, *method):
             self.builder.get_object(name).connect(signal, *method)
 
@@ -25,6 +26,10 @@ class main_window_controller(modifying_tab_control):
         shorter("main_window", "delete-event", self.main_window_quit)
         shorter("import_from_old_database", "activate", self.import_from_old_database_activate)
         shorter("save_as", "activate", self.save_as_activate)
+        shorter("call_points", "activate", self.call_points)
+
+    def call_points(self, action):
+        self.points.run()
 
     def save_as_activate(self, action):
         self.save_as()
