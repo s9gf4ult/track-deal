@@ -1,5 +1,4 @@
-CREATE TABLE deals_view(
--- Attributes --
+CREATE TEMPORARY TABLE deals_view(
 id integer primary key not null,
 deal_id integer not null,
 manual_made integer,
@@ -35,11 +34,19 @@ net_before float,
 net_after float,
 paper_ballance_before float,
 paper_ballance_after float,
-user_attributes_formated text);
-CREATE TABLE positions_view(
+user_attributes_formated text,
+foreign key (deal_id) references deals(id),
+foreign key (account_id) references accounts(id),
+foreign key (paper_id) references papers(id),
+foreign key (money_id) references moneys(id),
+unique(deal_id));
+
+CREATE TEMPORARY TABLE positions_view(
 id integer primary key not null,
 account_id integer not null,
 position_id integer not null,
+money_id integer not null,
+money_name text,
 manual_made integer,
 point float,
 step float,
@@ -106,35 +113,48 @@ commission float,
 net_before float,
 net_after float,
 gross_before float,
-gross_after float);
+gross_after float
+foreign key (position_id) references positions(id),
+foreign key (account_id) references accounts(id),
+foreign key (paper_id) references papers(id),
+foreign key (money_id) references moneys(id),
+unique(position_id),
+);
+
 CREATE TABLE account_statistics(
 id integer primary key not null,
 account_id integer not null,
 parameter_name text not null,
 parameter_comment text,
 value );
+
 CREATE TABLE deal_paper_selected(
 id integer,
 paper_id integer,
 deal_id integer);
+
 CREATE TABLE deal_account_selected(
 id integer,
 account_id integer,
 deal_id integer);
+
 CREATE TABLE position_account_selected(
 id integer primary key not null,
 position_id integer not null,
 account_id integer not null);
+
 CREATE TABLE position_paper_selected(
 id integer primary key not null,
 paper_id integer not null,
 position_id integer not null);
+
 CREATE TABLE account_ballance(
 account_id integer,
 paper_type text,
 paper_class text,
 paper_name text,
 count float);
+
 CREATE TABLE accounts_view(
 account_id integer,
 name text,
