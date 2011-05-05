@@ -113,49 +113,68 @@ commission float,
 net_before float,
 net_after float,
 gross_before float,
-gross_after float
+gross_after float,
 foreign key (position_id) references positions(id),
 foreign key (account_id) references accounts(id),
 foreign key (paper_id) references papers(id),
 foreign key (money_id) references moneys(id),
-unique(position_id),
-);
+unique(position_id));
 
-CREATE TABLE account_statistics(
+CREATE TEMPORARY TABLE account_statistics(
 id integer primary key not null,
 account_id integer not null,
 parameter_name text not null,
 parameter_comment text,
-value );
+value,
+foreign key (account_id) references accounts(id),
+unique(account_id, parameter_name));
 
-CREATE TABLE deal_paper_selected(
+CREATE TEMPORARY TABLE deal_paper_selected(
 id integer,
 paper_id integer,
-deal_id integer);
+deal_id integer,
+foreign key (paper_id) references papers(id),
+foreign key (deal_id) references deals(id));
 
-CREATE TABLE deal_account_selected(
+CREATE TEMPORARY TRIGGER _just_one_deal_paper_selected BEFORE INSERT ON deal_paper_selected
+BEGIN
+delete from deal_paper_selected where paper_id = new.paper_id and deal_id = new.deal_id;
+END;
+
+CREATE TEMPORARY TABLE deal_account_selected(
 id integer,
 account_id integer,
-deal_id integer);
+deal_id integer,
+foreign key (account_id) references accounts(id),
+foreign key (deal_id) references deals(id));
 
-CREATE TABLE position_account_selected(
+CREATE TEMPORARY TRIGGER _just_one_deal_account_selected BEFORE INSERT ON deal_account_selected
+BEGIN
+delete from deal_account_selected where account_id = new.account_id and deal_id = new.deal_id;
+END;
+
+CREATE TEMPORARY TABLE position_account_selected(
 id integer primary key not null,
 position_id integer not null,
-account_id integer not null);
+account_id integer not null,
+foreign key (position_id) references positions(id),
+foreign key (account_id) references accounts(id));
 
-CREATE TABLE position_paper_selected(
+CREATE TEMPORARY TABLE position_paper_selected(
 id integer primary key not null,
 paper_id integer not null,
-position_id integer not null);
+position_id integer not null,
+foreign key (paper_id) references papers(id),
+foreign key (position_id) references positions(id));
 
-CREATE TABLE account_ballance(
+CREATE TEMPORARY TABLE account_ballance(
 account_id integer,
 paper_type text,
 paper_class text,
 paper_name text,
 count float);
 
-CREATE TABLE accounts_view(
+CREATE TEMPORARY TABLE accounts_view(
 account_id integer,
 name text,
 money_name text,
