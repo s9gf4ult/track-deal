@@ -180,6 +180,11 @@ position_id integer not null,
 foreign key (paper_id) references papers(id),
 foreign key (position_id) references positions(id));
 
+CREATE TEMPORARY TRIGGER _just_one_position_paper_selected BEFORE INSERT ON position_paper_selected
+BEGIN
+delete from position_paper_selected where paper_id = new.paper_id and position_id = new.position_id;
+END;
+
 CREATE TEMPORARY TABLE account_ballance(
 account_id integer,
 paper_type text,
