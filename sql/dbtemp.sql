@@ -38,8 +38,12 @@ user_attributes_formated text,
 foreign key (deal_id) references deals(id),
 foreign key (account_id) references accounts(id),
 foreign key (paper_id) references papers(id),
-foreign key (money_id) references moneys(id),
-unique(deal_id));
+foreign key (money_id) references moneys(id));
+
+CREATE TEMPORARY TRIGGER _just_one_deals_view BEFORE INSERT ON deals_view
+BEGIN
+delete from deals_view where deal_id = new.deal_id;
+END;
 
 CREATE TEMPORARY TABLE positions_view(
 id integer primary key not null,
@@ -117,8 +121,12 @@ gross_after float,
 foreign key (position_id) references positions(id),
 foreign key (account_id) references accounts(id),
 foreign key (paper_id) references papers(id),
-foreign key (money_id) references moneys(id),
-unique(position_id));
+foreign key (money_id) references moneys(id));
+
+CREATE TEMPORARY TRIGGER _just_one_positions_view BEFORE INSERT ON positions_view
+BEGIN
+delete from positions_view where position_id = new.position_id;
+END;
 
 CREATE TEMPORARY TABLE account_statistics(
 id integer primary key not null,
@@ -159,6 +167,11 @@ position_id integer not null,
 account_id integer not null,
 foreign key (position_id) references positions(id),
 foreign key (account_id) references accounts(id));
+
+CREATE TEMPORARY TRIGGER _just_one_position_account_selected BEFORE INSERT ON position_account_selected
+BEGIN
+delete from position_account_selected where position_id = new.position_id and account_id = new.account_id;
+END;
 
 CREATE TEMPORARY TABLE position_paper_selected(
 id integer primary key not null,
