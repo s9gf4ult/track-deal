@@ -61,39 +61,40 @@ datetime datetime not null,
 foreign key (parent_deal_id) references deals(id),
 foreign key (account_id) references accounts(id),
 foreign key (position_id) references positions(id),
-foreign key (paper_id) references papers(id));
+foreign key (paper_id) references papers(id),
+unique(sha1, account_id));
 
 CREATE TABLE user_deal_attributes(
 id integer primary key not null,
 deal_id integer not null,
 name text not null,
 value,
-foreign key (deal_id) references deals(id));
+foreign key (deal_id) references deals(id),
+unique(deal_id, name));
 
 CREATE TABLE stored_deal_attributes(
 id integer primary key not null,
 deal_id integer not null,
 type text not null,
 value,
-foreign key (deal_id) references deals(id));
-
-
+foreign key (deal_id) references deals(id),
+unique(deal_id, type));
 
 CREATE TABLE user_position_attributes(
 id integer primary key not null,
 position_id integer not null,
 name text not null,
 value,
-foreign key (position_id) references positions(id));
+foreign key (position_id) references positions(id),
+unique(position_id, name));
 
 CREATE TABLE stored_position_attributes(
 id integer primary key not null,
 position_id integer not null,
 type text not null,
 value,
-foreign key (position_id) references positions(id));
-
-
+foreign key (position_id) references positions(id),
+unique(position_id, type));
 
 CREATE TABLE candles(
 id integer primary key not null,
@@ -106,23 +107,21 @@ close_value float not null,
 min_value float not null,
 max_value float not null,
 value_type text not null,
-foreign key (paper_id) references papers(id));
-
-
-
-
-
-
+foreign key (paper_id) references papers(id),
+unique(paper_id, duration, value_type, open_datetime),
+unique(paper_id, duration, value_type, close_datetime));
 
 CREATE TABLE global_data(
 id integer primary key not null,
 name text,
-value );
+value ,
+unique(name));
 
 CREATE TABLE database_attributes(
 id integer primary key not null,
 name text,
-value );
+value ,
+unique(name));
 
 CREATE TABLE hystory_steps(
 id integer primary key not null,
@@ -144,6 +143,10 @@ CREATE TABLE current_hystory_position(
 step_id integer not null,
 foreign key (step_id) references hystory_steps(id));
 
+CREATE TRIGGER _just_one_hystorypos BEFORE INSERT ON current_hystory_position FOR EACH ROW BEGIN
+delete from current_hystory_position;
+END;
+
 CREATE TABLE filter_redelts(
 id integer primary key not null,
 parent_redelt integer not null,
@@ -156,11 +159,13 @@ root_redelt_id integer not null,
 query_type text not null,
 from_part text not null,
 comment text,
-foreign key (root_redelt_id) references filter_redelts(id));
+foreign key (root_redelt_id) references filter_redelts(id),
+unique(root_redelt_id));
 
 CREATE TABLE filter_conditions(
 id integer primary key not null,
 redelt_id integer not null,
+is_formula integer,
 left_value text,
 right_value text,
 binary_comparator text,
