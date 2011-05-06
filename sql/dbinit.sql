@@ -129,13 +129,13 @@ autoname text);
 
 CREATE TABLE undo_queries(
 id integer primary key not null,
-step_id integer not null,
+step_id integer,
 query text not null,
 foreign key (step_id) references hystory_steps(id));
 
 CREATE TABLE redo_queries(
 id integer primary key not null,
-step_id integer not null,
+step_id integer,
 query text not null,
 foreign key (step_id) references hystory_steps(id));
 

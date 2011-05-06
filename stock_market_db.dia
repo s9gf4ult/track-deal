@@ -2522,7 +2522,7 @@
         <dia:point val="-26.75,17.65"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="-26.8,17.6;-13.495,48.5"/>
+        <dia:rectangle val="-26.8,17.6;-13.495,49.3"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
         <dia:point val="-26.75,17.65"/>
@@ -2531,7 +2531,7 @@
         <dia:real val="13.205"/>
       </dia:attribute>
       <dia:attribute name="elem_height">
-        <dia:real val="30.800000000000015"/>
+        <dia:real val="31.600000000000016"/>
       </dia:attribute>
       <dia:attribute name="name">
         <dia:string>#deals_view#</dia:string>
@@ -3432,6 +3432,29 @@
           </dia:attribute>
           <dia:attribute name="type">
             <dia:string>#text#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="value">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="comment">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="visibility">
+            <dia:enum val="0"/>
+          </dia:attribute>
+          <dia:attribute name="abstract">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+          <dia:attribute name="class_scope">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+        </dia:composite>
+        <dia:composite type="umlattribute">
+          <dia:attribute name="name">
+            <dia:string>#commission#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="type">
+            <dia:string>#float not null#</dia:string>
           </dia:attribute>
           <dia:attribute name="value">
             <dia:string>##</dia:string>
@@ -10213,20 +10236,24 @@ current_account - текущий счет один из параметров#</d
         <dia:point val="60.155,10.2"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="-27.8,4.8;60.205,18.8"/>
+        <dia:rectangle val="-27.8,5.55;62.675,18.8"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
         <dia:point val="60.155,10.2"/>
-        <dia:point val="53.355,10.2"/>
-        <dia:point val="53.355,5.6"/>
+        <dia:point val="62.625,10.2"/>
+        <dia:point val="62.625,7.25"/>
+        <dia:point val="44.325,7.25"/>
+        <dia:point val="44.325,5.6"/>
         <dia:point val="-27.75,5.6"/>
         <dia:point val="-27.75,18.35"/>
         <dia:point val="-26.75,18.35"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">
+        <dia:enum val="0"/>
+        <dia:enum val="1"/>
         <dia:enum val="0"/>
         <dia:enum val="1"/>
         <dia:enum val="0"/>
@@ -10734,13 +10761,13 @@ current_account - текущий счет один из параметров#</d
     </dia:object>
     <dia:object type="UML - Class" version="0" id="O80">
       <dia:attribute name="obj_pos">
-        <dia:point val="61.05,91.725"/>
+        <dia:point val="61.5,91.925"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="61,91.675;74.305,96.175"/>
+        <dia:rectangle val="61.45,91.875;74.755,96.375"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
-        <dia:point val="61.05,91.725"/>
+        <dia:point val="61.5,91.925"/>
       </dia:attribute>
       <dia:attribute name="elem_width">
         <dia:real val="13.205"/>
@@ -10864,7 +10891,7 @@ current_account - текущий счет один из параметров#</d
             <dia:string>#step_id#</dia:string>
           </dia:attribute>
           <dia:attribute name="type">
-            <dia:string>#integer not null#</dia:string>
+            <dia:string>#integer#</dia:string>
           </dia:attribute>
           <dia:attribute name="value">
             <dia:string>##</dia:string>
@@ -10914,13 +10941,13 @@ current_account - текущий счет один из параметров#</d
     </dia:object>
     <dia:object type="UML - Class" version="0" id="O81">
       <dia:attribute name="obj_pos">
-        <dia:point val="61.09,97.045"/>
+        <dia:point val="61.59,97.295"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="61.04,96.995;74.345,101.495"/>
+        <dia:rectangle val="61.54,97.245;74.845,101.745"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
-        <dia:point val="61.09,97.045"/>
+        <dia:point val="61.59,97.295"/>
       </dia:attribute>
       <dia:attribute name="elem_width">
         <dia:real val="13.205"/>
@@ -11044,7 +11071,7 @@ current_account - текущий счет один из параметров#</d
             <dia:string>#step_id#</dia:string>
           </dia:attribute>
           <dia:attribute name="type">
-            <dia:string>#integer not null#</dia:string>
+            <dia:string>#integer#</dia:string>
           </dia:attribute>
           <dia:attribute name="value">
             <dia:string>##</dia:string>
@@ -11335,18 +11362,18 @@ current_account - текущий счет один из параметров#</d
         <dia:boolean val="false"/>
       </dia:attribute>
       <dia:attribute name="obj_pos">
-        <dia:point val="74.255,94.425"/>
+        <dia:point val="74.705,94.625"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="73.505,93.625;89.05,97.425"/>
+        <dia:rectangle val="73.955,93.825;89.05,97.425"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
-        <dia:point val="74.255,94.425"/>
-        <dia:point val="81.6275,94.425"/>
-        <dia:point val="81.6275,96.625"/>
+        <dia:point val="74.705,94.625"/>
+        <dia:point val="81.8525,94.625"/>
+        <dia:point val="81.8525,96.625"/>
         <dia:point val="89,96.625"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">
@@ -11406,18 +11433,18 @@ current_account - текущий счет один из параметров#</d
         <dia:boolean val="false"/>
       </dia:attribute>
       <dia:attribute name="obj_pos">
-        <dia:point val="74.295,99.745"/>
+        <dia:point val="74.795,99.995"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="73.545,95.825;89.05,100.545"/>
+        <dia:rectangle val="74.045,95.825;89.05,100.795"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
       </dia:attribute>
       <dia:attribute name="orth_points">
-        <dia:point val="74.295,99.745"/>
-        <dia:point val="81.6475,99.745"/>
-        <dia:point val="81.6475,96.625"/>
+        <dia:point val="74.795,99.995"/>
+        <dia:point val="81.8975,99.995"/>
+        <dia:point val="81.8975,96.625"/>
         <dia:point val="89,96.625"/>
       </dia:attribute>
       <dia:attribute name="orth_orient">

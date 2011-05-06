@@ -35,10 +35,7 @@ net_after float,
 paper_ballance_before float,
 paper_ballance_after float,
 user_attributes_formated text,
-foreign key (deal_id) references deals(id),
-foreign key (account_id) references accounts(id),
-foreign key (paper_id) references papers(id),
-foreign key (money_id) references moneys(id));
+commission float not null);
 
 CREATE TEMPORARY TRIGGER _just_one_deals_view BEFORE INSERT ON deals_view
 BEGIN
@@ -117,11 +114,7 @@ commission float,
 net_before float,
 net_after float,
 gross_before float,
-gross_after float,
-foreign key (position_id) references positions(id),
-foreign key (account_id) references accounts(id),
-foreign key (paper_id) references papers(id),
-foreign key (money_id) references moneys(id));
+gross_after float);
 
 CREATE TEMPORARY TRIGGER _just_one_positions_view BEFORE INSERT ON positions_view
 BEGIN
@@ -134,15 +127,12 @@ account_id integer not null,
 parameter_name text not null,
 parameter_comment text,
 value,
-foreign key (account_id) references accounts(id),
 unique(account_id, parameter_name));
 
 CREATE TEMPORARY TABLE deal_paper_selected(
 id integer,
 paper_id integer,
-deal_id integer,
-foreign key (paper_id) references papers(id),
-foreign key (deal_id) references deals(id));
+deal_id integer);
 
 CREATE TEMPORARY TRIGGER _just_one_deal_paper_selected BEFORE INSERT ON deal_paper_selected
 BEGIN
@@ -152,9 +142,7 @@ END;
 CREATE TEMPORARY TABLE deal_account_selected(
 id integer,
 account_id integer,
-deal_id integer,
-foreign key (account_id) references accounts(id),
-foreign key (deal_id) references deals(id));
+deal_id integer);
 
 CREATE TEMPORARY TRIGGER _just_one_deal_account_selected BEFORE INSERT ON deal_account_selected
 BEGIN
@@ -164,9 +152,7 @@ END;
 CREATE TEMPORARY TABLE position_account_selected(
 id integer primary key not null,
 position_id integer not null,
-account_id integer not null,
-foreign key (position_id) references positions(id),
-foreign key (account_id) references accounts(id));
+account_id integer not null);
 
 CREATE TEMPORARY TRIGGER _just_one_position_account_selected BEFORE INSERT ON position_account_selected
 BEGIN
@@ -176,27 +162,61 @@ END;
 CREATE TEMPORARY TABLE position_paper_selected(
 id integer primary key not null,
 paper_id integer not null,
-position_id integer not null,
-foreign key (paper_id) references papers(id),
-foreign key (position_id) references positions(id));
+position_id integer not null);
 
 CREATE TEMPORARY TRIGGER _just_one_position_paper_selected BEFORE INSERT ON position_paper_selected
 BEGIN
 delete from position_paper_selected where paper_id = new.paper_id and position_id = new.position_id;
 END;
 
-CREATE TEMPORARY TABLE account_ballance(
-account_id integer,
-paper_type text,
-paper_class text,
-paper_name text,
-count float);
+-- CREATE TEMPORARY TABLE account_ballance(
+-- account_id integer,
+-- paper_type text,
+-- paper_class text,
+-- paper_name text,
+-- count float);
 
-CREATE TEMPORARY TABLE accounts_view(
-account_id integer,
-name text,
-money_name text,
-first_money float,
-current_money float,
-deals integer,
-positions integer);
+CREATE TEMPORARY VIEW account_ballance AS
+SELECT * FROM (
+SELECT account_id, paper_type, paper_class, paper_name, sum(direction * count) as count FROM deals_view GROUP BY account_id, paper_id)
+WHERE count <> 0;
+
+-- CREATE TEMPORARY TABLE accounts_view(
+-- account_id integer,
+-- name text,
+-- money_name text,
+-- first_money float,
+-- current_money float,
+-- deals integer,
+-- positions integer);
+
+CREATE TEMPORARY VIEW accounts_view AS
+SELECT
+a.id as account_id,
+a.name as name,
+mm.name as money_name,
+a.money_count as first_money,
+(CASE WHEN ds.id THEN a.money_count + ds.profit ELSE a.money_count END) as current_money,
+(CASE WHEN ds.id THEN ds.deals ELSE 0 END) as deals,
+(CASE WHEN ps.id THEN ps.positions ELSE 0 END) as positions
+FROM accounts a INNER JOIN moneys mm ON a.money_id = mm.id
+LEFT JOIN (select account_id as id, count(id) as deals, sum(direction * volume) - sum(commission) as profit from deals_view group by account_id) ds ON ds.id = a.id
+LEFT JOIN (select account_id as id, count(id) as positions from positions_view group by account_id) ps ON ps.id = a.id;
+
+CREATE TEMPORARY TRIGGER _insert_moneys AFTER INSERT ON moneys
+BEGIN
+INSERT INTO undo_queries (step_id, query) values ((select step_id from current_hystory_position limit 1), 'DELETE FROM moneys WHERE id = '||quote(new.id));
+INSERT INTO redo_queries (step_id, query) values ((select step_id from current_hystory_position limit 1), 'INSERT INTO moneys (id, name, full_name) values ('||quote(new.id)||', '||quote(new.name)||', '||quote(new.full_name)||')');
+END;
+
+CREATE TEMPORARY TRIGGER _delete_moneys AFTER DELETE ON moneys
+BEGIN
+INSERT INTO redo_queries (step_id, query) values ((select step_id from current_hystory_position limit 1), 'DELETE FROM moneys WHERE id = '||quote(old.id));
+INSERT INTO undo_queries (step_id, query) values ((select step_id from current_hystory_position limit 1), 'INSERT INTO moneys (id, name, full_name) values ('||quote(old.id)||', '||quote(old.name)||', '||quote(old.full_name)||')');
+END;
+
+CREATE TEMPORARY TRIGGER _update_moneys AFTER UPDATE ON moneys
+BEGIN
+INSERT INTO undo_queries (step_id, query) VALUES ((select step_id from current_hystory_position limit 1), 'UPDATE moneys SET id = '||quote(old.id)||', name = '||quote(old.name)||', full_name = '||quote(old.full_name)||' WHERE id = '||quote(new.id));
+INSERT INTO redo_queries (step_id, query) VALUES ((select step_id from current_hystory_position limit 1), 'UPDATE moneys SET id = '||quote(new.id)||', name = '||quote(new.name)||', full_name = '||quote(new.full_name)||' WHERE id = '||quote(old.id));
+END;
