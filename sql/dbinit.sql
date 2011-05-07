@@ -9,7 +9,7 @@ name text not null,
 comments text,
 money_id integer not null,
 money_count float not null default 0,
-foreign key (money_id) references moneys(id));
+foreign key (money_id) references moneys(id) on delete cascade);
 
 CREATE TABLE papers(
 id integer primary key not null,
