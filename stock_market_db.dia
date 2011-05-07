@@ -10604,7 +10604,7 @@ current_account - текущий счет один из параметров#</d
         <dia:point val="89,94.725"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="88.95,94.675;102.255,98.375"/>
+        <dia:rectangle val="88.95,94.675;102.255,99.175"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
         <dia:point val="89,94.725"/>
@@ -10613,7 +10613,7 @@ current_account - текущий счет один из параметров#</d
         <dia:real val="13.205"/>
       </dia:attribute>
       <dia:attribute name="elem_height">
-        <dia:real val="3.6000000000000001"/>
+        <dia:real val="4.4000000000000004"/>
       </dia:attribute>
       <dia:attribute name="name">
         <dia:string>#hystory_steps#</dia:string>
@@ -10732,6 +10732,29 @@ current_account - текущий счет один из параметров#</d
           </dia:attribute>
           <dia:attribute name="type">
             <dia:string>#text#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="value">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="comment">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="visibility">
+            <dia:enum val="0"/>
+          </dia:attribute>
+          <dia:attribute name="abstract">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+          <dia:attribute name="class_scope">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+        </dia:composite>
+        <dia:composite type="umlattribute">
+          <dia:attribute name="name">
+            <dia:string>#datetime#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="type">
+            <dia:string>#datetime#</dia:string>
           </dia:attribute>
           <dia:attribute name="value">
             <dia:string>##</dia:string>
@@ -12713,7 +12736,7 @@ current_account - текущий счет один из параметров#</d
         <dia:point val="-11.605,85.7"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="-24.1,74.2;-10.005,87.3"/>
+        <dia:rectangle val="-24.1,73.45;-10.005,86.5"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>
@@ -12788,7 +12811,7 @@ current_account - текущий счет один из параметров#</d
         <dia:point val="-11.605,84.9"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="-12.355,25.7;12.65,86.5"/>
+        <dia:rectangle val="-12.355,24.95;12.65,85.7"/>
       </dia:attribute>
       <dia:attribute name="meta">
         <dia:composite type="dict"/>

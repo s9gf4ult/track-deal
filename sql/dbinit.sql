@@ -125,7 +125,8 @@ unique(name));
 
 CREATE TABLE hystory_steps(
 id integer primary key not null,
-autoname text);
+autoname text,
+datetime datetime);
 
 CREATE TABLE undo_queries(
 id integer primary key not null,
