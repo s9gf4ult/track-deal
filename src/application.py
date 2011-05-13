@@ -31,7 +31,23 @@ class application(object):
         self.exit()
 
     def exit(self, ):
-        """
+        """exit
         """
         pass
-    
+
+    def get_model(self):
+        """Getter for property model
+        
+        """
+        
+        return self._view.get_model()
+
+    def set_model(self, model):
+        """Setter for property model
+        
+        
+        Arguments:
+        - `model`:common_model child instance
+        """
+        assert(isinstance(model, common_model))
+        self._view.set_model(model)

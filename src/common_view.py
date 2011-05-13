@@ -7,7 +7,8 @@ class common_view(object):
     """abstract class for view
     """
     _model = None
-    def __init__(self, ):
+    
+    def __init__(self):
         """
         """
         
@@ -21,6 +22,15 @@ class common_view(object):
         """
         assert(isinstance(model, common_model))
         self._model = model
+
+    def get_model(self):
+        """gets model
+        
+        Arguments:
+        - `model`:
+        """
+        return self._model
+
 
     def run(self, ):
         """run the view
