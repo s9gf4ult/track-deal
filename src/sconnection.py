@@ -151,12 +151,18 @@ class sconnection(sqlite3.Connection):
         - `table`:
         - `set_fields`: hash like {"id" : value}
         - `where_part`: string
-        - `where_arguments`: list of arguments in query
+        - `where_arguments`: list of arguments in query for `where` part
         """
-        assert(isinstance(set_fields, dict))
-        names = set_fields.keys()
-        sets = reduce_by_string(", ", map(lambda a: "{0} = ?", names))
-        query = "update {0} set {1}".format(table, sets)
-        if not is_null_or_empty(where_part):
-            query += "where {0}".format(where_part)
-            
+        assert(isinstance(set_fields, dict) or hasattr(set_fields, "__iter__"))
+        names = []
+        data = []
+        for htb in (isinstance(set_fields, dict) and [set_fields] or set_fields):
+            nn = htb.keys()
+            names.append(nn)
+            data.append(map(lambda a: htb[a], nn) + where_arguments)
+
+        for (name, dd) in map(lambda a, b: (a, b), names, data):
+            q = "update {0} set {1}".format(table, reduce_by_string(", ", map(lambda a: "{0} = ?".format(a), name)))
+            if not is_null_or_empty(where_part):
+                q += "where {0}".format(where_part)
+            self.execute(q, dd)
