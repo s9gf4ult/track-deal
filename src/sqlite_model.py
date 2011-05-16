@@ -57,13 +57,15 @@ class sqlite_model(common_model):
         with open('./sqlite/dbtemp.sql') as ofile:
             self._sqlite_connection.executescript(ofile.read())
 
-    @raise_db_closed
+    @raise_db_opened
     def open_existing(self, filename):
         """
         Opens existing database from file
         Arguments:
         - `filename`:
         """
+        self.connect(filename)
+        self.dbtemp()
 
     @raise_db_closed
     def disconnect(self, ):
@@ -71,5 +73,30 @@ class sqlite_model(common_model):
         """
         self._sqlite_connection.close()
         self._sqlite_connection=None
+
+
+    @raise_db_closed
+    def begin_transaction(self, ):
+        """Begins transaction
+        """
+        self._sqlite_connection.begin_transaction()
+
+    @raise_db_closed
+    def commit(self, ):
+        """Commits
+        """
+        self._sqlite_connection.commit()
+
+    @raise_db_closed
+    def rollback(self, ):
+        """Rollback
+        """
+        self._sqlite_connection.rollback()
+
+
+
+
+        
+        
         
 

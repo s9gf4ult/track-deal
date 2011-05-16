@@ -60,5 +60,15 @@ class sconnection_test(unittest.TestCase):
         self.conn.update("aa", {"val": 1}, "id >= ?", [250])
         self.assertEqual(50, self.conn.execute("select count(id) as count from aa where val <> 1").fetchone()[0])
 
+    def test_commit_and_rollback(self, ):
+        """
+        """
+        self.conn.begin_transaction()
+        self.conn.executemany("insert into aa(id, val) values (?, ?)", map(lambda a, b: (a, b), xrange(0, 100), xrange(0, 100)))
+        self.assertEqual(100, self.conn.execute("select count(*) from aa").fetchone()[0])
+        self.conn.rollback()
+        self.assertEqual(0, self.conn.execute("select count(*) from aa").fetchone()[0])
+
+
 if __name__ == '__main__':
     unittest.main()

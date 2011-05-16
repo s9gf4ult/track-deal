@@ -40,7 +40,6 @@ class sqlite_model_test(unittest.TestCase):
         self.model.dbtemp()
         self.assertEqual(7, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_temp_master where type = 'table'").fetchall()[0]["count"])
         
-
         
 
 if __name__ == '__main__':

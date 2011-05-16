@@ -145,3 +145,28 @@ def raise_db_opened(func):
         else:
             raise Exception("self has no attribute _sqlite_connection")
     return ret
+
+def in_transaction(func):
+    """
+    Decorator makes method executing in transaction, if error occures then transaction will be rlled back
+    and exception will be passed up
+    Arguments:
+    - `func`:
+    """
+    def ret(*args, **kargs):
+        """
+        
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        self = args[0]
+        self.begin_transaction()
+        try:
+            func(*args, **kargs)
+        except Exception as e:
+            self.rollback()
+            raise e
+        else:
+            self.commit()
+    return ret

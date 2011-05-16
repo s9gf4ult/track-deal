@@ -104,6 +104,16 @@ class sconnection(sqlite3.Connection):
     ###########
     # Methods #
     ###########
+    def __init__(self, connect_string):
+        """initializes connection and makes some other things
+        
+        Arguments:
+        - `connect_string`:
+        """
+        super(sconnection, self).__init__(connect_string)
+        self.execute("pragma foreign_keys=on")
+        
+
 
     def insert(self, table, fields):
         """inserts data in fields into table
@@ -166,3 +176,10 @@ class sconnection(sqlite3.Connection):
             if not is_null_or_empty(where_part):
                 q += "where {0}".format(where_part)
             self.execute(q, dd)
+
+    def begin_transaction(self, ):
+        """Begins transaction
+        """
+        self.execute("begin transaction")
+
+        
