@@ -68,6 +68,12 @@ class sconnection_test(unittest.TestCase):
         self.assertEqual(100, self.conn.execute("select count(*) from aa").fetchone()[0])
         self.conn.rollback()
         self.assertEqual(0, self.conn.execute("select count(*) from aa").fetchone()[0])
+        
+        self.conn.begin_transaction()
+        self.conn.executemany("insert into aa(id, val) values (?, ?)", map(lambda a, b: (a, b), xrange(0, 100), xrange(0, 100)))
+        self.assertEqual(100, self.conn.execute("select count(*) from aa").fetchone()[0])
+        self.conn.commit()
+        self.assertEqual(100, self.conn.execute("select count(*) from aa").fetchone()[0])
 
 
 if __name__ == '__main__':
