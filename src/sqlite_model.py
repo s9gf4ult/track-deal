@@ -7,11 +7,11 @@ from common_view import common_view
 from sconnection import sconnection
 
 class sqlite_model(common_model):
-    """stores data in sqlite
-    Attributes:
-    _connection_string = None
-    _sqlite_connection = None
-    
+    """
+    stores data in sqlite
+    :Attributes:
+       _connection_string = None
+       _sqlite_connection = None
     """
     ##############
     # Attributes #
@@ -36,4 +36,13 @@ class sqlite_model(common_model):
         - `connection_string`:
         """
         assert(isinstance(connection_string, basestring))
+        self._connection_string = connection_string
         self._sqlite_connection = sconnection(connection_string)
+
+    def dbinit(self, ):
+        """
+        initializes new database
+        """
+        with open('./sqlite/dbinit.sql') as ofile:
+            self._sqlite_connection.executescript
+
