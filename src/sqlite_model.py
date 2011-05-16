@@ -44,5 +44,12 @@ class sqlite_model(common_model):
         initializes new database
         """
         with open('./sqlite/dbinit.sql') as ofile:
-            self._sqlite_connection.executescript
+            self._sqlite_connection.executescript(ofile.read())
 
+    def dbtemp(self, ):
+        """
+        initalizes temporary objects in database
+        """
+        with open('./sqlite/dbtemp.sql') as ofile:
+            self._sqlite_connection.executescript(ofile.read())
+            
