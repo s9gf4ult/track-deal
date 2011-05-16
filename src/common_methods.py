@@ -100,3 +100,48 @@ def if_database(func):
         if args[0].database.connection != None:
             func(*args, **kargs)
     return ret
+
+def raise_db_closed(func):
+    """Decorator makes function to raise Exception when
+    self._sqlite_connection is null
+    
+    Arguments:
+    - `func`:
+    """
+    def ret(*args, **kargs):
+        """
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        if hasattr(args[0], "_sqlite_connection"):
+            if args[0]._sqlite_connection != None:
+                func(*args, **kargs)
+            else:
+                raise Exception("Database is not opened now")
+        else:
+            raise Exception("self has no attribute _sqlite_connection")
+    return ret
+
+    
+def raise_db_opened(func):
+    """Decorator raises exception of databse is still opened
+    
+    Arguments:
+    - `func`:
+    """
+    def ret(*args, **kargs):
+        """
+        
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        if hasattr(args[0], "_sqlite_connection"):
+            if args[0]._sqlite_connection == None:
+                func(*args, **kargs)
+            else:
+                raise Exception("Database is still opened")
+        else:
+            raise Exception("self has no attribute _sqlite_connection")
+    return ret
