@@ -144,7 +144,7 @@ class sconnection(sqlite3.Connection):
         assert(isinstance(query, basestring))
         return scon_cursor(self, query, arguments)
 
-    def update(self, table, set_fields, where_part, where_arguments = []):
+    def update(self, table, set_fields, where_part = None, where_arguments = []):
         """executes update on all `set_fields` where `where_part`
         
         Arguments:

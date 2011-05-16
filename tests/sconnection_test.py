@@ -44,13 +44,21 @@ class sconnection_test(unittest.TestCase):
     def test_select(self, ):
         """test of execute_select method
         """
-        pass
+        self.conn.executemany("insert into aa(id, val) values (?, ?)", map(lambda a, b: (a, b), xrange(0, 100), xrange(200, 300)))
+        self.assertEqual(99, self.conn.execute_select("select max(id) as max from aa").fetchall()[0]["max"])
+        self.assertEqual(299, self.conn.execute_select("select max(val) as max from aa").fetchall()[0]["max"])
+        self.assertEqual(100, len(self.conn.execute_select("select * from aa").fetchall()))
+        self.assertEqual(100, self.conn.execute_select("select count(*) as count from aa").fetchall()[0]["count"])
 
-            
-            
-            
-        
-
+    def test_udate(self, ):
+        """tests update method
+        """
+        self.conn.executemany("insert into aa (id, val) values (?, ?)", map(lambda a, b: (a, b), xrange(200, 300), xrange(300, 400)))
+        self.conn.update("aa", {"val" : 0}, "id > ?", [200])
+        self.assertEqual(300, self.conn.execute("select sum(val) as sum from aa").fetchone()[0])
+        self.conn.update("aa", {"val" : 0})
+        self.conn.update("aa", {"val": 1}, "id >= ?", [250])
+        self.assertEqual(50, self.conn.execute("select count(id) as count from aa where val <> 1").fetchone()[0])
 
 if __name__ == '__main__':
     unittest.main()
