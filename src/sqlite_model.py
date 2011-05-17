@@ -220,7 +220,20 @@ class sqlite_model(common_model):
         else:
             raise od_exception("get_paper: wrong arguments")
         return (len(ret) > 0 and ret[0] or None)
-    
+
+    @raise_db_closed
+    @in_transaction
+    @remover_decorator("papers", {int : "id"})
+    def remove_paper(self, type_or_id, name = None):
+        """Removes one paper by type and name or many papers by id
+        
+        Arguments:
+        - `type_or_id`:
+        - `name`:
+        """
+        if isinstance(type_or_id, basestring) and isinstance(name, basestring) and not is_null_or_empty(name):
+            self._sqlite_connection.execute("delete from papers where type = ? and name = ?", [type_or_id, name])
+
 
     @raise_db_closed
     @in_transaction
@@ -249,3 +262,51 @@ class sqlite_model(common_model):
         ret = self._sqlite_connection.execute_select("select * from candles where id = ?", [candle_id]).fetchall()
         return (len(ret) > 0 and ret[0] or None)
 
+    @raise_db_closed
+    @in_transaction
+    @remover_decorator("candles", {int : "id", basestring : "name"})
+    def remove_candle(self, candles_id):
+        """removes one or more candles
+        Arguments:
+        - `candles_id`: int or list of ints
+        """
+        pass
+
+    @raise_db_closed
+    @in_transaction
+    def create_money(self, name, full_name = None):
+        """Creates new money and return it's id
+        
+        Arguments:
+        - `name`:
+        - `full_name`:
+        """
+        return self._sqlite_connection.insert("moneys", {"name" : name,
+                                                         "full_name" : full_name}).lastrowid
+
+    @raise_db_closed
+    def get_money(self, name_or_id):
+        """Returns money object by id or name
+        
+        Arguments:
+        - `name_or_id`:
+        """
+        if isinstance(name_or_id, basestring):
+            ret = self._sqlite_connection.execute_select("select * from moneys where name = ?", [name_or_id]).fetchall()
+        elif isinstance(name_or_id, int):
+            ret = self._sqlite_connection.execute_select("select * from moneys where id = ?", [name_or_id]).fetchall()
+        else:
+            raise od_exception("get_money: incorrect parameters")
+        
+        return (len(ret) > 0 and ret[0] or None)
+
+    @raise_db_closed
+    @in_transaction
+    @remover_decorator("moneys", {int : "id", basestring : "name"})
+    def remove_papers(self, name_or_id):
+        """removes one or more paper by name or id
+        
+        Arguments:
+        - `name_or_id`:
+        """
+        pass

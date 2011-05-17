@@ -117,6 +117,7 @@ def raise_db_closed(func):
         else:
             raise od_exception("self has no attribute _sqlite_connection")
         return rtt
+    ret.__doc__ = func.__doc__
     return ret
 
     
@@ -135,6 +136,7 @@ def raise_db_opened(func):
         else:
             raise od_exception("self has no attribute _sqlite_connection")
         return rtt
+    ret.__doc__ = func.__doc__
     return ret
 
 def in_transaction(func):
@@ -156,4 +158,38 @@ def in_transaction(func):
         else:
             self.commit()
         return rtt
+    ret.__doc__ = func.__doc__
     return ret
+
+class remover_decorator(object):
+    """Makes method remove objects
+    Attributes:
+    
+    """
+    def __init__(self, table_name, class_field):
+        """
+        Arguments:
+        - `table_name`: string with name of table delete entries from
+        - `class_field`: hash like {argument_type: table field}
+        """
+        self._table_name = table_name
+        self._class_field = class_field
+
+    def __call__(self, method):
+        """
+        Arguments:
+        - `method`:
+        """
+        def ret(*args, **kargs):
+            rtt = method(*args, **kargs)
+            farg = (isinstance(args[1], (list, tuple)) and args[1] or [args[1]])
+            farg = map(lambda a: (a, ), farg)
+            for classes in self._class_field.keys():
+                if isinstance(farg[0][0], classes):
+                    args[0]._sqlite_connection.executemany("delete from {0} where {1} = ?".format(self._table_name, self._class_field[classes]), farg)
+                    return rtt
+            raise od_exception_decorator("given value of class {0} there is no registered classes for delete operation".format(args[1].__class__))
+        ret.__doc__ = method.__doc__
+        return ret
+        
+

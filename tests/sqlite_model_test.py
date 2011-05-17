@@ -109,6 +109,7 @@ class sqlite_model_test(unittest.TestCase):
         self.model.dbtemp()
         paid = self.model.create_paper(type = "stock", name = "something", class_name = "paperclass")
         pp = self.model.get_paper(paid)
+        pid = pp["id"]
         self.assertTrue(pp.has_key("id"))
         self.assertIsInstance(pp["id"], int)
         for k in pp.keys():
@@ -118,7 +119,20 @@ class sqlite_model_test(unittest.TestCase):
                 del pp[k]
         self.assertDictEqual({"type" : "stock", "name" : "something", "class" : "paperclass"}, pp)
         self.assertEqual(None, self.model.get_paper("stock", "adsfa"))
+        self.assertEqual(pid, self.model.get_paper("stock", "something")["id"])
+        self.model.remove_paper(pid)
+        self.assertEqual(None, self.model.get_paper("stock", "something"))
+        self.model.create_paper("type", "name")
+        self.assertIsInstance(self.model.get_paper("type", "name"), dict)
+        self.model.remove_paper("type", "name")
+        self.assertEqual(None, self.model.get_paper("type", "name"))
         
+    # def test_candles(self, ):
+    #     """tests creation and deleting candles
+    #     """
+    #     self.model.dbinit()
+    #     self.model.dbtemp()
+    #     self.model.create_paper("stock", 
 
         
         

@@ -25,6 +25,12 @@ class od_exception_db_opened(od_exception_db_error):
     Attributes:
     
     """
+
+class od_exception_decorator(od_exception):
+    """Exception in decorator
+    Attributes:
+    
+    """
         
         
 
