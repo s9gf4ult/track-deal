@@ -6,6 +6,7 @@ from common_model import common_model
 from common_view import common_view
 from sconnection import sconnection
 from common_methods import *
+from exceptions import *
 
 class sqlite_model(common_model):
     """
@@ -205,15 +206,46 @@ class sqlite_model(common_model):
                                                          "full_name" : full_name}).lastrowid
 
     @raise_db_closed
-    def get_paper(self, type_or_id):
+    def get_paper(self, type_or_id, name = None):
         """returns paper by name or by id
         if there is no one returns None
         Arguments:
         - `type_or_id`:
         """
         ret = None
-        if isinstance(type_or_id, basestring):
-            ret = self._sqlite_connection.execute_select("select * from papers where name = ?", [type_or_id])
+        if isinstance(type_or_id, basestring) and not is_null_or_empty(name):
+            ret = self._sqlite_connection.execute_select("select * from papers where type = ? and name = ?", [type_or_id, name]).fetchall()
         elif isinstance(type_or_id, int):
-            ret = self._sqlite_connection.execute_select("select * from papers where id = ?", [type_or_id])
-        return (len(ret) > 0 and ret[0] or None) 
+            ret = self._sqlite_connection.execute_select("select * from papers where id = ?", [type_or_id]).fetchall()
+        else:
+            raise od_exception("get_paper: wrong arguments")
+        return (len(ret) > 0 and ret[0] or None)
+    
+
+    @raise_db_closed
+    @in_transaction
+    def create_candles(self, paper_id, candles):
+        """Creates one or several candles of paper `paper_id`
+        Arguments:
+        - `paper_id`:
+        - `candles`: hash table with keys, [duration, open_datetime, close_datetime, open_value, close_value, min_value, max_value, volume, value_type] or the list of tables
+        """
+        candles = (isinstance(candles, dict) and [candles] or candles)
+        for candle in candles:
+            assert(set(["duration", "open_datetime", "close_datetime", "open_value", "close_value", "min_value", "max_value", "volume", "value_type"]) == set(candle.keys()))
+            candle["paper_id"] = paper_id
+            assert(isinstance(candle["duration"], basestring))
+
+        self._sqlite_connection.insert("candles", candles)
+        
+
+    @raise_db_closed
+    def get_candle(self, candle_id):
+        """Get candle by id
+        
+        Arguments:
+        - `candle_id`:
+        """
+        ret = self._sqlite_connection.execute_select("select * from candles where id = ?", [candle_id]).fetchall()
+        return (len(ret) > 0 and ret[0] or None)
+

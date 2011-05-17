@@ -3,6 +3,7 @@ import unittest
 import sqlite3
 import random
 import os
+from common_methods import *
 
 class sqlite_model_test(unittest.TestCase):
     """
@@ -108,12 +109,15 @@ class sqlite_model_test(unittest.TestCase):
         self.model.dbtemp()
         paid = self.model.create_paper(type = "stock", name = "something", class_name = "paperclass")
         pp = self.model.get_paper(paid)
+        self.assertTrue(pp.has_key("id"))
+        self.assertIsInstance(pp["id"], int)
         for k in pp.keys():
             if k == "id":
                 del pp[k]
-            if pp[k] == None:
+            if pp.has_key(k) and pp[k] == None:
                 del pp[k]
         self.assertDictEqual({"type" : "stock", "name" : "something", "class" : "paperclass"}, pp)
+        self.assertEqual(None, self.model.get_paper("stock", "adsfa"))
         
 
         
