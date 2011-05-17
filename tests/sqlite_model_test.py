@@ -67,6 +67,55 @@ class sqlite_model_test(unittest.TestCase):
         self.assertRaises(Exception, self.model.begin_transaction)
         self.assertRaises(Exception, self.model.disconnect)
 
+    def test_global_parameters(self, ):
+        """tests actions on global parameters
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        self.model.add_global_data({"p1" : 100, "p2" : 200})
+        self.assertEqual(100, self.model.get_global_data("p1"))
+        self.model.add_global_data({"p1" : 300})
+        self.assertEqual(300, self.model.get_global_data("p1"))
+        self.assertEqual(200, self.model.get_global_data("p2"))
+        self.assertSetEqual(set(["p1", "p2"]), set(self.model.list_global_data()))
+        self.model.remove_global_data("p1")
+        self.assertEqual(None, self.model.get_global_data("p1"))
+        self.model.remove_global_data(["p2"])
+        self.assertEqual(None, self.model.get_global_data("p2"))
+        self.assertSetEqual(set([]), set(self.model.list_global_data()))
+
+    def test_database_attributes(self, ):
+        """tests actions on global parameters
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        self.model.add_database_attributes({"p1" : 100, "p2" : 200})
+        self.assertEqual(100, self.model.get_database_attribute("p1"))
+        self.model.add_database_attributes({"p1" : 300})
+        self.assertEqual(300, self.model.get_database_attribute("p1"))
+        self.assertEqual(200, self.model.get_database_attribute("p2"))
+        self.assertSetEqual(set(["p1", "p2"]), set(self.model.list_database_attributes()))
+        self.model.remove_database_attribute("p1")
+        self.assertEqual(None, self.model.get_database_attribute("p1"))
+        self.model.remove_database_attribute(["p2"])
+        self.assertEqual(None, self.model.get_database_attribute("p2"))
+        self.assertSetEqual(set([]), set(self.model.list_database_attributes()))
+
+    def test_papers(self, ):
+        """tests method for make and get papers
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        paid = self.model.create_paper(type = "stock", name = "something", class_name = "paperclass")
+        pp = self.model.get_paper(paid)
+        for k in pp.keys():
+            if k == "id":
+                del pp[k]
+            if pp[k] == None:
+                del pp[k]
+        self.assertDictEqual({"type" : "stock", "name" : "something", "class" : "paperclass"}, pp)
+        
+
         
         
 

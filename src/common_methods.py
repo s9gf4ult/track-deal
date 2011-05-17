@@ -104,40 +104,42 @@ def if_database(func):
 def raise_db_closed(func):
     """Decorator makes function to raise Exception when
     self._sqlite_connection is null
-    
     Arguments:
     - `func`:
     """
     def ret(*args, **kargs):
+        rtt = None
         if hasattr(args[0], "_sqlite_connection"):
             if args[0]._sqlite_connection != None:
-                func(*args, **kargs)
+                rtt = func(*args, **kargs)
             else:
                 raise od_exception_db_opened("Database is not opened now")
         else:
             raise od_exception("self has no attribute _sqlite_connection")
+        return rtt
     return ret
 
     
 def raise_db_opened(func):
     """Decorator raises exception of databse is still opened
-    
     Arguments:
     - `func`:
     """
     def ret(*args, **kargs):
+        rtt = None
         if hasattr(args[0], "_sqlite_connection"):
             if args[0]._sqlite_connection == None:
-                func(*args, **kargs)
+                rtt = func(*args, **kargs)
             else:
                 raise od_exception_db_opened("The database is still opened")
         else:
             raise od_exception("self has no attribute _sqlite_connection")
+        return rtt
     return ret
 
 def in_transaction(func):
     """
-    Decorator makes method executing in transaction, if error occures then transaction will be rlled back
+    Decorator makes method executing in transaction, if error occures then transaction will be rolled back
     and exception will be passed up
     Arguments:
     - `func`:
@@ -145,11 +147,13 @@ def in_transaction(func):
     def ret(*args, **kargs):
         self = args[0]
         self.begin_transaction()
+        rtt = None
         try:
-            func(*args, **kargs)
+            rtt = func(*args, **kargs)
         except Exception as e:
             self.rollback()
             raise e
         else:
             self.commit()
+        return rtt
     return ret

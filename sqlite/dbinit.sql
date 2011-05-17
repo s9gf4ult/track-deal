@@ -17,7 +17,8 @@ type text not null,
 stock text,
 class text,
 name text not null,
-full_name text);
+full_name text,
+unique(type, name));
 
 CREATE TABLE points(
 id integer primary key not null,
@@ -117,11 +118,19 @@ name text,
 value ,
 unique(name));
 
+CREATE TRIGGER _just_one_global_data BEFORE INSERT ON global_data FOR EACH ROW BEGIN
+DELETE FROM global_data where name = new.name;
+END;
+
 CREATE TABLE database_attributes(
 id integer primary key not null,
 name text,
 value ,
 unique(name));
+        
+CREATE TRIGGER _just_one_database_attributes BEFORE INSERT ON database_attributes FOR EACH ROW BEGIN
+DELETE FROM database_attributes where name = new.name;
+END;
 
 CREATE TABLE hystory_steps(
 id integer primary key not null,
