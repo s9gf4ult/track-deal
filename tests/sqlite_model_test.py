@@ -160,7 +160,13 @@ class sqlite_model_test(unittest.TestCase):
         self.model.remove_money(mid)
         self.assertEqual(0, len(self.model.list_moneys().fetchall()))
 
+    def test_points(self, ):
+        """test point
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
         
+
         
 
         
