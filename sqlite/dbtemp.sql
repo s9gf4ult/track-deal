@@ -37,12 +37,12 @@
           (newline)
           (apply #'gentriggers tt))))            
 */
-CREATE TABLE deal_groups(
+CREATE TEMPORARY TABLE deal_groups(
 id integer primary key not null,
 direction integer not null,
 paper_id integer not null);
 
-CREATE TABLE deal_group_assign(
+CREATE TEMPORARY TABLE deal_group_assign(
 deal_id integer not null,
 group_id integer not null,
 foreign key (group_id) references deal_groups(id) on delete cascade,

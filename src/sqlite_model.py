@@ -67,6 +67,17 @@ class sqlite_model(common_model):
         self.connect(filename)
         self.dbtemp()
 
+    @raise_db_opened
+    def create_new(self, filename):
+        """Creates new empty database
+        Arguments:
+        - `filename`:
+        """
+        self.connect(filename)
+        self.dbinit()
+        self.dbtemp()
+
+
     @raise_db_closed
     def disconnect(self, ):
         """Disconnects from the database

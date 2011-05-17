@@ -4,7 +4,7 @@
 import gtk
 from math import *
 import traceback
-
+from exceptions import *
 
 
 def show_error(message, parent):
@@ -109,18 +109,13 @@ def raise_db_closed(func):
     - `func`:
     """
     def ret(*args, **kargs):
-        """
-        Arguments:
-        - `*args`:
-        - `**kargs`:
-        """
         if hasattr(args[0], "_sqlite_connection"):
             if args[0]._sqlite_connection != None:
                 func(*args, **kargs)
             else:
-                raise Exception("Database is not opened now")
+                raise od_exception_db_opened("Database is not opened now")
         else:
-            raise Exception("self has no attribute _sqlite_connection")
+            raise od_exception("self has no attribute _sqlite_connection")
     return ret
 
     
@@ -131,19 +126,13 @@ def raise_db_opened(func):
     - `func`:
     """
     def ret(*args, **kargs):
-        """
-        
-        Arguments:
-        - `*args`:
-        - `**kargs`:
-        """
         if hasattr(args[0], "_sqlite_connection"):
             if args[0]._sqlite_connection == None:
                 func(*args, **kargs)
             else:
-                raise Exception("Database is still opened")
+                raise od_exception_db_opened("The database is still opened")
         else:
-            raise Exception("self has no attribute _sqlite_connection")
+            raise od_exception("self has no attribute _sqlite_connection")
     return ret
 
 def in_transaction(func):
@@ -154,12 +143,6 @@ def in_transaction(func):
     - `func`:
     """
     def ret(*args, **kargs):
-        """
-        
-        Arguments:
-        - `*args`:
-        - `**kargs`:
-        """
         self = args[0]
         self.begin_transaction()
         try:
