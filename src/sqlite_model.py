@@ -323,9 +323,58 @@ class sqlite_model(common_model):
     @raise_db_closed
     @in_transaction
     @remover_decorator("moneys", {int : "id", basestring : "name"})
-    def remove_papers(self, name_or_id):
-        """removes one or more paper by name or id
+    def remove_money(self, name_or_id):
+        """Removes money by name or by id
         Arguments:
         - `name_or_id`:
         """
         pass
+
+    @raise_db_closed
+    def list_moneys(self, order_by = []):
+        """return list of moneys
+        """
+        q = "select * from moneys{0}".format((len(order_by) > 0 and " order by {0}".format(reduce_by_string(", ", order_by))  or ""))
+        return self._sqlite_connection.execute_select(q)
+    
+    @raise_db_closed
+    @in_transaction
+    def create_point(self, paper_id, money_id, point, step):
+        """Creates point explanation and return it's id
+        Arguments:
+        - `paper_id`:
+        - `money_id`:
+        - `point`:
+        - `step`:
+        """
+        return self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step})
+
+    @raise_db_closed
+    def list_points(self, money_id = None, order_by = []):
+        """Return list of points
+        Arguments:
+        - `money_id`:
+        - `order_by`:
+        """
+        q = "select * from points"
+        if money_id != None:
+            q += " where money_id = ?"
+        if len(order_by) > 0:
+            q += " order by {0}".format(reduce_by_string(", ", order_by))
+        if money_id != None:
+            return self._sqlite_connection.execute_select(q, [money_id])
+        else:
+            return self._sqlite_connection.execute_select(q)
+
+    @raise_db_closed
+    def get_point(self, id_or_paper_id, money_id = None):
+        """Returns point explanation by id or by paper_id and money_id
+        Arguments:
+        - `id_or_paper_id`:
+        - `money_id`:
+        """
+        if money_id != None:
+            ret = self._sqlite_connection.execute_select("select * from points where paper_id = ? and money_id = ?", [id_or_paper_id, money_id]).fetchall()
+        else:
+            ret = self._sqlite_connection.execute_select("select * from points where id = ?", [id_or_paper_id]).fetchall()
+        return (len(ret) > 0 and ret[0] or None)

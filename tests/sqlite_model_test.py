@@ -143,6 +143,22 @@ class sqlite_model_test(unittest.TestCase):
         self.model.create_candles(paid, cndls)
         self.assertEqual(101, len(self.model.list_candles(paid).fetchall()))
         self.assertIsInstance(self.model.list_candles(paid).fetchall()[0], dict)
+        self.model.remove_paper(paid)
+        self.assertEqual(0, len(self.model.list_candles(paid).fetchall()))
+
+    def test_moneys(self, ):
+        """tests money creation and deletion
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        mid = self.model.create_money("RU", "rubles")
+        self.assertEqual(1, len(self.model.list_moneys(["name"]).fetchall()))
+        self.model.remove_money("RU")
+        self.assertEqual(0, len(self.model.list_moneys().fetchall()))
+        mid = self.model.create_money("RU", "rubles")
+        self.assertEqual(1, len(self.model.list_moneys(["name"]).fetchall()))
+        self.model.remove_money(mid)
+        self.assertEqual(0, len(self.model.list_moneys().fetchall()))
 
         
         
