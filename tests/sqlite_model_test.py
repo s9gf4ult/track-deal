@@ -126,13 +126,23 @@ class sqlite_model_test(unittest.TestCase):
         self.assertIsInstance(self.model.get_paper("type", "name"), dict)
         self.model.remove_paper("type", "name")
         self.assertEqual(None, self.model.get_paper("type", "name"))
+        self.assertListEqual([], self.model.list_papers().fetchall())
         
-    # def test_candles(self, ):
-    #     """tests creation and deleting candles
-    #     """
-    #     self.model.dbinit()
-    #     self.model.dbtemp()
-    #     self.model.create_paper("stock", 
+    def test_candles(self, ):
+        """tests creation and deleting candles
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        paid = self.model.create_paper("stock", "name")
+        self.model.create_candles(paid, {"duration" : "1min", "open_datetime" : 100, "close_datetime" : 200, "open_value" : 1.2, "close_value" : 2.1, "min_value" : 1.1, "max_value" : 3, "value_type" : "price", "volume" : 200})
+        self.assertEqual(1, len(self.model.list_candles(paid).fetchall()))
+        cndls = []
+        for x in xrange(0, 100):
+            cc = {"duration" : "1min", "open_datetime" : x * 60, "close_datetime" : x*60 + 59, "open_value" : 10, "close_value" : 20, "min_value" : 5, "max_value" : 22, "volume" : 0, "value_type" : "price"}
+            cndls.append(cc)
+        self.model.create_candles(paid, cndls)
+        self.assertEqual(101, len(self.model.list_candles(paid).fetchall()))
+        self.assertIsInstance(self.model.list_candles(paid).fetchall()[0], dict)
 
         
         

@@ -187,8 +187,8 @@ class remover_decorator(object):
             for classes in self._class_field.keys():
                 if isinstance(farg[0][0], classes):
                     args[0]._sqlite_connection.executemany("delete from {0} where {1} = ?".format(self._table_name, self._class_field[classes]), farg)
-                    return rtt
-            raise od_exception_decorator("given value of class {0} there is no registered classes for delete operation".format(args[1].__class__))
+                    break
+            return rtt
         ret.__doc__ = method.__doc__
         return ret
         

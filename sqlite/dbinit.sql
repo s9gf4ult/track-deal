@@ -107,8 +107,9 @@ open_value float not null,
 close_value float not null,
 min_value float not null,
 max_value float not null,
+volume float,
 value_type text not null,
-foreign key (paper_id) references papers(id),
+foreign key (paper_id) references papers(id) on delete cascade,
 unique(paper_id, duration, value_type, open_datetime),
 unique(paper_id, duration, value_type, close_datetime));
 
