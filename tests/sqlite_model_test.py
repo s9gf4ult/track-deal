@@ -165,9 +165,34 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model.dbinit()
         self.model.dbtemp()
-        
+        mid = self.model.create_money("RU")
+        paid = self.model.create_paper("type", "name")
+        ppid = self.model.create_point(paid, mid, 1000, 1)
+        self.assertEqual(1000, self.model.get_point(paid, mid)["point"])
+        self.assertEqual(1, self.model.get_point(ppid)["step"])
+        self.assertRaises(Exception, self.model.create_point, paid, mid)
+        self.assertEqual(1, len(self.model.list_points(paid).fetchall()))
+        self.model.remove_point(ppid)
+        self.assertEqual(0, len(self.model.list_points().fetchall()))
+        ppid = self.model.create_point(paid, mid, 1000, 1)
+        self.model.remove_point(paid, mid)
+        self.assertEqual(0, len(self.model.list_points().fetchall()))
+        ppid = self.model.create_point(paid, mid, 1000, 1)
+        self.model.remove_paper(paid)
+        self.assertEqual(0, len(self.model.list_points().fetchall()))
 
-        
+    def test_account(self, ):
+        """tests add and delete account
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        mid = self.model.create_money("RU")
+        aid = self.model.create_account("ac1", mid, 100)
+        self.assertEqual(1, len(self.model.list_accounts(["name"]).fetchall()))
+        self.model.remove_account("ac1")
+        self.assertEqual(0, len(self.model.list_accounts().fetchall()))
+        self.model.create_account("ac2", mid, 200, "ruru")
+        self.assertEqual("ruru", self.model.list_accounts().fetchall()[0]["comments"])
 
         
 

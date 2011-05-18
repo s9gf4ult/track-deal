@@ -26,8 +26,8 @@ paper_id integer not null,
 money_id integer not null,
 point float not null,
 step float not null,
-foreign key (paper_id) references papers(id),
-foreign key (money_id) references moneys(id),
+foreign key (paper_id) references papers(id) on delete cascade,
+foreign key (money_id) references moneys(id) on delete cascade,
 unique(paper_id, money_id));
      
 CREATE TABLE positions(

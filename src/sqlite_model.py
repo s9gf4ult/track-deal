@@ -347,7 +347,7 @@ class sqlite_model(common_model):
         - `point`:
         - `step`:
         """
-        return self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step})
+        return self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step}).lastrowid
 
     @raise_db_closed
     def list_points(self, money_id = None, order_by = []):
@@ -378,3 +378,61 @@ class sqlite_model(common_model):
         else:
             ret = self._sqlite_connection.execute_select("select * from points where id = ?", [id_or_paper_id]).fetchall()
         return (len(ret) > 0 and ret[0] or None)
+
+    @raise_db_closed
+    @in_transaction
+    def remove_point(self, id_or_paper_id, money_id = None):
+        """Removes point of this paper / money or by id
+        Arguments:
+        - `id_or_paper_id`:
+        - `money_id`:
+        """
+        if money_id != None:
+            self._sqlite_connection.execute("delete from points where paper_id = ? and money_id = ?", [id_or_paper_id, money_id])
+        else:
+            self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
+
+    @raise_db_closed
+    @in_transaction
+    def create_account(self, name, money_id_or_name, money_count, comment = None):
+        """Creates a new account
+        Arguments:
+        - `name`:
+        - `money_id_or_name`:
+        - `money_count`:
+        - `comment`:
+        """
+        if isinstance(money_id_or_name, basestring):
+            mid = gethash(self.get_money(money_id_or_name), "id")
+            if mid == None:
+                raise od_exception("There is no such money {0}".format(money_id_or_name))
+        else:
+            mid = money_id_or_name
+        return self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count}).lastrowid
+
+    @raise_db_closed
+    def list_accounts(self, order_by = []):
+        """Return list of accounts
+        """
+        return self._sqlite_connection.execute_select("select * from accounts{0}".format(order_by_print(order_by)))
+
+    @raise_db_closed
+    @remover_decorator("accounts", {int : "id", basestring : "name"})
+    def remove_account(self, name_or_id):
+        """Removes account by name or by id
+        Arguments:
+        - `name_or_id`:
+        """
+        pass
+
+            
+    @raise_db_closed
+    @in_transaction
+    def create_deal(self, account_id, deal):
+        """creates one or more deal with attributes, return id of deal if creates one
+        Arguments:
+        - `account_id`:
+        - `deal`:
+        """
+        pass
+

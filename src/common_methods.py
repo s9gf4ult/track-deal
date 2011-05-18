@@ -193,3 +193,12 @@ class remover_decorator(object):
         return ret
         
 
+def order_by_print(order_list = []):
+    """generates string with `order by` definition
+    Arguments:
+    - `order_list`:
+    """
+    if len(order_list) > 0:
+        return " order by {0}".format(reduce_by_string(", ", order_list))
+    else:
+        return ""
