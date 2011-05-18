@@ -429,13 +429,44 @@ class sqlite_model(common_model):
     @raise_db_closed
     @in_transaction
     def create_deal(self, account_id, deal):
-        """creates one or more deal with attributes, return id of deal if creates one
+        """creates one or more deal with attributes, return id of last created
         Arguments:
         - `account_id`:
         - `deal`: list of or one hash table with deal
         """
+        did = None
         for dd in (isinstance(deal, dict) and [deal] or deal):
             uat = gethash(dd, "user_attributes")
             if uat == None:
                 uat = {}
+            sat = gethash(dd, "stored_attributes")
+            if sat == None:
+                sat = {}
+            remhash(dd, "user_attributes")
+            remhash(dd, "stored_attributes")
+            did = self._sqlite_connection.insert("deals", dd).lastrowid
+            if len(uat) > 0:
+                uk = uat.keys()
+                uv = map(lambda k: uat[k], uk)
+                self._sqlite_connection.executemany("insert into user_deal_attributes(deal_id, name, value) values (?, ?, ?)", map(lambda name, value: (did, name, value), uk, uv)) 
+            if len(sat) > 0:
+                sk = sat.keys()
+                sv = map(lambda k: sat[k], sk)
+                self._sqlite_connection.executemany("insert into stored_deal_attributes(deal_id, type, value) values (?, ?, ?)", map(lambda typ, val: (did, typ, val), sk, sv))
+        return did
+
+    @raise_db_closed
+    def list_deals(self, account_id, paper_id = None, order_by = []):
+        """Return cursor iterating on deals
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `order_by`:
+        """
+        if paper_id != None:
+            return self._sqlite_connection.execute_select("select * from deals where account_id = ? and paper_id = ?{0}".format(order_by_print(order_by)), [account_id, paper_id])
+        else:
+            return self._sqlite_connection.execute_select("select * from deals where account_id = ?{0}".format(order_by_print(order_by)), [account_id])
+                                                                                                                       
+
                 

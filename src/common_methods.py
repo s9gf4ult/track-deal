@@ -202,3 +202,12 @@ def order_by_print(order_list = []):
         return " order by {0}".format(reduce_by_string(", ", order_list))
     else:
         return ""
+
+def remhash(hasht, key):
+    """removes key from hashtable if exits
+    Arguments:
+    - `hasht`:
+    - `key`:
+    """
+    if hasht.has_key(key):
+        del hasht[key]

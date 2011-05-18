@@ -78,12 +78,12 @@ class sqlite_model_test(unittest.TestCase):
         self.model.add_global_data({"p1" : 300})
         self.assertEqual(300, self.model.get_global_data("p1"))
         self.assertEqual(200, self.model.get_global_data("p2"))
-        self.assertSetEqual(set(["p1", "p2"]), set(self.model.list_global_data()))
+        self.assertEqual(set(["p1", "p2"]), set(self.model.list_global_data()))
         self.model.remove_global_data("p1")
         self.assertEqual(None, self.model.get_global_data("p1"))
         self.model.remove_global_data(["p2"])
         self.assertEqual(None, self.model.get_global_data("p2"))
-        self.assertSetEqual(set([]), set(self.model.list_global_data()))
+        self.assertEqual(set([]), set(self.model.list_global_data()))
 
     def test_database_attributes(self, ):
         """tests actions on global parameters
@@ -95,12 +95,12 @@ class sqlite_model_test(unittest.TestCase):
         self.model.add_database_attributes({"p1" : 300})
         self.assertEqual(300, self.model.get_database_attribute("p1"))
         self.assertEqual(200, self.model.get_database_attribute("p2"))
-        self.assertSetEqual(set(["p1", "p2"]), set(self.model.list_database_attributes()))
+        self.assertEqual(set(["p1", "p2"]), set(self.model.list_database_attributes()))
         self.model.remove_database_attribute("p1")
         self.assertEqual(None, self.model.get_database_attribute("p1"))
         self.model.remove_database_attribute(["p2"])
         self.assertEqual(None, self.model.get_database_attribute("p2"))
-        self.assertSetEqual(set([]), set(self.model.list_database_attributes()))
+        self.assertEqual(set([]), set(self.model.list_database_attributes()))
 
     def test_papers(self, ):
         """tests method for make and get papers
@@ -111,22 +111,22 @@ class sqlite_model_test(unittest.TestCase):
         pp = self.model.get_paper(paid)
         pid = pp["id"]
         self.assertTrue(pp.has_key("id"))
-        self.assertIsInstance(pp["id"], int)
+        self.assertTrue(isinstance(pp["id"], int))
         for k in pp.keys():
             if k == "id":
                 del pp[k]
             if pp.has_key(k) and pp[k] == None:
                 del pp[k]
-        self.assertDictEqual({"type" : "stock", "name" : "something", "class" : "paperclass"}, pp)
+        self.assertEqual({"type" : "stock", "name" : "something", "class" : "paperclass"}, pp)
         self.assertEqual(None, self.model.get_paper("stock", "adsfa"))
         self.assertEqual(pid, self.model.get_paper("stock", "something")["id"])
         self.model.remove_paper(pid)
         self.assertEqual(None, self.model.get_paper("stock", "something"))
         self.model.create_paper("type", "name")
-        self.assertIsInstance(self.model.get_paper("type", "name"), dict)
+        self.assertTrue(isinstance(self.model.get_paper("type", "name"), dict))
         self.model.remove_paper("type", "name")
         self.assertEqual(None, self.model.get_paper("type", "name"))
-        self.assertListEqual([], self.model.list_papers().fetchall())
+        self.assertEqual([], self.model.list_papers().fetchall())
         
     def test_candles(self, ):
         """tests creation and deleting candles
@@ -142,7 +142,7 @@ class sqlite_model_test(unittest.TestCase):
             cndls.append(cc)
         self.model.create_candles(paid, cndls)
         self.assertEqual(101, len(self.model.list_candles(paid).fetchall()))
-        self.assertIsInstance(self.model.list_candles(paid).fetchall()[0], dict)
+        self.assertTrue(isinstance(self.model.list_candles(paid).fetchall()[0], dict))
         self.model.remove_paper(paid)
         self.assertEqual(0, len(self.model.list_candles(paid).fetchall()))
 
