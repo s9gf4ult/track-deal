@@ -432,7 +432,10 @@ class sqlite_model(common_model):
         """creates one or more deal with attributes, return id of deal if creates one
         Arguments:
         - `account_id`:
-        - `deal`:
+        - `deal`: list of or one hash table with deal
         """
-        pass
-
+        for dd in (isinstance(deal, dict) and [deal] or deal):
+            uat = gethash(dd, "user_attributes")
+            if uat == None:
+                uat = {}
+                
