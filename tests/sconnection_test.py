@@ -5,6 +5,7 @@
 import random
 import unittest
 import sconnection
+from common_methods import *
 
 
 class sconnection_test(unittest.TestCase):
@@ -74,6 +75,25 @@ class sconnection_test(unittest.TestCase):
         self.assertEqual(100, self.conn.execute("select count(*) from aa").fetchone()[0])
         self.conn.commit()
         self.assertEqual(100, self.conn.execute("select count(*) from aa").fetchone()[0])
+
+    def test_execute_select_cond(self, ):
+        """
+        """
+        self.conn.executemany("insert into aa(id, val) values (?, ?)", map(lambda a, b: (a, b), xrange(100, 200), xrange(200, 300)))
+        x = self.conn.execute_select_cond("aa")
+        self.assertEqual(100, len(x.fetchall()))
+        x = self.conn.execute_select_cond("aa", wheres = [(">=", ["id"], 150)], order_by = ["val"])
+        self.assertEqual(50, len(x.fetchall()))
+        a = x.fetchall()[0]["id"]
+        self.assertEqual(150, a)
+        x = self.conn.execute_select_cond("aa", [("id", "ident"), ("val * 2", "value")], [("<", ["id"], 120), (">", ["val"], 200)], ["id desc"])
+        a = gethash(x.fetchall()[0], "ident")
+        b = gethash(x.fetchall()[0], "value")
+        self.assertEqual(119, a)
+        self.assertNotEqual(None, b)
+
+
+
 
 
 if __name__ == '__main__':

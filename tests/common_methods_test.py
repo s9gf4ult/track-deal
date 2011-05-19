@@ -18,5 +18,10 @@ class cm_test(unittest.TestCase):
         (string, args) = format_where_part([(">=", ["some_field"], 10), ("between", ["value"], 100, 200)])
         self.assertTrue(len(string) > 0)
         self.assertEqual([10, 100, 200], args)
-        print("Where part of query is {0}".format(string))
+        (a, b) = format_where_part([("<=", ["a"], ["b"]), ("=", ["soso"], ["ruru"])], "or")
+        self.assertEqual([], b)
+        self.assertEqual("a <= b or soso = ruru", a)
         
+        
+if __name__ == '__main__':
+    unittest.main()

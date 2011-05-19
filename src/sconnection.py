@@ -182,4 +182,20 @@ class sconnection(sqlite3.Connection):
         """
         self.execute("begin transaction")
 
-        
+    def execute_select_cond(self, tablename, selects = ["*"], wheres = [], order_by = []):
+        """generates query for execute_select pass it to
+        Arguments:
+        - `tablename`: string with table name
+        - `selects`: [* | field name | expression | (field name | expression, alias)]
+        - `wheres`: [(= | < | > | ... | 'between', exp1, exp2, exp3 ...)]
+        - `order_by`: [field name]
+        """
+        q = u"select {0} from {1}".format(format_select_part(selects), tablename)
+        (whpart, adarg) = format_where_part(wheres)
+        if not is_null_or_empty(whpart):
+            q += " where {0}".format(whpart)
+        q += order_by_print(order_by)
+        if len(adarg) > 0:
+            return self.execute_select(q, adarg)
+        else:
+            return self.execute_select(q)

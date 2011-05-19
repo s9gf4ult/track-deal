@@ -4,6 +4,7 @@ import sqlite3
 import random
 import os
 from common_methods import *
+from datetime import *
 
 class sqlite_model_test(unittest.TestCase):
     """
@@ -194,7 +195,24 @@ class sqlite_model_test(unittest.TestCase):
         self.model.create_account("ac2", mid, 200, "ruru")
         self.assertEqual("ruru", self.model.list_accounts().fetchall()[0]["comments"])
 
-        
+    def test_deals(self, ):
+        """test deals
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        mid = self.model.create_money("RU")
+        aid = self.model.create_account("name", mid, 100)
+        paid = self.model.create_paper("stock", "stock1", "fjfj")
+        did = self.model.create_deal(aid, {"paper_id" : paid, "count" : 10, "direction" : -1, "points" : 200, "commission" : 0.1, "datetime" : datetime(2010, 10, 10)})
+        self.assertEqual(1, len(self.model.list_deals(aid).fetchall()))
+        self.model.remove_deal(did)
+        self.assertEqual(0, len(self.model.list_deals().fetchall()))
+        did = self.model.create_deal(aid, {"paper_id" : paid, "count" : 5, "direction" : 1, "points" : 100, "commission" : 2.3, "datetime" : datetime(2010, 10, 11), "user_attributes" : {"at1" : 10, "at2" : "thecap"}, "stored_attributes" : {"at1" : 20, "at2" : 2.3}})
+        ua = self.model.get_user_deal_attributes(did)
+        sa = self.model.get_stored_deal_attributes(did)
+        self.assertEqual({"at1" : 10, "at2" : "thecap"}, ua)
+        self.assertEqual({"at1" : 20, "at2" : 2.3}, sa)
+
 
 if __name__ == '__main__':
     unittest.main()

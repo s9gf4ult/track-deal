@@ -7,6 +7,7 @@ from common_view import common_view
 from sconnection import sconnection
 from common_methods import *
 from exceptions import *
+from copy import copy
 
 class sqlite_model(common_model):
     """
@@ -436,6 +437,7 @@ class sqlite_model(common_model):
         """
         did = None
         for dd in (isinstance(deal, dict) and [deal] or deal):
+            dd = copy(dd)
             uat = gethash(dd, "user_attributes")
             if uat == None:
                 uat = {}
@@ -444,6 +446,7 @@ class sqlite_model(common_model):
                 sat = {}
             remhash(dd, "user_attributes")
             remhash(dd, "stored_attributes")
+            dd["account_id"] = account_id
             did = self._sqlite_connection.insert("deals", dd).lastrowid
             if len(uat) > 0:
                 uk = uat.keys()
@@ -456,17 +459,50 @@ class sqlite_model(common_model):
         return did
 
     @raise_db_closed
-    def list_deals(self, account_id, paper_id = None, order_by = []):
+    def list_deals(self, account_id = None, paper_id = None, order_by = []):
         """Return cursor iterating on deals
         Arguments:
         - `account_id`:
         - `paper_id`:
         - `order_by`:
         """
+        conds = []
+        if account_id != None:
+            conds.append(("=", ["account_id"], account_id))
         if paper_id != None:
-            return self._sqlite_connection.execute_select("select * from deals where account_id = ? and paper_id = ?{0}".format(order_by_print(order_by)), [account_id, paper_id])
-        else:
-            return self._sqlite_connection.execute_select("select * from deals where account_id = ?{0}".format(order_by_print(order_by)), [account_id])
-                                                                                                                       
+            conds.append(("=", ["paper_id"], paper_id))
+        return self._sqlite_connection.execute_select_cond("deals", wheres = conds, order_by = order_by)
+        
+    @raise_db_closed
+    @in_transaction
+    @remover_decorator("deals", {int : "id"})
+    def remove_deal(self, deal_id):
+        """remove one or more deal by id
+        Arguments:
+        - `deal_id`:
+        """
+        pass
 
-                
+    @raise_db_closed
+    def get_user_deal_attributes(self, deal_id):
+        """return hash of attributes
+        Arguments:
+        - `deal_id`:
+        """
+        ret = {}
+        for at in self._sqlite_connection.execute_select_cond("user_deal_attributes", wheres = [("=", ["deal_id"], deal_id)]):
+            ret[at["name"]] = at["value"]
+        return ret
+
+    @raise_db_closed
+    def get_stored_deal_attributes(self, deal_id):
+        """return hash of stored attributes
+        
+        Arguments:
+        - `deal_id`:
+        """
+        ret = {}
+        for at in self._sqlite_connection.execute_select_cond("stored_deal_attributes", wheres = [("=", ["deal_id"], deal_id)]):
+            ret[at["type"]] = at["value"]
+        return ret
+

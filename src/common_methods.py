@@ -39,8 +39,11 @@ def is_null_or_empty(obj):
     return obj == None or len(obj) == 0
 
 def reduce_by_string(reductor, seq):
-    return reduce(lambda a, b: u'{0}{1}{2}'.format(a, reductor, b),
-                  seq)
+    if len(seq) > 0:
+        return reduce(lambda a, b: u'{0}{1}{2}'.format(a, reductor, b),
+                      seq)
+    else:
+        return ""
 
 def seconds_to_time_distance(seconds):
     ret = {}
@@ -211,3 +214,58 @@ def remhash(hasht, key):
     """
     if hasht.has_key(key):
         del hasht[key]
+
+def format_where_part(wherepart, reductor = "and"):
+    """return tuple of text for query and arguments for query
+    Arguments:
+    - `wherepart`: [(= | < | > | ... | 'between', [field_name], exp2, exp3 ...)]
+    - `reductor`: `and` or `or` word for condition
+    """
+    exprlist = []
+    arglist = []
+    def formatarg(arg):
+        if isinstance(arg, (tuple, list)):
+            return arg[0]
+        else:
+            arglist.append(arg)
+            return "?"
+        
+    def mkel():
+        exprlist.append("{0} {1} {2}".format(formatarg(cond[1]), cond[0], formatarg(cond[2])))
+        
+    for cond in wherepart:
+        assert(isinstance(cond, tuple))
+        if cond[0] == 'between':
+            exprlist.append("{0} between {1} and {2}".format(formatarg(cond[1]), formatarg(cond[2]), formatarg(cond[3])))
+        elif cond[0] == "=" or cond[0] == "==":
+            if isinstance(cond[1], (list, tuple)) and cond[2] == None:
+                exprlist.append("{0} is null".format(cond[1]))
+            elif isinstance(cond[2], (list, tuple)) and cond[1] == None:
+                exprlist.append("{0} is null".format(cond[2]))
+            else:
+                mkel()
+        elif cond[0] == "<>" or cond[0] == "!=":
+            if isinstance(cond[1], (list, tuple)) and cond[2] == None:
+                exprlist.append("{0} is not null".format(cond[1]))
+            elif isinstance(cond[2], (list, tuple)) and cond[1] == None:
+                exprlist.append("{0} is not null".format(cond[2]))
+            else:
+                mkel()
+        else:
+            mkel()
+    return (reduce_by_string(" {0} ".format(reductor), exprlist), arglist)
+
+def format_select_part(select_part):
+    """return string with select part
+    
+    Arguments:
+    - `select_part`: [* | field name | expression | (field name | expression, alias)]
+    """
+    rlist = []
+    for sp in select_part:
+        if isinstance(sp, basestring):
+            rlist.append(sp)
+        else:
+            rlist.append("{0} as {1}".format(sp[0], sp[1]))
+    return reduce_by_string(", ", rlist)
+            
