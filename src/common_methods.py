@@ -239,16 +239,16 @@ def format_where_part(wherepart, reductor = "and"):
             exprlist.append("{0} between {1} and {2}".format(formatarg(cond[1]), formatarg(cond[2]), formatarg(cond[3])))
         elif cond[0] == "=" or cond[0] == "==":
             if isinstance(cond[1], (list, tuple)) and cond[2] == None:
-                exprlist.append("{0} is null".format(cond[1]))
+                exprlist.append("{0} is null".format(cond[1][0]))
             elif isinstance(cond[2], (list, tuple)) and cond[1] == None:
-                exprlist.append("{0} is null".format(cond[2]))
+                exprlist.append("{0} is null".format(cond[2][0]))
             else:
                 mkel()
         elif cond[0] == "<>" or cond[0] == "!=":
             if isinstance(cond[1], (list, tuple)) and cond[2] == None:
-                exprlist.append("{0} is not null".format(cond[1]))
+                exprlist.append("{0} is not null".format(cond[1][0]))
             elif isinstance(cond[2], (list, tuple)) and cond[1] == None:
-                exprlist.append("{0} is not null".format(cond[2]))
+                exprlist.append("{0} is not null".format(cond[2][0]))
             else:
                 mkel()
         else:

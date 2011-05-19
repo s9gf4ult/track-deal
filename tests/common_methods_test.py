@@ -21,6 +21,9 @@ class cm_test(unittest.TestCase):
         (a, b) = format_where_part([("<=", ["a"], ["b"]), ("=", ["soso"], ["ruru"])], "or")
         self.assertEqual([], b)
         self.assertEqual("a <= b or soso = ruru", a)
+        (x, y) = format_where_part([("=", ["fof"], None), ("<>", ["fufu"], None)])
+        self.assertEqual("fof is null and fufu is not null", x)
+        self.assertEqual([], y)
         
         
 if __name__ == '__main__':
