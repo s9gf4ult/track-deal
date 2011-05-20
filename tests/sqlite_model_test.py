@@ -234,7 +234,27 @@ class sqlite_model_test(unittest.TestCase):
         gid1 = self.model.create_group(di1)
         gid2 = self.model.create_group(di2)
         pid = self.model.create_position(gid1, gid2)
-        self.assertEqual(1, len(self.list_positions(aid).fetchall()))
+        self.assertEqual(1, len(self.model.list_positions(aid).fetchall()))
+        for (field, value) in [("count", 9),
+                               ("direction", -1),
+                               ("datetime", 99)]:
+            di1 = self.model.create_deal(aid, {"paper_id" : paid,
+                                               "count" : 10,
+                                               "direction" : -1,
+                                               "points" : 100,
+                                               "datetime" : 100})
+            x = {"paper_id" : paid,
+                 "count" : 10,
+                 "direction" : 1,
+                 "points" : 110,
+                 "datetime" : 110}
+            x[field] = value
+            di2 = self.model.create_deal(aid, x)
+            gid1 = self.model.create_group([di1])
+            gid2 = self.model.create_group(di2)
+            self.assertRaises(Exception, self.model.create_position, gid1, gid2)
+            
+        
 
 
 

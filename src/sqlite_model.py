@@ -519,8 +519,8 @@ class sqlite_model(common_model):
 
         odirs = map(lambda a: self._sqlite_connection.execute("select distinct d.direction from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ?", [a]).fetchall(), [open_group_id, close_group_id])
         assert(len(odirs[0]) == len(odirs[1]) == 1)
-        assert(odirs[0][0] == -(odirs[1][0]) <> 0)
-        cnts = map(lambda a: self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]), [open_group_id, close_group_id])
+        assert(odirs[0][0][0] == -(odirs[1][0][0]) <> 0)
+        cnts = map(lambda a: self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]).fetchone()[0], [open_group_id, close_group_id])
         assert(cnts[0] == cnts[1] > 0)
         dds = self._sqlite_connection.execute("select max(d.datetime), min(dd.datetime) from deals d inner join deal_group_assign dg on dg.deal_id = d.id, deals dd inner join deal_group_assign ddg on ddg.deal_id = dd.id where dg.group_id = ? and ddg.group_id = ?", [open_group_id, close_group_id]).fetchone()
         assert(dds[0] <= dds[1])
@@ -533,15 +533,15 @@ class sqlite_model(common_model):
         pid = self._sqlite_connection.insert("positions", {"account_id" : acc_id,
                                                            "paper_id" : pap_id,
                                                            "count" : cnts[0],
-                                                           "direction" : odirs[0],
+                                                           "direction" : odirs[0][0][0],
                                                            "commission" : comm,
                                                            "open_datetime" : odate,
                                                            "close_datetime" : cdate,
                                                            "open_points" : opoints,
                                                            "close_points" : cpoints,
                                                            "manual_made" : manual_made,
-                                                           "do_not_delete" : do_not_delete})
-        self._sqlite_connection.execute("update deals set position_id = ? where id in (select dg.deal_id from deal_group_assign dg where dg.group_id = ? or dg.group_id = ?)", [open_group_id, close_group_id])
+                                                           "do_not_delete" : do_not_delete}).lastrowid
+        self._sqlite_connection.execute("update deals set position_id = ? where id in (select dg.deal_id from deal_group_assign dg where dg.group_id = ? or dg.group_id = ?)", [pid, open_group_id, close_group_id])
         uk = user_attributes.keys()
         if len(uk) > 0:
             self._sqlite_connection.insert("user_position_attributes", map(lambda k: {"name" : k, "value" : user_attributes[k], "position_id" : pid}, uk))
