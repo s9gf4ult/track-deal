@@ -549,6 +549,61 @@ class sqlite_model(common_model):
         if len(sk) > 0:
             self._sqlite_connection.insert("stored_position_attributes", map(lambda k: {"type" : k, "value" : stored_attributes[k], "position_id" : pid}, sk))
         return pid
+
+    @raise_db_closed
+    def list_positions(self, account_id = None, paper_id = None, order_by = []):
+        """return cursor for getting position descriptions
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `order_by`:
+        """
+        conds = []
+        if account_id <> None:
+            conds.append(("=", ["account_id"], account_id))
+        if paper_id <> None:
+            conds.append(("=", ["paper_id"], paper_id))
+        return self._sqlite_connection.execute_select_cond("positions", wheres = conds, order_by = order_by)
+                          
     
-                                           
-        
+    @raise_db_closed
+    def get_position_user_attributes(self, position_id, order_by = []):
+        """return cursor for user position attributes
+        Arguments:
+        - `position_id`:
+        """
+        return self._sqlite_connection.execute_select_cond("user_position_attributes", wheres = [("=", ["position_id"], position_id)], order_by = order_by)
+                                                                                                 
+    @raise_db_closed
+    def get_stored_position_attributes(self, position_id, order_by = []):
+        """return cursor for stored position attributes
+        Arguments:
+        - `position_id`:
+        - `order_by`:
+        """
+        return self._sqlite_connection.execute_select_cond("stored_position_attributes", wheres = [("=", ["position_id"], position_id)], order_by = order_by)
+
+    @raise_db_closed
+    def create_group(self, deal_id):
+        """return id the group maked from deals
+        Arguments:
+        - `deal_id`: int or list of ints
+        """
+        paper_id = None
+        direction = None
+        gid = None
+        for did in (isinstance(deal_id, int) and [deal_id] or deal_id):
+            deal = self._sqlite_connection.execute_select("select * from deals where id = ?", [did]).fetchall()[0]
+            if paper_id == direction == gid == None:
+                paper_id = deal["paper_id"]
+                direction = deal["direction"]
+                gid = self._sqlite_connection.insert("deal_groups", {"paper_id" : paper_id,
+                                                                    "direction" : direction}).lastrowid
+            else:
+                assert(paper_id == deal["paper_id"])
+                assert(direction == deal["direction"])
+            self._sqlite_connection.insert("deal_group_assign", {"deal_id" : did, "group_id" : gid})
+        return gid
+            
+                                                                                                    
+

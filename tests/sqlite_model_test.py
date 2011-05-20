@@ -213,6 +213,30 @@ class sqlite_model_test(unittest.TestCase):
         self.assertEqual({"at1" : 10, "at2" : "thecap"}, ua)
         self.assertEqual({"at1" : 20, "at2" : 2.3}, sa)
 
+    def test_positions(self, ):
+        """
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        mid = self.model.create_money("RU")
+        aid = self.model.create_account("ac1", mid, 1000)
+        paid = self.model.create_paper("stock", "stock")
+        di1 = self.model.create_deal(aid, {"paper_id" : paid,
+                                           "count" : 10,
+                                           "direction" : -1,
+                                           "points" : 100,
+                                           "datetime" : 100})
+        di2 = self.model.create_deal(aid, {"paper_id" :paid,
+                                           "count" : 10,
+                                           "direction" : 1,
+                                           "points" : 110,
+                                           "datetime" : 150})
+        gid1 = self.model.create_group(di1)
+        gid2 = self.model.create_group(di2)
+        pid = self.model.create_position(gid1, gid2)
+        self.assertEqual(1, len(self.list_positions(aid).fetchall()))
+
+
 
 if __name__ == '__main__':
     unittest.main()
