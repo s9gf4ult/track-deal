@@ -43,8 +43,8 @@ open_points float not null,
 close_points points not null,
 manual_made integer,
 do_not_delete integer,
-foreign key (account_id) references accounts(id),
-foreign key (paper_id) references papers(id));
+foreign key (account_id) references accounts(id) on delete cascade,
+foreign key (paper_id) references papers(id) on delete cascade);
               
 CREATE TABLE deals(
 id integer primary key not null,
@@ -59,10 +59,10 @@ direction integer not null,
 points float not null,
 commission float not null default 0,
 datetime datetime not null,
-foreign key (parent_deal_id) references deals(id),
-foreign key (account_id) references accounts(id),
-foreign key (position_id) references positions(id),
-foreign key (paper_id) references papers(id),
+foreign key (parent_deal_id) references deals(id) on delete cascade,
+foreign key (account_id) references accounts(id) on delete cascade,
+foreign key (position_id) references positions(id) on delete set null,
+foreign key (paper_id) references papers(id) on delete cascade,
 unique(sha1, account_id));
 
 CREATE TABLE user_deal_attributes(
@@ -70,7 +70,7 @@ id integer primary key not null,
 deal_id integer not null,
 name text not null,
 value,
-foreign key (deal_id) references deals(id),
+foreign key (deal_id) references deals(id) on delete cascade,
 unique(deal_id, name));
 
 CREATE TABLE stored_deal_attributes(
@@ -78,7 +78,7 @@ id integer primary key not null,
 deal_id integer not null,
 type text not null,
 value,
-foreign key (deal_id) references deals(id),
+foreign key (deal_id) references deals(id) on delete cascade,
 unique(deal_id, type));
 
 CREATE TABLE user_position_attributes(
@@ -86,7 +86,7 @@ id integer primary key not null,
 position_id integer not null,
 name text not null,
 value,
-foreign key (position_id) references positions(id),
+foreign key (position_id) references positions(id) on delete cascade,
 unique(position_id, name));
 
 CREATE TABLE stored_position_attributes(
@@ -94,7 +94,7 @@ id integer primary key not null,
 position_id integer not null,
 type text not null,
 value,
-foreign key (position_id) references positions(id),
+foreign key (position_id) references positions(id) on delete cascade,
 unique(position_id, type));
 
 CREATE TABLE candles(
@@ -142,13 +142,13 @@ CREATE TABLE undo_queries(
 id integer primary key not null,
 step_id integer,
 query text not null,
-foreign key (step_id) references hystory_steps(id));
+foreign key (step_id) references hystory_steps(id) on delete cascade);
 
 CREATE TABLE redo_queries(
 id integer primary key not null,
 step_id integer,
 query text not null,
-foreign key (step_id) references hystory_steps(id));
+foreign key (step_id) references hystory_steps(id) on delete cascade);
 
 CREATE TABLE current_hystory_position(
 step_id integer not null,
@@ -162,7 +162,7 @@ CREATE TABLE filter_redelts(
 id integer primary key not null,
 parent_redelt integer not null,
 value text not null,
-foreign key (parent_redelt) references filter_redelts(id));
+foreign key (parent_redelt) references filter_redelts(id) on delete cascade);
 
 CREATE TABLE filters(
 id integer primary key not null,
@@ -170,7 +170,7 @@ root_redelt_id integer not null,
 query_type text not null,
 from_part text not null,
 comment text,
-foreign key (root_redelt_id) references filter_redelts(id),
+foreign key (root_redelt_id) references filter_redelts(id) on delete set null,
 unique(root_redelt_id));
 
 CREATE TABLE filter_conditions(
@@ -180,4 +180,4 @@ is_formula integer,
 left_value text,
 right_value text,
 binary_comparator text,
-foreign key (redelt_id) references filter_redelts(id));
+foreign key (redelt_id) references filter_redelts(id) on delete cascade);

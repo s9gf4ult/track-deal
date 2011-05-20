@@ -47,6 +47,11 @@ deal_id integer not null,
 group_id integer not null,
 foreign key (group_id) references deal_groups(id) on delete cascade,
 unique(deal_id));
+
+CREATE TEMPORARY TRIGGER _just_one_deal_group_assign BEFORE INSERT ON deal_group_assign FOR EACH ROW
+BEGIN
+delete from deal_group_assign where deal_id = new.deal_id;
+END;
         
 CREATE TEMPORARY TABLE deals_view(
 id integer primary key not null,
