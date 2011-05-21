@@ -4,6 +4,8 @@
 
 import sqlite3
 from common_methods import *
+import datetime
+import time
 
 class scon_cursor(object):
     """
@@ -110,7 +112,15 @@ class sconnection(sqlite3.Connection):
         Arguments:
         - `connect_string`:
         """
-        super(sconnection, self).__init__(connect_string)
+        sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
+        sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
+        sqlite3.register_adapter(datetime.date, lambda a: time.mktime(a.timetuple()))
+        sqlite3.register_adapter(datetime.time, lambda a: a.hour * 3600 + a.minute * 60 + a.second)
+        sqlite3.register_converter('datetime', lambda a: datetime.datetime.fromtimestamp(float(a)))
+        sqlite3.register_converter("date", lambda a: datetime.date.fromtimestamp(float(a)))
+        sqlite3.register_converter("time", seconds_to_time)
+
+        super(sconnection, self).__init__(connect_string, detect_types = sqlite3.PARSE_DECLTYPES)
         self.execute("pragma foreign_keys=on")
         
 

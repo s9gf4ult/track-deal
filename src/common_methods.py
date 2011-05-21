@@ -5,6 +5,7 @@ import gtk
 from math import *
 import traceback
 from exceptions import *
+import datetime
 
 
 def show_error(message, parent):
@@ -321,5 +322,24 @@ class makes_insafe(object):
         ret.__doc__ = func.__doc__
         return ret
 
+def add_hash(h1, h2):
+    """adds and replaces keys and vals of h2 to h1
+    Arguments:
+    - `h1`:
+    - `h2`:
+    """
+    for k in h2.keys():
+        h1[k] = h2[k]
 
-        
+def seconds_to_time(seconds):
+    """turn seconds to time
+    Arguments:
+    - `seconds`:
+    """
+    h = trunc(seconds / 3600)
+    seconds = seconds % 3600
+    m = trunc(seconds / 60)
+    seconds = seconds % 60
+    s = trunc(seconds)
+    ms = seconds - s
+    return datetime.time(h, m, s, ms)

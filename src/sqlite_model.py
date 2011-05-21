@@ -631,9 +631,78 @@ class sqlite_model(common_model):
         - `paper_id`:
         - `deal_id`:
         """
-        pass
+        if deal_id == None:
+            cur = self._sqlite_connection.execute_select("select d.* from deals d where d.account_id = ? and d.paper_id = ?  and not exists(select dd.* from deals dd where dd.parent_deal_id = d.id) order by d.datetime", [account_id, paper_id])
+            (mc, ) = self._sqlite_connection.execute("select a.money_count from accounts a where a.id = ?", [account_id]).fetchone()
+            self._calculate_deals_with_initial(cur, mc, 0)
+        else:
+            cur = self._sqlite_connection.execute_select("select d.* from deals d, deals dd where dd.id = ? and d.datetime >= dd.datetime and d.account_id = ? and d.paper_id = ? and not exists(select ddd.* from deals ddd where ddd.parent_deal_id = d.id) order by d.datetime", [deal_id, account_id, paper_id])
+            (mc, pbl) = self._sqlite_connection.execute("select dw.net_after, dw.paper_ballance_after from deals_view dw inner join deals d on dw.deal_id = d.id where d.id = ?", [deal_id]).fetchone() or (None, None)
+            if mc == None:
+                return self.calculate_deals(account_id, paper_id)
+            self._calculate_deals_with_initial(cur, mc, pbl)
+                                     
+    def _calculate_deals_with_initial(self, cursor, money, paper_ballance):
+        """calculates deals given in cursor
+        Arguments:
+        - `cursor`:
+        - `money`:
+        - `paper_ballance`:
+        """
+        def addition(h, m, p):
+            h["datetime_formated"] = h["datetime"].__str__()
+            h["date"] = h["datetime"].date()
+            h["date_formated"] = h["date"].__str__()
+            h["time"] = h["datetime"].time()
+            h["time_formated"] = h["time"].__str__()
+            h["day_of_week"] = h["datetime"].weekday()
+            h["day_of_week_formated"] = h["datetime"].strftime("%a")
+            h["month"] = h["datetime"].month
+            h["month_formated"] = h["datetime"].strftime("%b")
+            h["year"] = h["datetime"].year
+            h["price"] = h["point"] * h["points"]
+            h["price_formated"] = h["price"] + h["money_name"]
+            h["volume"] = h["price"] * h["count"]
+            h["volume_formated"] = h["volume"] + h["money_name"]
+            h["direction_formated"] = (h["direction"] >= 0 and "S" or "L")
+            h["net_before"] = m
+            h["net_after"] = m + (h["volume"] * h["direction"] / abs(h["direction"]))
+            h["paper_ballance_before"] = p
+            h["paper_ballance_after"] = p - (h["count"] * h["direction"] / abs(h["direction"]))
+            (h["user_attributes_formated"], ) = self._sqlite_connection.execute("select string_reduce(argument_value(a.name, a.value)) from user_deal_attributes where deal_id = ? group by deal_id", [h["deal_id"]]).fetchone()
+            
+        first = True
+        for dd in cursor:
+            if first:
+                common = self._sqlite_connection.execute_select("select p.id as paper_id, p.type as paper_type, p.class as paper_class, p.name as paper_name, m.id as money_id, m.name as money_name from accounts a inner join deals d on d.account_id = a.id inner join moneys m on m.id = a.money_id inner join papers p on d.paper_id = p.id where d.id = ?", [dd["id"]]).fetchall()[0]
+                (common["point"], common["step"]) = self._sqlite_connection.execute("select point, step from points where paper_id = ? and money_id = ?", [common["paper_id"], common["money_id"]]).fetchone() or (1, 1)
+            newdw = copy(dd)
+            del newdw["id"]
+            del newdw["sha1"]
+            del newdw["parent_deal_id"]
+            del newdw["position_id"]
+            newdw["deal_id"] = dd["id"]
+            add_hash(newdw, common)
+            if first:
+                addition(newdw, money, paper_ballance)
+            else:
+                addition(newdw, olddw["net_after"], olddw["paper_ballance_after"])
+            self._sqlite_connection.insert("deals_view", newdw)
+            olddw = newdw
 
-    def calculate_all_deals(self, account_id, paper_id, *args, **kargs):
+    @raise_db_closed
+    def recalculate_deals(self, account_id, paper_id):
+        """removes and recalculate additional table for deals
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `deal_id`:
+        """
+        self._sqlite_connection.execute("delete from deals_view where account_id = ? and paper_id = ?", [account_id, paper_id])
+        self._sqlite_connection.execute("delete from deals_view where id in (select dw.id from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?", [account_id, paper_id])
+        self.calculate_deals(account_id, paper_id)
+
+    def __recalculate_deals__(self, account_id, paper_id, *args, **kargs):
         """
         Arguments:
         - `account_id`:
@@ -641,10 +710,11 @@ class sqlite_model(common_model):
         - `*args`:
         - `**kargs`:
         """
-        self.calculate_deals(account_id, paper_id)
+        self.recalculate_deals(account_id, paper_id)
+
 
     @raise_db_closed
-    @safe_executeion("_deals_recalc", calculate_all_deals)
+    @safe_executeion("_deals_recalc", __recalculate_deals__)
     def make_groups(self, account_id, paper_id, time_distance = 5):
         """
         Arguments:
@@ -652,9 +722,17 @@ class sqlite_model(common_model):
         - `paper_id`:
         - `time_distance`:max time difference between deals in one group
         """
+        gid = None
         for dd in self._sqlite_connection.execute_select("select d.* from deals d inner join deals_view dd on dd.deal_id = d.id where d.position_id is null and d.account_id = ? and paper_id = ? order by d.datetime", [account_id, paper_id]):
-            pass
-            
+            if gid == None:
+                gid = self.create_group(dd["id"])
+            else:
+                gg = self._sqlite_connection.execute_select("select max(d.datetime) as d, g.paper_id as pid, g.direction as dir from deals d inner join deal_group_assign gd on gd.deal_id = d.id inner join deal_groups g on dg.group_id = g.id where g.id = ? group by g.id", [gid]).fetchall()[0]
+                if gg["pid"] == dd["paper_id"] and gg["dir"] == dd["direction"] and dd["datetime"] - gg["d"] <= time_distance:
+                    self.add_to_group(gid, dd["id"])
+                else:
+                    gid = self.create_group(dd["id"])
+                
 
 
 
