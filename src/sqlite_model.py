@@ -21,6 +21,8 @@ class sqlite_model(common_model):
     ##############
     _connection_string = None
     _sqlite_connection = None
+    _deals_recalc = False
+    _positions_recalc = False
     
     
     ###########
@@ -428,7 +430,7 @@ class sqlite_model(common_model):
 
             
     @raise_db_closed
-    @in_transaction
+    @makes_insafe("_deals_recalc")
     def create_deal(self, account_id, deal):
         """creates one or more deal with attributes, return id of last created
         Arguments:
@@ -507,6 +509,7 @@ class sqlite_model(common_model):
         return ret
 
     @raise_db_closed
+    @makes_insafe("_positions_recalc")
     def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
         """Return position id built from groups
         Arguments:
@@ -604,6 +607,54 @@ class sqlite_model(common_model):
                 assert(direction == deal["direction"])
             self._sqlite_connection.insert("deal_group_assign", {"deal_id" : did, "group_id" : gid})
         return gid
+
+    @raise_db_closed
+    def add_to_group(self, group_id, deal_id):
+        """add deals to group
+        Arguments:
+        - `group_id`:
+        - `deal_id`:
+        """
+        g = self._sqlite_connection.execute_select("select * from deal_groups where id = ?", [group_id]).fetchall()[0]
+        for di in (isinstance(deal_id, int) and [deal_id] or deal_id):
+            (c,) = self._sqlite_connection.execute("select count(*) from deals where id = ? and paper_id = ? and direction = ?", [di, g["paper_id"], g["direction"]]).fetchone()
+            assert(c == 1)
+            self._sqlite_connection.insert("deal_group_assign", {"group_id" : group_id,
+                                                                 "deal_id" : di})
             
-                                                                                                    
+
+            
+    def calculate_deals(self, account_id, paper_id, deal_id = None):
+        """Recalculate temporary table deals_view starting from deal_id 
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `deal_id`:
+        """
+        pass
+
+    def calculate_all_deals(self, account_id, paper_id, *args, **kargs):
+        """
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `*args`:
+        - `**kargs`:
+        """
+        self.calculate_deals(account_id, paper_id)
+
+    @raise_db_closed
+    @safe_executeion("_deals_recalc", calculate_all_deals)
+    def make_groups(self, account_id, paper_id, time_distance = 5):
+        """
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `time_distance`:max time difference between deals in one group
+        """
+        for dd in self._sqlite_connection.execute_select("select d.* from deals d inner join deals_view dd on dd.deal_id = d.id where d.position_id is null and d.account_id = ? and paper_id = ? order by d.datetime", [account_id, paper_id]):
+            pass
+            
+
+
 

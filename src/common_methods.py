@@ -269,3 +269,57 @@ def format_select_part(select_part):
             rlist.append("{0} as {1}".format(sp[0], sp[1]))
     return reduce_by_string(", ", rlist)
             
+class safe_executeion(object):
+    """Decorator executes given method if given attribute of the class is True
+    and set this attribute to False after that, in any way decorated method will be executed
+    """
+    def __init__(self, attribute, method):
+        """
+        """
+        self._attribute = attribute
+        self._method = method
+
+    def __call__(self, func):
+        """
+        Arguments:
+        - `func`:
+        """
+        def ret(*args, **kargs):
+            assert(hasattr(args[0], self._attribute))
+            if getattr(args[0], self._attribute):
+                self._method(*args, **kargs)
+                setattr(args[0], self._attribute, False)
+            return func(*args, **kargs)
+        ret.__doc__ = func.__doc__
+        return ret
+    
+class makes_insafe(object):
+    """Decorator set attribute of object to true after the correct execution of decorated method
+    """
+    def __init__(self, attribute):
+        """
+        Arguments:
+        - `attribute`:
+        """
+        self._attribute = attribute
+        
+    def __call__(self, func):
+        """
+        Arguments:
+        - `func`:
+        """
+        def ret(*args, **kargs):
+            rtt = None
+            assert(hasattr(args[0], self._attribute))
+            try:
+                rtt = func(*args, **kargs)
+            except e:
+                raise e
+            else:
+                setattr(args[0], self._attribute, True)
+            return rtt
+        ret.__doc__ = func.__doc__
+        return ret
+
+
+        
