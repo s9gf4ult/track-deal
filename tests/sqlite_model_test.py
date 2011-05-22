@@ -330,6 +330,7 @@ class sqlite_model_test(unittest.TestCase):
                                          "count" : 3,
                                          "datetime" : dd})
             dd += timedelta(0, 2)
+        self.model.make_groups(aid, paid)
         self.assertEqual(5, len(self.model.list_groups(aid, paid).fetchall()))
                      
 
