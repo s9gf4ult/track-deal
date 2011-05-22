@@ -336,10 +336,48 @@ def seconds_to_time(seconds):
     Arguments:
     - `seconds`:
     """
+    seconds = int(seconds)
     h = trunc(seconds / 3600)
     seconds = seconds % 3600
     m = trunc(seconds / 60)
     seconds = seconds % 60
     s = trunc(seconds)
-    ms = seconds - s
-    return datetime.time(h, m, s, ms)
+    return datetime.time(h, m, s)
+
+def argument_value(name, value):
+    """return string in format "name = value"
+    Arguments:
+    - `name`:
+    - `value`:
+    """
+    if name != None:
+        if value != None:
+            return "{0} = {1}".format(name, value)
+        else:
+            return "{0}".format(name)
+    else:
+        return None
+
+class string_reduce(object):
+    """class for sqlite aggregate
+    return string of splited by comma
+    """
+    _ret = ""
+    def step(self, argument):
+        """
+        Arguments:
+        - `argument`:
+        """
+        if not is_null_or_empty(argument):
+            if is_null_or_empty(self._ret):
+                self._ret = argument
+            else:
+                self._ret = "{0}, {1}".format(self._ret, argument)
+
+    def finalize(self, ):
+        """
+        """
+        return self._ret
+    
+
+

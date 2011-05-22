@@ -254,9 +254,46 @@ class sqlite_model_test(unittest.TestCase):
             gid2 = self.model.create_group(di2)
             self.assertRaises(Exception, self.model.create_position, gid1, gid2)
             
-        
-
-
+    def test_calculate_deals(self, ):
+        """
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        mid = self.model.create_money("RU")
+        aid = self.model.create_account("ac1", "RU", 1000)
+        paid = self.model.create_paper("stock", "stock")
+        dd = datetime.now()
+        x = 1000
+        ll = [(100, 1, 120, 1.2, 10),
+              (111, 1.11, 100, 1, 10),
+              (80, 0.8, 100, 1, 5)]
+        for (oprice, ocomm, cprice, ccomm, count) in ll:
+            self.model.create_deal(aid, {"paper_id" : paid,
+                                         "direction" : -1,
+                                         "count" : count,
+                                         "points" : oprice,
+                                         "commission" : ocomm,
+                                         "datetime" : dd})
+            dd += timedelta(1)
+            self.model.create_deal(aid, {"paper_id" : paid,
+                                         "direction" : 1,
+                                         "count" : count,
+                                         "points" : cprice,
+                                         "commission" : ccomm,
+                                         "datetime" : dd})
+            dd += timedelta(1)
+            x += ((cprice - oprice) * count) - ocomm - ccomm
+        self.model.calculate_deals(aid, paid)
+        self.assertEqual(2 * len(ll), self.model._sqlite_connection.execute("select count(dw.id) from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?", [aid, paid]).fetchone()[0])
+        self.assertAlmostEqual(x, self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [aid, paid]).fetchone()[0])
+        self.assertEqual((ll[-1][-1], 0), self.model._sqlite_connection.execute("select paper_ballance_before, paper_ballance_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [aid, paid]).fetchone())
+        point = 10
+        self.model.create_point(paid, mid, point, 0.001)
+        self.model.recalculate_deals(aid, paid)
+        xx = 1000
+        for (oprice, ocomm, cprice, comm, count) in ll:
+            xx += ((cprice - oprice) * count * point) - ocomm - comm
+        self.assertAlmostEqual(xx, self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [aid, paid]).fetchone()[0])
 
 if __name__ == '__main__':
     unittest.main()

@@ -341,7 +341,8 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select(q)
     
     @raise_db_closed
-    @in_transaction
+    @makes_insafe("_deals_recalc")
+    @makes_insafe("_positions_recalc")
     def create_point(self, paper_id, money_id, point, step):
         """Creates point explanation and return it's id
         Arguments:
@@ -383,7 +384,8 @@ class sqlite_model(common_model):
         return (len(ret) > 0 and ret[0] or None)
 
     @raise_db_closed
-    @in_transaction
+    @makes_insafe("_deals_recalc")
+    @makes_insafe("_positions_recalc")
     def remove_point(self, id_or_paper_id, money_id = None):
         """Removes point of this paper / money or by id
         Arguments:
@@ -396,7 +398,6 @@ class sqlite_model(common_model):
             self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
 
     @raise_db_closed
-    @in_transaction
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
         Arguments:
@@ -412,6 +413,20 @@ class sqlite_model(common_model):
         else:
             mid = money_id_or_name
         return self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count}).lastrowid
+
+    @raise_db_closed
+    @makes_insafe("_deals_recalc")
+    @makes_insafe("_positions_recalc")
+    def change_account(self, aid, money_id_or_name = None, money_count = None, comment = None):
+        """changes existing account
+        Arguments:
+        - `aid`:
+        - `money_id_or_name`:
+        - `money_count`:
+        - `comment`:
+        """
+        pass
+
 
     @raise_db_closed
     def list_accounts(self, order_by = []):
@@ -650,26 +665,26 @@ class sqlite_model(common_model):
         - `paper_ballance`:
         """
         def addition(h, m, p):
-            h["datetime_formated"] = h["datetime"].__str__()
+            h["datetime_formated"] = h["datetime"].isoformat()
             h["date"] = h["datetime"].date()
-            h["date_formated"] = h["date"].__str__()
+            h["date_formated"] = h["date"].isoformat()
             h["time"] = h["datetime"].time()
-            h["time_formated"] = h["time"].__str__()
+            h["time_formated"] = h["time"].isoformat()
             h["day_of_week"] = h["datetime"].weekday()
             h["day_of_week_formated"] = h["datetime"].strftime("%a")
             h["month"] = h["datetime"].month
             h["month_formated"] = h["datetime"].strftime("%b")
             h["year"] = h["datetime"].year
             h["price"] = h["point"] * h["points"]
-            h["price_formated"] = h["price"] + h["money_name"]
+            h["price_formated"] = "{0}{1}".format(h["price"], h["money_name"])
             h["volume"] = h["price"] * h["count"]
-            h["volume_formated"] = h["volume"] + h["money_name"]
+            h["volume_formated"] = "{0}{1}".format(h["volume"], h["money_name"])
             h["direction_formated"] = (h["direction"] >= 0 and "S" or "L")
             h["net_before"] = m
-            h["net_after"] = m + (h["volume"] * h["direction"] / abs(h["direction"]))
+            h["net_after"] = m + (h["volume"] * h["direction"] / abs(h["direction"])) - h["commission"]
             h["paper_ballance_before"] = p
             h["paper_ballance_after"] = p - (h["count"] * h["direction"] / abs(h["direction"]))
-            (h["user_attributes_formated"], ) = self._sqlite_connection.execute("select string_reduce(argument_value(a.name, a.value)) from user_deal_attributes where deal_id = ? group by deal_id", [h["deal_id"]]).fetchone()
+            (h["user_attributes_formated"], ) = self._sqlite_connection.execute("select string_reduce(argument_value(a.name, a.value)) from user_deal_attributes a where a.deal_id = ? group by a.deal_id", [h["deal_id"]]).fetchone() or (None,)
             
         first = True
         for dd in cursor:
@@ -689,6 +704,7 @@ class sqlite_model(common_model):
                 addition(newdw, olddw["net_after"], olddw["paper_ballance_after"])
             self._sqlite_connection.insert("deals_view", newdw)
             olddw = newdw
+            first = False
 
     @raise_db_closed
     def recalculate_deals(self, account_id, paper_id):
@@ -696,10 +712,9 @@ class sqlite_model(common_model):
         Arguments:
         - `account_id`:
         - `paper_id`:
-        - `deal_id`:
         """
         self._sqlite_connection.execute("delete from deals_view where account_id = ? and paper_id = ?", [account_id, paper_id])
-        self._sqlite_connection.execute("delete from deals_view where id in (select dw.id from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?", [account_id, paper_id])
+        self._sqlite_connection.execute("delete from deals_view where id in (select dw.id from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
         self.calculate_deals(account_id, paper_id)
 
     def __recalculate_deals__(self, account_id, paper_id, *args, **kargs):

@@ -6,6 +6,7 @@ import random
 import unittest
 import sconnection
 from common_methods import *
+from datetime import *
 
 
 class sconnection_test(unittest.TestCase):
@@ -92,7 +93,36 @@ class sconnection_test(unittest.TestCase):
         self.assertEqual(119, a)
         self.assertNotEqual(None, b)
 
+    def test_datetime(self, ):
+        """
+        """
+        dt = datetime(2010, 10, 11, 23, 8, 34)
+        d = date(2010, 4, 2)
+        t = time(12, 34, 23)
+        self.conn.execute("create table dd(id, dt datetime, d date, t time)")
+        self.conn.execute("insert into dd(id, dt, d, t) values (?, ?, ?, ?)", [10, dt, d, t])
+        self.assertEqual((dt, d, t), self.conn.execute("select dt, d, t from dd where id = 10").fetchone())
+        d2 = datetime(2011, 10, 11, 3, 4, 2)
+        d3 = dt - timedelta(1)
+        self.conn.executemany("insert into dd(dt) values (?)", [(d2,), (d3,)])
+        self.assertEqual([(d3,), (dt,), (d2,)], self.conn.execute("select dt from dd order by dt").fetchall())
+        dd2 = date(2010, 4, 4)
+        dd3 = date(2009, 10, 2)
+        self.conn.executemany("insert into dd(d) values (?)", [(dd2,), (dd3,)])
+        self.assertEqual([(dd3,), (d,), (dd2,)], self.conn.execute("select d from dd where d is not null order by d").fetchall())
+        t2 = time(12, 40, 2)
+        t3 = time(2, 34, 23)
+        self.conn.executemany("insert into dd(id, t) values (?, ?)",[(100, t2,), (200, t3,)])
+        self.assertEqual([(t3,), (t,), (t2,)], self.conn.execute("select t from dd where t is not null order by t").fetchall())
+        self.assertEqual(10 * 3600, self.conn.execute("select t1.t - t2.t from dd t1, dd t2 where t1.id = 10 and t2.id = 200").fetchone()[0])
 
+    def test_string_reduce(self, ):
+        """test reduce class and function formatting user arguments
+        """
+        self.conn.execute("insert into aa(id, val) values (?, ?)", ["arg1", 100])
+        self.assertEqual("arg1 = 100", self.conn.execute("select argument_value(id, val) from aa where val = 100").fetchone()[0])
+        self.conn.execute("insert into aa(id, val) values (?, ?)", ["arg2", 200])
+        self.assertEqual("arg1 = 100, arg2 = 200", self.conn.execute("select string_reduce(x) from (select argument_value(id, val) as x from aa order by val)").fetchone()[0])
 
 
 
