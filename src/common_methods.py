@@ -331,7 +331,7 @@ def add_hash(h1, h2):
     for k in h2.keys():
         h1[k] = h2[k]
 
-def seconds_to_time(seconds):
+def any_to_time(seconds):
     """turn seconds to time
     Arguments:
     - `seconds`:
@@ -381,3 +381,9 @@ class string_reduce(object):
     
 
 
+def any_to_datetime(value):
+    """return datetime
+    Arguments:
+    - `value`: any type convertable to float
+    """
+    return datetime.datetime.fromtimestamp(float(value))

@@ -255,7 +255,7 @@ class sqlite_model_test(unittest.TestCase):
             self.assertRaises(Exception, self.model.create_position, gid1, gid2)
             
     def test_calculate_deals(self, ):
-        """
+        """complex test of deal_view recalculation and group calculations
         """
         self.model.dbinit()
         self.model.dbtemp()
@@ -294,6 +294,38 @@ class sqlite_model_test(unittest.TestCase):
         for (oprice, ocomm, cprice, comm, count) in ll:
             xx += ((cprice - oprice) * count * point) - ocomm - comm
         self.assertAlmostEqual(xx, self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [aid, paid]).fetchone()[0])
+        self.model.make_groups(aid, paid)
+        self.assertEqual(2 * len(ll), len(self.model.list_groups(aid, paid).fetchall()))
+        self.assertEqual(len(ll), self.model._sqlite_connection.execute("select count(*) from deal_groups where direction = -1").fetchone()[0])
+        self.assertEqual(len(ll), self.model._sqlite_connection.execute("select count(*) from deal_groups where direction = 1").fetchone()[0])
+
+    def test_groups(self, ):
+        """special test of group making
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        mid = self.model.create_money("RU")
+        aid = self.model.create_account("ac1", mid, 1000)
+        paid = self.model.create_paper("stock", "stock")
+        dd = datetime(2010, 10, 10)
+        for direc in [-1, -1, 1, -1]:
+            for x in xrange(0, 5):
+                self.model.create_deal(aid, {"paper_id" : paid,
+                                             "points" : 100,
+                                             "commission" : 1,
+                                             "direction" : direc,
+                                             "count" : 1,
+                                             "datetime" : dd})
+                dd += timedelta(0, 4)
+            if direc == -1:
+                dd += timedelta(0, 5)
+        self.model.make_groups(aid, paid)
+        self.assertEqual(4, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
+            
+                     
+
+
+        
 
 if __name__ == '__main__':
     unittest.main()

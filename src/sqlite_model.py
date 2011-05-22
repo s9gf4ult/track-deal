@@ -8,6 +8,7 @@ from sconnection import sconnection
 from common_methods import *
 from exceptions import *
 from copy import copy
+from datetime import *
 
 class sqlite_model(common_model):
     """
@@ -23,6 +24,7 @@ class sqlite_model(common_model):
     _sqlite_connection = None
     _deals_recalc = False
     _positions_recalc = False
+    _positions_broken = False
     
     
     ###########
@@ -109,7 +111,6 @@ class sqlite_model(common_model):
         self._sqlite_connection.rollback()
 
     @raise_db_closed
-    @in_transaction
     def add_global_data(self, parameters):
         """adds global data and
         Arguments:
@@ -131,7 +132,6 @@ class sqlite_model(common_model):
             return None
 
     @raise_db_closed
-    @in_transaction
     def remove_global_data(self, name):
         """Removes global parameters
         Arguments:
@@ -150,7 +150,6 @@ class sqlite_model(common_model):
         return map(lambda a: a[0], self._sqlite_connection.execute("select name from global_data"))
 
     @raise_db_closed
-    @in_transaction
     def add_database_attributes(self, parameters):
         """adds database attributes and
         Arguments:
@@ -172,7 +171,6 @@ class sqlite_model(common_model):
             return None
 
     @raise_db_closed
-    @in_transaction
     def remove_database_attribute(self, name):
         """Removes global parameters
         Arguments:
@@ -191,7 +189,6 @@ class sqlite_model(common_model):
         return map(lambda a: a[0], self._sqlite_connection.execute("select name from database_attributes"))
     
     @raise_db_closed
-    @in_transaction
     def create_paper(self, type, name, stock = None, class_name = None, full_name = None):
         """creates new paper and returns it's id
         
@@ -225,7 +222,6 @@ class sqlite_model(common_model):
         return (len(ret) > 0 and ret[0] or None)
 
     @raise_db_closed
-    @in_transaction
     @remover_decorator("papers", {int : "id"})
     def remove_paper(self, type_or_id, name = None):
         """Removes one paper by type and name or many papers by id
@@ -248,7 +244,6 @@ class sqlite_model(common_model):
 
 
     @raise_db_closed
-    @in_transaction
     def create_candles(self, paper_id, candles):
         """Creates one or several candles of paper `paper_id`
         Arguments:
@@ -275,7 +270,6 @@ class sqlite_model(common_model):
         return (len(ret) > 0 and ret[0] or None)
 
     @raise_db_closed
-    @in_transaction
     @remover_decorator("candles", {int : "id"})
     def remove_candle(self, candles_id):
         """removes one or more candles
@@ -298,7 +292,6 @@ class sqlite_model(common_model):
 
 
     @raise_db_closed
-    @in_transaction
     def create_money(self, name, full_name = None):
         """Creates new money and return it's id
         Arguments:
@@ -324,7 +317,6 @@ class sqlite_model(common_model):
         return (len(ret) > 0 and ret[0] or None)
 
     @raise_db_closed
-    @in_transaction
     @remover_decorator("moneys", {int : "id", basestring : "name"})
     def remove_money(self, name_or_id):
         """Removes money by name or by id
@@ -425,8 +417,17 @@ class sqlite_model(common_model):
         - `money_count`:
         - `comment`:
         """
-        pass
-
+        sets = {}
+        if money_id_or_name != None:
+            m = self.get_money(money_id_or_name)
+            sets["money_id"] = m["id"]
+        if money_count != None:
+            sets["money_count"] = money_count
+        if comment != None:
+            sets["comments"] = comment
+        if len(sets) > 0:
+            self._sqlite_connection.update("accounts", sets, "id = ?", [aid])
+            
 
     @raise_db_closed
     def list_accounts(self, order_by = []):
@@ -491,7 +492,8 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select_cond("deals", wheres = conds, order_by = order_by)
         
     @raise_db_closed
-    @in_transaction
+    @makes_insafe("_deals_recalc")
+    @makes_insafe("_positions_broken")
     @remover_decorator("deals", {int : "id"})
     def remove_deal(self, deal_id):
         """remove one or more deal by id
@@ -738,16 +740,24 @@ class sqlite_model(common_model):
         - `time_distance`:max time difference between deals in one group
         """
         gid = None
-        for dd in self._sqlite_connection.execute_select("select d.* from deals d inner join deals_view dd on dd.deal_id = d.id where d.position_id is null and d.account_id = ? and paper_id = ? order by d.datetime", [account_id, paper_id]):
+        for dd in self._sqlite_connection.execute_select("select d.* from deals d inner join deals_view dd on dd.deal_id = d.id where d.position_id is null and d.account_id = ? and d.paper_id = ? order by d.datetime", [account_id, paper_id]):
             if gid == None:
                 gid = self.create_group(dd["id"])
             else:
-                gg = self._sqlite_connection.execute_select("select max(d.datetime) as d, g.paper_id as pid, g.direction as dir from deals d inner join deal_group_assign gd on gd.deal_id = d.id inner join deal_groups g on dg.group_id = g.id where g.id = ? group by g.id", [gid]).fetchall()[0]
-                if gg["pid"] == dd["paper_id"] and gg["dir"] == dd["direction"] and dd["datetime"] - gg["d"] <= time_distance:
+                gg = self._sqlite_connection.execute_select("select max(d.datetime) as d, g.paper_id as pid, g.direction as dir from deals d inner join deal_group_assign gd on gd.deal_id = d.id inner join deal_groups g on gd.group_id = g.id where g.id = ? group by g.id", [gid]).fetchall()[0]
+                if gg["pid"] == dd["paper_id"] and gg["dir"] == dd["direction"] and dd["datetime"] - any_to_datetime(gg["d"]) <= timedelta(0, time_distance):
                     self.add_to_group(gid, dd["id"])
                 else:
                     gid = self.create_group(dd["id"])
                 
+    @raise_db_closed
+    def list_groups(self, account_id, paper_id):
+        """
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        """
+        return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ?", [account_id, paper_id])
 
 
 
