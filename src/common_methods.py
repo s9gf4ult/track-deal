@@ -394,3 +394,4 @@ def any_to_date(value):
     - `value`:
     """
     return datetime.date.fromtimestamp(float(value))
+
