@@ -117,7 +117,7 @@ class sconnection(sqlite3.Connection):
         sqlite3.register_adapter(datetime.date, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_adapter(datetime.time, lambda a: int(a.hour * 3600 + a.minute * 60 + a.second))
         sqlite3.register_converter('datetime', any_to_datetime)
-        sqlite3.register_converter("date", lambda a: datetime.date.fromtimestamp(float(a)))
+        sqlite3.register_converter("date", any_to_date)
         sqlite3.register_converter("time", any_to_time)
 
         super(sconnection, self).__init__(connect_string, detect_types = sqlite3.PARSE_DECLTYPES)

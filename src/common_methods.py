@@ -387,3 +387,10 @@ def any_to_datetime(value):
     - `value`: any type convertable to float
     """
     return datetime.datetime.fromtimestamp(float(value))
+
+def any_to_date(value):
+    """turn value to date
+    Arguments:
+    - `value`:
+    """
+    return datetime.date.fromtimestamp(float(value))

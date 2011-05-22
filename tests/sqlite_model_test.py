@@ -321,7 +321,16 @@ class sqlite_model_test(unittest.TestCase):
                 dd += timedelta(0, 5)
         self.model.make_groups(aid, paid)
         self.assertEqual(4, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
-            
+        dd += timedelta(1)
+        for x in xrange(0, 10):
+            self.model.create_deal(aid, {"paper_id" : paid,
+                                         "points" : 200,
+                                         "commission" : 2,
+                                         "direction" : 1,
+                                         "count" : 3,
+                                         "datetime" : dd})
+            dd += timedelta(0, 2)
+        self.assertEqual(5, len(self.model.list_groups(aid, paid).fetchall()))
                      
 
 

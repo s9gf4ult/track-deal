@@ -757,7 +757,7 @@ class sqlite_model(common_model):
         - `account_id`:
         - `paper_id`:
         """
-        return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ?", [account_id, paper_id])
+        return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ? group by g.id", [account_id, paper_id])
 
 
 
