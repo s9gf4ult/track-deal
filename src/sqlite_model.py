@@ -699,6 +699,7 @@ class sqlite_model(common_model):
             first = False
 
     @raise_db_closed
+    @confirm_safety("deals_changed")
     def recalculate_deals(self, account_id, paper_id):
         """removes and recalculate additional table for deals
         Arguments:
@@ -709,7 +710,6 @@ class sqlite_model(common_model):
         self._sqlite_connection.execute("delete from deals_view where id in (select dw.id from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
         self.calculate_deals(account_id, paper_id)
 
-    @confirm_safety("deals_changed")
     def __recalculate_deals__(self, account_id, paper_id, *args, **kargs):
         """
         Arguments:
@@ -762,19 +762,20 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ? group by g.id", [account_id, paper_id])
 
-    def try_remake_groups(self, account_id, paper_id, time_distance = 5):
-        """remake groups if some conditions executing
-        
+    
+    def __remake_groups__(self, account_id, paper_id, time_distance = 5, *args, **kargs):
+        """
         Arguments:
         - `account_id`:
         - `paper_id`:
         - `time_distance`:
+        - `*args`:
+        - `**kargs`:
         """
-        if self._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where d.position_id is not null and d.account_id = ? and d.paper_id = ?", [account_id, paper_id]).fetchone()[0] > 0 or self._sqlite_connection.execute("select count(d.id) from deals d where not exists(select dg.id from deal_group_assign dg where dg.deal_id = d.id) and d.position_id is null and d.account_id = ? and d.paper_id = ?", [account_id, paper_id]).fetchone()[0] > 0:
-            self.remake_groups(account_id, paper_id, time_distance)
+        self.remake_groups(account_id, paper_id, time_distance)
 
 
-
+    @safe_executeion(__remake_groups__, "deals_changed")
     def make_positions(self, account_id, paper_id, time_distance = 5):
         """automatically makes positions
         Arguments:
@@ -782,10 +783,49 @@ class sqlite_model(common_model):
         - `paper_id`:
         - `time_distance`: time distance for make_groups
         """
-        self.try_remake_groups(account_id, paper_id, time_distance)
-        fgroup = None
         
+        def go_on():
+            g1 = self._sqlite_connection.execute_select("select * from (select g.id as id, g.direction as direction, min(d.datetime) as mindatetime, max(d.datetime) as maxdatetime from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.account_id = ? and g.paper_id = ? group by g.id) order by maxdatetime, mindatetime limit 1", [account_id, paper_id]).fetchall()
+            if len(g1) == 0:
+                return False
+            g1 = g1[0]
+            g2 = self._sqlite_connection.execute_select("select * from (select g.id as id, g.direction as direction, min(d.datetime) as mindatetime, max(d.datetime) as maxdatetime from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.account_id = ? and g.paper_id = ? and g.direction = ? group by g.id) where mindatetime >= ? order by maxdatetime, mindatetime limit 1", [account_id, paper_id, -(g1["direction"]), g1["maxdatetime"]]).fetchall()
+            if len(g2) == 0:
+                return False
+            g2 = g2[0]
+            (g1, g2) = self.try_make_ballanced_groups(g1["id"], g2["id"])
+            self.create_position(g1, g2)
+            self._sqlite_connection.executemany("delete from deal_groups where id = ?", [(g1,), (g2,)])
+            return True
+        while go_on():
+            pass
+
+    def try_make_ballanced_groups(self, gid1, gid2):
+        """if count of papers for gid1 and gid2 is the same then just return gid1 and gid2,
+        else just split gid1 or gid2 to the minimal count papers and return splited gids
+        Arguments:
+        - `gid1`: group_id
+        - `gid2`:
+        """
+        (c1, c2) = map(lambda a: self._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]).fetchone()[0], [gid1, gid2])
+        if c1 == c2:
+            return (gid1, gid2)
+        elif c1 > c2:
+            (g, gg) = self.split_group(gid1, c2)
+            return (g, gid2)
+        else:
+            (g, gg) = self.split_group(gid2, c1)
+            return (gid1, g)
+
+    def split_group(self, gid, count):
+        """
+        Arguments:
+        - `gid`:
+        - `count`:
+        """
+        pass
         
+
     @raise_db_closed
     def start_action(self, action_name):
         """starts new action with an action name
