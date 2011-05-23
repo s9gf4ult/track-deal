@@ -35,7 +35,7 @@
   (loop for tt in (reverse datalist) do
         (save-excursion
           (newline)
-          (apply #'gentriggers tt))))            
+          (apply #'gentriggers tt))))
 */
 CREATE TEMPORARY TABLE deal_groups(
 id integer primary key not null,

@@ -274,10 +274,10 @@ class safe_executeion(object):
     """Decorator executes given method if given attribute of the class is True
     and set this attribute to False after that, in any way decorated method will be executed
     """
-    def __init__(self, attribute, method):
+    def __init__(self, method, *attributes):
         """
         """
-        self._attribute = attribute
+        self._attrbutes = attributes
         self._method = method
 
     def __call__(self, func):
@@ -286,10 +286,10 @@ class safe_executeion(object):
         - `func`:
         """
         def ret(*args, **kargs):
-            assert(hasattr(args[0], self._attribute))
-            if getattr(args[0], self._attribute):
-                self._method(*args, **kargs)
-                setattr(args[0], self._attribute, False)
+            for attr in self._attrbutes:
+                if args[0].get_database_attribute(attr) != None:
+                    self._method(*args, **kargs)
+                    break
             return func(*args, **kargs)
         ret.__doc__ = func.__doc__
         return ret
@@ -417,6 +417,28 @@ class in_action(object):
                 rtt = method(*args, **kargs)
             finally:
                 args[0].end_action()
+            return rtt
+        ret.__doc__ = method.__doc__
+        return ret
+    
+class confirm_safety(object):
+    """Decorator set database attributes to false after execution of method
+    """
+    def __init__(self, *attributes):
+        """
+        Arguments:
+        - `*attributes`:
+        """
+        self._attributes = attributes
+        
+    def __call__(self, method):
+        """
+        Arguments:
+        - `method`:
+        """
+        def ret(*args, **kargs):
+            rtt = method(*args, **kargs)
+            args[0].remove_database_attribute(self._attributes)
             return rtt
         ret.__doc__ = method.__doc__
         return ret

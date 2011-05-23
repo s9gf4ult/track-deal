@@ -22,10 +22,6 @@ class sqlite_model(common_model):
     ##############
     _connection_string = None
     _sqlite_connection = None
-    _deals_recalc = False
-    _positions_recalc = False
-    _positions_broken = False
-    
     
     ###########
     # Methods #
@@ -333,8 +329,6 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select(q)
     
     @raise_db_closed
-    @makes_insafe("_deals_recalc")
-    @makes_insafe("_positions_recalc")
     def create_point(self, paper_id, money_id, point, step):
         """Creates point explanation and return it's id
         Arguments:
@@ -376,8 +370,6 @@ class sqlite_model(common_model):
         return (len(ret) > 0 and ret[0] or None)
 
     @raise_db_closed
-    @makes_insafe("_deals_recalc")
-    @makes_insafe("_positions_recalc")
     def remove_point(self, id_or_paper_id, money_id = None):
         """Removes point of this paper / money or by id
         Arguments:
@@ -407,8 +399,6 @@ class sqlite_model(common_model):
         return self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count}).lastrowid
 
     @raise_db_closed
-    @makes_insafe("_deals_recalc")
-    @makes_insafe("_positions_recalc")
     def change_account(self, aid, money_id_or_name = None, money_count = None, comment = None):
         """changes existing account
         Arguments:
@@ -446,7 +436,6 @@ class sqlite_model(common_model):
 
             
     @raise_db_closed
-    @makes_insafe("_deals_recalc")
     def create_deal(self, account_id, deal):
         """creates one or more deal with attributes, return id of last created
         Arguments:
@@ -492,8 +481,6 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select_cond("deals", wheres = conds, order_by = order_by)
         
     @raise_db_closed
-    @makes_insafe("_deals_recalc")
-    @makes_insafe("_positions_broken")
     @remover_decorator("deals", {int : "id"})
     def remove_deal(self, deal_id):
         """remove one or more deal by id
@@ -526,7 +513,6 @@ class sqlite_model(common_model):
         return ret
 
     @raise_db_closed
-    @makes_insafe("_positions_recalc")
     def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
         """Return position id built from groups
         Arguments:
@@ -723,6 +709,7 @@ class sqlite_model(common_model):
         self._sqlite_connection.execute("delete from deals_view where id in (select dw.id from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
         self.calculate_deals(account_id, paper_id)
 
+    @confirm_safety("deals_changed")
     def __recalculate_deals__(self, account_id, paper_id, *args, **kargs):
         """
         Arguments:
@@ -735,7 +722,7 @@ class sqlite_model(common_model):
 
 
     @raise_db_closed
-    @safe_executeion("_deals_recalc", __recalculate_deals__)
+    @safe_executeion(__recalculate_deals__, "deals_changed")
     def make_groups(self, account_id, paper_id, time_distance = 5):
         """
         Arguments:
@@ -788,8 +775,6 @@ class sqlite_model(common_model):
 
 
 
-    @safe_executeion("_deals_recalc", __recalculate_deals__)
-    @makes_insafe("_positions_recalc")
     def make_positions(self, account_id, paper_id, time_distance = 5):
         """automatically makes positions
         Arguments:
