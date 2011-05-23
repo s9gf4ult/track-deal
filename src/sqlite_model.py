@@ -610,18 +610,22 @@ class sqlite_model(common_model):
         - `deal_id`: int or list of ints
         """
         paper_id = None
+        account_id = None
         direction = None
         gid = None
         for did in (isinstance(deal_id, int) and [deal_id] or deal_id):
             deal = self._sqlite_connection.execute_select("select * from deals where id = ?", [did]).fetchall()[0]
-            if paper_id == direction == gid == None:
+            if paper_id == direction == gid == account_id == None:
                 paper_id = deal["paper_id"]
                 direction = deal["direction"]
+                account_id = deal["account_id"]
                 gid = self._sqlite_connection.insert("deal_groups", {"paper_id" : paper_id,
-                                                                    "direction" : direction}).lastrowid
+                                                                     "account_id" : account_id,
+                                                                     "direction" : direction}).lastrowid
             else:
                 assert(paper_id == deal["paper_id"])
                 assert(direction == deal["direction"])
+                assert(account_id == deal["account_id"])
             self._sqlite_connection.insert("deal_group_assign", {"deal_id" : did, "group_id" : gid})
         return gid
 
@@ -634,7 +638,7 @@ class sqlite_model(common_model):
         """
         g = self._sqlite_connection.execute_select("select * from deal_groups where id = ?", [group_id]).fetchall()[0]
         for di in (isinstance(deal_id, int) and [deal_id] or deal_id):
-            (c,) = self._sqlite_connection.execute("select count(*) from deals where id = ? and paper_id = ? and direction = ?", [di, g["paper_id"], g["direction"]]).fetchone()
+            (c,) = self._sqlite_connection.execute("select count(*) from deals where id = ? and paper_id = ? and direction = ? and account_id = ?", [di, g["paper_id"], g["direction"], g["account_id"]]).fetchone()
             assert(c == 1)
             self._sqlite_connection.insert("deal_group_assign", {"group_id" : group_id,
                                                                  "deal_id" : di})
@@ -744,8 +748,8 @@ class sqlite_model(common_model):
             if gid == None:
                 gid = self.create_group(dd["id"])
             else:
-                gg = self._sqlite_connection.execute_select("select max(d.datetime) as d, g.paper_id as pid, g.direction as dir from deals d inner join deal_group_assign gd on gd.deal_id = d.id inner join deal_groups g on gd.group_id = g.id where g.id = ? group by g.id", [gid]).fetchall()[0]
-                if gg["pid"] == dd["paper_id"] and gg["dir"] == dd["direction"] and dd["datetime"] - any_to_datetime(gg["d"]) <= timedelta(0, time_distance):
+                gg = self._sqlite_connection.execute_select("select max(d.datetime) as d, g.account_id as account_id, g.paper_id as pid, g.direction as dir from deals d inner join deal_group_assign gd on gd.deal_id = d.id inner join deal_groups g on gd.group_id = g.id where g.id = ? group by g.id", [gid]).fetchall()[0]
+                if gg["pid"] == dd["paper_id"] and gg["dir"] == dd["direction"] and dd["account_id"] == gg["account_id"] and dd["datetime"] - any_to_datetime(gg["d"]) <= timedelta(0, time_distance):
                     self.add_to_group(gid, dd["id"])
                 else:
                     gid = self.create_group(dd["id"])

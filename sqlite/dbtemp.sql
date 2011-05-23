@@ -39,6 +39,7 @@
 */
 CREATE TEMPORARY TABLE deal_groups(
 id integer primary key not null,
+account_id integer not null,
 direction integer not null,
 paper_id integer not null);
 
