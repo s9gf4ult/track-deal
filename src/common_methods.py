@@ -395,3 +395,28 @@ def any_to_date(value):
     """
     return datetime.date.fromtimestamp(float(value))
 
+class in_action(object):
+    """Decorator makes method executing in action
+    """
+    def __init__(self, action_name):
+        """
+        Arguments:
+        - `action_name`:
+        """
+        self._action_name = action_name
+        
+    def __call__(self, method):
+        """
+        Arguments:
+        - `method`:
+        """
+        def ret(*args, **kargs):
+            rtt = None
+            try:
+                args[0].start_action(action_name)
+                rtt = method(*args, **kargs)
+            finally:
+                args[0].end_action()
+            return rtt
+        ret.__doc__ = method.__doc__
+        return ret

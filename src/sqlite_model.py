@@ -596,7 +596,7 @@ class sqlite_model(common_model):
                                                                                                  
     @raise_db_closed
     def get_stored_position_attributes(self, position_id, order_by = []):
-        """return cursor for stored position attributes
+        """return cursor for stcored position attributes
         Arguments:
         - `position_id`:
         - `order_by`:
@@ -749,6 +749,17 @@ class sqlite_model(common_model):
                     self.add_to_group(gid, dd["id"])
                 else:
                     gid = self.create_group(dd["id"])
+
+    @raise_db_closed
+    def remake_groups(self, account_id, paper_id, time_distance = 5):
+        """delete all groups and remake it again
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `time_distance`:
+        """
+        self._sqlite_connection.execute("delete from deal_group where id in (select g.id from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id group by g.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
+        self.make_groups(account_id, paper_id, time_distance)
                 
     @raise_db_closed
     def list_groups(self, account_id, paper_id):
@@ -759,7 +770,8 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ? group by g.id", [account_id, paper_id])
 
-    @raise_db_closed
+    @safe_executeion("_deals_recalc", __recalculate_deals__)
+    @makes_insafe("_positions_recalc")
     def make_positions(self, account_id, paper_id):
         """automatic makes positions
         Arguments:
@@ -767,5 +779,40 @@ class sqlite_model(common_model):
         - `paper_id`:
         """
         pass
+        
+    @raise_db_closed
+    def start_action(self, action_name):
+        """starts new action with an action name
+        Arguments:
+        - `action_name`:
+        """
+        ab = self._sqlite_connection.execute("select count(h1.id) from hystory_steps h1, current_hystory_position ch where h1.id > ch.step_id").fetchone()[0]
+        if ab > 0:
+            raise od_exception_action_cannot_create(ab)
+        aid = self._sqlite_connection.insert("hystory_steps", {"autoname" : action_name,
+                                                               "datetime" : datetime.now()}).lastrowid
+        self._sqlite_connection.insert("current_hystory_position", {"step_id" : aid})
+        
+    @raise_db_closed
+    def end_action(self, ):
+        """ends an action recording
+        """
+        self._sqlite_connection.execute("delete from current_hystory_position")
 
+    @raise_db_closed
+    def list_actions(self, ):
+        """list all actions executed
+        """
+        return self._sqlite_connection.execute_select("select * from hystory_steps")
+
+    @raise_db_closed
+    def get_current_action(self, ):
+        """return current action or None if no one set
+        """
+        a = self._sqlite_connection.execute_select("select h.* from hystory_steps h inner join current_hystory_position c on c.step_id = h.id").fetchall()
+        if len(a) > 0:
+            return a[0]
+        else:
+            return None
+        
 
