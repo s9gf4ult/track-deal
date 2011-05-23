@@ -798,7 +798,7 @@ class sqlite_model(common_model):
         - `time_distance`: time distance for make_groups
         """
         self.try_remake_groups(account_id, paper_id, time_distance)
-        
+        fgroup = None
         
         
     @raise_db_closed

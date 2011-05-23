@@ -1,7 +1,17 @@
+CREATE TABLE database_attributes(
+id integer primary key not null,
+name text,
+value ,
+unique(name));
+        
 CREATE TABLE moneys(
 id integer primary key not null,
 name text not null,
 full_name text);
+
+CREATE TRIGGER moneys_changed AFTER UPDATE ON moneys BEGIN
+insert into database_attributes(name, value) values ('moneys_changed', 1);
+END;
 
 CREATE TABLE accounts(
 id integer primary key not null,
@@ -10,6 +20,10 @@ comments text,
 money_id integer not null,
 money_count float not null default 0,
 foreign key (money_id) references moneys(id) on delete cascade);
+
+CREATE TRIGGER AFTER accounts_changed UPDATE ON accounts BEGIN
+insert into database_attributes(name, value) values ('accounts_changed', 1);
+END;
 
 CREATE TABLE papers(
 id integer primary key not null,
@@ -20,6 +34,10 @@ name text not null,
 full_name text,
 unique(type, name));
 
+CREATE TRIGGER papers_changed AFTER UPDATE ON papers BEGIN
+insert into database_attributes(name, value) values ('papers_changed', 1);
+END;
+
 CREATE TABLE points(
 id integer primary key not null,
 paper_id integer not null,
@@ -29,6 +47,18 @@ step float not null,
 foreign key (paper_id) references papers(id) on delete cascade,
 foreign key (money_id) references moneys(id) on delete cascade,
 unique(paper_id, money_id));
+
+CREATE TRIGGER points_inserted AFTER INSERT ON points BEGIN
+insert into database_attributes(name, value) values ('points_changed', 1);
+END;
+
+CREATE TRIGGER points_updated AFTER UPDATE ON points BEGIN
+insert into database_attributes(name, value) values ('points_changed', 1);
+END;
+
+CREATE TRIGGER points_deleted AFTER DELETE ON points BEGIN
+insert into database_attributes(name, value) values ('points_changed', 1);
+END;
      
 CREATE TABLE positions(
 id integer primary key not null,
@@ -45,7 +75,19 @@ manual_made integer,
 do_not_delete integer,
 foreign key (account_id) references accounts(id) on delete cascade,
 foreign key (paper_id) references papers(id) on delete cascade);
-              
+
+CREATE TRIGGER positions_inserted AFTER INSERT ON positions BEGIN
+insert into database_attributes(name, value) values ('positions_changed', 1);
+END;
+
+CREATE TRIGGER positions_deleted AFTER DELETE ON positions BEGIN
+insert into database_attributes(name, value) values ('positions_changed', 1);
+END;
+
+CREATE TRIGGER positions_updated AFTER UPDATE ON positions BEGIN
+insert into database_attributes(name, value) values ('positions_changed', 1);
+END;
+
 CREATE TABLE deals(
 id integer primary key not null,
 sha1 text,
@@ -65,6 +107,18 @@ foreign key (position_id) references positions(id) on delete set null,
 foreign key (paper_id) references papers(id) on delete cascade,
 unique(sha1, account_id));
 
+CREATE TRIGGER deals_inserted AFTER INSERT ON deals BEGIN
+insert into database_attributes(name, value) values ('deals_changed', 1);
+END;
+
+CREATE TRIGGER deals_deleted AFTER DELETE ON deals BEGIN
+insert into database_attributes(name, value) values ('deals_changed', 1);
+END;
+
+CREATE TRIGGER deals_updated AFTER UPDATE ON deals BEGIN
+insert into database_attributes(name, value) values ('deals_changed', 1);
+END
+
 CREATE TABLE user_deal_attributes(
 id integer primary key not null,
 deal_id integer not null,
@@ -72,6 +126,18 @@ name text not null,
 value,
 foreign key (deal_id) references deals(id) on delete cascade,
 unique(deal_id, name));
+
+CREATE TRIGGER deals_attributes_inserted AFTER INSERT ON user_deal_attributes BEGIN
+insert into database_attributes(name, value) values ('deals_attributes_changed', 1);
+END;
+
+CREATE TRIGGER deals_attributes_updated AFTER UPDATE ON user_deal_attributes BEGIN
+insert into database_attributes(name, value) values ('deals_attributes_changed', 1);
+END;
+
+CREATE TRIGGER deals_attributes_deleted AFTER DELETE ON user_deal_attributes BEGIN
+insert into database_attributes(name, value) values ('deals_attributes_changed', 1);
+END;
 
 CREATE TABLE stored_deal_attributes(
 id integer primary key not null,
@@ -88,6 +154,18 @@ name text not null,
 value,
 foreign key (position_id) references positions(id) on delete cascade,
 unique(position_id, name));
+
+CREATE TRIGGER position_attributes_updated AFTER UPDATE ON user_position_attributes BEGIN
+insert into database_attributes(name, value) values ('positions_attributes_changed', 1);
+END;
+
+CREATE TRIGGER position_attributes_inserted AFTER INSERT ON user_position_attributes BEGIN
+insert into database_attributes(name, value) values ('positions_attributes_changed', 1);
+END;
+
+CREATE TRIGGER position_attributes_deleted AFTER DELETE ON user_position_attributes BEGIN
+insert into database_attributes(name, value) values ('positions_attributes_changed', 1);
+END;
 
 CREATE TABLE stored_position_attributes(
 id integer primary key not null,
@@ -123,12 +201,8 @@ CREATE TRIGGER _just_one_global_data BEFORE INSERT ON global_data FOR EACH ROW B
 DELETE FROM global_data where name = new.name;
 END;
 
-CREATE TABLE database_attributes(
-id integer primary key not null,
-name text,
-value ,
-unique(name));
-        
+INSERT INTO global_data(name, value) values ('group_time_difference', 5);
+
 CREATE TRIGGER _just_one_database_attributes BEFORE INSERT ON database_attributes FOR EACH ROW BEGIN
 DELETE FROM database_attributes where name = new.name;
 END;
