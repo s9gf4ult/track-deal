@@ -21,7 +21,7 @@ money_id integer not null,
 money_count float not null default 0,
 foreign key (money_id) references moneys(id) on delete cascade);
 
-CREATE TRIGGER AFTER accounts_changed UPDATE ON accounts BEGIN
+CREATE TRIGGER accounts_changed AFTER UPDATE ON accounts BEGIN
 insert into database_attributes(name, value) values ('accounts_changed', 1);
 END;
 
@@ -117,7 +117,7 @@ END;
 
 CREATE TRIGGER deals_updated AFTER UPDATE ON deals BEGIN
 insert into database_attributes(name, value) values ('deals_changed', 1);
-END
+END;
 
 CREATE TABLE user_deal_attributes(
 id integer primary key not null,
@@ -200,8 +200,6 @@ unique(name));
 CREATE TRIGGER _just_one_global_data BEFORE INSERT ON global_data FOR EACH ROW BEGIN
 DELETE FROM global_data where name = new.name;
 END;
-
-INSERT INTO global_data(name, value) values ('group_time_difference', 5);
 
 CREATE TRIGGER _just_one_database_attributes BEFORE INSERT ON database_attributes FOR EACH ROW BEGIN
 DELETE FROM database_attributes where name = new.name;
