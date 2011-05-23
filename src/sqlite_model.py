@@ -762,7 +762,8 @@ class sqlite_model(common_model):
         - `paper_id`:
         - `time_distance`:
         """
-        self._sqlite_connection.execute("delete from deal_group where id in (select g.id from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id group by g.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
+        self._sqlite_connection.execute("delete from deal_groups where id in (select g.id from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id group by g.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
+        self._sqlite_connection.execute("delete from deal_groups where account_id = ? and paper_id = ?", [account_id, paper_id])
         self.make_groups(account_id, paper_id, time_distance)
                 
     @raise_db_closed
@@ -774,15 +775,31 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ? group by g.id", [account_id, paper_id])
 
-    @safe_executeion("_deals_recalc", __recalculate_deals__)
-    @makes_insafe("_positions_recalc")
-    def make_positions(self, account_id, paper_id):
-        """automatic makes positions
+    def try_remake_groups(self, account_id, paper_id, time_distance = 5):
+        """remake groups if some conditions executing
+        
         Arguments:
         - `account_id`:
         - `paper_id`:
+        - `time_distance`:
         """
-        pass
+        if self._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where d.position_id is not null and d.account_id = ? and d.paper_id = ?", [account_id, paper_id]).fetchone()[0] > 0 or self._sqlite_connection.execute("select count(d.id) from deals d where not exists(select dg.id from deal_group_assign dg where dg.deal_id = d.id) and d.position_id is null and d.account_id = ? and d.paper_id = ?", [account_id, paper_id]).fetchone()[0] > 0:
+            self.remake_groups(account_id, paper_id, time_distance)
+
+
+
+    @safe_executeion("_deals_recalc", __recalculate_deals__)
+    @makes_insafe("_positions_recalc")
+    def make_positions(self, account_id, paper_id, time_distance = 5):
+        """automatically makes positions
+        Arguments:
+        - `account_id`:
+        - `paper_id`:
+        - `time_distance`: time distance for make_groups
+        """
+        self.try_remake_groups(account_id, paper_id, time_distance)
+        
+        
         
     @raise_db_closed
     def start_action(self, action_name):
