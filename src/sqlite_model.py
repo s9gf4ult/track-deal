@@ -823,7 +823,22 @@ class sqlite_model(common_model):
         - `gid`:
         - `count`:
         """
-        pass
+        (c, ) = self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = gid group by dg.group_id").fetchone()
+        if c <= count:
+            return gid
+        else:
+            deals = []
+            sum = 0
+            for deal in self._sqlite_connection.execute_select("select d.* from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = gid order by d.datetime"):
+                deals.append(deal["id"])
+                sum += deal["count"]
+                if sum == count:
+                    return self.create_group(deals)
+                elif sum > count:
+                    (d, dd) = self.split_deal(deals[-1], deal["count"] - (count - sum))
+                    return self.create_group(deals[:-1] + [d])
+            
+                
         
 
     @raise_db_closed

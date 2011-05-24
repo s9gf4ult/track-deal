@@ -333,6 +333,29 @@ class sqlite_model_test(unittest.TestCase):
         self.model.make_groups(aid, paid)
         self.assertEqual(5, len(self.model.list_groups(aid, paid).fetchall()))
                      
+    def test_group_replacement(self, ):
+        """
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        mid = self.model.create_money("RU")
+        aid = self.model.create_account("ac1", mid, 1000)
+        paid = self.model.create_paper("stock", "stock")
+        dls = []
+        d = datetime(2010, 10, 10)
+        for x in xrange(0, 10):
+            dls.append(self.model.create_deal(aid, {"paper_id" : paid,
+                                                    "datetime" : d,
+                                                    "count" : 10,
+                                                    "direction" : -1,
+                                                    "commission" : 0.1,
+                                                    "points" : 100}))
+            d += timedelta(0, 3)
+        self.model.make_groups(aid, paid)
+        gid1 = self.model.list_groups(aid, paid).fetchall()[0]["id"]
+        gid2 = self.model.create_group(dls[:5])
+        self.assertEqual(set(dls[:5]), set(map(lambda a: a[0], self.model._sqlite_connection.execute("select d.id from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ?", [gid2]).fetchall())))
+        self.assertEqual(set(dls[5:]), set(map(lambda a: a[0], self.model._sqlite_connection.execute("select d.id from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ?", [gid1]).fetchall())))
 
 
         
