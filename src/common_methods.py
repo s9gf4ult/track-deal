@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import gtk
-from math import *
+from math import trunc
 import traceback
 from exceptions import *
 import datetime

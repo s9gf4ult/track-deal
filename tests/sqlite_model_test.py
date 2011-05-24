@@ -5,6 +5,7 @@ import random
 import os
 from common_methods import *
 from datetime import *
+import random
 
 class sqlite_model_test(unittest.TestCase):
     """
@@ -198,11 +199,7 @@ class sqlite_model_test(unittest.TestCase):
     def test_deals(self, ):
         """test deals
         """
-        self.model.dbinit()
-        self.model.dbtemp()
-        mid = self.model.create_money("RU")
-        aid = self.model.create_account("name", mid, 100)
-        paid = self.model.create_paper("stock", "stock1", "fjfj")
+        (mid, aid, paid) = self.deals_init()
         did = self.model.create_deal(aid, {"paper_id" : paid, "count" : 10, "direction" : -1, "points" : 200, "commission" : 0.1, "datetime" : datetime(2010, 10, 10)})
         self.assertEqual(1, len(self.model.list_deals(aid).fetchall()))
         self.model.remove_deal(did)
@@ -216,11 +213,7 @@ class sqlite_model_test(unittest.TestCase):
     def test_positions(self, ):
         """
         """
-        self.model.dbinit()
-        self.model.dbtemp()
-        mid = self.model.create_money("RU")
-        aid = self.model.create_account("ac1", mid, 1000)
-        paid = self.model.create_paper("stock", "stock")
+        (mid, aid, paid) = self.deals_init()
         di1 = self.model.create_deal(aid, {"paper_id" : paid,
                                            "count" : 10,
                                            "direction" : -1,
@@ -257,11 +250,7 @@ class sqlite_model_test(unittest.TestCase):
     def test_calculate_deals(self, ):
         """complex test of deal_view recalculation and group calculations
         """
-        self.model.dbinit()
-        self.model.dbtemp()
-        mid = self.model.create_money("RU")
-        aid = self.model.create_account("ac1", "RU", 1000)
-        paid = self.model.create_paper("stock", "stock")
+        (mid, aid, paid) = self.deals_init()
         dd = datetime.now()
         x = 1000
         ll = [(100, 1, 120, 1.2, 10),
@@ -302,11 +291,7 @@ class sqlite_model_test(unittest.TestCase):
     def test_groups(self, ):
         """special test of group making
         """
-        self.model.dbinit()
-        self.model.dbtemp()
-        mid = self.model.create_money("RU")
-        aid = self.model.create_account("ac1", mid, 1000)
-        paid = self.model.create_paper("stock", "stock")
+        (mid, aid, paid) = self.deals_init()
         dd = datetime(2010, 10, 10)
         for direc in [-1, -1, 1, -1]:
             for x in xrange(0, 5):
@@ -333,7 +318,7 @@ class sqlite_model_test(unittest.TestCase):
         self.model.make_groups(aid, paid)
         self.assertEqual(5, len(self.model.list_groups(aid, paid).fetchall()))
                      
-    def test_group_replacement(self, ):
+    def deals_init(self, ):
         """
         """
         self.model.dbinit()
@@ -341,6 +326,13 @@ class sqlite_model_test(unittest.TestCase):
         mid = self.model.create_money("RU")
         aid = self.model.create_account("ac1", mid, 1000)
         paid = self.model.create_paper("stock", "stock")
+        return (mid, aid, paid)
+
+        
+    def test_group_replacement(self, ):
+        """
+        """
+        (mid, aid, paid) = self.deals_init()
         dls = []
         d = datetime(2010, 10, 10)
         for x in xrange(0, 10):
@@ -358,6 +350,79 @@ class sqlite_model_test(unittest.TestCase):
         self.assertEqual(set(dls[5:]), set(map(lambda a: a[0], self.model._sqlite_connection.execute("select d.id from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ?", [gid1]).fetchall())))
 
 
+    def test_split_deals(self, ):
+        """reduction test of splitting deals
+        """
+        (mid, aid, paid) = self.deals_init()
+        d = datetime(2010, 10, 10)
+        sumc = 0
+        for x in xrange(0, 10):
+            cc = random.randint(1, 100)
+            sumc += cc
+            self.model.create_deal(aid, {"paper_id" : paid,
+                                         "count" : cc,
+                                         "direction" : (random.random() > 0.5 and 1 or -1),
+                                         "commission" : 1,
+                                         "points" : random.random() * 100 + 100,
+                                         "datetime" : d})
+            d += timedelta(0, random.randint(1, 20))
+
+        def go_on():
+            x = self.model._sqlite_connection.execute_select("select d.* from deals d where d.count > 1 and not exists(select dd.id from deals dd where dd.parent_deal_id = d.id) limit 1").fetchall()
+            if len(x) == 0:
+                return False
+            x = x[0]
+            self.model.split_deal(x["id"], random.randint(1, x["count"] - 1))
+            return True
+        
+        while go_on():
+            pass
+
+        self.assertEqual(0, self.model._sqlite_connection.execute("select count(d.id) from deals d where d.count <> 1 and not exists(select dd.id from deals dd where dd.parent_deal_id = d.id)").fetchone()[0])
+        self.assertEqual(0, self.model._sqlite_connection.execute("select count(dw.id) from deals_view dw inner join deals d on dw.deal_id = d.id where d.count <> 1 or dw.count <> 1").fetchone()[0])
+        self.assertEqual(sumc, self.model._sqlite_connection.execute("select count(*) from deals_view").fetchone()[0])
+        self.assertEqual(sumc, self.model._sqlite_connection.execute("select sum(d.count) as sum from deals d where not exists(select dd.id from deals dd where dd.parent_deal_id = d.id)").fetchone()[0])
+
+    def test_split_group(self, ):
+        """reduction test for split_group
+        """
+        (mid, aid, paid) = self.deals_init()
+        d = datetime(2010, 10, 10)
+        sumc = 0
+        sumv = 0
+        for x in xrange(0, 1000):
+            cc = random.randint(1, 10)
+            dirc = (random.random() > 0.5 and -1 or 1)
+            pr = random.random() * 100 + 100
+            sumc += cc
+            sumv += dirc * cc * pr
+            self.model.create_deal(aid, {"paper_id" : paid,
+                                         "datetime" : d,
+                                         "count" : cc,
+                                         "points" : pr,
+                                         "direction" : dirc,
+                                         "commission" : 1})
+            d += timedelta(0, random.randint(1, 7))
+        self.model.make_groups(aid, paid)
+        
+        def go_on():
+            g = self.model._sqlite_connection.execute_select("select * from (select g.id as id, sum(d.count) as count from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on d.id = dg.deal_id group by g.id) where count > 1 limit 1").fetchall()
+            if len(g) == 0:
+                return False
+            g = g[0]
+            (g1, g2) = self.model.split_group(g["id"], random.randint(1, g["count"] - 1))
+            self.assertEqual(1, self.model._sqlite_connection.execute("select count(*) from deal_groups where id = ?", [g1]).fetchone()[0])
+            self.assertEqual(1, self.model._sqlite_connection.execute("select count(*) from deal_groups where id = ?", [g2]).fetchone()[0])
+            self.assertLessEqual(1, self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g1]).fetchone()[0])
+            self.assertLessEqual(1, self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g2]).fetchone()[0])
+            
+            cc1 = self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g1]).fetchall()
+            self.assertGreater(len(cc1), 0)
+            return True
+        while go_on():
+            pass
+        
+        self.assertEqual(sumc, self.model._sqlite_connection.execute("select count(*) from deals_view"))
         
 
 if __name__ == '__main__':

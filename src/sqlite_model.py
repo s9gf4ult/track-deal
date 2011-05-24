@@ -823,33 +823,58 @@ class sqlite_model(common_model):
         - `gid`:
         - `count`:
         """
-        (c, ) = self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = gid group by dg.group_id").fetchone()
+        (c, ) = self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [gid]).fetchone()
         if c <= count:
             return gid
         else:
             deals = []
             sum = 0
-            for deal in self._sqlite_connection.execute_select("select d.* from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = gid order by d.datetime"):
+            for deal in self._sqlite_connection.execute_select("select d.* from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? order by d.datetime", [gid]):
                 deals.append(deal["id"])
                 sum += deal["count"]
                 if sum == count:
-                    return self.create_group(deals)
+                    return (self.create_group(deals), gid)
                 elif sum > count:
                     (d, dd) = self.split_deal(deals[-1], deal["count"] - (count - sum))
-                    return self.create_group(deals[:-1] + [d])
+                    return (self.create_group(deals[:-1] + [d]), gid)
+
+    def __recalculate_deals_by_id__(self, deal_id, *args, **kargs):
+        """get account_id and paper_id from deal and pass to __recalculate_deals__
+        Arguments:
+        - `deal_id`:
+        - `*args`:
+        - `**kargs`:
+        """
+        (aid, paid) = self._sqlite_connection.execute("select account_id, paper_id from deals where id = ?", [deal_id]).fetchone()
+        self.__recalculate_deals__(aid, paid)
+
                 
-    @safe_execution(__recalculate_deals__, "deals_changed", "papers_changed", "accounts_changed", "points_changed")
-    @confirm_safety("deals_changed")
+    @confirm_safety("deals_changed", "papers_changed", "accounts_changed", "points_changed")
+    @safe_execution(__recalculate_deals_by_id__, "deals_changed", "papers_changed", "accounts_changed", "points_changed")
     def split_deal(self, deal_id, count):
-        """return tuple with 2 deal_id one is the deal with `count` papers second with remainder
+        """return tuple with 2 deal_id. One is the deal with `count` papers, second with remainder
+        if count of deal is less or equal to `count` then return tuple (deal_id, None)
         Arguments:
         - `deal_id`:
         - `count`: needed count of papers for deal
         """
-        pass
-
-                
-        
+        deal = self._sqlite_connection.execute_select("select * from deals where id = ?",[deal_id]).fetchall()[0]
+        if count >= deal["count"]:
+            return (deal["id"], None)
+        else:
+            nd1 = copy(deal)
+            del nd1["id"]
+            nd1["parent_deal_id"] = deal["id"]
+            nd2 = copy(nd1)
+            nd1["count"] = count
+            nd2["count"] = deal["count"] - count
+            d1 = self.create_deal(deal["account_id"], nd1)
+            d2 = self.create_deal(deal["account_id"], nd2)
+            (pap, mon) = self._sqlite_connection.execute("select paper_ballance_before, net_before from deals_view where deal_id = ?", [deal["id"]]).fetchone()
+            self._sqlite_connection.execute("delete from deals_view where deal_id = ?", [deal["id"]])
+            self._calculate_deals_with_initial(self._sqlite_connection.execute_select("select * from deals where id = ? or id = ?",[d1, d2]), mon, pap)
+            return (d1, d2)
+            
 
     @raise_db_closed
     def start_action(self, action_name):
