@@ -270,7 +270,7 @@ def format_select_part(select_part):
             rlist.append("{0} as {1}".format(sp[0], sp[1]))
     return reduce_by_string(", ", rlist)
             
-class safe_executeion(object):
+class safe_execution(object):
     """Decorator executes given method if given attribute of the class is True
     and set this attribute to False after that, in any way decorated method will be executed
     """

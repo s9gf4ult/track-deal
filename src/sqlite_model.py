@@ -722,7 +722,7 @@ class sqlite_model(common_model):
 
 
     @raise_db_closed
-    @safe_executeion(__recalculate_deals__, "deals_changed")
+    @safe_execution(__recalculate_deals__, "deals_changed")
     def make_groups(self, account_id, paper_id, time_distance = 5):
         """
         Arguments:
@@ -775,7 +775,7 @@ class sqlite_model(common_model):
         self.remake_groups(account_id, paper_id, time_distance)
 
 
-    @safe_executeion(__remake_groups__, "deals_changed")
+    @safe_execution(__remake_groups__, "deals_changed")
     def make_positions(self, account_id, paper_id, time_distance = 5):
         """automatically makes positions
         Arguments:
@@ -837,7 +837,17 @@ class sqlite_model(common_model):
                 elif sum > count:
                     (d, dd) = self.split_deal(deals[-1], deal["count"] - (count - sum))
                     return self.create_group(deals[:-1] + [d])
-            
+                
+    @safe_execution(__recalculate_deals__, "deals_changed", "papers_changed", "accounts_changed", "points_changed")
+    @confirm_safety("deals_changed")
+    def split_deal(self, deal_id, count):
+        """return tuple with 2 deal_id one is the deal with `count` papers second with remainder
+        Arguments:
+        - `deal_id`:
+        - `count`: needed count of papers for deal
+        """
+        pass
+
                 
         
 
