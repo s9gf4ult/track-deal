@@ -829,7 +829,6 @@ class sqlite_model(common_model):
         self.recalculate_deals(account_id, paper_id)
 
 
-    @safe_execution(__recalculate_deals_by_group_id__, "deals_changed")
     def split_group(self, gid, count):
         """return tuple (gid1, gid2)
         if count >= sum of counts all deals assigned to group `gid` then gid2 = None
