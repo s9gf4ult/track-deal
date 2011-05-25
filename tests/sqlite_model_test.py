@@ -372,7 +372,13 @@ class sqlite_model_test(unittest.TestCase):
             if len(x) == 0:
                 return False
             x = x[0]
-            self.model.split_deal(x["id"], random.randint(1, x["count"] - 1))
+            rnd = random.randint(1, x["count"] - 1)
+            (d, dd) = self.model.split_deal(x["id"], rnd)
+            self.assertEqual(rnd, self.model._sqlite_connection.execute("select count from deals where id = ?", [d]).fetchone()[0])
+            self.assertEqual(x["count"] - rnd, self.model._sqlite_connection.execute("select count from deals where id = ?", [dd]).fetchone()[0])
+            self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deals_view where deal_id = ?", [x["id"]]).fetchone()[0])
+            self.assertEqual(2, self.model._sqlite_connection.execute("select count(*) from deals_view where deal_id = ? or deal_id = ?", [d, dd]).fetchone()[0])
+                             
             return True
         
         while go_on():
@@ -390,7 +396,7 @@ class sqlite_model_test(unittest.TestCase):
         d = datetime(2010, 10, 10)
         sumc = 0
         sumv = 0
-        for x in xrange(0, 1000):
+        for x in xrange(0, 10):
             cc = random.randint(1, 10)
             dirc = (random.random() > 0.5 and -1 or 1)
             pr = random.random() * 100 + 100
@@ -410,19 +416,25 @@ class sqlite_model_test(unittest.TestCase):
             if len(g) == 0:
                 return False
             g = g[0]
-            (g1, g2) = self.model.split_group(g["id"], random.randint(1, g["count"] - 1))
+            rnd = random.randint(1, g["count"] - 1)
+            (g1, g2) = self.model.split_group(g["id"], rnd)
+            self.assertNotEqual(None, g1)
+            self.assertNotEqual(None, g2)
             self.assertEqual(1, self.model._sqlite_connection.execute("select count(*) from deal_groups where id = ?", [g1]).fetchone()[0])
             self.assertEqual(1, self.model._sqlite_connection.execute("select count(*) from deal_groups where id = ?", [g2]).fetchone()[0])
             self.assertLessEqual(1, self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g1]).fetchone()[0])
             self.assertLessEqual(1, self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g2]).fetchone()[0])
             
-            cc1 = self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g1]).fetchall()
-            self.assertGreater(len(cc1), 0)
+            (cc1, ) = self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g1]).fetchone()
+            self.assertEqual(cc1, rnd)
+            (cc2, ) = self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g2]).fetchone()
+            self.assertEqual(cc2, g["count"] - rnd)
             return True
         while go_on():
             pass
         
-        self.assertEqual(sumc, self.model._sqlite_connection.execute("select count(*) from deals_view"))
+        self.assertEqual(sumc, self.model._sqlite_connection.execute("select count(*) from deals_view").fetchone()[0])
+        self.assertAlmostEqual(sumv, self.model._sqlite_connection.execute("select sum(volume * direction) from deals_view").fetchone()[0])
         
 
 if __name__ == '__main__':

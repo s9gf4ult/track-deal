@@ -749,7 +749,7 @@ class sqlite_model(common_model):
         - `paper_id`:
         - `time_distance`:
         """
-        self._sqlite_connection.execute("delete from deal_groups where id in (select g.id from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id group by g.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
+        self._sqlite_connection.execute("delete from deal_groups where id in (select distinct g.id from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
         self._sqlite_connection.execute("delete from deal_groups where account_id = ? and paper_id = ?", [account_id, paper_id])
         self.make_groups(account_id, paper_id, time_distance)
                 
@@ -817,26 +817,40 @@ class sqlite_model(common_model):
             (g, gg) = self.split_group(gid2, c1)
             return (gid1, g)
 
+    @safe_execution(__recalculate_deals__, "deals_changed")
     def split_group(self, gid, count):
-        """
+        """return tuple (gid1, gid2)
+        if count >= sum of counts all deals assigned to group `gid` then gid2 = None
         Arguments:
-        - `gid`:
-        - `count`:
+        - `gid`: Group id split to
+        - `count`: count of papers of papers assigned to gid1
         """
         (c, ) = self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [gid]).fetchone()
         if c <= count:
-            return gid
+            return (gid, None)
         else:
             deals = []
-            sum = 0
+            summ = 0
             for deal in self._sqlite_connection.execute_select("select d.* from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? order by d.datetime", [gid]):
                 deals.append(deal["id"])
-                sum += deal["count"]
-                if sum == count:
+                summ += deal["count"]
+                if summ == count:
                     return (self.create_group(deals), gid)
-                elif sum > count:
-                    (d, dd) = self.split_deal(deals[-1], deal["count"] - (count - sum))
+                elif summ > count:
+                    self.remove_from_group(deals[-1])
+                    (d, dd) = self.split_deal(deals[-1], deal["count"] - (summ - count))
+                    self.add_to_group(gid, dd)
                     return (self.create_group(deals[:-1] + [d]), gid)
+
+    def remove_from_group(self, deal_id):
+        """remove deal(s) from group
+        Arguments:
+        - `gid`:
+        - `deal_id`:
+        """
+        deals = map(lambda a: (a,), (isinstance(deal_id, int) and [deal_id] or deal_id))
+        self._sqlite_connection.executemany("delete from deal_group_assign where deal_id = ?", deals)
+
 
     def __recalculate_deals_by_id__(self, deal_id, *args, **kargs):
         """get account_id and paper_id from deal and pass to __recalculate_deals__
