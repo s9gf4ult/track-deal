@@ -422,8 +422,8 @@ class sqlite_model_test(unittest.TestCase):
             self.assertNotEqual(None, g2)
             self.assertEqual(1, self.model._sqlite_connection.execute("select count(*) from deal_groups where id = ?", [g1]).fetchone()[0])
             self.assertEqual(1, self.model._sqlite_connection.execute("select count(*) from deal_groups where id = ?", [g2]).fetchone()[0])
-            self.assertLessEqual(1, self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g1]).fetchone()[0])
-            self.assertLessEqual(1, self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g2]).fetchone()[0])
+            self.assertTrue(1 <= self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g1]).fetchone()[0])
+            self.assertTrue(1 <= self.model._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.id = ? group by g.id", [g2]).fetchone()[0])
             
             (cc1, ) = self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g1]).fetchone()
             self.assertEqual(cc1, rnd)
