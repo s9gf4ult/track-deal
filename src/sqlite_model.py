@@ -513,6 +513,7 @@ class sqlite_model(common_model):
         return ret
 
     @raise_db_closed
+    @confirm_safety("deals_changed")
     def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
         """Return position id built from groups
         Arguments:
@@ -785,6 +786,7 @@ class sqlite_model(common_model):
         """
         
         def go_on():
+            print("go on")
             g1 = self._sqlite_connection.execute_select("select * from (select g.id as id, g.direction as direction, min(d.datetime) as mindatetime, max(d.datetime) as maxdatetime from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.account_id = ? and g.paper_id = ? group by g.id) order by maxdatetime, mindatetime limit 1", [account_id, paper_id]).fetchall()
             if len(g1) == 0:
                 return False
