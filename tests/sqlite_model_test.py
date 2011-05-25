@@ -442,24 +442,26 @@ class sqlite_model_test(unittest.TestCase):
         """
         (mid, aid, paid) = self.deals_init()
         d = datetime(2010, 10, 10)
-        for dir in [1, -1]:
-            for x in xrange(0, 500):
-                price = random.random() * 100 + 100
-                count = random.randint(1, 7)
-                self.model.create_deal(aid, {"paper_id" : paid,
-                                             "count" : count,
-                                             "direction" : dir,
-                                             "commission" : 0.1,
-                                             "points" : price,
-                                             "datetime" : d})
-                d += timedelta(0, random.randint(0, 7))
-        self.model.make_groups(aid, paid)
-        for g1 in self.model._sqlite_connection.execute_select("select * from deal_groups limit 1"):
-            for g2 in self.model._sqlite_connection.execute_select("select * from deal_groups where direction = ? limit 1", [g1["direction"]]):
-                (gg1, gg2) = self.model.try_make_ballanced_groups(g1["id"], g2["id"])
-                self.assertEqual(self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [gg1]).fetchone()[0], self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [gg2]).fetchone()[0])
-                
-
+        for (a, b) in [(1, 10),
+                       (20, 12),
+                       (3, 3),
+                       (10, 10),
+                       (1, 1)]:
+            for x in [a, b]:
+                self.model.create_group(self.model.create_deal(aid, {"paper_id" : paid,
+                                                                     "commission" : 0.1,
+                                                                     "direction" : 1,
+                                                                     "points" : 100,
+                                                                     "count" : x,
+                                                                     "datetime" : d}))
+                d += timedelta(0, random.randint(1, 10))
+            (g1, g2) = self.model._sqlite_connection.execute_select("select * from deal_groups")
+            self.assertNotEqual(None, g1)
+            self.assertNotEqual(None, g2)
+            (g1, g2) = self.model.try_make_ballanced_groups(g1["id"], g2["id"])
+            self.assertEqual(self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g1]).fetchone()[0], self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g2]).fetchone()[0])
+            self.assertEqual(min(a, b), self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [g1]).fetchone()[0])
+            self.model._sqlite_connection.execute("delete from deal_groups")
         
     def test_make_positions(self, ):
         """
@@ -473,14 +475,19 @@ class sqlite_model_test(unittest.TestCase):
             for dirr in [direction, -direction]:
                 for y in xrange(0, 10):
                     self.model.create_deal(aid, {"paper_id" : paid,
-                                             "count" : count,
-                                             "commission" : 0.1,
-                                             "direction" : dirr,
-                                             "datetime" : d,
-                                             "points" : price})
+                                                 "count" : count,
+                                                 "commission" : 0.1,
+                                                 "direction" : dirr,
+                                                 "datetime" : d,
+                                                 "points" : price})
                     d += timedelta(0, random.randint(1, 7))
         self.model.make_positions(aid, paid)
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deals where position_id is null").fetchone()[0])
+        for p in self.model._sqlite_connection.execute_select("select * from positions"):
+            self.assertAlmostEqual(0, self.model._sqlite_connection.execute("select sum(d.count * d.direction) from deals d where d.position_id = ?", [p["id"]]).fetchone()[0])
+            self.assertEqual(p["count"], self.model._sqlite_connection.execute("select sum(d.count) from deals d where d.direction = 1 and d.position_id = ?", [p["id"]]).fetchone()[0])
+        self.model.remake_groups(aid, paid)
+        self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
                                              
             
 

@@ -786,7 +786,6 @@ class sqlite_model(common_model):
         """
         
         def go_on():
-            print("go on")
             g1 = self._sqlite_connection.execute_select("select * from (select g.id as id, g.direction as direction, min(d.datetime) as mindatetime, max(d.datetime) as maxdatetime from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.account_id = ? and g.paper_id = ? group by g.id) order by maxdatetime, mindatetime limit 1", [account_id, paper_id]).fetchall()
             if len(g1) == 0:
                 return False
@@ -809,7 +808,7 @@ class sqlite_model(common_model):
         - `gid1`: group_id
         - `gid2`:
         """
-        (c1, c2) = map(lambda a: self._sqlite_connection.execute("select count(d.id) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]).fetchone()[0], [gid1, gid2])
+        (c1, c2) = map(lambda a: self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]).fetchone()[0], [gid1, gid2])
         if c1 == c2:
             return (gid1, gid2)
         elif c1 > c2:
@@ -819,7 +818,18 @@ class sqlite_model(common_model):
             (g, gg) = self.split_group(gid2, c1)
             return (gid1, g)
 
-    @safe_execution(__recalculate_deals__, "deals_changed")
+    def __recalculate_deals_by_group_id__(self, gid, *args, **kargs):
+        """
+        Arguments:
+        - `gid`:
+        - `*args`:
+        - `**kargs`:
+        """
+        (account_id, paper_id) = self._sqlite_connection.execute("select account_id, paper_id from deal_groups where id = ?", [gid]).fetchone()
+        self.recalculate_deals(account_id, paper_id)
+
+
+    @safe_execution(__recalculate_deals_by_group_id__, "deals_changed")
     def split_group(self, gid, count):
         """return tuple (gid1, gid2)
         if count >= sum of counts all deals assigned to group `gid` then gid2 = None
