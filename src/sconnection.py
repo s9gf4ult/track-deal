@@ -116,9 +116,11 @@ class sconnection(sqlite3.Connection):
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_adapter(datetime.date, lambda a: time.mktime(a.timetuple()))
         sqlite3.register_adapter(datetime.time, lambda a: int(a.hour * 3600 + a.minute * 60 + a.second))
+        sqlite3.register_adapter(datetime.timedelta, lambda a: a.days * 3600 * 24 + a.seconds)
         sqlite3.register_converter('datetime', any_to_datetime)
         sqlite3.register_converter("date", any_to_date)
         sqlite3.register_converter("time", any_to_time)
+        sqlite3.register_converter("timedelta", any_to_timedelta)
 
         super(sconnection, self).__init__(connect_string, detect_types = sqlite3.PARSE_DECLTYPES)
         self.execute("pragma foreign_keys=on")

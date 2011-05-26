@@ -28,7 +28,7 @@
           <dia:boolean val="false"/>
         </dia:attribute>
         <dia:attribute name="scaling">
-          <dia:real val="0.13175117969512939"/>
+          <dia:real val="0.12996698915958405"/>
         </dia:attribute>
         <dia:attribute name="fitto">
           <dia:boolean val="true"/>
@@ -4084,9 +4084,6 @@
       <dia:attribute name="elem_height">
         <dia:real val="3.3499999999999996"/>
       </dia:attribute>
-      <dia:attribute name="border_width">
-        <dia:real val="0.10000000000000001"/>
-      </dia:attribute>
       <dia:attribute name="show_background">
         <dia:boolean val="true"/>
       </dia:attribute>
@@ -4795,7 +4792,7 @@
         <dia:point val="14.775,53.1"/>
       </dia:attribute>
       <dia:attribute name="obj_bb">
-        <dia:rectangle val="14.725,53.05;28.415,112.75"/>
+        <dia:rectangle val="14.725,53.05;28.415,114.35"/>
       </dia:attribute>
       <dia:attribute name="elem_corner">
         <dia:point val="14.775,53.1"/>
@@ -4804,7 +4801,7 @@
         <dia:real val="13.59"/>
       </dia:attribute>
       <dia:attribute name="elem_height">
-        <dia:real val="59.599999999999923"/>
+        <dia:real val="61.199999999999918"/>
       </dia:attribute>
       <dia:attribute name="name">
         <dia:string>#positions_view#</dia:string>
@@ -4943,6 +4940,29 @@
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#manual_made#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="type">
+            <dia:string>#integer#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="value">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="comment">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="visibility">
+            <dia:enum val="0"/>
+          </dia:attribute>
+          <dia:attribute name="abstract">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+          <dia:attribute name="class_scope">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+        </dia:composite>
+        <dia:composite type="umlattribute">
+          <dia:attribute name="name">
+            <dia:string>#do_not_delete#</dia:string>
           </dia:attribute>
           <dia:attribute name="type">
             <dia:string>#integer#</dia:string>
@@ -5104,6 +5124,29 @@
         <dia:composite type="umlattribute">
           <dia:attribute name="name">
             <dia:string>#paper_type#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="type">
+            <dia:string>#text#</dia:string>
+          </dia:attribute>
+          <dia:attribute name="value">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="comment">
+            <dia:string>##</dia:string>
+          </dia:attribute>
+          <dia:attribute name="visibility">
+            <dia:enum val="0"/>
+          </dia:attribute>
+          <dia:attribute name="abstract">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+          <dia:attribute name="class_scope">
+            <dia:boolean val="false"/>
+          </dia:attribute>
+        </dia:composite>
+        <dia:composite type="umlattribute">
+          <dia:attribute name="name">
+            <dia:string>#paper_stock#</dia:string>
           </dia:attribute>
           <dia:attribute name="type">
             <dia:string>#text#</dia:string>

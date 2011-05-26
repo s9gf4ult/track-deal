@@ -464,4 +464,10 @@ class pass_to_method(object):
         ret.__doc__ = func.__doc__
         return ret
 
-    
+def any_to_timedelta(value):
+    """
+    return timedelta from anything convertable to int
+    Arguments:
+    - `value`:
+    """
+    return datetime.timedelta(0, int(value))

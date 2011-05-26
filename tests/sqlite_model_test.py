@@ -493,8 +493,7 @@ class sqlite_model_test(unittest.TestCase):
     def test_complex(self, ):
         """complex test simulating work with model by user interface 
         """
-        pass
-
+        self.model = sqlite_model.sqlite_model
 
 
 if __name__ == '__main__':

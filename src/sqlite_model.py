@@ -453,7 +453,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("create an account")
+    @in_action(lambda name, *args, **kargs: u"create account {0}".format(name))
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
         Arguments:
@@ -997,10 +997,48 @@ class sqlite_model(common_model):
         - `pid`:
         """
         if pid == None:
-            cur = self._sqlite_connection.execute("select * from positions order by close_datetime, open_datetime")
-            net = self.get_acc
+            cur = self._sqlite_connection.execute_select("select * from positions order by close_datetime, open_datetime")
+            net = self.get_account(aid)["money_count"]
+            self._calculate_positions_with_initial(cur, net, net)
+        else:
+            cur = self._sqlite_connection.execute_select("select p.* from positions p, positions pp where pp.id = ? and p.close_datetime >= pp.close_datetime order by close_datetime, open_datetime",[pid])
+            (net, gross) = self._sqlite_connection.execute("select net_after, gross_after from positions_view where position_id = ?", [pid]) or (None, None)
+            if net == gross == None:
+                return self.recalculate_positions(aid, paid)
+            self._calculate_positions_with_initial(cur, net, gross)
 
-    def recalculate_positions(self, aid, paid)
+    def _calculate_positions_with_initial(self, cursor, net, gross):
+        """
+        Arguments:
+        - `cursor`:
+        - `net`: net start from
+        - `gross`: gross start from
+        """
+        def do_the_work(post, netx, grossx):
+            
+        
+        first = True
+        for pos in cursor:
+            posx = copy(pos)
+            del posx["id"]
+            posx["position_id"] = pos["id"]
+            if first:
+                common = {}
+                (common["money_id"], ) = self._sqlite_connection.execute("select money_id from accounts where id = ? limit 1", [pos["account_id"]]).fetchone()
+                (common["point"], common["step"]) = self._sqlite_connection.execute("select point, step from points where money_id = ? and paper_id = ?", [common["money_id"], common["paper_id"]]).fetchone() or (1, 1)
+                (common["paper_type"], common["paper_stock"], common["paper_class"], common["paper_name"]) = self._sqlite_connection.execute("select type, stock, class, name from papers where id = ?", [common["paper_id"]]).fetchone()
+            add_hash(posx, common)
+            if first:
+                do_the_work(posx, net, gross)
+            else:
+                do_the_work(posx, oldpos["net_after"], oldpos["gross_after"])
+            oldpos = posx
+            first = False
+            
+                
+            
+
+    def recalculate_positions(self, aid, paid):
         """
         Arguments:
         - `aid`: account id
