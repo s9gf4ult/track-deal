@@ -114,7 +114,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("change global data")
+    @in_action(lambda self, parameters: "add parameters {0}".format(reduce_by_string(", ", paramters.keys())))
     @pass_to_method(add_global_data)
     def taadd_global_data(self, paramters):
         """
@@ -147,7 +147,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("removing global data")
+    @in_action(lambda self, name, *args, **kargs: "remove global data {0}".format(reduce_by_string(", ", (isinstance(name, basestring) and [name] or name))))
     @pass_to_method(remove_global_data)
     def taremove_global_data(self, name):
         """
@@ -171,7 +171,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("add database attributes")
+    @in_action(lambda self, paramters, *args, **kargs: "add database attributes {0}".format(reduce_by_string(", ", parameter.keys())))
     @pass_to_method(add_database_attributes)
     def taadd_database_attributes(self, paramters):
         """
@@ -202,7 +202,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("remove database attribute")
+    @in_action(lambda self, name, *args, **kargs: "remove database attributes {0}".format(reduce_by_string(", ", (isinstance(name, basestring) and [name] or name))))
     @pass_to_method(remove_database_attribute)
     def taremove_database_attribute(self, name):
         """
@@ -234,7 +234,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("change paper")
+    @in_action(lambda self, type, name, *args, **kargs: "create paper class {0}, name {1}".format(type, name))
     @pass_to_method(create_paper)
     def tacreate_paper(self, *args, **kargs):
         """
@@ -451,6 +451,9 @@ class sqlite_model(common_model):
         else:
             self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
 
+    @raise_db_closed
+    @in_transaction
+    @in_action("create an account")
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
         Arguments:
@@ -986,4 +989,25 @@ class sqlite_model(common_model):
         else:
             return None
         
+    def calculate_positions(self, aid, paid, pid = None):
+        """
+        Arguments:
+        - `aid`:
+        - `paid`:
+        - `pid`:
+        """
+        if pid == None:
+            cur = self._sqlite_connection.execute("select * from positions order by close_datetime, open_datetime")
+            net = self.get_acc
+
+    def recalculate_positions(self, aid, paid)
+        """
+        Arguments:
+        - `aid`: account id
+        - `paid`: paper id
+        """
+        self._sqlite_connection.execute("delete from positions_view where account_id = ? and paper_id = ?", [aid, paid])
+        self._sqlite_connection.execute("delete from positions_view where id in (select pw.id from positions_view pw inner join positions p on p.id = pw.position_id where p.account_id = ? and p.paper_id = ?)",[aid, paid])
+        self.calculate_positions(aid, paid)
+
 

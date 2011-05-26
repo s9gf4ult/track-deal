@@ -413,7 +413,7 @@ class in_action(object):
         def ret(*args, **kargs):
             rtt = None
             try:
-                args[0].start_action(action_name)
+                args[0].start_action(self._action_name(*args, **kargs))
                 rtt = method(*args, **kargs)
             finally:
                 args[0].end_action()
