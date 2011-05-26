@@ -481,3 +481,4 @@ CREATE TEMPORARY TRIGGER _update_user_deal_attributes AFTER UPDATE ON user_deal_
 INSERT INTO undo_queries(step_id, query) values ((SELECT step_id from current_hystory_position limit 1), 'UPDATE user_deal_attributes SET deal_id = '||quote(old.deal_id)||',name = '||quote(old.name)||',value = '||quote(old.value)||' WHERE id = '||quote(new.id));
 INSERT INTO redo_queries(step_id, query) values ((SELECT step_id from current_hystory_position limit 1), 'UPDATE user_deal_attributes SET deal_id = '||quote(new.deal_id)||',name = '||quote(new.name)||',value = '||quote(new.value)||' WHERE id = '||quote(old.id));
 END;
+

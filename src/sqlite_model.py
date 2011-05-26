@@ -94,19 +94,16 @@ class sqlite_model(common_model):
         """
         self._sqlite_connection.begin_transaction()
 
-    @raise_db_closed
     def commit(self, ):
         """Commits
         """
         self._sqlite_connection.commit()
 
-    @raise_db_closed
     def rollback(self, ):
         """Rollback
         """
         self._sqlite_connection.rollback()
 
-    @raise_db_closed
     def add_global_data(self, parameters):
         """adds global data and
         Arguments:
@@ -115,7 +112,6 @@ class sqlite_model(common_model):
         names = parameters.keys()
         self._sqlite_connection.insert("global_data", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names))) 
 
-    @raise_db_closed
     def get_global_data(self, name):
         """returns value of global data or None if there is no one
         Arguments:
@@ -127,7 +123,6 @@ class sqlite_model(common_model):
         else:
             return None
 
-    @raise_db_closed
     def remove_global_data(self, name):
         """Removes global parameters
         Arguments:
@@ -139,13 +134,11 @@ class sqlite_model(common_model):
             name = map(lambda a: (a, ), name) 
         self._sqlite_connection.executemany("delete from global_data where name = ?", name)
 
-    @raise_db_closed
     def list_global_data(self, ):
         """Returns list of names of global parameters
         """
         return map(lambda a: a[0], self._sqlite_connection.execute("select name from global_data"))
 
-    @raise_db_closed
     def add_database_attributes(self, parameters):
         """adds database attributes and
         Arguments:
@@ -154,7 +147,6 @@ class sqlite_model(common_model):
         names = parameters.keys()
         self._sqlite_connection.insert("database_attributes", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names))) 
 
-    @raise_db_closed
     def get_database_attribute(self, name):
         """returns value of global parameter or None if there is no one
         Arguments:
@@ -166,7 +158,6 @@ class sqlite_model(common_model):
         else:
             return None
 
-    @raise_db_closed
     def remove_database_attribute(self, name):
         """Removes global parameters
         Arguments:
@@ -178,13 +169,11 @@ class sqlite_model(common_model):
             name = map(lambda a: (a, ), name) 
         self._sqlite_connection.executemany("delete from database_attributes where name = ?", name)
 
-    @raise_db_closed
     def list_database_attributes(self, ):
         """Returns list of names of global parameters
         """
         return map(lambda a: a[0], self._sqlite_connection.execute("select name from database_attributes"))
     
-    @raise_db_closed
     def create_paper(self, type, name, stock = None, class_name = None, full_name = None):
         """creates new paper and returns it's id
         
@@ -201,7 +190,6 @@ class sqlite_model(common_model):
                                                          "name" : name,
                                                          "full_name" : full_name}).lastrowid
 
-    @raise_db_closed
     def get_paper(self, type_or_id, name = None):
         """returns paper by name or by id
         if there is no one returns None
@@ -217,7 +205,6 @@ class sqlite_model(common_model):
             raise od_exception("get_paper: wrong arguments")
         return (len(ret) > 0 and ret[0] or None)
 
-    @raise_db_closed
     @remover_decorator("papers", {int : "id"})
     def remove_paper(self, type_or_id, name = None):
         """Removes one paper by type and name or many papers by id
@@ -229,7 +216,6 @@ class sqlite_model(common_model):
         if isinstance(type_or_id, basestring) and isinstance(name, basestring) and not is_null_or_empty(name):
             self._sqlite_connection.execute("delete from papers where type = ? and name = ?", [type_or_id, name])
 
-    @raise_db_closed
     def list_papers(self, order_by = []):
         """Returns list of papers
         """
@@ -238,8 +224,22 @@ class sqlite_model(common_model):
             q += "order by {0}".format(reduce_by_string(", ", order_by))
         return self._sqlite_connection.execute_select(q)
 
+    def change_paper(self, paper_id, fields):
+        """changes existing paper
+        Arguments:
+        - `paper_id`:
+        - `fields`: hash {"field" : value}
+        """
+        if len(fields) > 0:
+            if self._sqlite_connection.execute("select count(*) from papers where id = ?", [paper_id]).fetchone()[0] > 0:
+                remhash(fields, "id")
+                self._sqlite_connection.update("papers", fields)
+                for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals where paper_id = ?", [paper_id]):
+                    self.recalculate_deals(aid, paper_id)
+                for (aid, ) in self._sqlite_connection.execute("select distinct account_id from positions where paper_id = ?", [paper_id]):
+                    self.recalculate_positions(aid, paper_id)
+                
 
-    @raise_db_closed
     def create_candles(self, paper_id, candles):
         """Creates one or several candles of paper `paper_id`
         Arguments:
@@ -256,7 +256,6 @@ class sqlite_model(common_model):
         self._sqlite_connection.insert("candles", candles)
         
 
-    @raise_db_closed
     def get_candle(self, candle_id):
         """Get candle by id
         Arguments:
@@ -265,7 +264,6 @@ class sqlite_model(common_model):
         ret = self._sqlite_connection.execute_select("select * from candles where id = ?", [candle_id]).fetchall()
         return (len(ret) > 0 and ret[0] or None)
 
-    @raise_db_closed
     @remover_decorator("candles", {int : "id"})
     def remove_candle(self, candles_id):
         """removes one or more candles
@@ -274,7 +272,6 @@ class sqlite_model(common_model):
         """
         pass
 
-    @raise_db_closed
     def list_candles(self, paper_id, order_by = []):
         """Return ordered list of candles
         Arguments:
@@ -287,7 +284,6 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select(q, [paper_id])
 
 
-    @raise_db_closed
     def create_money(self, name, full_name = None):
         """Creates new money and return it's id
         Arguments:
@@ -297,7 +293,6 @@ class sqlite_model(common_model):
         return self._sqlite_connection.insert("moneys", {"name" : name,
                                                          "full_name" : full_name}).lastrowid
 
-    @raise_db_closed
     def get_money(self, name_or_id):
         """Returns money object by id or name
         Arguments:
@@ -312,7 +307,6 @@ class sqlite_model(common_model):
         
         return (len(ret) > 0 and ret[0] or None)
 
-    @raise_db_closed
     @remover_decorator("moneys", {int : "id", basestring : "name"})
     def remove_money(self, name_or_id):
         """Removes money by name or by id
@@ -321,14 +315,12 @@ class sqlite_model(common_model):
         """
         pass
 
-    @raise_db_closed
     def list_moneys(self, order_by = []):
         """return list of moneys
         """
         q = "select * from moneys{0}".format((len(order_by) > 0 and " order by {0}".format(reduce_by_string(", ", order_by))  or ""))
         return self._sqlite_connection.execute_select(q)
     
-    @raise_db_closed
     def create_point(self, paper_id, money_id, point, step):
         """Creates point explanation and return it's id
         Arguments:
@@ -339,7 +331,6 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step}).lastrowid
 
-    @raise_db_closed
     def list_points(self, money_id = None, order_by = []):
         """Return list of points
         Arguments:
@@ -356,7 +347,6 @@ class sqlite_model(common_model):
         else:
             return self._sqlite_connection.execute_select(q)
 
-    @raise_db_closed
     def get_point(self, id_or_paper_id, money_id = None):
         """Returns point explanation by id or by paper_id and money_id
         Arguments:
@@ -369,7 +359,6 @@ class sqlite_model(common_model):
             ret = self._sqlite_connection.execute_select("select * from points where id = ?", [id_or_paper_id]).fetchall()
         return (len(ret) > 0 and ret[0] or None)
 
-    @raise_db_closed
     def remove_point(self, id_or_paper_id, money_id = None):
         """Removes point of this paper / money or by id
         Arguments:
@@ -381,7 +370,6 @@ class sqlite_model(common_model):
         else:
             self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
 
-    @raise_db_closed
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
         Arguments:
@@ -396,9 +384,11 @@ class sqlite_model(common_model):
                 raise od_exception("There is no such money {0}".format(money_id_or_name))
         else:
             mid = money_id_or_name
-        return self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count}).lastrowid
+        aid = self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count}).lastrowid
+        if self.get_global_data("current_account") == None and self._sqlite_connection.execute("select count(*) from accounts").fetchone()[0] == 1:
+            self.add_global_data({"current_account" : aid})
+        return aid
 
-    @raise_db_closed
     def change_account(self, aid, money_id_or_name = None, money_count = None, comment = None):
         """changes existing account
         Arguments:
@@ -419,13 +409,11 @@ class sqlite_model(common_model):
             self._sqlite_connection.update("accounts", sets, "id = ?", [aid])
             
 
-    @raise_db_closed
     def list_accounts(self, order_by = []):
         """Return list of accounts
         """
         return self._sqlite_connection.execute_select("select * from accounts{0}".format(order_by_print(order_by)))
 
-    @raise_db_closed
     @remover_decorator("accounts", {int : "id", basestring : "name"})
     def remove_account(self, name_or_id):
         """Removes account by name or by id
@@ -435,7 +423,6 @@ class sqlite_model(common_model):
         pass
 
             
-    @raise_db_closed
     def create_deal(self, account_id, deal):
         """creates one or more deal with attributes, return id of last created
         Arguments:
@@ -465,7 +452,6 @@ class sqlite_model(common_model):
                 self._sqlite_connection.executemany("insert into stored_deal_attributes(deal_id, type, value) values (?, ?, ?)", map(lambda typ, val: (did, typ, val), sk, sv))
         return did
 
-    @raise_db_closed
     def list_deals(self, account_id = None, paper_id = None, order_by = []):
         """Return cursor iterating on deals
         Arguments:
@@ -480,7 +466,6 @@ class sqlite_model(common_model):
             conds.append(("=", ["paper_id"], paper_id))
         return self._sqlite_connection.execute_select_cond("deals", wheres = conds, order_by = order_by)
         
-    @raise_db_closed
     @remover_decorator("deals", {int : "id"})
     def remove_deal(self, deal_id):
         """remove one or more deal by id
@@ -489,7 +474,6 @@ class sqlite_model(common_model):
         """
         pass
 
-    @raise_db_closed
     def get_user_deal_attributes(self, deal_id):
         """return hash of attributes
         Arguments:
@@ -500,7 +484,6 @@ class sqlite_model(common_model):
             ret[at["name"]] = at["value"]
         return ret
 
-    @raise_db_closed
     def get_stored_deal_attributes(self, deal_id):
         """return hash of stored attributes
         
@@ -512,7 +495,6 @@ class sqlite_model(common_model):
             ret[at["type"]] = at["value"]
         return ret
 
-    @raise_db_closed
     @confirm_safety("deals_changed")
     def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
         """Return position id built from groups
@@ -557,7 +539,6 @@ class sqlite_model(common_model):
             self._sqlite_connection.insert("stored_position_attributes", map(lambda k: {"type" : k, "value" : stored_attributes[k], "position_id" : pid}, sk))
         return pid
 
-    @raise_db_closed
     def list_positions(self, account_id = None, paper_id = None, order_by = []):
         """return cursor for getting position descriptions
         Arguments:
@@ -573,7 +554,6 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select_cond("positions", wheres = conds, order_by = order_by)
                           
     
-    @raise_db_closed
     def get_position_user_attributes(self, position_id, order_by = []):
         """return cursor for user position attributes
         Arguments:
@@ -581,7 +561,6 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.execute_select_cond("user_position_attributes", wheres = [("=", ["position_id"], position_id)], order_by = order_by)
                                                                                                  
-    @raise_db_closed
     def get_stored_position_attributes(self, position_id, order_by = []):
         """return cursor for stcored position attributes
         Arguments:
@@ -590,7 +569,6 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.execute_select_cond("stored_position_attributes", wheres = [("=", ["position_id"], position_id)], order_by = order_by)
 
-    @raise_db_closed
     def create_group(self, deal_id):
         """return id the group maked from deals
         Arguments:
@@ -616,7 +594,6 @@ class sqlite_model(common_model):
             self._sqlite_connection.insert("deal_group_assign", {"deal_id" : did, "group_id" : gid})
         return gid
 
-    @raise_db_closed
     def add_to_group(self, group_id, deal_id):
         """add deals to group
         Arguments:
@@ -699,7 +676,6 @@ class sqlite_model(common_model):
             olddw = newdw
             first = False
 
-    @raise_db_closed
     @confirm_safety("deals_changed")
     def recalculate_deals(self, account_id, paper_id):
         """removes and recalculate additional table for deals
@@ -722,7 +698,6 @@ class sqlite_model(common_model):
         self.recalculate_deals(account_id, paper_id)
 
 
-    @raise_db_closed
     @safe_execution(__recalculate_deals__, "deals_changed")
     def make_groups(self, account_id, paper_id, time_distance = 5):
         """
@@ -742,7 +717,6 @@ class sqlite_model(common_model):
                 else:
                     gid = self.create_group(dd["id"])
 
-    @raise_db_closed
     def remake_groups(self, account_id, paper_id, time_distance = 5):
         """delete all groups and remake it again
         Arguments:
@@ -754,7 +728,6 @@ class sqlite_model(common_model):
         self._sqlite_connection.execute("delete from deal_groups where account_id = ? and paper_id = ?", [account_id, paper_id])
         self.make_groups(account_id, paper_id, time_distance)
                 
-    @raise_db_closed
     def list_groups(self, account_id, paper_id):
         """
         Arguments:
@@ -809,6 +782,7 @@ class sqlite_model(common_model):
         - `gid2`:
         """
         (c1, c2) = map(lambda a: self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]).fetchone()[0], [gid1, gid2])
+        assert(c1 > 0 and c2 > 0)
         if c1 == c2:
             return (gid1, gid2)
         elif c1 > c2:
@@ -873,9 +847,8 @@ class sqlite_model(common_model):
         (aid, paid) = self._sqlite_connection.execute("select account_id, paper_id from deals where id = ?", [deal_id]).fetchone()
         self.__recalculate_deals__(aid, paid)
 
-                
-    @confirm_safety("deals_changed", "papers_changed", "accounts_changed", "points_changed")
-    @safe_execution(__recalculate_deals_by_id__, "deals_changed", "papers_changed", "accounts_changed", "points_changed")
+    @confirm_safety("deals_changed")
+    @safe_execution(__recalculate_deals_by_id__, "deals_changed")
     def split_deal(self, deal_id, count):
         """return tuple with 2 deal_id. One is the deal with `count` papers, second with remainder
         if count of deal is less or equal to `count` then return tuple (deal_id, None)
@@ -901,7 +874,6 @@ class sqlite_model(common_model):
             return (d1, d2)
             
 
-    @raise_db_closed
     def start_action(self, action_name):
         """starts new action with an action name
         Arguments:
@@ -914,19 +886,16 @@ class sqlite_model(common_model):
                                                                "datetime" : datetime.now()}).lastrowid
         self._sqlite_connection.insert("current_hystory_position", {"step_id" : aid})
         
-    @raise_db_closed
     def end_action(self, ):
         """ends an action recording
         """
         self._sqlite_connection.execute("delete from current_hystory_position")
 
-    @raise_db_closed
     def list_actions(self, ):
         """list all actions executed
         """
         return self._sqlite_connection.execute_select("select * from hystory_steps")
 
-    @raise_db_closed
     def get_current_action(self, ):
         """return current action or None if no one set
         """

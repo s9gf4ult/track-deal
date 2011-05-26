@@ -117,7 +117,7 @@ def raise_db_closed(func):
             if args[0]._sqlite_connection != None:
                 rtt = func(*args, **kargs)
             else:
-                raise od_exception_db_opened("Database is not opened now")
+                raise od_exception_db_closed("Database is not opened now")
         else:
             raise od_exception("self has no attribute _sqlite_connection")
         return rtt
