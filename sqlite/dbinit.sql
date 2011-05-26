@@ -206,18 +206,18 @@ DELETE FROM database_attributes where name = new.name;
 END;
 
 CREATE TABLE hystory_steps(
-id integer primary key not null,
+id integer primary key autoincrement not null, /*this will increase count of tables in 1*/
 autoname text,
 datetime datetime);
 
 CREATE TABLE undo_queries(
-id integer primary key not null,
+id integer primary key autoincrement not null,
 step_id integer,
 query text not null,
 foreign key (step_id) references hystory_steps(id) on delete cascade);
 
 CREATE TABLE redo_queries(
-id integer primary key not null,
+id integer primary key autoincrement not null,
 step_id integer,
 query text not null,
 foreign key (step_id) references hystory_steps(id) on delete cascade);

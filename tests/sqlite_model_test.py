@@ -33,7 +33,7 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model.dbinit()
         self.assertEqual(1, self.model._sqlite_connection.execute_select("select count(name) as count from sqlite_master where name = ? and type = 'table'", ('deals', )).fetchall()[0]["count"])
-        self.assertEqual(20, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_master where type = 'table'").fetchall()[0]["count"])
+        self.assertEqual(21, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_master where type = 'table'").fetchall()[0]["count"])
 
     def test_dbtemp(self, ):
         """tests dbtemp execution
@@ -489,7 +489,12 @@ class sqlite_model_test(unittest.TestCase):
         self.model.remake_groups(aid, paid)
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
                                              
-            
+
+    def test_complex(self, ):
+        """complex test simulating work with model by user interface 
+        """
+        pass
+
 
 
 if __name__ == '__main__':

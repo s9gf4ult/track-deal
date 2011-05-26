@@ -110,7 +110,18 @@ class sqlite_model(common_model):
         - `parameters`: hash with name of parameter and value
         """
         names = parameters.keys()
-        self._sqlite_connection.insert("global_data", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names))) 
+        self._sqlite_connection.insert("global_data", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names)))
+
+    @raise_db_closed
+    @in_transaction
+    @in_action("change global data")
+    @pass_to_method(add_global_data)
+    def taadd_global_data(self, paramters):
+        """
+        Arguments:
+        - `paramters`:
+        """
+        pass
 
     def get_global_data(self, name):
         """returns value of global data or None if there is no one
@@ -134,6 +145,17 @@ class sqlite_model(common_model):
             name = map(lambda a: (a, ), name) 
         self._sqlite_connection.executemany("delete from global_data where name = ?", name)
 
+    @raise_db_closed
+    @in_transaction
+    @in_action("removing global data")
+    @pass_to_method(remove_global_data)
+    def taremove_global_data(self, name):
+        """
+        Arguments:
+        - `name`:
+        """
+        pass
+
     def list_global_data(self, ):
         """Returns list of names of global parameters
         """
@@ -145,7 +167,16 @@ class sqlite_model(common_model):
         - `parameters`: hash with name of parameter and value
         """
         names = parameters.keys()
-        self._sqlite_connection.insert("database_attributes", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names))) 
+        self._sqlite_connection.insert("database_attributes", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names)))
+
+    @raise_db_closed
+    @in_transaction
+    @in_action("add database attributes")
+    @pass_to_method(add_database_attributes)
+    def taadd_database_attributes(self, paramters):
+        """
+        """
+        pass
 
     def get_database_attribute(self, name):
         """returns value of global parameter or None if there is no one
@@ -169,6 +200,17 @@ class sqlite_model(common_model):
             name = map(lambda a: (a, ), name) 
         self._sqlite_connection.executemany("delete from database_attributes where name = ?", name)
 
+    @raise_db_closed
+    @in_transaction
+    @in_action("remove database attribute")
+    @pass_to_method(remove_database_attribute)
+    def taremove_database_attribute(self, name):
+        """
+        Arguments:
+        - `name`:
+        """
+        pass
+
     def list_database_attributes(self, ):
         """Returns list of names of global parameters
         """
@@ -189,6 +231,20 @@ class sqlite_model(common_model):
                                                          "class" : class_name,
                                                          "name" : name,
                                                          "full_name" : full_name}).lastrowid
+
+    @raise_db_closed
+    @in_transaction
+    @in_action("change paper")
+    @pass_to_method(create_paper)
+    def tacreate_paper(self, *args, **kargs):
+        """
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
+
 
     def get_paper(self, type_or_id, name = None):
         """returns paper by name or by id
@@ -216,6 +272,19 @@ class sqlite_model(common_model):
         if isinstance(type_or_id, basestring) and isinstance(name, basestring) and not is_null_or_empty(name):
             self._sqlite_connection.execute("delete from papers where type = ? and name = ?", [type_or_id, name])
 
+    @raise_db_closed
+    @in_transaction
+    @in_action("remove paper")
+    @pass_to_method(remove_paper)
+    def taremove_paper(self, *args, **kargs):
+        """
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
+
     def list_papers(self, order_by = []):
         """Returns list of papers
         """
@@ -238,7 +307,19 @@ class sqlite_model(common_model):
                     self.recalculate_deals(aid, paper_id)
                 for (aid, ) in self._sqlite_connection.execute("select distinct account_id from positions where paper_id = ?", [paper_id]):
                     self.recalculate_positions(aid, paper_id)
-                
+
+    @raise_db_closed
+    @in_transaction
+    @in_action("change paper")
+    @pass_to_method(change_paper)
+    def tachange_paper(self, *args, **kargs):
+        """
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
 
     def create_candles(self, paper_id, candles):
         """Creates one or several candles of paper `paper_id`
@@ -254,7 +335,7 @@ class sqlite_model(common_model):
             assert(candle["open_datetime"] < candle["close_datetime"])
             assert(isinstance(candle["duration"], basestring,))
         self._sqlite_connection.insert("candles", candles)
-        
+
 
     def get_candle(self, candle_id):
         """Get candle by id

@@ -442,3 +442,26 @@ class confirm_safety(object):
             return rtt
         ret.__doc__ = method.__doc__
         return ret
+
+class pass_to_method(object):
+    """Decorator call `method` after the body of decorated method and return value of `method`
+    """
+    def __init__(self, method):
+        """
+        Arguments:
+        - `method`: method to call after decorated, and return value of
+        """
+        self._method = method
+
+    def __call__(self, func):
+        """
+        Arguments:
+        - `func`:
+        """
+        def ret(*args, **kargs):
+            func(*args, **kargs)
+            return self._method(*args, **kargs)
+        ret.__doc__ = func.__doc__
+        return ret
+
+    
