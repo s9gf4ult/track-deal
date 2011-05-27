@@ -1015,7 +1015,25 @@ class sqlite_model(common_model):
         - `gross`: gross start from
         """
         def do_the_work(post, netx, grossx):
-            
+            post["direction_formated"] = (post["direction"] > 0 and "S" or "L")
+            for c in ["open_", "close_"]:
+                post["{0}price".format(c)] = post["{0}points".format(c)] * post["point"]
+                post["{0}price_formated".format(c)] = u"{0}{1}".format(post["{0}price".format(c)], post["money_name"])
+                post["{0}volume".format(c)] = post["{0}price".format(c)] * post["count"]
+                post["{0}volume_formated".format(c)] = u'{0}{1}'.format(post["{0}volume".format(c)], post["money_name"])
+                post["{0}datetime_formated".format(c)] = post["{0}datetime".format(c)].strftime("%Y-%m-%d %H:%M:%S")
+                post["{0}date".format(c)] = post["{0}datetime".format(c)].date()
+                post['{0}time'.format(c)] = post["{0}datetime".format(c)].time()
+                post['{0}date_formated'.format(c)] = post['{0}datetime'.format(c)].strftime("%d-%m-%Y")
+                post['{0}time_formated'.format(c)] = post['{0}time'.format(c)].isoformat()
+                post['{0}day_of_week'.format(c)] = post['{0}datetime'.format(c)].weekday()
+                post['{0}day_of_week_formated'.format(c)] = post['{0}datetime'.format(c)].strftime("%a")
+                post['{0}month'.format(c)] = post['{0}datetime'.format(c)].month
+                post['{0}month_formated'.format(c)] = post['{0}datetime'.format(c)].strftime("%b")
+                post['{0}year'.format(c)] = post['{0}datetime'.format(c)].year
+
+            post["duration"] = post["close_datetime"] - post["open_datetime"]
+            post["duration_formated"] = post["duration"].__str__()
         
         first = True
         for pos in cursor:
