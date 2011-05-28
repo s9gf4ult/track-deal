@@ -472,4 +472,5 @@ def any_to_timedelta(value):
     """
     return datetime.timedelta(0, int(value))
 
-    
+def format_abs_value(val):
+    return (val < 0 and "({0})" or "{0}").format(abs(val))

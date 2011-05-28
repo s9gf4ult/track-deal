@@ -1046,7 +1046,10 @@ class sqlite_model(common_model):
             post["pl_net"] = post["pl_gross"] - post["commission"]
             post["pl_net_abs"] = abs(post["pl_net"])
             post["pl_net_abs_formated"] = (post["pl_net"] < 0 and "({0})" or "{0}").format(post["pl_net_abs"])
-            
+            post["steps_range"] = post["points_range"] / post["step"]
+            post["steps_range_abs"] = abs(post["steps_range"])
+            post["steps_range_abs_formated"] = format_abs_value(post["steps_range"])
+            post["percent_range"] = post["pl_net"] / post["open_volume"] * 100
         
         first = True
         for pos in cursor:
