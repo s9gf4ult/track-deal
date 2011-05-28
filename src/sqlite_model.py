@@ -1034,6 +1034,19 @@ class sqlite_model(common_model):
 
             post["duration"] = post["close_datetime"] - post["open_datetime"]
             post["duration_formated"] = post["duration"].__str__()
+            post["points_range"] =  (post["open_points"] - post["close_points"]) * post["direction"]
+            post["points_range_abs"] = abs(post["points_range"])
+            post["points_range_abs_formated"] = (post["points_range"] < 0 and "({0})" or "{0}").format(post["points_range_abs"])
+            post["price_range"] = post["points_range"] * post["point"]
+            post["price_range_abs"] = post["points_range_abs"] * post["point"]
+            post["price_range_abs_formated"] = (post["price_range"] < 0 and "({0})" or "{0}").format(post["price_range_abs"])
+            post["pl_gross"] = post["price_range"] * post["count"]
+            post["pl_gross_abs"] = abs(post["pl_gross"])
+            post["pl_gross_abs_formated"] = (post["pl_gross"] < 0 and "({0})" or "{0}").format(post["pl_gross_abs"])
+            post["pl_net"] = post["pl_gross"] - post["commission"]
+            post["pl_net_abs"] = abs(post["pl_net"])
+            post["pl_net_abs_formated"] = (post["pl_net"] < 0 and "({0})" or "{0}").format(post["pl_net_abs"])
+            
         
         first = True
         for pos in cursor:
