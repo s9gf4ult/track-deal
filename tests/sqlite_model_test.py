@@ -488,6 +488,34 @@ class sqlite_model_test(unittest.TestCase):
             self.assertEqual(p["count"], self.model._sqlite_connection.execute("select sum(d.count) from deals d where d.direction = 1 and d.position_id = ?", [p["id"]]).fetchone()[0])
         self.model.remake_groups(aid, paid)
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
+
+    def test_calculate_positions(self, ):
+        """
+        """
+        (mid, aid, paid) = self.deals_init()
+        d = datetime(2000, 1, 1)
+        net = 1000
+        gross = 1000
+        for x in xrange(0, 10):
+            count = random.randint(1, 100)
+            price = random.random() * 100 + 100
+            direction = (random.random() > 0.5 and 1 or -1)
+            for dirr in [direction, -direction]:
+                for y in xrange(0, 10):
+                    self.model.create_deal(aid, {"paper_id" : paid,
+                                                 "count" : count,
+                                                 "commission" : 0.1,
+                                                 "direction" : dirr,
+                                                 "datetime" : d,
+                                                 "points" : price})
+                    d += timedelta(0, random.randint(1, 7))
+                    plg = dirr * count * price
+                    gross += plg
+                    net += plg - 0.1
+        self.model.make_positions(aid, paid)
+        self.model.recalculate_positions(aid, paid)
+        self.assertAlmostEqual(net, self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by desc close_datetime, desc open_datetime limit 1", [aid, paid]).fetchone()[0])
+
                                              
 
     def test_complex(self, ):
