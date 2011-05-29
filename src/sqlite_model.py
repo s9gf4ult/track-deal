@@ -632,6 +632,7 @@ class sqlite_model(common_model):
         sk = stored_attributes.keys()
         if len(sk) > 0:
             self._sqlite_connection.insert("stored_position_attributes", map(lambda k: {"type" : k, "value" : stored_attributes[k], "position_id" : pid}, sk))
+        self.recalculate_positions(acc_id, pap_id, pid)
         return pid
 
     def list_positions(self, account_id = None, paper_id = None, order_by = []):
@@ -1017,7 +1018,7 @@ class sqlite_model(common_model):
             self._calculate_positions_with_initial(cur, net, net)
         else:
             cur = self._sqlite_connection.execute_select("select p.* from positions p, positions pp where pp.id = ? and p.close_datetime >= pp.close_datetime order by close_datetime, open_datetime",[pid])
-            (net, gross) = self._sqlite_connection.execute("select net_after, gross_after from positions_view where position_id = ?", [pid]) or (None, None)
+            (net, gross) = self._sqlite_connection.execute("select net_after, gross_after from positions_view where position_id = ?", [pid]).fetchone() or (None, None)
             if net == gross == None:
                 return self.recalculate_positions(aid, paid)
             self._calculate_positions_with_initial(cur, net, gross)
@@ -1064,13 +1065,13 @@ class sqlite_model(common_model):
             post["steps_range"] = post["points_range"] / post["step"]
             post["steps_range_abs"] = abs(post["steps_range"])
             post["steps_range_abs_formated"] = format_abs_value(post["steps_range"])
-            post["percent_range"] = post["pl_net"] / xnet * 100
+            post["percent_range"] = post["pl_net"] / netx * 100
             post["percent_range_abs"] = abs(post["percent_range"])
             post["percent_range_abs_formated"] = format_abs_value(post["percent_range"])
-            post["net_before"] = xnet
-            post["net_after"] = xnet + post["pl_net"]
-            post["gross_before"] = xgross
-            post["gross_after"] = xgross + post["pl_gross"]
+            post["net_before"] = netx
+            post["net_after"] = netx + post["pl_net"]
+            post["gross_before"] = grossx
+            post["gross_after"] = grossx + post["pl_gross"]
           
         
         first = True
@@ -1089,10 +1090,9 @@ class sqlite_model(common_model):
                 do_the_work(posx, net, gross)
             else:
                 do_the_work(posx, oldpos["net_after"], oldpos["gross_after"])
+            self._sqlite_connection.insert("positions_view", posx)
             oldpos = posx
             first = False
-            
-                
             
 
     def recalculate_positions(self, aid, paid, position_id = None):

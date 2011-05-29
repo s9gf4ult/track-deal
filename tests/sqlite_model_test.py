@@ -513,8 +513,10 @@ class sqlite_model_test(unittest.TestCase):
                     gross += plg
                     net += plg - 0.1
         self.model.make_positions(aid, paid)
-        self.model.recalculate_positions(aid, paid)
-        self.assertAlmostEqual(net, self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by desc close_datetime, desc open_datetime limit 1", [aid, paid]).fetchone()[0])
+        #self.model.recalculate_positions(aid, paid)
+        self.assertTrue(self.model._sqlite_connection.execute("select count(*) from positions_view").fetchone()[0] > 0)
+        self.assertAlmostEqual(net, self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
+        self.assertAlmostEqual(gross, self.model._sqlite_connection.execute("select gross_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
 
                                              
 
