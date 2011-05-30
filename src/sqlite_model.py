@@ -234,7 +234,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda self, type, name, *args, **kargs: "create paper class {0}, name {1}".format(type, name))
+    @in_action(lambda self, type, name, *args, **kargs: "create paper type {0}, name {1}".format(type, name))
     @pass_to_method(create_paper)
     def tacreate_paper(self, *args, **kargs):
         """
@@ -274,7 +274,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("remove paper")
+    @in_action(lambda torid, name = None: "remove paper {0}".format((isinstance(torid, int) and "with id {0}".format(torid) or "with type {0} and name {1}".format(torid, name))))
     @pass_to_method(remove_paper)
     def taremove_paper(self, *args, **kargs):
         """
@@ -410,8 +410,24 @@ class sqlite_model(common_model):
         - `point`:
         - `step`:
         """
-        return self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step}).lastrowid
+        ret = self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step}).lastrowid
+        for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
+            self.recalculate_deals(aid, paper_id)
+            self.recalculate_positions(aid, paper_id)
 
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda paper_id, money_id, *args, **kargs: "create point for paper {0} and money {1}".format(paper_id, money_id))
+    @pass_to_method(create_point)
+    def tacreate_point(self, *args, **kargs):
+        """transacted wrapper for create point
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
+    
     def list_points(self, money_id = None, order_by = []):
         """Return list of points
         Arguments:
@@ -448,12 +464,43 @@ class sqlite_model(common_model):
         """
         if money_id != None:
             self._sqlite_connection.execute("delete from points where paper_id = ? and money_id = ?", [id_or_paper_id, money_id])
+            for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
+                self.recalculate_deals(aid, id_or_paper_id)
+                self.recalculate_positions(aid, id_or_paper_id)
         else:
             self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
+            (paid, ) = self._sqlite_connection.execute("select paper_id from points where id = ?", [id_or_paper_id]).fetchone() or (None)
+            if paid <> None:
+                for (aid, ) in self._sqlite_connection.execute("select a.id from accounts a inner join points p on p.money_id = a.money_id where p.id = ?", [id_or_paper_id]):
+                    self.recalculate_deals(aid, paid)
+                    self.recalculate_positions(aid, paid)
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda id_or_paper_id, money_id = None:"remove point {0}".format((money_id == None and "with id {0}".format(id_or_paper_id) or "with paper_id {0} and money_id {1}".format(id_or_paper_id, money_id))))
+    @pass_to_method(remove_point)
+    def taremove_point(self, *args, **kargs):
+        """transacted wrapper for remove point
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
+
 
     @raise_db_closed
     @in_transaction
     @in_action(lambda name, *args, **kargs: u"create account {0}".format(name))
+    @pass_to_method(create_account)
+    def tacreate_account(self, *args, **kargs):
+        """transacted wrapper for create account
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
         Arguments:
@@ -491,7 +538,25 @@ class sqlite_model(common_model):
             sets["comments"] = comment
         if len(sets) > 0:
             self._sqlite_connection.update("accounts", sets, "id = ?", [aid])
-            
+
+        if money_id_or_name <> None or money_count <> None:
+            for (paid, ) in self._sqlite_connection.execute("select distinct paper_id from deals where account_id = ?", [aid]):
+                self.recalculate_deals(aid, paid)
+
+            for (paid, ) in self._sqlite_connection.execute("select distinct paper_id from positions where account_id = ?", [aid]):
+                self.recalculate_positions(aid, paid)
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda aid, *args, **kargs: "changed account with id {0}".format(aid))
+    @pass_to_method(change_account)
+    def tachange_account(self, *args, **kargs):
+        """transacted wrapper for change account function
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
 
     def list_accounts(self, order_by = []):
         """Return list of accounts
@@ -505,6 +570,19 @@ class sqlite_model(common_model):
         - `name_or_id`:
         """
         pass
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda name_or_id: "remove account with {0}".format((isinstance(name_or_id, int) and "id {0}".format(name_or_id) or "name {0}".format(name_or_id))))
+    @pass_to_method(remove_account)
+    def taremove_account(self, *args, **kargs):
+        """transacted wrapper for remove account
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
 
     def get_account(self, aid):
         """
@@ -525,7 +603,8 @@ class sqlite_model(common_model):
         - `deal`: list of or one hash table with deal
         """
         did = None
-        for dd in (isinstance(deal, dict) and [deal] or deal):
+        deals = (isinstance(deal, dict) and [deal] or deal)
+        for dd in deals:
             dd = copy(dd)
             uat = gethash(dd, "user_attributes")
             if uat == None:
@@ -545,7 +624,22 @@ class sqlite_model(common_model):
                 sk = sat.keys()
                 sv = map(lambda k: sat[k], sk)
                 self._sqlite_connection.executemany("insert into stored_deal_attributes(deal_id, type, value) values (?, ?, ?)", map(lambda typ, val: (did, typ, val), sk, sv))
+        md = reduce(lambda a, b: (a["datetime"] < b["datetime"] and a or b), deals)
+        self.recalculate_deals(account_id, md["paper_id"], md["id"])
         return did
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda account_id, deal, *args, **kargs: "create deal for paper {0}".format(deal["paper_id"]))
+    @pass_to_method(create_deal)
+    def tacreate_deal(self, *args, **kargs):
+        """wrapper for create deal
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
 
     def list_deals(self, account_id = None, paper_id = None, order_by = []):
         """Return cursor iterating on deals
