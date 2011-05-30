@@ -489,17 +489,6 @@ class sqlite_model(common_model):
 
 
 
-    @raise_db_closed
-    @in_transaction
-    @in_action(lambda name, *args, **kargs: u"create account {0}".format(name))
-    @pass_to_method(create_account)
-    def tacreate_account(self, *args, **kargs):
-        """transacted wrapper for create account
-        Arguments:
-        - `*args`:
-        - `**kargs`:
-        """
-        pass
 
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
@@ -519,6 +508,19 @@ class sqlite_model(common_model):
         if self.get_global_data("current_account") == None and self._sqlite_connection.execute("select count(*) from accounts").fetchone()[0] == 1:
             self.add_global_data({"current_account" : aid})
         return aid
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda name, *args, **kargs: u"create account {0}".format(name))
+    @pass_to_method(create_account)
+    def tacreate_account(self, *args, **kargs):
+        """transacted wrapper for create account
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
 
     def change_account(self, aid, money_id_or_name = None, money_count = None, comment = None):
         """changes existing account
@@ -655,11 +657,65 @@ class sqlite_model(common_model):
             conds.append(("=", ["paper_id"], paper_id))
         return self._sqlite_connection.execute_select_cond("deals", wheres = conds, order_by = order_by)
         
-    @remover_decorator("deals", {int : "id"})
     def remove_deal(self, deal_id):
         """remove one or more deal by id
         Arguments:
         - `deal_id`:
+        """
+        x = map(lambda a: (a, ), (isinstance(deal_id, int) and [deal_id] or deal_id))
+        self._sqlite_connection.executemany("delete from deals where id = ?", x)
+        self._sqlite_connection.executemany("delete from deals_view where deal_id = ?", x)
+        self.fix_groups()
+        self.fix_positions()
+
+    def fix_groups(self, ):
+        """fixes broken groups by deleting
+        """
+        self._sqlite_connection.execute("""delete from deal_groups where id in (
+        select id from (
+        select g.group_id as id, count(d.id) as count
+        from deal_group_assign g left join deals d on g.deal_id = d.id
+        group by g.group_id)
+        where count = 0
+
+        union
+
+        select g.id from deal_groups g
+        where not exists(select * from deal_group_assign where gorup_id = g.id)
+
+        union
+
+        select id from (
+        select g.group_id as id, sum(d.count * d.direction) as sum
+        from deal_group_assign g left join deals d on g.deal_id = g.id
+        group by g.group_id)
+        where sum <> 0)""")
+
+    def fix_positions(self, ):
+        """fixes broken positions by deleting
+        """
+        self._sqlite_connection.execute("""
+        delete from positions where id in (
+        select id from positions p
+        where not exists(select * from deals where position_id = p.id)
+
+        union
+
+        select id from (
+        select p.id as id, sum(d.count * d.direction) as sum
+        from positions p inner join deals d on d.position_id = d.id
+        group by p.id)
+        where sum <> 0)""")
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda *args, **kargs: "remove deals(s)")
+    @pass_to_method(remove_deal)
+    def taremove_deal(self, *args, **kargs):
+        """
+        Arguments:
+        - `*args`:
+        - `**kargs`:
         """
         pass
 
@@ -684,7 +740,6 @@ class sqlite_model(common_model):
             ret[at["type"]] = at["value"]
         return ret
 
-    @confirm_safety("deals_changed")
     def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
         """Return position id built from groups
         Arguments:
@@ -866,7 +921,6 @@ class sqlite_model(common_model):
             olddw = newdw
             first = False
 
-    @confirm_safety("deals_changed")
     def recalculate_deals(self, account_id, paper_id, deal_id = None):
         """removes and recalculate additional table for deals
         Arguments:
@@ -892,7 +946,6 @@ class sqlite_model(common_model):
         self.recalculate_deals(account_id, paper_id)
 
 
-    @safe_execution(__recalculate_deals__, "deals_changed")
     def make_groups(self, account_id, paper_id, time_distance = 5):
         """
         Arguments:
@@ -942,8 +995,6 @@ class sqlite_model(common_model):
         """
         self.remake_groups(account_id, paper_id, time_distance)
 
-
-    @safe_execution(__remake_groups__, "deals_changed")
     def make_positions(self, account_id, paper_id, time_distance = 5):
         """automatically makes positions
         Arguments:
@@ -951,7 +1002,7 @@ class sqlite_model(common_model):
         - `paper_id`:
         - `time_distance`: time distance for make_groups
         """
-        
+        self.remake_groups(account_id, paper_id, time_distance)
         def go_on():
             g1 = self._sqlite_connection.execute_select("select * from (select g.id as id, g.direction as direction, min(d.datetime) as mindatetime, max(d.datetime) as maxdatetime from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.account_id = ? and g.paper_id = ? group by g.id) order by maxdatetime, mindatetime limit 1", [account_id, paper_id]).fetchall()
             if len(g1) == 0:
@@ -1041,8 +1092,6 @@ class sqlite_model(common_model):
         (aid, paid) = self._sqlite_connection.execute("select account_id, paper_id from deals where id = ?", [deal_id]).fetchone()
         self.__recalculate_deals__(aid, paid)
 
-    @confirm_safety("deals_changed")
-    @safe_execution(__recalculate_deals_by_id__, "deals_changed")
     def split_deal(self, deal_id, count):
         """return tuple with 2 deal_id. One is the deal with `count` papers, second with remainder
         if count of deal is less or equal to `count` then return tuple (deal_id, None)
