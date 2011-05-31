@@ -748,11 +748,48 @@ class sqlite_model(common_model):
             ret[at["type"]] = at["value"]
         return ret
 
-    def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
-        """Return position id built from groups
+    def _create_position_raw(self, position, do_recalc = True):
+        """just create position in database 
+        
+        Arguments:
+        - `position`: hash table, keys may be "user_attributes", "stored_attributes", "deals_assigned" and fields of table positions. It can be list of this hashes
+        """
+        pss = (isinstance(position, (list, tuple)) and position or [position])
+        paper_position = {}             # {paper_id : (position_id, close_datetime, open_datetime)}
+        aid = None
+        pid = None
+        for ps in pss:
+            xps = copy(ps)
+            remhash(xps, "user_attributes")
+            remhash(xps, "stored_attributes")
+            remhash(xps, "deals_assigned")
+            remhash(xps, "id")
+            pid = self._sqlite_connection.insert("positions", xps).lastrowid
+            if isinstance(gethash(ps, "user_attributes"), dict):
+                self._sqlite_connection.insert("user_position_attributes", map(lambda k: {"position_id" : pid, "name" : k, "value" : ps["user_attributes"][k]}, ps["user_attributes"].keys()))
+            if isinstance(gethash(ps, "stored_attributes"), dict):
+                self._sqlite_connection.insert("stored_position_attributes", map(lambda k: {"position_id" : pid, "type" : k, "value" : ps["stored_attributes"][k]}, ps["stored_attributes"].keys()))
+            if gethash(ps, "deals_assigned") <> None:
+                self._sqlite_connection.executemany("update deals set position_id = ? where id = ?", map(lambda a: (pid, a), ps["deals_assigned"]))
+            papid = ps["paper_id"]
+            if gethash(paper_position, papid) == None or ps["close_datetime"] < paper_position[papid][1] or (ps["close_datetime"] == paper_position[papid][1] and ps["open_datetime"] < paper_position[papid][2]):
+                paper_position[papid] = (pid, ps["close_datetime"], ps["open_datetime"])
+            aid = ps["account_id"]
+            
+        if do_recalc:
+            for paper in paper_position.keys():
+                self.recalculate_positions(aid, paper, paper_position[paper][0])
+        return pid
+                    
+    def create_position_hash(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
+        """return hash to insert by _create_position_raw
         Arguments:
         - `open_group_id`:
         - `close_group_id`:
+        - `user_attributes`:
+        - `stored_attributes`:
+        - `manual_made`:
+        - `do_not_delete`:
         """
         for field in ["paper_id", "account_id"]:
             odids = self._sqlite_connection.execute("select count(*) from (select distinct d.{0} from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on dg.group_id = g.id where g.id = ? or g.id = ?)".format(field), [open_group_id, close_group_id]).fetchone()[0]
@@ -770,26 +807,39 @@ class sqlite_model(common_model):
         (acc_id, pap_id) = self._sqlite_connection.execute("select d.account_id, d.paper_id from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? limit 1", [open_group_id]).fetchone()
         (comm, ) = self._sqlite_connection.execute("select sum(d.commission) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? or dg.group_id = ?", [open_group_id, close_group_id]).fetchone()
         (odate, opoints) = self._sqlite_connection.execute("select max(d.datetime), sum(d.points * d.count) / sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [open_group_id]).fetchone()
-        (cdate, cpoints) = self._sqlite_connection.execute("select max(d.datetime), sum(d.points * d.count) / sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [close_group_id]).fetchone()
-        pid = self._sqlite_connection.insert("positions", {"account_id" : acc_id,
-                                                           "paper_id" : pap_id,
-                                                           "count" : cnts[0],
-                                                           "direction" : odirs[0][0][0],
-                                                           "commission" : comm,
-                                                           "open_datetime" : odate,
-                                                           "close_datetime" : cdate,
-                                                           "open_points" : opoints,
-                                                           "close_points" : cpoints,
-                                                           "manual_made" : manual_made,
-                                                           "do_not_delete" : do_not_delete}).lastrowid
-        self._sqlite_connection.execute("update deals set position_id = ? where id in (select dg.deal_id from deal_group_assign dg where dg.group_id = ? or dg.group_id = ?)", [pid, open_group_id, close_group_id])
-        uk = user_attributes.keys()
-        if len(uk) > 0:
-            self._sqlite_connection.insert("user_position_attributes", map(lambda k: {"name" : k, "value" : user_attributes[k], "position_id" : pid}, uk))
-        sk = stored_attributes.keys()
-        if len(sk) > 0:
-            self._sqlite_connection.insert("stored_position_attributes", map(lambda k: {"type" : k, "value" : stored_attributes[k], "position_id" : pid}, sk))
-        self.recalculate_positions(acc_id, pap_id, pid)
+        (cdate, cpoints) = self._sqlite_connection.execute("select max(d.datetime), sum(d.points * d.count) / sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [close_group_id]).fetchone()        
+
+        ret = {"account_id" : acc_id,
+               "paper_id" : pap_id,
+               "count" : cnts[0],
+               "direction" : odirs[0][0][0],
+               "commission" : comm,
+               "open_datetime" : odate,
+               "close_datetime" : cdate,
+               "open_points" : opoints,
+               "close_points" : cpoints,
+               "manual_made" : manual_made,
+               "do_not_delete" : do_not_delete}
+        if len(stored_attributes) > 0:
+            ret["stored_attributes"] = stored_attributes
+        if len(user_attributes) > 0:
+            ret["user_attributes"] = user_attributes
+        dds = self._sqlite_connection.execute("select distinct deal_id from deal_group_assign where group_id = ? or group_id = ?", [open_group_id, close_group_id]).fetchall()
+        if len(dds) > 0:
+            ret["deals_assigned"] = map(lambda a: a[0], dds)
+        return ret
+
+
+
+            
+
+    def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
+        """Return position id built from groups
+        Arguments:
+        - `open_group_id`:
+        - `close_group_id`:
+        """
+        pid = self._create_position_raw(self.create_position_hash(open_group_id, close_group_id, user_attributes, stored_attributes, manual_made, do_not_delete))
         return pid
 
     def list_positions(self, account_id = None, paper_id = None, order_by = []):
