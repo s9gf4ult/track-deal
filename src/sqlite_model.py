@@ -599,7 +599,7 @@ class sqlite_model(common_model):
             return None
 
             
-    def create_deal(self, account_id, deal):
+    def create_deal(self, account_id, deal, do_recalc = True):
         """creates one or more deal with attributes, return id of last created
         Arguments:
         - `account_id`:
@@ -633,8 +633,9 @@ class sqlite_model(common_model):
             else:
                 if paper_deal[dd["paper_id"]][1] > dd["datetime"]:
                     paper_deal[dd["paper_id"]] = (did, dd["datetime"])
-        for p in paper_deal.keys():
-            self.recalculate_deals(account_id, p, paper_deal[p][0])
+        if do_recalc:
+            for p in paper_deal.keys():
+                self.recalculate_deals(account_id, p, paper_deal[p][0])
         return did
 
     @raise_db_closed
@@ -1118,9 +1119,11 @@ class sqlite_model(common_model):
             nd2 = copy(nd1)
             nd1["count"] = count
             nd2["count"] = deal["count"] - count
-            (pap, mon) = self._sqlite_connection.execute("select paper_ballance_before, net_before from deals_view where deal_id = ?", [deal["id"]]).fetchone()
-            self.create_deal(deal['account_id'], [nd1, nd2])
+            (pap, mon) = self._sqlite_connection.execute("select paper_ballance_before, net_before from deals_view where deal_id = ?", [deal_id]).fetchone()
+            self.create_deal(deal['account_id'], [nd1, nd2], do_recalc = False)
+            self._sqlite_connection.execute("delete from deals_view where deal_id = ?", [deal_id])
             (d1, d2) = map(lambda a: a[0], self._sqlite_connection.execute("select id from deals where parent_deal_id = ?", [deal_id]))
+            self._calculate_deals_with_initial(self._sqlite_connection.execute_select("select * from deals where id = ? or id = ?", [d1, d2]), mon, pap)
             return (d1, d2)
             
 
