@@ -1063,6 +1063,7 @@ class sqlite_model(common_model):
         - `time_distance`: time distance for make_groups
         """
         self.remake_groups(account_id, paper_id, time_distance)
+        hashes = []
         def go_on():
             g1 = self._sqlite_connection.execute_select("select * from (select g.id as id, g.direction as direction, min(d.datetime) as mindatetime, max(d.datetime) as maxdatetime from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on g.id = dg.group_id where g.account_id = ? and g.paper_id = ? group by g.id) order by maxdatetime, mindatetime limit 1", [account_id, paper_id]).fetchall()
             if len(g1) == 0:
@@ -1073,11 +1074,12 @@ class sqlite_model(common_model):
                 return False
             g2 = g2[0]
             (g1, g2) = self.try_make_ballanced_groups(g1["id"], g2["id"])
-            self.create_position(g1, g2)
+            hashes.append(self.create_position_hash(g1, g2))
             self._sqlite_connection.executemany("delete from deal_groups where id = ?", [(g1,), (g2,)])
             return True
         while go_on():
             pass
+        self._create_position_raw(hashes)
 
     def try_make_ballanced_groups(self, gid1, gid2):
         """if count of papers for gid1 and gid2 is the same then just return gid1 and gid2,
