@@ -91,7 +91,11 @@ net_after float,
 paper_ballance_before float,
 paper_ballance_after float,
 user_attributes_formated text,
-commission float not null);
+commission float not null,
+unique(deal_id));
+
+CREATE INDEX temp.deals_view_account on deals_view(account_id);
+CREATE INDEX temp.deals_view_paper_id on deals_view(paper_id);
 
 CREATE TEMPORARY TRIGGER _just_one_deals_view BEFORE INSERT ON deals_view
 BEGIN

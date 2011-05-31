@@ -71,6 +71,8 @@ foreign key (position_id) references positions(id) on delete set null,
 foreign key (paper_id) references papers(id) on delete cascade,
 unique(sha1, account_id));
 
+CREATE INDEX deals_datetime on deals(datetime);
+
 CREATE TABLE user_deal_attributes(
 id integer primary key not null,
 deal_id integer not null,

@@ -256,22 +256,24 @@ class sqlite_model_test(unittest.TestCase):
         ll = [(100, 1, 120, 1.2, 10),
               (111, 1.11, 100, 1, 10),
               (80, 0.8, 100, 1, 5)]
+        dds = []
         for (oprice, ocomm, cprice, ccomm, count) in ll:
-            self.model.create_deal(aid, {"paper_id" : paid,
-                                         "direction" : -1,
-                                         "count" : count,
-                                         "points" : oprice,
-                                         "commission" : ocomm,
-                                         "datetime" : dd})
+            dds.append({"paper_id" : paid,
+                        "direction" : -1,
+                        "count" : count,
+                        "points" : oprice,
+                        "commission" : ocomm,
+                        "datetime" : dd})
             dd += timedelta(1)
-            self.model.create_deal(aid, {"paper_id" : paid,
-                                         "direction" : 1,
-                                         "count" : count,
-                                         "points" : cprice,
-                                         "commission" : ccomm,
-                                         "datetime" : dd})
+            dds.append({"paper_id" : paid,
+                        "direction" : 1,
+                        "count" : count,
+                        "points" : cprice,
+                        "commission" : ccomm,
+                        "datetime" : dd})
             dd += timedelta(1)
             x += ((cprice - oprice) * count) - ocomm - ccomm
+        self.model.create_deal(aid, dds)
         self.model.calculate_deals(aid, paid)
         self.assertEqual(2 * len(ll), self.model._sqlite_connection.execute("select count(dw.id) from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?", [aid, paid]).fetchone()[0])
         self.assertAlmostEqual(x, self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [aid, paid]).fetchone()[0])
@@ -293,28 +295,32 @@ class sqlite_model_test(unittest.TestCase):
         """
         (mid, aid, paid) = self.deals_init()
         dd = datetime(2010, 10, 10)
+        dds = []
         for direc in [-1, -1, 1, -1]:
             for x in xrange(0, 5):
-                self.model.create_deal(aid, {"paper_id" : paid,
-                                             "points" : 100,
-                                             "commission" : 1,
-                                             "direction" : direc,
-                                             "count" : 1,
-                                             "datetime" : dd})
+                dds.append({"paper_id" : paid,
+                            "points" : 100,
+                            "commission" : 1,
+                            "direction" : direc,
+                            "count" : 1,
+                            "datetime" : dd})
                 dd += timedelta(0, 4)
             if direc == -1:
                 dd += timedelta(0, 5)
+        self.model.create_deal(aid, dds)
         self.model.make_groups(aid, paid)
         self.assertEqual(4, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
         dd += timedelta(1)
+        dds = []
         for x in xrange(0, 10):
-            self.model.create_deal(aid, {"paper_id" : paid,
-                                         "points" : 200,
-                                         "commission" : 2,
-                                         "direction" : 1,
-                                         "count" : 3,
-                                         "datetime" : dd})
+            dds.append({"paper_id" : paid,
+                        "points" : 200,
+                        "commission" : 2,
+                        "direction" : 1,
+                        "count" : 3,
+                        "datetime" : dd})
             dd += timedelta(0, 2)
+        self.model.create_deal(aid, dds)
         self.model.make_groups(aid, paid)
         self.assertEqual(5, len(self.model.list_groups(aid, paid).fetchall()))
                      
@@ -330,7 +336,7 @@ class sqlite_model_test(unittest.TestCase):
 
         
     def test_group_replacement(self, ):
-        """
+        """test that when you create new group with deals assigned to other group, they automatically disconnect from old group
         """
         (mid, aid, paid) = self.deals_init()
         dls = []
@@ -356,16 +362,18 @@ class sqlite_model_test(unittest.TestCase):
         (mid, aid, paid) = self.deals_init()
         d = datetime(2010, 10, 10)
         sumc = 0
+        dds = []
         for x in xrange(0, 10):
             cc = random.randint(1, 100)
             sumc += cc
-            self.model.create_deal(aid, {"paper_id" : paid,
-                                         "count" : cc,
-                                         "direction" : (random.random() > 0.5 and 1 or -1),
-                                         "commission" : 1,
-                                         "points" : random.random() * 100 + 100,
-                                         "datetime" : d})
+            dds.append({"paper_id" : paid,
+                        "count" : cc,
+                        "direction" : (random.random() > 0.5 and 1 or -1),
+                        "commission" : 1,
+                        "points" : random.random() * 100 + 100,
+                        "datetime" : d})
             d += timedelta(0, random.randint(1, 20))
+        self.model.create_deal(aid, dds)
 
         def go_on():
             x = self.model._sqlite_connection.execute_select("select d.* from deals d where d.count > 1 and not exists(select dd.id from deals dd where dd.parent_deal_id = d.id) limit 1").fetchall()
@@ -396,19 +404,21 @@ class sqlite_model_test(unittest.TestCase):
         d = datetime(2010, 10, 10)
         sumc = 0
         sumv = 0
+        dds = []
         for x in xrange(0, 10):
             cc = random.randint(1, 10)
             dirc = (random.random() > 0.5 and -1 or 1)
             pr = random.random() * 100 + 100
             sumc += cc
             sumv += dirc * cc * pr
-            self.model.create_deal(aid, {"paper_id" : paid,
-                                         "datetime" : d,
-                                         "count" : cc,
-                                         "points" : pr,
-                                         "direction" : dirc,
-                                         "commission" : 1})
+            dds.append({"paper_id" : paid,
+                        "datetime" : d,
+                        "count" : cc,
+                        "points" : pr,
+                        "direction" : dirc,
+                        "commission" : 1})
             d += timedelta(0, random.randint(1, 7))
+        self.model.create_deal(aid, dds)
         self.model.make_groups(aid, paid)
         
         def go_on():
@@ -468,19 +478,21 @@ class sqlite_model_test(unittest.TestCase):
         """
         d = datetime(2010, 10, 10)
         (mid, aid, paid) = self.deals_init()
+        dds = []
         for x in xrange(0, 10):
             count = random.randint(1, 100)
             price = random.random() * 100 + 100
             direction = (random.random() > 0.5 and 1 or -1)
             for dirr in [direction, -direction]:
                 for y in xrange(0, 10):
-                    self.model.create_deal(aid, {"paper_id" : paid,
-                                                 "count" : count,
-                                                 "commission" : 0.1,
-                                                 "direction" : dirr,
-                                                 "datetime" : d,
-                                                 "points" : price})
+                    dds.append({"paper_id" : paid,
+                                "count" : count,
+                                "commission" : 0.1,
+                                "direction" : dirr,
+                                "datetime" : d,
+                                "points" : price})
                     d += timedelta(0, random.randint(1, 7))
+        self.model.create_deal(aid, dds)
         self.model.make_positions(aid, paid)
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deals where position_id is null").fetchone()[0])
         for p in self.model._sqlite_connection.execute_select("select * from positions"):
@@ -496,22 +508,24 @@ class sqlite_model_test(unittest.TestCase):
         d = datetime(2000, 1, 1)
         net = 1000
         gross = 1000
+        dds = []
         for x in xrange(0, 10):
             count = random.randint(1, 100)
             price = random.random() * 100 + 100
             direction = (random.random() > 0.5 and 1 or -1)
             for dirr in [direction, -direction]:
                 for y in xrange(0, 10):
-                    self.model.create_deal(aid, {"paper_id" : paid,
-                                                 "count" : count,
-                                                 "commission" : 0.1,
-                                                 "direction" : dirr,
-                                                 "datetime" : d,
-                                                 "points" : price})
+                    dds.append({"paper_id" : paid,
+                                "count" : count,
+                                "commission" : 0.1,
+                                "direction" : dirr,
+                                "datetime" : d,
+                                "points" : price})
                     d += timedelta(0, random.randint(1, 7))
                     plg = dirr * count * price
                     gross += plg
                     net += plg - 0.1
+        self.model.create_deal(aid, dds)
         self.model.make_positions(aid, paid)
         #self.model.recalculate_positions(aid, paid)
         self.assertTrue(self.model._sqlite_connection.execute("select count(*) from positions_view").fetchone()[0] > 0)

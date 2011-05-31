@@ -414,6 +414,7 @@ class sqlite_model(common_model):
         for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
             self.recalculate_deals(aid, paper_id)
             self.recalculate_positions(aid, paper_id)
+        return ret
 
     @raise_db_closed
     @in_transaction
@@ -469,7 +470,7 @@ class sqlite_model(common_model):
                 self.recalculate_positions(aid, id_or_paper_id)
         else:
             self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
-            (paid, ) = self._sqlite_connection.execute("select paper_id from points where id = ?", [id_or_paper_id]).fetchone() or (None)
+            (paid, ) = self._sqlite_connection.execute("select paper_id from points where id = ?", [id_or_paper_id]).fetchone() or (None, )
             if paid <> None:
                 for (aid, ) in self._sqlite_connection.execute("select a.id from accounts a inner join points p on p.money_id = a.money_id where p.id = ?", [id_or_paper_id]):
                     self.recalculate_deals(aid, paid)
@@ -606,6 +607,7 @@ class sqlite_model(common_model):
         """
         did = None
         deals = (isinstance(deal, dict) and [deal] or deal)
+        paper_deal = {}
         for dd in deals:
             dd = copy(dd)
             uat = gethash(dd, "user_attributes")
@@ -626,8 +628,13 @@ class sqlite_model(common_model):
                 sk = sat.keys()
                 sv = map(lambda k: sat[k], sk)
                 self._sqlite_connection.executemany("insert into stored_deal_attributes(deal_id, type, value) values (?, ?, ?)", map(lambda typ, val: (did, typ, val), sk, sv))
-        md = reduce(lambda a, b: (a["datetime"] < b["datetime"] and a or b), deals)
-        self.recalculate_deals(account_id, md["paper_id"], md["id"])
+            if gethash(paper_deal, dd["paper_id"]) == None:
+                paper_deal[dd["paper_id"]] = (did, dd["datetime"])
+            else:
+                if paper_deal[dd["paper_id"]][1] > dd["datetime"]:
+                    paper_deal[dd["paper_id"]] = (did, dd["datetime"])
+        for p in paper_deal.keys():
+            self.recalculate_deals(account_id, p, paper_deal[p][0])
         return did
 
     @raise_db_closed
@@ -681,13 +688,13 @@ class sqlite_model(common_model):
         union
 
         select g.id from deal_groups g
-        where not exists(select * from deal_group_assign where gorup_id = g.id)
+        where not exists(select * from deal_group_assign where group_id = g.id)
 
         union
 
         select id from (
         select g.group_id as id, sum(d.count * d.direction) as sum
-        from deal_group_assign g left join deals d on g.deal_id = g.id
+        from deal_group_assign g left join deals d on g.deal_id = d.id
         group by g.group_id)
         where sum <> 0)""")
 
@@ -902,6 +909,7 @@ class sqlite_model(common_model):
             (h["user_attributes_formated"], ) = self._sqlite_connection.execute("select string_reduce(argument_value(a.name, a.value)) from user_deal_attributes a where a.deal_id = ? group by a.deal_id", [h["deal_id"]]).fetchone() or (None,)
             
         first = True
+        inserts = []
         for dd in cursor:
             if first:
                 common = self._sqlite_connection.execute_select("select p.id as paper_id, p.type as paper_type, p.class as paper_class, p.name as paper_name, m.id as money_id, m.name as money_name from accounts a inner join deals d on d.account_id = a.id inner join moneys m on m.id = a.money_id inner join papers p on d.paper_id = p.id where d.id = ?", [dd["id"]]).fetchall()[0]
@@ -917,9 +925,10 @@ class sqlite_model(common_model):
                 addition(newdw, money, paper_ballance)
             else:
                 addition(newdw, olddw["net_after"], olddw["paper_ballance_after"])
-            self._sqlite_connection.insert("deals_view", newdw)
+            inserts.append(newdw)
             olddw = newdw
             first = False
+        self._sqlite_connection.insert("deals_view", inserts)
 
     def recalculate_deals(self, account_id, paper_id, deal_id = None):
         """removes and recalculate additional table for deals
@@ -1109,11 +1118,9 @@ class sqlite_model(common_model):
             nd2 = copy(nd1)
             nd1["count"] = count
             nd2["count"] = deal["count"] - count
-            d1 = self.create_deal(deal["account_id"], nd1)
-            d2 = self.create_deal(deal["account_id"], nd2)
             (pap, mon) = self._sqlite_connection.execute("select paper_ballance_before, net_before from deals_view where deal_id = ?", [deal["id"]]).fetchone()
-            self._sqlite_connection.execute("delete from deals_view where deal_id = ?", [deal["id"]])
-            self._calculate_deals_with_initial(self._sqlite_connection.execute_select("select * from deals where id = ? or id = ?",[d1, d2]), mon, pap)
+            self.create_deal(deal['account_id'], [nd1, nd2])
+            (d1, d2) = map(lambda a: a[0], self._sqlite_connection.execute("select id from deals where parent_deal_id = ?", [deal_id]))
             return (d1, d2)
             
 
