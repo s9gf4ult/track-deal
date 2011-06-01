@@ -1315,3 +1315,21 @@ class sqlite_model(common_model):
         else:
             self._sqlite_connection.execute("delete from positions_view where id in (select pv.id from positions_view pv inner join positions p on pv.position_id = p.id, positions pp where pp.id = ? and ((p.account_id = ? and p.paper_id = ?) or (pv.account_id = ? and pv.paper_id = ?)) and p.close_datetime >= pp.close_datetime)", [position_id, aid, paid, aid, paid])
             self.calculate_positions(aid, paid, position_id)
+
+    def go_to_action(self, action_id):
+        """roll back or forward to the action
+        
+        Arguments:
+        - `action_id`:
+        """
+        a = self.get_current_action()
+        if action_id == a:
+            return
+        l = self._sqlite_connection.execute_select("select * from hystory_steps order by id desc limit 1").fetchall() # последнее действие
+        if len(l) > 0:
+            l = l[0]
+        else:
+            l = None
+            
+            
+            
