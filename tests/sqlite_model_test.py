@@ -527,13 +527,39 @@ class sqlite_model_test(unittest.TestCase):
                     net += plg - 0.1
         self.model.create_deal(aid, dds)
         self.model.make_positions(aid, paid)
-        #self.model.recalculate_positions(aid, paid)
-        self.assertTrue(self.model._sqlite_connection.execute("select count(*) from positions_view").fetchone()[0] > 0)
+        self.assertEqual(self.model._sqlite_connection.execute("select sum(count) from deals where direction > 0").fetchone()[0], self.model._sqlite_connection.execute("select sum(count) from deals where direction < 0").fetchone()[0])
+        self.assertEqual(self.model._sqlite_connection.execute("select count(*) from positions_view").fetchone()[0], self.model._sqlite_connection.execute("select count(*) from positions").fetchone()[0])
+        self.assertAlmostEqual(net, self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
+        self.assertAlmostEqual(gross, self.model._sqlite_connection.execute("select gross_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
+        
+        
+        d = datetime(2001, 1, 1, 0, 1)
+        ndds = []
+        for x in xrange(0, 10):
+            count = random.randint(1, 100)
+            price = random.random() * 100 + 100
+            direction = (random.random() > 0.5 and 1 or -1)
+            for dirr in [direction, -direction]:
+                for y in xrange(0, 10):
+                    ndds.append({"paper_id" : paid,
+                                 "count" : count,
+                                 "commission" : 0.1,
+                                 "direction" : dirr,
+                                 "datetime" : d,
+                                 "points" : price})
+                    d += timedelta(0, random.randint(1, 7))
+                    plg = dirr * count * price
+                    gross += plg
+                    net += plg - 0.1
+        self.model.create_deal(aid, ndds)
+        self.model.make_positions(aid, paid)
+        self.assertEqual(self.model._sqlite_connection.execute("select count(*) from positions_view").fetchone()[0], self.model._sqlite_connection.execute("select count(*) from positions").fetchone()[0])
+        self.assertEqual(self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deals_view dv on dv.deal_id = d.id where d.direction > 0").fetchone()[0], self.model._sqlite_connection.execute("select sum(d.count) from deals d inner join deals_view dv on dv.deal_id = d.id where d.direction < 0").fetchone()[0])
+        self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deals where position_id is null").fetchone()[0])
         self.assertAlmostEqual(net, self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
         self.assertAlmostEqual(gross, self.model._sqlite_connection.execute("select gross_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
 
-                                             
-
+        
     def test_complex(self, ):
         """complex test simulating work with model by user interface 
         """

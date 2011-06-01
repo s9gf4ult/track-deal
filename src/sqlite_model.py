@@ -1176,6 +1176,7 @@ class sqlite_model(common_model):
             self._sqlite_connection.execute("delete from deals_view where deal_id = ?", [deal_id])
             (d1, d2) = map(lambda a: a[0], self._sqlite_connection.execute("select id from deals where parent_deal_id = ?", [deal_id]))
             self._calculate_deals_with_initial(self._sqlite_connection.execute_select("select * from deals where id = ? or id = ?", [d1, d2]), mon, pap)
+            
             return (d1, d2)
             
 
@@ -1196,10 +1197,10 @@ class sqlite_model(common_model):
         """
         self._sqlite_connection.execute("delete from current_hystory_position")
 
-    def list_actions(self, ):
+    def list_actions(self, order_by = ["datetime"]):
         """list all actions executed
         """
-        return self._sqlite_connection.execute_select("select * from hystory_steps")
+        return self._sqlite_connection.execute_select_cond("hystory_steps", order_by = order_by)
 
     def get_current_action(self, ):
         """return current action or None if no one set
@@ -1314,5 +1315,3 @@ class sqlite_model(common_model):
         else:
             self._sqlite_connection.execute("delete from positions_view where id in (select pv.id from positions_view pv inner join positions p on pv.position_id = p.id, positions pp where pp.id = ? and ((p.account_id = ? and p.paper_id = ?) or (pv.account_id = ? and pv.paper_id = ?)) and p.close_datetime >= pp.close_datetime)", [position_id, aid, paid, aid, paid])
             self.calculate_positions(aid, paid, position_id)
-
-
