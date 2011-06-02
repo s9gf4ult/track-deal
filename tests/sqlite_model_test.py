@@ -565,6 +565,7 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model = sqlite_model.sqlite_model()
         self.model.create_new(":memory:")
+        aid1 = self.model.tacreate_account(
         
 
 
