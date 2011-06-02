@@ -68,6 +68,7 @@ class sqlite_model(common_model):
         """
         self.connect(filename)
         self.dbtemp()
+        self.recalculate_all_temporary()
 
     @raise_db_opened
     def create_new(self, filename):
@@ -1355,6 +1356,14 @@ class sqlite_model(common_model):
             self._redo_to_action(a["id"], gac["id"])
         elif action_id < a["id"] <= l["id"]: # делаем undo
             self._undo_to_action(a["id"], gac["id"])
+        self.recalculate_all_temporary()
+
+    def clear_temporary_tables(self, ):
+        """execute `delete` operator for all temporary tables
+        """
+        for table in ["account_statistics", "deals_view", "positions_view", "deal_groups", "deal_group_assign", "deal_paper_selected", "deal_account_selected", "position_account_selected", "position_paper_selected"]:
+            self._sqlite_connection.execute("delete from {0}".format(table))
+
             
     def _redo_to_action(self, start_id, end_id):
         """redo all actions from the first action after the `start_id` to the `end_id` including
@@ -1379,8 +1388,43 @@ class sqlite_model(common_model):
         for (q, ) in self._sqlite_connection.execute("select query from redo_queries where step_id = ? order by id", [action_id]):
             self._sqlite_connection.execute(q)
 
-        
-        
-        
-            
-            
+    def _undo_to_action(self, start_id, end_id):
+        """undo all actions from `start_id` to the first action after `end_id` including in reverse order
+        Arguments:
+        - `start_id`:
+        - `end_id`:
+        """
+        self.set_current_action()
+        maked = None
+        for (action_id, ) in self._sqlite_connection.execute("select id from hystory_steps where id > ? and id <= ? order by id desc", [end_id, start_id]):
+            self._undo_action(action_id)
+            maked = action_id
+        if maked <> None:
+            self.set_current_action(maked)
+        self._clear_unassigned_undo_redo()
+
+    def _undo_action(self, action_id):
+        """execute queries assigned to action in reverse order
+        Arguments:
+        - `action_id`:
+        """
+        for (q, ) in self._sqlite_connection.execute("select query from undo_queries where step_id = ? order by id desc", [action_id]):
+            self._sqlite_connection.execute(q)
+
+    def _clear_unassigned_undo_redo(self, ):
+        """clear all undo / redo queries not assigned to any action
+        """
+        self._sqlite_connection.execute("delete from undo_queries where id in (select id from undo_queries q where not exists(select h.* from hystory_steps h where h.id = q.step_id))")
+        self._sqlite_connection.execute("delete from redo_queries where id in (select id from redo_queries q where not exists(select h.* from hystory_steps h where h.id = q.step_id))")
+
+    def recalculate_all_temporary(self, ):
+        """recalculate all temporary tables in the database
+        """
+        for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals"):
+            for (paid, ) in self._sqlite_connection.execute("select distinct paper_id from deals where account_id = ?", [aid]):
+                self.recalculate_deals(aid, paid)
+        for (aid, ) in self._sqlite_connection.execute("select distinct account_id from positions"):
+            for (paid, ) in self._sqlite_connection.execute("select distinct paper_id from positions where account_id = ?", [aid]):
+                self.recalculate_positions(aid, paid)
+
+    

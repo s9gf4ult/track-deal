@@ -4084,6 +4084,9 @@
       <dia:attribute name="elem_height">
         <dia:real val="3.3499999999999996"/>
       </dia:attribute>
+      <dia:attribute name="border_width">
+        <dia:real val="0.10000000000000001"/>
+      </dia:attribute>
       <dia:attribute name="show_background">
         <dia:boolean val="true"/>
       </dia:attribute>

@@ -154,7 +154,7 @@ foreign key (step_id) references hystory_steps(id) on delete cascade);
 
 CREATE TABLE current_hystory_position(
 step_id integer not null,
-foreign key (step_id) references hystory_steps(id));
+foreign key (step_id) references hystory_steps(id) on delete cascade);
 
 CREATE TRIGGER _just_one_hystorypos BEFORE INSERT ON current_hystory_position FOR EACH ROW BEGIN
 delete from current_hystory_position;
