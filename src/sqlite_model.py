@@ -240,8 +240,11 @@ class sqlite_model(common_model):
     def tacreate_paper(self, *args, **kargs):
         """
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        - `type`:
+        - `name`:
+        - `stock`:
+        - `class_name`:
+        - `full_name`:
         """
         pass
 
@@ -374,6 +377,18 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.insert("moneys", {"name" : name,
                                                          "full_name" : full_name}).lastrowid
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, name, *args, **kargs: "add money {0}".format(name))
+    @pass_to_method(create_money)
+    def tacreate_money(self, name, full_name = None):
+        """transacted wrapper for create_money
+        Arguments:
+        - `name`:
+        - `full_name`:
+        """
+        pass
+
 
     def get_money(self, name_or_id):
         """Returns money object by id or name
@@ -518,8 +533,10 @@ class sqlite_model(common_model):
     def tacreate_account(self, *args, **kargs):
         """transacted wrapper for create account
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        - `name`:
+        - `money_id_or_name`:
+        - `money_count`:
+        - `comment`:
         """
         pass
 
@@ -1198,7 +1215,7 @@ class sqlite_model(common_model):
         """
         self._sqlite_connection.execute("delete from current_hystory_position")
 
-    def list_actions(self, order_by = ["datetime"]):
+    def list_actions(self, order_by = ["id"]):
         """list all actions executed
         """
         return self._sqlite_connection.execute_select_cond("hystory_steps", order_by = order_by)

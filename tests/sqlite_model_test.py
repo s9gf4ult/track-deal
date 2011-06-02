@@ -565,7 +565,26 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model = sqlite_model.sqlite_model()
         self.model.create_new(":memory:")
-        aid1 = self.model.tacreate_account(
+        rubles = self.model.tacreate_money("RU")
+        yens = self.model.tacreate_money("YEN")
+        dollars = self.model.tacreate_money("USD")
+        self.assertEqual(3, self.model._sqlite_connection.execute("select count(*) from hystory_steps").fetchone()[0])
+        self.assertTrue(rubles <> yens <> dollars <> None)
+        ruacc = self.model.tacreate_account("test account with rubles", rubles, 1000)
+        yenacc = self.model.tacreate_account("test account with yens", yens, 9000)
+        dollac = self.model.tacreate_account("test account with dollars US", dollars, 100500)
+        self.assertTrue(ruacc <> yenacc <> dollac <> None)
+        sber = self.model.tacreate_paper("stock", "SBRF", 'MICEX')
+        gaz = self.model.tacreate_paper("stock", "GAZP", 'MICEX')
+        self.assertEqual(8, len(self.model.list_accounts().fetchall()))
+        # def create_random_deals(account, stock, ballanced = True):
+        #     """
+        #     Arguments:
+        #     - `account`:
+        #     - `stock`:
+        #     """
+        #     for 
+
         
 
 
