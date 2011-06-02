@@ -49,7 +49,9 @@ class od_exception_action_cannot_create(od_exception_action_error):
         super(od_exception_action_cannot_create, self).__init__()
         self.__actions_above__ = actions_above
 
-        
+class od_exception_action_does_not_exists(od_exception_action_error):
+    pass
+
 
         
 

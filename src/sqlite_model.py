@@ -1210,6 +1210,21 @@ class sqlite_model(common_model):
             return a[0]
         else:
             return None
+
+    def set_current_action(self, action_id = None):
+        """set current action to action_id
+        Arguments:
+        - `action_id`:
+        """
+        if action_id == None:
+            self._sqlite_connection.execute("delete from current_hystory_position")
+        else:
+            (g, ) = self._sqlite_connection.execute("select id from hystory_steps where id = ?", [action ]).fetchone() or (None, )
+            if g == None:
+                raise od_exception_action_does_not_exists()
+            self._sqlite_connection.insert("current_hystory_position", {"step_id" : action_id})
+        
+
         
     def calculate_positions(self, aid, paid, pid = None):
         """
@@ -1318,18 +1333,54 @@ class sqlite_model(common_model):
 
     def go_to_action(self, action_id):
         """roll back or forward to the action
-        
         Arguments:
         - `action_id`:
         """
         a = self.get_current_action()
-        if action_id == a:
+        if action_id == a["id"]:
             return
         l = self._sqlite_connection.execute_select("select * from hystory_steps order by id desc limit 1").fetchall() # последнее действие
         if len(l) > 0:
             l = l[0]
         else:
-            l = None
+            return                      # нет действий в базе - ничего не делаем
+        gac = self._sqlite_connection.execute_select("select * from hystory_steps where id = ?", [account_id]).fetchall()
+        if len(gac) == 0:
+            raise od_exception_action_does_not_exists() # отсутствует такое действие в базе - выбрасываем исключение
+        else:
+            gac = gac[0]
+        if a == None or a["id"] == l["id"]:
+            a = l
+        if a["id"] < action_id <= l["id"]: # нужно сделать redo
+            self._redo_to_action(a["id"], gac["id"])
+        elif action_id < a["id"] <= l["id"]: # делаем undo
+            self._undo_to_action(a["id"], gac["id"])
             
+    def _redo_to_action(self, start_id, end_id):
+        """redo all actions from the first action after the `start_id` to the `end_id` including
+        Arguments:
+        - `start_id`:
+        - `end_id`:
+        """
+        self.set_current_action()
+        maked = None
+        for (action_id, ) in self._sqlite_connection.execute("select id from actions where id > ? and id <= ? order by id", [start_id, end_id]):
+            self._redo_action(action_id)
+            maked = action_id
+        if maked <> None:
+            self.set_current_action(maked)
+        self._clear_unassigned_undo_redo()
+
+    def _redo_action(self, action_id):
+        """executes all queries for this action in direct order
+        Arguments:
+        - `action_id`:id of action execute queries from
+        """
+        for (q, ) in self._sqlite_connection.execute("select query from redo_queries where step_id = ? order by id", [action_id]):
+            self._sqlite_connection.execute(q)
+
+        
+        
+        
             
             
