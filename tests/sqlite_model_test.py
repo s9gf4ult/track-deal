@@ -6,6 +6,7 @@ import os
 from common_methods import *
 from datetime import *
 import random
+from copy import copy
 
 class sqlite_model_test(unittest.TestCase):
     """
@@ -559,6 +560,21 @@ class sqlite_model_test(unittest.TestCase):
         self.assertAlmostEqual(net, self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
         self.assertAlmostEqual(gross, self.model._sqlite_connection.execute("select gross_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [aid, paid]).fetchone()[0])
 
+    def test_list_actions(self, ):
+        """
+        """
+        self.model.dbinit()
+        self.model.dbtemp()
+        for x in xrange(0, 5):
+            self.model.start_action("the action")
+            self.model.create_money("{0}".format(x))
+            self.model.end_action()
+        # import pudb
+        # pudb.set_trace()
+        z = self.model.list_actions()
+        self.assertEqual(5, len(z.fetchall()))
+        
+
         
     def test_complex(self, ):
         """complex test simulating work with model by user interface 
@@ -568,7 +584,7 @@ class sqlite_model_test(unittest.TestCase):
         rubles = self.model.tacreate_money("RU")
         yens = self.model.tacreate_money("YEN")
         dollars = self.model.tacreate_money("USD")
-        self.assertEqual(3, self.model._sqlite_connection.execute("select count(*) from hystory_steps").fetchone()[0])
+        self.assertEqual(3, len(self.model.list_actions().fetchall()))
         self.assertTrue(rubles <> yens <> dollars <> None)
         ruacc = self.model.tacreate_account("test account with rubles", rubles, 1000)
         yenacc = self.model.tacreate_account("test account with yens", yens, 9000)
@@ -576,14 +592,52 @@ class sqlite_model_test(unittest.TestCase):
         self.assertTrue(ruacc <> yenacc <> dollac <> None)
         sber = self.model.tacreate_paper("stock", "SBRF", 'MICEX')
         gaz = self.model.tacreate_paper("stock", "GAZP", 'MICEX')
-        self.assertEqual(8, len(self.model.list_accounts().fetchall()))
-        # def create_random_deals(account, stock, ballanced = True):
-        #     """
-        #     Arguments:
-        #     - `account`:
-        #     - `stock`:
-        #     """
-        #     for 
+        self.assertEqual(8, len(self.model.list_actions().fetchall()))
+        def create_random_deals(date_start, stock, ballanced = True):
+            ret = []
+            d = copy(date_start)
+            for x in xrange(0, random.randint(120, 150)):
+                count1 = random.random() * 100 + 100
+                count2 = (ballanced and count1 or random.random() * 100 + 100)
+                dir1 = (random.random() > 0.5 and 1 or -1)
+                dir2 = (ballanced and -dir1 or (random.random() > 0.5 and 1 or -1))
+                ret.append({"paper_id" : stock,
+                            "count" : count1,
+                            "direction" : dir1,
+                            "points" : random.random() * 20 + 100,
+                            "commission" : random.random(),
+                            "datetime" : d})
+                d += timedelta(0, random.randint(1, 10))
+                ret.append({"paper_id" : stock,
+                            "count" : count2,
+                            "direction" : dir2,
+                            "points" : random.random() * 20 + 100,
+                            "commission" : random.random(),
+                            "datetime" : d})
+                d += timedelta(0, random.randint(1, 10))
+            if ballanced:
+                self.assertEqual(0, reduce(lambda a, b: a + b, map(lambda c: c["count"] * c["direction"], ret)))
+            return ret
+        
+        x = create_random_deals(datetime(2010, 10, 10), sber)
+        self.model.tacreate_deal(ruacc, x)
+        self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)),
+                               self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [ruacc, rubles]).fetchone()[0])
+        self.model.tamake_positions(ruacc, sber)
+        self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [ruacc, rubles]).fetchone()[0],
+                               self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)))
+        a = self.model.list_actions().fetchall()
+        self.assertEqual(10, len(a))
+        self.model.go_to_action(a[0]["id"])
+        self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from accounts").fetchone()[0])
+        self.assertEqual(rubles, self.model._sqlite_connection.execute("select id from moneys limit 1").fetchone()[0])
+        self.model.go_to_action(self.model._sqlite_connection.execute("select max(id) from hystory_steps").fetchone()[0])
+        self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)),
+                               self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [ruacc, rubles]).fetchone()[0])
+        self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [ruacc, rubles]).fetchone()[0],
+                               self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)))
+        
+                
 
         
 

@@ -278,7 +278,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda torid, name = None: "remove paper {0}".format((isinstance(torid, int) and "with id {0}".format(torid) or "with type {0} and name {1}".format(torid, name))))
+    @in_action(lambda self, torid, name = None: "remove paper {0}".format((isinstance(torid, int) and "with id {0}".format(torid) or "with type {0} and name {1}".format(torid, name))))
     @pass_to_method(remove_paper)
     def taremove_paper(self, *args, **kargs):
         """
@@ -314,13 +314,13 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action("change paper")
+    @in_action(lambda self, paper_id, *args, **kargs: "change paper {0}".format(paper_id))
     @pass_to_method(change_paper)
     def tachange_paper(self, *args, **kargs):
         """
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        - `paper_id`:
+        - `fields`: hash {"field" : value}
         """
         pass
 
@@ -434,7 +434,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda paper_id, money_id, *args, **kargs: "create point for paper {0} and money {1}".format(paper_id, money_id))
+    @in_action(lambda self, paper_id, money_id, *args, **kargs: "create point for paper {0} and money {1}".format(paper_id, money_id))
     @pass_to_method(create_point)
     def tacreate_point(self, *args, **kargs):
         """transacted wrapper for create point
@@ -494,7 +494,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda id_or_paper_id, money_id = None:"remove point {0}".format((money_id == None and "with id {0}".format(id_or_paper_id) or "with paper_id {0} and money_id {1}".format(id_or_paper_id, money_id))))
+    @in_action(lambda self, id_or_paper_id, money_id = None:"remove point {0}".format((money_id == None and "with id {0}".format(id_or_paper_id) or "with paper_id {0} and money_id {1}".format(id_or_paper_id, money_id))))
     @pass_to_method(remove_point)
     def taremove_point(self, *args, **kargs):
         """transacted wrapper for remove point
@@ -528,7 +528,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda name, *args, **kargs: u"create account {0}".format(name))
+    @in_action(lambda self, name, *args, **kargs: u"create account {0}".format(name))
     @pass_to_method(create_account)
     def tacreate_account(self, *args, **kargs):
         """transacted wrapper for create account
@@ -569,7 +569,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda aid, *args, **kargs: "changed account with id {0}".format(aid))
+    @in_action(lambda self, aid, *args, **kargs: "changed account with id {0}".format(aid))
     @pass_to_method(change_account)
     def tachange_account(self, *args, **kargs):
         """transacted wrapper for change account function
@@ -582,7 +582,7 @@ class sqlite_model(common_model):
     def list_accounts(self, order_by = []):
         """Return list of accounts
         """
-        return self._sqlite_connection.execute_select("select * from accounts{0}".format(order_by_print(order_by)))
+        return self._sqlite_connection.execute_select_cond("accounts", order_by = order_by)
 
     @remover_decorator("accounts", {int : "id", basestring : "name"})
     def remove_account(self, name_or_id):
@@ -594,7 +594,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda name_or_id: "remove account with {0}".format((isinstance(name_or_id, int) and "id {0}".format(name_or_id) or "name {0}".format(name_or_id))))
+    @in_action(lambda self, name_or_id: "remove account with {0}".format((isinstance(name_or_id, int) and "id {0}".format(name_or_id) or "name {0}".format(name_or_id))))
     @pass_to_method(remove_account)
     def taremove_account(self, *args, **kargs):
         """transacted wrapper for remove account
@@ -658,13 +658,13 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda account_id, deal, *args, **kargs: "create deal for paper {0}".format(deal["paper_id"]))
+    @in_action(lambda self, account_id, deal, *args, **kargs: (isinstance(deal, (tuple, list)) and "create {0} deals".format(len(deal)) or "create deal with paper id {0}".format(deal["paper_id"])))
     @pass_to_method(create_deal)
     def tacreate_deal(self, *args, **kargs):
         """wrapper for create deal
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        - `account_id`:
+        - `deal`: list of or one hash table with deal
         """
         pass
 
@@ -735,13 +735,12 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda *args, **kargs: "remove deals(s)")
+    @in_action(lambda self, deal_id, *args, **kargs: "remove deals(s)".format(deal_id))
     @pass_to_method(remove_deal)
     def taremove_deal(self, *args, **kargs):
         """
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        - `deal_id`:
         """
         pass
 
@@ -1073,6 +1072,7 @@ class sqlite_model(common_model):
         """
         self.remake_groups(account_id, paper_id, time_distance)
 
+
     def make_positions(self, account_id, paper_id, time_distance = 5):
         """automatically makes positions
         Arguments:
@@ -1098,6 +1098,20 @@ class sqlite_model(common_model):
         while go_on():
             pass
         self._create_position_raw(hashes)
+
+        
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, account_id, paper_id, *args, **kargs: "automake positions for acc {0} and paper {1}".format(account_id, paper_id))
+    @pass_to_method(make_positions)
+    def tamake_positions(self, *args, **kargs):
+        """transacted wrapper oround make_positions
+        Arguments:
+        - `*args`:
+        - `**kargs`:
+        """
+        pass
+
 
     def try_make_ballanced_groups(self, gid1, gid2):
         """if count of papers for gid1 and gid2 is the same then just return gid1 and gid2,
@@ -1237,7 +1251,7 @@ class sqlite_model(common_model):
         if action_id == None:
             self._sqlite_connection.execute("delete from current_hystory_position")
         else:
-            (g, ) = self._sqlite_connection.execute("select id from hystory_steps where id = ?", [action ]).fetchone() or (None, )
+            (g, ) = self._sqlite_connection.execute("select id from hystory_steps where id = ?", [action_id]).fetchone() or (None, )
             if g == None:
                 raise od_exception_action_does_not_exists()
             self._sqlite_connection.insert("current_hystory_position", {"step_id" : action_id})
@@ -1355,14 +1369,14 @@ class sqlite_model(common_model):
         - `action_id`:
         """
         a = self.get_current_action()
-        if action_id == a["id"]:
+        if a <> None and action_id == a["id"]:
             return
         l = self._sqlite_connection.execute_select("select * from hystory_steps order by id desc limit 1").fetchall() # последнее действие
         if len(l) > 0:
             l = l[0]
         else:
             return                      # нет действий в базе - ничего не делаем
-        gac = self._sqlite_connection.execute_select("select * from hystory_steps where id = ?", [account_id]).fetchall()
+        gac = self._sqlite_connection.execute_select("select * from hystory_steps where id = ?", [action_id]).fetchall()
         if len(gac) == 0:
             raise od_exception_action_does_not_exists() # отсутствует такое действие в базе - выбрасываем исключение
         else:
@@ -1390,7 +1404,7 @@ class sqlite_model(common_model):
         """
         self.set_current_action()
         maked = None
-        for (action_id, ) in self._sqlite_connection.execute("select id from actions where id > ? and id <= ? order by id", [start_id, end_id]):
+        for (action_id, ) in self._sqlite_connection.execute("select id from hystory_steps where id > ? and id <= ? order by id", [start_id, end_id]):
             self._redo_action(action_id)
             maked = action_id
         if maked <> None:
@@ -1402,8 +1416,10 @@ class sqlite_model(common_model):
         Arguments:
         - `action_id`:id of action execute queries from
         """
+        # print("========== REDOING action {0} ===========".format(action_id))
         for (q, ) in self._sqlite_connection.execute("select query from redo_queries where step_id = ? order by id", [action_id]):
             self._sqlite_connection.execute(q)
+          #  print("REDO:: {0}".format(q))
 
     def _undo_to_action(self, start_id, end_id):
         """undo all actions from `start_id` to the first action after `end_id` including in reverse order
@@ -1417,7 +1433,7 @@ class sqlite_model(common_model):
             self._undo_action(action_id)
             maked = action_id
         if maked <> None:
-            self.set_current_action(maked)
+            self.set_current_action(end_id)
         self._clear_unassigned_undo_redo()
 
     def _undo_action(self, action_id):
@@ -1425,8 +1441,10 @@ class sqlite_model(common_model):
         Arguments:
         - `action_id`:
         """
+    #    print("============= UNDOING action {0} ==============".format(action_id))
         for (q, ) in self._sqlite_connection.execute("select query from undo_queries where step_id = ? order by id desc", [action_id]):
             self._sqlite_connection.execute(q)
+     #       print("UNDO: {0}".format(q))
 
     def _clear_unassigned_undo_redo(self, ):
         """clear all undo / redo queries not assigned to any action
