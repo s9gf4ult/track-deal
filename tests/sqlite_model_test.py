@@ -621,21 +621,32 @@ class sqlite_model_test(unittest.TestCase):
         
         x = create_random_deals(datetime(2010, 10, 10), sber)
         self.model.tacreate_deal(ruacc, x)
-        self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)),
-                               self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [ruacc, rubles]).fetchone()[0])
+        xcount = reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x))
+        self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + xcount,
+                               self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0])
         self.model.tamake_positions(ruacc, sber)
-        self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [ruacc, rubles]).fetchone()[0],
-                               self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)))
+        self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0],
+                               self.model.get_account(ruacc)["money_count"] + xcount)
         a = self.model.list_actions().fetchall()
         self.assertEqual(10, len(a))
         self.model.go_to_action(a[0]["id"])
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from accounts").fetchone()[0])
         self.assertEqual(rubles, self.model._sqlite_connection.execute("select id from moneys limit 1").fetchone()[0])
         self.model.go_to_action(self.model._sqlite_connection.execute("select max(id) from hystory_steps").fetchone()[0])
-        self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)),
-                               self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [ruacc, rubles]).fetchone()[0])
-        self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc limit 1", [ruacc, rubles]).fetchone()[0],
-                               self.model.get_account(ruacc)["money_count"] + reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], x)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], x)))
+        self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + xcount,
+                               self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0])
+        self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0],
+                               self.model.get_account(ruacc)["money_count"] + xcount)
+        
+        y = create_random_deals(datetime(2010, 10, 10), gaz)
+        ycount = reduce(lambda a, b: a + b, map(lambda c: c["direction"] * c["count"] * c["points"], y)) - reduce(lambda a, b: a + b, map(lambda c: c["commission"], y))
+        self.model.tacreate_deal(ruacc, y)
+        self.model.tamake_positions(ruacc, gaz)
+        self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + xcount + ycount,
+                               self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ?  order by datetime desc, id desc limit 1", [ruacc]).fetchone()[0])
+        self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? order by close_datetime desc, open_datetime desc, id desc limit 1", [ruacc]).fetchone()[0],
+                               self.model.get_account(ruacc)["money_count"] + xcount + ycount)
+        
         
                 
 

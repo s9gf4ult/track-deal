@@ -55,11 +55,12 @@ delete from deal_group_assign where deal_id = new.deal_id;
 END;
         
 CREATE TEMPORARY TABLE deals_view(
-id integer primary key not null,
+id integer primary key autoincrement not null,
 deal_id integer not null,
 manual_made integer,
 account_id integer not null,
 paper_id integer not null,
+position_id integer,
 paper_type text,
 paper_class text,
 paper_name text not null,
@@ -103,7 +104,7 @@ delete from deals_view where deal_id = new.deal_id;
 END;
 
 CREATE TEMPORARY TABLE positions_view(
-id integer primary key not null,
+id integer primary key autoincrement not null,
 account_id integer not null,
 position_id integer not null,
 money_id integer not null,

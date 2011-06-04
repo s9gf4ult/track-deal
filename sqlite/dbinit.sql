@@ -37,7 +37,7 @@ foreign key (money_id) references moneys(id) on delete cascade,
 unique(paper_id, money_id));
 
 CREATE TABLE positions(
-id integer primary key not null,
+id integer primary key autoincrement not null,
 account_id integer not null,
 paper_id integer not null,
 count float not null,
@@ -53,7 +53,7 @@ foreign key (account_id) references accounts(id) on delete cascade,
 foreign key (paper_id) references papers(id) on delete cascade);
 
 CREATE TABLE deals(
-id integer primary key not null,
+id integer primary key autoincrement not null,
 sha1 text,
 manual_made integer,
 parent_deal_id integer,
@@ -106,7 +106,7 @@ foreign key (position_id) references positions(id) on delete cascade,
 unique(position_id, type));
 
 CREATE TABLE candles(
-id integer primary key not null,
+id integer primary key autoincrement not null,
 paper_id integer not null,
 duration text not null,
 open_datetime datetime not null,
