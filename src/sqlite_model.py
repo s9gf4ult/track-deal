@@ -310,7 +310,7 @@ class sqlite_model(common_model):
                 for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals where paper_id = ?", [paper_id]):
                     self.recalculate_deals(aid)
                 for (aid, ) in self._sqlite_connection.execute("select distinct account_id from positions where paper_id = ?", [paper_id]):
-                    self.recalculate_positions(aid, paper_id)
+                    self.recalculate_positions(aid)
 
     @raise_db_closed
     @in_transaction
@@ -429,7 +429,7 @@ class sqlite_model(common_model):
         ret = self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step}).lastrowid
         for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
             self.recalculate_deals(aid)
-            self.recalculate_positions(aid, paper_id)
+            self.recalculate_positions(aid)
         return ret
 
     @raise_db_closed
@@ -483,14 +483,14 @@ class sqlite_model(common_model):
             self._sqlite_connection.execute("delete from points where paper_id = ? and money_id = ?", [id_or_paper_id, money_id])
             for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
                 self.recalculate_deals(aid)
-                self.recalculate_positions(aid, id_or_paper_id)
+                self.recalculate_positions(aid)
         else:
             self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
             (paid, ) = self._sqlite_connection.execute("select paper_id from points where id = ?", [id_or_paper_id]).fetchone() or (None, )
             if paid <> None:
                 for (aid, ) in self._sqlite_connection.execute("select a.id from accounts a inner join points p on p.money_id = a.money_id where p.id = ?", [id_or_paper_id]):
                     self.recalculate_deals(aid)
-                    self.recalculate_positions(aid, paid)
+                    self.recalculate_positions(aid)
 
     @raise_db_closed
     @in_transaction
@@ -561,11 +561,8 @@ class sqlite_model(common_model):
             self._sqlite_connection.update("accounts", sets, "id = ?", [aid])
 
         if money_id_or_name <> None or money_count <> None:
-            for (paid, ) in self._sqlite_connection.execute("select distinct paper_id from deals where account_id = ?", [aid]):
-                self.recalculate_deals(aid)
-
-            for (paid, ) in self._sqlite_connection.execute("select distinct paper_id from positions where account_id = ?", [aid]):
-                self.recalculate_positions(aid, paid)
+            self.recalculate_deals(aid)
+            self.recalculate_positions(aid)
 
     @raise_db_closed
     @in_transaction
@@ -769,7 +766,7 @@ class sqlite_model(common_model):
         - `position`: hash table, keys may be "user_attributes", "stored_attributes", "deals_assigned" and fields of table positions. It can be list of this hashes
         """
         pss = (isinstance(position, (list, tuple)) and position or [position])
-        paper_position = {}             # {paper_id : (position_id, close_datetime, open_datetime)}
+        paper_position = None             # {paper_id : (position_id, close_datetime, open_datetime)}
         aid = None
         pid = None
         for ps in pss:
@@ -785,14 +782,13 @@ class sqlite_model(common_model):
                 self._sqlite_connection.insert("stored_position_attributes", map(lambda k: {"position_id" : pid, "type" : k, "value" : ps["stored_attributes"][k]}, ps["stored_attributes"].keys()))
             if gethash(ps, "deals_assigned") <> None:
                 self._sqlite_connection.executemany("update deals set position_id = ? where id = ?", map(lambda a: (pid, a), ps["deals_assigned"]))
-            papid = ps["paper_id"]
-            if gethash(paper_position, papid) == None or ps["close_datetime"] < paper_position[papid][1] or (ps["close_datetime"] == paper_position[papid][1] and ps["open_datetime"] < paper_position[papid][2]):
-                paper_position[papid] = (pid, ps["close_datetime"], ps["open_datetime"])
+            if do_recalc:
+                if paper_position == None or (paper_position[1] > ps["close_datetime"]) or (paper_position[1] == ps["close_datetime"] and (paper_position[2] > ps["open_datetime"] or (paper_position[2] == ps["open_datetime"] and paper_position[0] > pid))):
+                    paper_position = (pid, ps["close_datetime"], ps["open_datetime"])
             aid = ps["account_id"]
             
         if do_recalc:
-            for paper in paper_position.keys():
-                self.recalculate_positions(aid, paper, paper_position[paper][0])
+            self.recalculate_positions(aid, paper_position[0])
         return pid
                     
     def create_position_hash(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
@@ -988,7 +984,8 @@ class sqlite_model(common_model):
             (newdw["point"], newdw["step"]) = self._sqlite_connection.execute("select pn.point, pn.step from points pn inner join accounts a on a.money_id = pn.money_id inner join deals d on d.account_id = a.id and d.paper_id = pn.paper_id where d.id = ?", [dd["id"]]).fetchone() or (1, 1)
             (net, bal[dd["paper_id"]]) = addition(newdw, net, (gethash(bal, dd["paper_id"]) <> None and gethash(bal, dd["paper_id"]) or 0))
             inserts.append(newdw)
-        self._sqlite_connection.insert("deals_view", inserts)
+        if len(inserts) > 0:
+            self._sqlite_connection.insert("deals_view", inserts)
 
     def recalculate_deals(self, account_id, deal_id = None):
         """removes and recalculate additional table for deals
@@ -1250,23 +1247,23 @@ class sqlite_model(common_model):
         
 
         
-    def calculate_positions(self, aid, paid, pid = None):
+    def calculate_positions(self, aid, pid = None):
         """
         Arguments:
         - `aid`:
         - `paid`:
         - `pid`:
         """
-        if pid == None:
-            cur = self._sqlite_connection.execute_select("select * from positions order by close_datetime, open_datetime")
-            net = self.get_account(aid)["money_count"]
-            self._calculate_positions_with_initial(cur, net, net)
-        else:
-            cur = self._sqlite_connection.execute_select("select p.* from positions p, positions pp where pp.id = ? and p.close_datetime >= pp.close_datetime order by close_datetime, open_datetime",[pid])
-            (net, gross) = self._sqlite_connection.execute("select net_after, gross_after from positions_view where position_id = ?", [pid]).fetchone() or (None, None)
-            if net == gross == None:
-                return self.recalculate_positions(aid, paid)
-            self._calculate_positions_with_initial(cur, net, gross)
+        # if pid == None:
+        cur = self._sqlite_connection.execute_select("select * from positions order by close_datetime, open_datetime")
+        net = self.get_account(aid)["money_count"]
+        self._calculate_positions_with_initial(cur, net, net)
+        # else:
+        #     cur = self._sqlite_connection.execute_select("select p.* from positions p, positions pp where pp.id = ? and p.close_datetime >= pp.close_datetime order by close_datetime, open_datetime",[pid])
+        #     (net, gross) = self._sqlite_connection.execute("select net_after, gross_after from positions_view where position_id = ?", [pid]).fetchone() or (None, None)
+        #     if net == gross == None:
+        #         return self.recalculate_positions(aid, paid)
+        #     self._calculate_positions_with_initial(cur, net, gross)
 
     def _calculate_positions_with_initial(self, cursor, net, gross):
         """
@@ -1317,43 +1314,45 @@ class sqlite_model(common_model):
             post["net_after"] = netx + post["pl_net"]
             post["gross_before"] = grossx
             post["gross_after"] = grossx + post["pl_gross"]
+            return (post["net_after"], post["gross_after"])
           
-        
-        first = True
+        n = net
+        g = gross
+        ins = []
         for pos in cursor:
             posx = copy(pos)
             del posx["id"]
             posx["position_id"] = pos["id"]
-            if first:
-                common = {}
-                (paper_id, ) = self._sqlite_connection.execute("select paper_id from positions where id = ? limit 1", [pos["id"]]).fetchone()
-                (common["money_id"], common["money_name"]) = self._sqlite_connection.execute("select m.id, m.name from moneys m inner join accounts a on a.money_id = m.id where a.id = ? limit 1", [pos["account_id"]]).fetchone()
-                (common["point"], common["step"]) = self._sqlite_connection.execute("select point, step from points where money_id = ? and paper_id = ?", [common["money_id"], paper_id]).fetchone() or (1, 1)
-                (common["paper_type"], common["paper_stock"], common["paper_class"], common["paper_name"]) = self._sqlite_connection.execute("select type, stock, class, name from papers where id = ?", [paper_id]).fetchone()
-            add_hash(posx, common)
-            if first:
-                do_the_work(posx, net, gross)
-            else:
-                do_the_work(posx, oldpos["net_after"], oldpos["gross_after"])
-            self._sqlite_connection.insert("positions_view", posx)
-            oldpos = posx
-            first = False
+            (posx["money_id"], posx["money_name"]) = self._sqlite_connection.execute("select m.id, m.name from moneys m inner join accounts a on a.money_id = m.id inner join positions p on p.account_id = a.id where p.id = ?", [pos["id"]]).fetchone()
+            (posx["point"], posx["step"]) = self._sqlite_connection.execute("select point, step from points where money_id = ? and paper_id = ?", [posx["money_id"], posx["paper_id"]]).fetchone() or (1, 1)
+            (posx["paper_type"], posx["paper_stock"], posx["paper_class"], posx["paper_name"]) = self._sqlite_connection.execute("select type, stock, class, name from papers where id = ?", [posx["paper_id"]]).fetchone()
+            # if first:
+            #     common = {}
+            #     (paper_id, ) = self._sqlite_connection.execute("select paper_id from positions where id = ? limit 1", [pos["id"]]).fetchone()
+            #     (common["money_id"], common["money_name"]) = self._sqlite_connection.execute("select m.id, m.name from moneys m inner join accounts a on a.money_id = m.id where a.id = ? limit 1", [pos["account_id"]]).fetchone()
+            #     (common["point"], common["step"]) = self._sqlite_connection.execute("select point, step from points where money_id = ? and paper_id = ?", [common["money_id"], paper_id]).fetchone() or (1, 1)
+            #     (common["paper_type"], common["paper_stock"], common["paper_class"], common["paper_name"]) = self._sqlite_connection.execute("select type, stock, class, name from papers where id = ?", [paper_id]).fetchone()
+            # add_hash(posx, common)
+            (n, g) = do_the_work(posx, n, g)
+            ins.append(posx)
+        if len(ins) > 0:
+            self._sqlite_connection.insert("positions_view", ins)
             
 
-    def recalculate_positions(self, aid, paid, position_id = None):
+    def recalculate_positions(self, aid, position_id = None):
         """
         Arguments:
         - `aid`: account id
         - `paid`: paper id
         - `position_id`: id of position recalculate from
         """
-        if position_id == None:
-            self._sqlite_connection.execute("delete from positions_view where account_id = ? and paper_id = ?", [aid, paid])
-            self._sqlite_connection.execute("delete from positions_view where id in (select pw.id from positions_view pw inner join positions p on p.id = pw.position_id where p.account_id = ? and p.paper_id = ?)",[aid, paid])
-            self.calculate_positions(aid, paid)
-        else:
-            self._sqlite_connection.execute("delete from positions_view where id in (select pv.id from positions_view pv inner join positions p on pv.position_id = p.id, positions pp where pp.id = ? and ((p.account_id = ? and p.paper_id = ?) or (pv.account_id = ? and pv.paper_id = ?)) and p.close_datetime >= pp.close_datetime)", [position_id, aid, paid, aid, paid])
-            self.calculate_positions(aid, paid, position_id)
+        # if position_id == None:
+        self._sqlite_connection.execute("delete from positions_view where account_id = ?", [aid])
+        self._sqlite_connection.execute("delete from positions_view where id in (select pw.id from positions_view pw inner join positions p on p.id = pw.position_id where p.account_id = ?)",[aid])
+        self.calculate_positions(aid)
+        # else:
+        #     self._sqlite_connection.execute("delete from positions_view where id in (select pv.id from positions_view pv inner join positions p on pv.position_id = p.id, positions pp where pp.id = ? and ((p.account_id = ? and p.paper_id = ?) or (pv.account_id = ? and pv.paper_id = ?)) and p.close_datetime >= pp.close_datetime)", [position_id, aid, paid, aid, paid])
+        #     self.calculate_positions(aid, paid, position_id)
 
     def go_to_action(self, action_id):
         """roll back or forward to the action
@@ -1449,8 +1448,6 @@ class sqlite_model(common_model):
         """
         for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals"):
             self.recalculate_deals(aid)
-        for (aid, ) in self._sqlite_connection.execute("select distinct account_id from positions"):
-            for (paid, ) in self._sqlite_connection.execute("select distinct paper_id from positions where account_id = ?", [aid]):
-                self.recalculate_positions(aid, paid)
+            self.recalculate_positions(aid)
 
     
