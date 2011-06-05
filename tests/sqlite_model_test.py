@@ -44,7 +44,7 @@ class sqlite_model_test(unittest.TestCase):
         self.model.connect(":memory:")
         self.model.dbinit()
         self.model.dbtemp()
-        self.assertEqual(9, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_temp_master where type = 'table'").fetchall()[0]["count"])
+        self.assertEqual(10, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_temp_master where type = 'table'").fetchall()[0]["count"]) # 9 tables + 1 special (autoincrement)
 
     def test_create_new_and_open(self, ):
         """tests of creation new database and opening existing
@@ -275,13 +275,13 @@ class sqlite_model_test(unittest.TestCase):
             dd += timedelta(1)
             x += ((cprice - oprice) * count) - ocomm - ccomm
         self.model.create_deal(aid, dds)
-        self.model.calculate_deals(aid, paid)
+        self.model.calculate_deals(aid)
         self.assertEqual(2 * len(ll), self.model._sqlite_connection.execute("select count(dw.id) from deals_view dw inner join deals d on dw.deal_id = d.id where d.account_id = ? and d.paper_id = ?", [aid, paid]).fetchone()[0])
         self.assertAlmostEqual(x, self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [aid, paid]).fetchone()[0])
         self.assertEqual((ll[-1][-1], 0), self.model._sqlite_connection.execute("select paper_ballance_before, paper_ballance_after from deals_view where account_id = ? and paper_id = ? order by datetime desc limit 1", [aid, paid]).fetchone())
         point = 10
         self.model.create_point(paid, mid, point, 0.001)
-        self.model.recalculate_deals(aid, paid)
+        self.model.recalculate_deals(aid)
         xx = 1000
         for (oprice, ocomm, cprice, comm, count) in ll:
             xx += ((cprice - oprice) * count * point) - ocomm - comm
