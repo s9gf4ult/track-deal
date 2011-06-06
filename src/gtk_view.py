@@ -11,14 +11,15 @@ class gtk_view(common_view):
     def __init__(self, ):
         """initialize gtk view
         """
-        self._window = main_window_controller()
+        self._window = main_window_controller(self)
 
     
     def run(self, ):
         """show main window and initialize all the necessary
         """
-        pass
-
+        self._window.run()
+        
+        
     def call_update_callback(self, ):
         """try send update signal to the all controllers
         """
