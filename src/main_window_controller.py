@@ -7,7 +7,7 @@ from modifying_tab_control import modifying_tab_control
 from common_methods import *
 
 class main_window_controller(modifying_tab_control):
-    def __init__(self, global_data, database, builder, points, update_callback):
+    def __init__(self, parent):
         self.database = database
         self.builder = builder
         self.global_data = global_data
