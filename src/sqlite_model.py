@@ -113,6 +113,31 @@ class sqlite_model(common_model):
         names = parameters.keys()
         self._sqlite_connection.insert("global_data", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names)))
 
+    def select_account(self, account_id):
+        """set the current account in the database
+        Arguments:
+        - `account_id`:
+        """
+        self._sqlite_connection.insert("global_data", {"name" : "current_account", "value" : account_id})
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, account_id: "set {0} as current account".format(account_id))
+    @pass_to_method(select_account)
+    def taselect_account(self, account_id):
+        """wrapper for select account
+        Arguments:
+        - `account_id`:
+        """
+        pass
+
+    def get_current_account(self, ):
+        """return id of current account
+        """
+        (ret, ) = self._sqlite_connection.execute("select value from global_data where name = 'current_account'").fetchone() or (None, )
+        return ret
+
+
     @raise_db_closed
     @in_transaction
     @in_action(lambda self, parameters: "add parameters {0}".format(reduce_by_string(", ", paramters.keys())))
@@ -134,6 +159,8 @@ class sqlite_model(common_model):
             return ret[0]["value"]
         else:
             return None
+
+        
 
     def remove_global_data(self, name):
         """Removes global parameters
@@ -809,7 +836,9 @@ class sqlite_model(common_model):
         assert(len(odirs[0]) == len(odirs[1]) == 1)
         assert(odirs[0][0][0] == -(odirs[1][0][0]) <> 0)
         cnts = map(lambda a: self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]).fetchone()[0], [open_group_id, close_group_id])
-        assert(cnts[0] == cnts[1] > 0)
+        assert(cnts[0] == cnts[1])
+        assert(cnts[0] > 0)
+               
         dds = self._sqlite_connection.execute("select max(d.datetime), min(dd.datetime) from deals d inner join deal_group_assign dg on dg.deal_id = d.id, deals dd inner join deal_group_assign ddg on ddg.deal_id = dd.id where dg.group_id = ? and ddg.group_id = ?", [open_group_id, close_group_id]).fetchone()
         assert(dds[0] <= dds[1])
         (apids, ) = self._sqlite_connection.execute("select count(*) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where (dg.group_id = ? or dg.group_id = ?) and d.position_id is not null", [open_group_id, close_group_id]).fetchone()
@@ -1096,8 +1125,9 @@ class sqlite_model(common_model):
     def tamake_positions(self, *args, **kargs):
         """transacted wrapper oround make_positions
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        - `account_id`:
+        - `paper_id`:
+        - `time_distance`: time distance for make_groups
         """
         pass
 

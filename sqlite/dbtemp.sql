@@ -233,9 +233,7 @@ delete from position_paper_selected where paper_id = new.paper_id and position_i
 END;
 
 CREATE TEMPORARY VIEW account_ballance AS
-SELECT * FROM (
-SELECT account_id, paper_type, paper_class, paper_name, sum(direction * count) as count FROM deals_view GROUP BY account_id, paper_id)
-WHERE count <> 0;
+SELECT account_id, paper_id, paper_type, paper_class, paper_name, sum(direction * count) as count FROM deals_view GROUP BY account_id, paper_id;
 
 CREATE TEMPORARY VIEW accounts_view AS
 SELECT

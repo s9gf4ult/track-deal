@@ -158,6 +158,7 @@ def in_transaction(func):
             rtt = func(*args, **kargs)
         except Exception as e:
             self.rollback()
+            print(traceback.format_exc())
             raise e
         else:
             self.commit()
