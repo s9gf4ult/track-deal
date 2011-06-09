@@ -8,6 +8,7 @@ from common_methods import *
 
 class main_window_controller(object):
     def __init__(self, parent):
+        self._parent = parent
         self._model = parent._model
         self._builder = parent._builder
         def shorter(name, signal, *method):

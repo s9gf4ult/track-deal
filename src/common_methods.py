@@ -475,3 +475,34 @@ def any_to_timedelta(value):
 
 def format_abs_value(val):
     return (val < 0 and "({0})" or "{0}").format(abs(val))
+
+
+class signal_fetcher(object):
+    """Decorator makes method the handler of signal received from widget
+    """
+    def __init__(self, builder_name, object_name, signal_name, *userattrs):
+        """
+        Arguments:
+        - `builder_name`:
+        - `object_name`:
+        - `signal_name`:
+        - `*userattrs`:
+        """
+        self._builder_name = builder_name
+        self._object_name = object_name
+        self._signal_name = signal_name
+        self._userattrs = userattrs
+        
+    def __call__(self, func):
+        """
+        Arguments:
+        - `func`:
+        """
+        myclass = func.im_class
+        def newinit(myself, *args, **kargs):
+            r = myself.__init__(*args, **kargs)
+            getattr(myself, self._builder_name).get_object(self._object_name).connect(self._signal_name, func, *self._userattrs)
+            return r
+        newinit.__doc__ = myclass.__init__.__doc__
+        setattr(myclass, "__init__", newinit)
+        return func
