@@ -119,7 +119,7 @@ class main_window_controller(object):
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self._model.open_existing(diag.get_filename())
-                    self.call_update_callback()
+                    self._parent.call_update_callback()
                 except Exception as e:
                     show_error(e.__str__(), self._builder.get_object("main_window"))
                     print(traceback.format_exc())
@@ -132,8 +132,7 @@ class main_window_controller(object):
     def quit(self):
         """returns True if you can quit"""
         try:
-            self._model.close()
-            self.global_data["current_account"] = None
+            self._model.disconnect()
         except Exception as e:
             show_error(e.__str__(), self._builder.get_object("main_window"))
             print(traceback.format_exc())
@@ -185,3 +184,9 @@ class main_window_controller(object):
         else:
             self.set_main_title("Open Deals")
             
+    def run(self, ):
+        """show main window
+        """
+        win = self._builder.get_object("main_window")
+        win.show_all()
+        

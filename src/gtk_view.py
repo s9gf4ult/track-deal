@@ -3,6 +3,7 @@
 ## gtk_view ##
 
 import gtk
+from common_view import common_view
 from main_window_controller import main_window_controller
 
 class gtk_view(common_view):
@@ -24,6 +25,7 @@ class gtk_view(common_view):
         """show main window and initialize all the necessary
         """
         self._window.run()
+        gtk.main()
         
         
     def call_update_callback(self, ):
