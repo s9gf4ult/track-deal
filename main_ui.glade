@@ -3759,6 +3759,18 @@
                 <property name="icon_size">1</property>
                 <property name="icon_size_set">True</property>
                 <child>
+                  <object class="GtkToolButton" id="toolbutton1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">toggletoolbutton1</property>
+                    <property name="use_underline">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkToolButton" id="toolbutton4">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -3780,44 +3792,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToolbar" id="toolbar2">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="show_arrow">False</property>
-                <property name="icon_size">1</property>
-                <property name="icon_size_set">True</property>
-                <child>
-                  <object class="GtkToolButton" id="toolbutton1">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="related_action">transaction_commit</property>
-                    <property name="label" translatable="yes">toolbutton1</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkToolButton" id="toolbutton2">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="related_action">transaction_rollback</property>
-                    <property name="label" translatable="yes">toolbutton2</property>
-                    <property name="use_underline">True</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="homogeneous">True</property>
-                  </packing>
-                </child>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
+              <placeholder/>
             </child>
           </object>
           <packing>
