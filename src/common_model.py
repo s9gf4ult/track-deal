@@ -21,6 +21,12 @@ class common_model(object):
         """
         raise NotImplementedError()
 
+    def connected(self, ):
+        """return true if connected
+        """
+        raise NotImplementedError()
+
+
     def disconnect(self, ):
         """disconnect from database
         """

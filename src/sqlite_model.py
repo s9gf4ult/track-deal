@@ -43,6 +43,12 @@ class sqlite_model(common_model):
         self._connection_string = connection_string
         self._sqlite_connection = sconnection(connection_string)
 
+    def connected(self, ):
+        """return true if connected
+        """
+        return self._sqlite_connection <> None
+
+
     @raise_db_closed
     def dbinit(self, ):
         """
