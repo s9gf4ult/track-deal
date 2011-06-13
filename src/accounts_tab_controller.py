@@ -7,21 +7,22 @@ from common_methods import *
 import sqlite3
 
 class accounts_tab_controller(modifying_tab_control):
-    def __init__(self, global_data, database, builder, update_callback, account_edit):
-        self.builder = builder
-        self.database = database
+    def __init__(self, parent):
+        self._parent = parent
+        self._builder = parent._builder
+        self._model = parent._model
         self.account_edit = account_edit
         self.global_data = global_data
         self.update_callback = update_callback
         def shorter(name, *method):
-            self.builder.get_object(name).connect("activate", *method)
+            self._builder.get_object(name).connect("activate", *method)
         shorter("add_account", self.add_account_activate)
         shorter("delete_account", self.delete_account_activate)
         shorter("modify_account", self.modify_account_activate)
         shorter("set_current_account", self.set_current_account_activate)
-        self.accounts_list = list_view_sort_control(self.builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererSpin(), int)])
-        self.account_list = list_view_sort_control(self.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
-        self.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
+        self.accounts_list = list_view_sort_control(self._builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererSpin(), int)])
+        self.account_list = list_view_sort_control(self._builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
+        self._builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
 
     def accounts_view_row_activated(self, tw, path, col):
         self.set_current_account()
@@ -37,11 +38,11 @@ class accounts_tab_controller(modifying_tab_control):
         self.update_account_list()
 
     def update_account_label(self):
-        if self.database.connection != None:
-            (acname, ) = self.database.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"),)).fetchone() or (None, )
-            self.builder.get_object("current_account_name_label").set_text(acname != None and acname or "")
+        if self._model.connection != None:
+            (acname, ) = self._model.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"),)).fetchone() or (None, )
+            self._builder.get_object("current_account_name_label").set_text(acname != None and acname or "")
         else:
-            self.builder.get_object("current_account_name_label").set_text("")
+            self._builder.get_object("current_account_name_label").set_text("")
 
     def update_account_list(self):
         """update list of properties and statistics of selected account"""
@@ -49,8 +50,8 @@ class accounts_tab_controller(modifying_tab_control):
 
     def update_accounts_list(self):
         """update list of accounts"""
-        if self.database.connection:
-            self.accounts_list.update_rows(self.database.connection.execute("select name, first_money, last_money, currency, deals_count from accounts_view").fetchall())
+        if self._model.connection:
+            self.accounts_list.update_rows(self._model.connection.execute("select name, first_money, last_money, currency, deals_count from accounts_view").fetchall())
         else:
             self.accounts_list.update_rows([])
             
@@ -59,17 +60,17 @@ class accounts_tab_controller(modifying_tab_control):
 
     def add_account(self):
         """runs account adder dialog and adds account to the database"""
-        if self.database.connection:
-            self.account_edit.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct currency from accounts order by currency")))
+        if self._model.connection:
+            self.account_edit.update_widget(map(lambda a: a[0], self._model.connection.execute("select distinct currency from accounts order by currency")))
             ret = self.account_edit.run()
             if ret != None:
                 try:
-                    self.database.make_account(ret['name'], ret['first_money'], ret['currency'])
+                    self._model.make_account(ret['name'], ret['first_money'], ret['currency'])
                     self.update_accounts_list()
                 except sqlite3.IntegrityError:
-                    show_error(u'Счет с таким именем уже существует', self.builder.get_object("main_window"))
+                    show_error(u'Счет с таким именем уже существует', self._builder.get_object("main_window"))
                 except Exception as e:
-                    show_error(e.__str__(), self.builder.get_object("main_window"))
+                    show_error(e.__str__(), self._builder.get_object("main_window"))
                     print(traceback.format_exc())
                     
                     
@@ -79,13 +80,13 @@ class accounts_tab_controller(modifying_tab_control):
 
     def delete_account(self):
         """delete selected account"""
-        if self.database.connection:
-            c = self.builder.get_object("accounts_view")
+        if self._model.connection:
+            c = self._builder.get_object("accounts_view")
             (mod, it) = c.get_selection().get_selected()
             if it != None:
                 acname = mod.get_value(it, 0)
-                if self.database.connection.execute("select count(d.id) from deals d inner join accounts a on d.account_id = a.id where a.name = ?", (acname, )).fetchone()[0] > 0:
-                    dial = gtk.Dialog(title = u'Удалить счет', parent = self.builder.get_object("main_window"), flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+                if self._model.connection.execute("select count(d.id) from deals d inner join accounts a on d.account_id = a.id where a.name = ?", (acname, )).fetchone()[0] > 0:
+                    dial = gtk.Dialog(title = u'Удалить счет', parent = self._builder.get_object("main_window"), flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
                     dial.get_content_area().pack_start(gtk.Label(u'Удалить сделки привязанные к данному счету ?'))
                     dial.show_all()
                     ret = dial.run()
@@ -93,8 +94,8 @@ class accounts_tab_controller(modifying_tab_control):
                     if ret != gtk.RESPONSE_NO and ret != gtk.RESPONSE_YES:
                         return
                     if  ret == gtk.RESPONSE_YES:
-                        self.database.connection.execute("delete from deals where account_id in (select id from accounts where name = ?)", (acname, ))
-                self.database.connection.execute("delete from accounts where name = ?", (acname, ))
+                        self._model.connection.execute("delete from deals where account_id in (select id from accounts where name = ?)", (acname, ))
+                self._model.connection.execute("delete from accounts where name = ?", (acname, ))
                 self.set_current_account()
                 self.call_update_callback()
                 
@@ -104,25 +105,25 @@ class accounts_tab_controller(modifying_tab_control):
 
     def modify_account(self):
         """runs account dialog and modifies selected account"""
-        if self.database.connection:
-            c = self.builder.get_object("accounts_view")
+        if self._model.connection:
+            c = self._builder.get_object("accounts_view")
             (mod, it) =  c.get_selection().get_selected()
             if it != None:
                 acname = mod.get_value(it, 0)
-                (id, name, first_money, currency) = self.database.connection.execute("select id, name, first_money, currency from accounts where name = ?", (acname, )).fetchone() or (None, None, None, None)
+                (id, name, first_money, currency) = self._model.connection.execute("select id, name, first_money, currency from accounts where name = ?", (acname, )).fetchone() or (None, None, None, None)
                 if name != None:
-                    self.account_edit.update_widget(map(lambda a: a[0], self.database.connection.execute("select distinct currency from accounts order by currency")))
+                    self.account_edit.update_widget(map(lambda a: a[0], self._model.connection.execute("select distinct currency from accounts order by currency")))
                     self.account_edit.load_to_widget({"name" : name,
                                                       "first_money" : first_money,
                                                       "currency" : currency})
                     ret = self.account_edit.run()
                     if ret != None:
-                        self.database.connection.execute("update accounts set name = ?, first_money = ?, currency = ? where id = ?", (ret['name'], ret['first_money'], ret['currency'], id))
+                        self._model.connection.execute("update accounts set name = ?, first_money = ?, currency = ? where id = ?", (ret['name'], ret['first_money'], ret['currency'], id))
                         self.call_update_callback()
 
     def set_current_account(self):
-        tw = self.builder.get_object("accounts_view")
+        tw = self._builder.get_object("accounts_view")
         (mod, it) = tw.get_selection().get_selected()
-        if it != None and self.database.connection != None:
-            (self.global_data["current_account"], ) = self.database.connection.execute("select id from accounts where name = ?", (tw.get_model().get_value(it, 0), )).fetchone() or (None, )
+        if it != None and self._model.connection != None:
+            (self.global_data["current_account"], ) = self._model.connection.execute("select id from accounts where name = ?", (tw.get_model().get_value(it, 0), )).fetchone() or (None, )
             
