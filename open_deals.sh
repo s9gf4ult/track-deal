@@ -1,2 +1,2 @@
 #!/bin/bash
-export PYTHONPATH='./src' pytnon ./src/start.py
+PYTHONPATH='./src' python ./src/start_gtk.py
