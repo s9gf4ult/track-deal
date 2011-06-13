@@ -120,10 +120,10 @@ class main_window_controller(object):
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self._parent.open_existing_sqlite(diag.get_filename())
-                    self._parent.call_update_callback()
                 except Exception as e:
                     show_error(e.__str__(), self._builder.get_object("main_window"))
                     print(traceback.format_exc())
+            self._parent.call_update_callback()
             diag.destroy()
             fl.destroy()
         
@@ -158,11 +158,12 @@ class main_window_controller(object):
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self._parent.create_new_sqlite(diag.get_filename())
-                    self._parent.call_update_callback()
                 except Exception as e:
                     show_error(e.__str__(), self._builder.get_object("main_window"))
                     print(traceback.format_exc())
             diag.destroy()
+            self._parent.call_update_callback()
+
 
     def create_database_activate(self, action):
         self.create_database_in_file()
