@@ -12,7 +12,6 @@ class accounts_tab_controller(modifying_tab_control):
         self._builder = parent._builder
         self._model = parent._model
         self.account_edit = account_edit
-        self.global_data = global_data
         self.update_callback = update_callback
         def shorter(name, *method):
             self._builder.get_object(name).connect("activate", *method)
@@ -60,7 +59,7 @@ class accounts_tab_controller(modifying_tab_control):
 
     def add_account(self):
         """runs account adder dialog and adds account to the database"""
-        if self._model.connection:
+        if self._parent.connected():
             self.account_edit.update_widget(map(lambda a: a[0], self._model.connection.execute("select distinct currency from accounts order by currency")))
             ret = self.account_edit.run()
             if ret != None:
