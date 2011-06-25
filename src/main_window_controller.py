@@ -9,7 +9,6 @@ from common_methods import *
 class main_window_controller(object):
     def __init__(self, parent):
         self._parent = parent
-        self._model = parent._model
         self._builder = parent._builder
         def shorter(name, signal, *method):
             self._builder.get_object(name).connect(signal, *method)
@@ -36,7 +35,7 @@ class main_window_controller(object):
         if not self._parent.connected():
             return
         win = self._builder.get_object("main_window")
-        # ch = self._model.get_changes()
+        # ch = self._parent._model.get_changes()
         # if ch > 0:
         #     show_error(u'Перед сохранением нужно завершить транзакцию выполните Rollback или Commit', win)
         #     return
@@ -50,7 +49,7 @@ class main_window_controller(object):
             if self._parent.disconnect():
                 try:
                     shutil.copyfile(filename, dstfile)
-                    self._model.open_existing(dstfile)
+                    self._parent._model.open_existing(dstfile)
                     self.call_update_callback()
                 except Exception as e:
                     show_and_print_error(e, win)
@@ -62,10 +61,10 @@ class main_window_controller(object):
         self.import_from_old_database()
 
     def import_from_old_database(self):
-        if self._model.connection == None:
+        if self._parent._model.connection == None:
             return
         win = self._builder.get_object("main_window")
-        ch = self._model.get_changes()
+        ch = self._parent._model.get_changes()
         if ch > 0:
             show_error(u'Перед импортом нужно завершить транзакцию выполните Rollback или Commit', win)
             return
@@ -77,7 +76,7 @@ class main_window_controller(object):
         diag.set_filter(fl)
         if diag.run() == gtk.RESPONSE_ACCEPT:
             try:
-                self._model.load_from_old_version(diag.get_filename())
+                self._parent._model.load_from_old_version(diag.get_filename())
             except Exception as e:
                 show_and_print_error(e, win)
         diag.destroy()
@@ -87,15 +86,15 @@ class main_window_controller(object):
         self.transaction_commit()
 
     def transaction_commit(self):
-        if self._model.connection:
-            self._model.commit()
+        if self._parent._model.connection:
+            self._parent._model.commit()
 
     def transaction_rollback_activate(self, action):
         self.transaction_rollback()
 
     def transaction_rollback(self):
-        if self._model.connection:
-            self._model.rollback()
+        if self._parent.connected():
+            self._parent._model.rollback()
             self.call_update_callback()
 
     def close_activate(self, action):

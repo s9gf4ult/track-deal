@@ -78,9 +78,3 @@ class gtk_view(common_view):
         """quit from gtk main loop
         """
         gtk.main_quit()
-
-
-
-
-
-

@@ -5,14 +5,13 @@ from list_view_sort_control import list_view_sort_control
 import gtk
 from common_methods import *
 import sqlite3
+import account_edit_control
 
-class accounts_tab_controller(modifying_tab_control):
+class accounts_tab_controller(object):
     def __init__(self, parent):
         self._parent = parent
         self._builder = parent._builder
-        self._model = parent._model
-        self.account_edit = account_edit
-        self.update_callback = update_callback
+        self.account_edit = account_edit_control(self._builder)
         def shorter(name, *method):
             self._builder.get_object(name).connect("activate", *method)
         shorter("add_account", self.add_account_activate)
@@ -31,7 +30,7 @@ class accounts_tab_controller(modifying_tab_control):
         self.set_current_account()
         self.call_update_callback()
 
-    def update_widget(self):
+    def update(self):
         self.update_accounts_list()
         self.update_account_label()
         self.update_account_list()
