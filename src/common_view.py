@@ -4,7 +4,12 @@
 from common_model import common_model
 
 class common_view(object):
-    """abstract class for view
+    """
+    \if russian
+    Общий класс для представления
+    \else
+    abstract class for view
+    \endif
     """
     _model = None
     
@@ -15,24 +20,34 @@ class common_view(object):
         raise NotImplementedError()
 
     def set_model(self, model):
-        """sets _model variable in view
-        
-        Arguments:
-        - `model`:
+        """
+        \if russian
+        \param model должна быть наследником класса \ref common_model
+        \else
+        \brief sets _model variable in view
+        \param model
+        \endif
         """
         assert(isinstance(model, common_model))
         self._model = model
 
     def get_model(self):
-        """gets model
-        
-        Arguments:
-        - `model`:
+        """
+        \if russian
+        \return модель активная в данном представлении
+        \endif
         """
         return self._model
 
 
     def run(self, ):
-        """run the view
+        """
+        \if russian
+        \brief Отображает окно программы.
+
+        забирает управление у потока вызвавшего метод до тех пор пока окно не будет закрыто
+        \else
+        run the view
+        \endif
         """
         raise NotImplementedError()

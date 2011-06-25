@@ -38,7 +38,7 @@ class scon_cursor(object):
         """initializes cursor
         
         Arguments:
-        - `cursor`:
+        \param cursor 
         """
         self._arguments = arguments
         self._query = query
@@ -71,7 +71,7 @@ class scon_iter(object):
         """
         
         Arguments:
-        - `cursor`:
+        \param cursor 
         """
         self._cursor = cursor
         self._names = map(lambda a: a[0], self._cursor.description)
@@ -110,7 +110,7 @@ class sconnection(sqlite3.Connection):
         """initializes connection and makes some other things
         
         Arguments:
-        - `connect_string`:
+        \param connect_string 
         """
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
         sqlite3.register_adapter(datetime.datetime, lambda a: time.mktime(a.timetuple()))
@@ -133,8 +133,8 @@ class sconnection(sqlite3.Connection):
         """inserts data in fields into table
         
         Arguments:
-        - `table`:
-        - `fields`: must be hash like that {"field_name" : data_to_insert} or list of that hashes
+        \param table 
+        \param fields  must be hash like that {"field_name" : data_to_insert} or list of that hashes
         """
         assert(isinstance(fields, dict) or hasattr(fields, "__iter__"))
         names = set()
@@ -162,8 +162,8 @@ class sconnection(sqlite3.Connection):
         object which returns hash tables like that {"field_name" : data}
         
         Arguments:
-        - `query`:
-        - `arguments`:
+        \param query 
+        \param arguments 
         """
         assert(isinstance(query, basestring))
         return scon_cursor(self, query, arguments)
@@ -172,10 +172,10 @@ class sconnection(sqlite3.Connection):
         """executes update on all `set_fields` where `where_part`
         
         Arguments:
-        - `table`:
-        - `set_fields`: hash like {"id" : value}
-        - `where_part`: string
-        - `where_arguments`: list of arguments in query for `where` part
+        \param table 
+        \param set_fields  hash like {"id" : value}
+        \param where_part  string
+        \param where_arguments  list of arguments in query for `where` part
         """
         assert(isinstance(set_fields, dict) or hasattr(set_fields, "__iter__"))
         names = []
@@ -199,10 +199,10 @@ class sconnection(sqlite3.Connection):
     def execute_select_cond(self, tablename, selects = ["*"], wheres = [], order_by = []):
         """generates query for execute_select pass it to
         Arguments:
-        - `tablename`: string with table name
-        - `selects`: [* | field name | expression | (field name | expression, alias)]
-        - `wheres`: [(= | < | > | ... | 'between', exp1, exp2, exp3 ...)]
-        - `order_by`: [field name]
+        \param tablename  string with table name
+        \param selects  [* | field name | expression | (field name | expression, alias)]
+        \param wheres  [(= | < | > | ... | 'between', exp1, exp2, exp3 ...)]
+        \param order_by  [field name]
         """
         q = u"select {0} from {1}".format(format_select_part(selects), tablename)
         (whpart, adarg) = format_where_part(wheres)

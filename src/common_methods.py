@@ -109,7 +109,7 @@ def raise_db_closed(func):
     """Decorator makes function to raise Exception when
     self._sqlite_connection is null
     Arguments:
-    - `func`:
+    \param func 
     """
     def ret(*args, **kargs):
         rtt = None
@@ -128,7 +128,7 @@ def raise_db_closed(func):
 def raise_db_opened(func):
     """Decorator raises exception of databse is still opened
     Arguments:
-    - `func`:
+    \param func 
     """
     def ret(*args, **kargs):
         rtt = None
@@ -148,7 +148,7 @@ def in_transaction(func):
     Decorator makes method executing in transaction, if error occures then transaction will be rolled back
     and exception will be passed up
     Arguments:
-    - `func`:
+    \param func 
     """
     def ret(*args, **kargs):
         self = args[0]
@@ -174,8 +174,8 @@ class remover_decorator(object):
     def __init__(self, table_name, class_field):
         """
         Arguments:
-        - `table_name`: string with name of table delete entries from
-        - `class_field`: hash like {argument_type: table field}
+        \param table_name  string with name of table delete entries from
+        \param class_field  hash like {argument_type: table field}
         """
         self._table_name = table_name
         self._class_field = class_field
@@ -183,7 +183,7 @@ class remover_decorator(object):
     def __call__(self, method):
         """
         Arguments:
-        - `method`:
+        \param method 
         """
         def ret(*args, **kargs):
             rtt = method(*args, **kargs)
@@ -201,7 +201,7 @@ class remover_decorator(object):
 def order_by_print(order_list = []):
     """generates string with `order by` definition
     Arguments:
-    - `order_list`:
+    \param order_list 
     """
     if len(order_list) > 0:
         return " order by {0}".format(reduce_by_string(", ", order_list))
@@ -211,8 +211,8 @@ def order_by_print(order_list = []):
 def remhash(hasht, key):
     """removes key from hashtable if exits
     Arguments:
-    - `hasht`:
-    - `key`:
+    \param hasht 
+    \param key 
     """
     if hasht.has_key(key):
         del hasht[key]
@@ -220,8 +220,8 @@ def remhash(hasht, key):
 def format_where_part(wherepart, reductor = "and"):
     """return tuple of text for query and arguments for query
     Arguments:
-    - `wherepart`: [(= | < | > | ... | 'between', [field_name], exp2, exp3 ...)]
-    - `reductor`: `and` or `or` word for condition
+    \param wherepart  [(= | < | > | ... | 'between', [field_name], exp2, exp3 ...)]
+    \param reductor  `and` or `or` word for condition
     """
     exprlist = []
     arglist = []
@@ -261,7 +261,7 @@ def format_select_part(select_part):
     """return string with select part
     
     Arguments:
-    - `select_part`: [* | field name | expression | (field name | expression, alias)]
+    \param select_part  [* | field name | expression | (field name | expression, alias)]
     """
     rlist = []
     for sp in select_part:
@@ -284,7 +284,7 @@ class safe_execution(object):
     def __call__(self, func):
         """
         Arguments:
-        - `func`:
+        \param func 
         """
         def ret(*args, **kargs):
             for attr in self._attrbutes:
@@ -301,14 +301,14 @@ class makes_insafe(object):
     def __init__(self, attribute):
         """
         Arguments:
-        - `attribute`:
+        \param attribute 
         """
         self._attribute = attribute
         
     def __call__(self, func):
         """
         Arguments:
-        - `func`:
+        \param func 
         """
         def ret(*args, **kargs):
             rtt = None
@@ -326,8 +326,8 @@ class makes_insafe(object):
 def add_hash(h1, h2):
     """adds and replaces keys and vals of h2 to h1
     Arguments:
-    - `h1`:
-    - `h2`:
+    \param h1 
+    \param h2 
     """
     for k in h2.keys():
         h1[k] = h2[k]
@@ -335,7 +335,7 @@ def add_hash(h1, h2):
 def any_to_time(seconds):
     """turn seconds to time
     Arguments:
-    - `seconds`:
+    \param seconds 
     """
     seconds = int(seconds)
     h = trunc(seconds / 3600)
@@ -348,8 +348,8 @@ def any_to_time(seconds):
 def argument_value(name, value):
     """return string in format "name = value"
     Arguments:
-    - `name`:
-    - `value`:
+    \param name 
+    \param value 
     """
     if name != None:
         if value != None:
@@ -367,7 +367,7 @@ class string_reduce(object):
     def step(self, argument):
         """
         Arguments:
-        - `argument`:
+        \param argument 
         """
         if not is_null_or_empty(argument):
             if is_null_or_empty(self._ret):
@@ -385,14 +385,14 @@ class string_reduce(object):
 def any_to_datetime(value):
     """return datetime
     Arguments:
-    - `value`: any type convertable to float
+    \param value  any type convertable to float
     """
     return datetime.datetime.fromtimestamp(float(value))
 
 def any_to_date(value):
     """turn value to date
     Arguments:
-    - `value`:
+    \param value 
     """
     return datetime.date.fromtimestamp(float(value))
 
@@ -402,14 +402,14 @@ class in_action(object):
     def __init__(self, action_name):
         """
         Arguments:
-        - `action_name`:
+        \param action_name 
         """
         self._action_name = action_name
         
     def __call__(self, method):
         """
         Arguments:
-        - `method`:
+        \param method 
         """
         def ret(*args, **kargs):
             rtt = None
@@ -428,14 +428,14 @@ class confirm_safety(object):
     def __init__(self, *attributes):
         """
         Arguments:
-        - `*attributes`:
+        \param *attributes 
         """
         self._attributes = attributes
         
     def __call__(self, method):
         """
         Arguments:
-        - `method`:
+        \param method 
         """
         def ret(*args, **kargs):
             rtt = method(*args, **kargs)
@@ -450,14 +450,14 @@ class pass_to_method(object):
     def __init__(self, method):
         """
         Arguments:
-        - `method`: method to call after decorated, and return value of
+        \param method  method to call after decorated, and return value of
         """
         self._method = method
 
     def __call__(self, func):
         """
         Arguments:
-        - `func`:
+        \param func 
         """
         def ret(*args, **kargs):
             func(*args, **kargs)
@@ -469,7 +469,7 @@ def any_to_timedelta(value):
     """
     return timedelta from anything convertable to int
     Arguments:
-    - `value`:
+    \param value 
     """
     return datetime.timedelta(0, int(value))
 
@@ -483,10 +483,10 @@ class signal_fetcher(object):
     def __init__(self, builder_name, object_name, signal_name, *userattrs):
         """
         Arguments:
-        - `builder_name`:
-        - `object_name`:
-        - `signal_name`:
-        - `*userattrs`:
+        \param builder_name 
+        \param object_name 
+        \param signal_name 
+        \param *userattrs 
         """
         self._builder_name = builder_name
         self._object_name = object_name
@@ -496,7 +496,7 @@ class signal_fetcher(object):
     def __call__(self, func):
         """
         Arguments:
-        - `func`:
+        \param func 
         """
         myclass = func.im_class
         def newinit(myself, *args, **kargs):

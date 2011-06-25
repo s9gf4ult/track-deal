@@ -9,7 +9,12 @@ from sqlite_model import sqlite_model
 from accounts_tab_controller import accounts_tab_controller
 
 class gtk_view(common_view):
-    """Open deals Gtk view class (gtk interface for open-deals)
+    """
+    \if russian
+    Класс для рисования интерфейса на Gtk создает и управляет всеми контролами.
+    \else
+    Open deals Gtk view class (gtk interface for open-deals)
+    \endif
     """
     _builder = None
     _window = None
@@ -60,16 +65,14 @@ class gtk_view(common_view):
 
     def create_new_sqlite(self, filename):
         """connect to new sqlite model and create new database in it
-        Arguments:
-        - `filename`:
+        \param filename 
         """
         self._model = sqlite_model()
         self._model.create_new(filename)
 
     def open_existing_sqlite(self, filename):
         """connect to existing sqlite file
-        Arguments:
-        - `filename`:
+        \param filename 
         """
         self._model = sqlite_model()
         self._model.open_existing(filename)

@@ -37,7 +37,7 @@ class sqlite_model(common_model):
         """connects to file or memory
         
         Arguments:
-        - `connection_string`:
+        \param connection_string 
         """
         assert(isinstance(connection_string, basestring))
         self._connection_string = connection_string
@@ -70,7 +70,7 @@ class sqlite_model(common_model):
         """
         Opens existing database from file
         Arguments:
-        - `filename`:
+        \param filename 
         """
         self.connect(filename)
         self.dbtemp()
@@ -80,7 +80,7 @@ class sqlite_model(common_model):
     def create_new(self, filename):
         """Creates new empty database
         Arguments:
-        - `filename`:
+        \param filename 
         """
         self.connect(filename)
         self.dbinit()
@@ -114,7 +114,7 @@ class sqlite_model(common_model):
     def add_global_data(self, parameters):
         """adds global data and
         Arguments:
-        - `parameters`: hash with name of parameter and value
+        \param parameters  hash with name of parameter and value
         """
         names = parameters.keys()
         self._sqlite_connection.insert("global_data", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names)))
@@ -122,7 +122,7 @@ class sqlite_model(common_model):
     def select_account(self, account_id):
         """set the current account in the database
         Arguments:
-        - `account_id`:
+        \param account_id 
         """
         self._sqlite_connection.insert("global_data", {"name" : "current_account", "value" : account_id})
 
@@ -133,7 +133,7 @@ class sqlite_model(common_model):
     def taselect_account(self, account_id):
         """wrapper for select account
         Arguments:
-        - `account_id`:
+        \param account_id 
         """
         pass
 
@@ -151,14 +151,14 @@ class sqlite_model(common_model):
     def taadd_global_data(self, paramters):
         """
         Arguments:
-        - `paramters`:
+        \param paramters 
         """
         pass
 
     def get_global_data(self, name):
         """returns value of global data or None if there is no one
         Arguments:
-        - `name`:
+        \param name 
         """
         ret = self._sqlite_connection.execute_select("select value from global_data where name = ?", [name]).fetchall()
         if len(ret) > 0:
@@ -171,7 +171,7 @@ class sqlite_model(common_model):
     def remove_global_data(self, name):
         """Removes global parameters
         Arguments:
-        - `name`: string or list of strings to remove
+        \param name  string or list of strings to remove
         """
         if isinstance(name, basestring):
             name = [(name, )]
@@ -186,7 +186,7 @@ class sqlite_model(common_model):
     def taremove_global_data(self, name):
         """
         Arguments:
-        - `name`:
+        \param name 
         """
         pass
 
@@ -198,7 +198,7 @@ class sqlite_model(common_model):
     def add_database_attributes(self, parameters):
         """adds database attributes and
         Arguments:
-        - `parameters`: hash with name of parameter and value
+        \param parameters  hash with name of parameter and value
         """
         names = parameters.keys()
         self._sqlite_connection.insert("database_attributes", map(lambda a, b: {"name" : a, "value" : b}, names, map(lambda x: parameters[x], names)))
@@ -215,7 +215,7 @@ class sqlite_model(common_model):
     def get_database_attribute(self, name):
         """returns value of global parameter or None if there is no one
         Arguments:
-        - `name`:
+        \param name 
         """
         ret = self._sqlite_connection.execute_select("select value from database_attributes where name = ?", [name]).fetchall()
         if len(ret) > 0:
@@ -226,7 +226,7 @@ class sqlite_model(common_model):
     def remove_database_attribute(self, name):
         """Removes global parameters
         Arguments:
-        - `name`: string or list of strings to remove
+        \param name  string or list of strings to remove
         """
         if isinstance(name, basestring):
             name = [(name, )]
@@ -241,7 +241,7 @@ class sqlite_model(common_model):
     def taremove_database_attribute(self, name):
         """
         Arguments:
-        - `name`:
+        \param name 
         """
         pass
 
@@ -254,11 +254,11 @@ class sqlite_model(common_model):
         """creates new paper and returns it's id
         
         Arguments:
-        - `type`:
-        - `name`:
-        - `stock`:
-        - `class_name`:
-        - `full_name`:
+        \param type 
+        \param name 
+        \param stock 
+        \param class_name 
+        \param full_name 
         """
         return self._sqlite_connection.insert("papers", {"type" : type,
                                                          "stock" : stock,
@@ -273,11 +273,11 @@ class sqlite_model(common_model):
     def tacreate_paper(self, *args, **kargs):
         """
         Arguments:
-        - `type`:
-        - `name`:
-        - `stock`:
-        - `class_name`:
-        - `full_name`:
+        \param type 
+        \param name 
+        \param stock 
+        \param class_name 
+        \param full_name 
         """
         pass
 
@@ -287,7 +287,7 @@ class sqlite_model(common_model):
         """returns paper by name or by id
         if there is no one returns None
         Arguments:
-        - `type_or_id`:
+        \param type_or_id 
         """
         ret = None
         if isinstance(type_or_id, basestring) and not is_null_or_empty(name):
@@ -303,8 +303,8 @@ class sqlite_model(common_model):
         """Removes one paper by type and name or many papers by id
         
         Arguments:
-        - `type_or_id`:
-        - `name`:
+        \param type_or_id 
+        \param name 
         """
         if isinstance(type_or_id, basestring) and isinstance(name, basestring) and not is_null_or_empty(name):
             self._sqlite_connection.execute("delete from papers where type = ? and name = ?", [type_or_id, name])
@@ -316,8 +316,8 @@ class sqlite_model(common_model):
     def taremove_paper(self, *args, **kargs):
         """
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        \param *args 
+        \param **kargs 
         """
         pass
 
@@ -333,8 +333,8 @@ class sqlite_model(common_model):
     def change_paper(self, paper_id, fields):
         """changes existing paper
         Arguments:
-        - `paper_id`:
-        - `fields`: hash {"field" : value}
+        \param paper_id 
+        \param fields  hash {"field" : value}
         """
         if len(fields) > 0:
             if self._sqlite_connection.execute("select count(*) from papers where id = ?", [paper_id]).fetchone()[0] > 0:
@@ -352,8 +352,8 @@ class sqlite_model(common_model):
     def tachange_paper(self, *args, **kargs):
         """
         Arguments:
-        - `paper_id`:
-        - `fields`: hash {"field" : value}
+        \param paper_id 
+        \param fields  hash {"field" : value}
         """
         pass
 
@@ -361,8 +361,8 @@ class sqlite_model(common_model):
     def create_candles(self, paper_id, candles):
         """Creates one or several candles of paper `paper_id`
         Arguments:
-        - `paper_id`:
-        - `candles`: hash table with keys, [duration, open_datetime, close_datetime, open_value, close_value, min_value, max_value, volume, value_type] or the list of tables
+        \param paper_id 
+        \param candles  hash table with keys, [duration, open_datetime, close_datetime, open_value, close_value, min_value, max_value, volume, value_type] or the list of tables
         """
         candles = (isinstance(candles, dict) and [candles] or candles)
         for candle in candles:
@@ -377,7 +377,7 @@ class sqlite_model(common_model):
     def get_candle(self, candle_id):
         """Get candle by id
         Arguments:
-        - `candle_id`:
+        \param candle_id 
         """
         ret = self._sqlite_connection.execute_select("select * from candles where id = ?", [candle_id]).fetchall()
         return (len(ret) > 0 and ret[0] or None)
@@ -386,15 +386,15 @@ class sqlite_model(common_model):
     def remove_candle(self, candles_id):
         """removes one or more candles
         Arguments:
-        - `candles_id`: int or list of ints
+        \param candles_id  int or list of ints
         """
         pass
 
     def list_candles(self, paper_id, order_by = []):
         """Return ordered list of candles
         Arguments:
-        - `paper_id`:
-        - `order_by`:
+        \param paper_id 
+        \param order_by 
         """
         q = "select * from candles where paper_id = ?"
         if len(order_by) > 0:
@@ -405,8 +405,8 @@ class sqlite_model(common_model):
     def create_money(self, name, full_name = None):
         """Creates new money and return it's id
         Arguments:
-        - `name`:
-        - `full_name`:
+        \param name 
+        \param full_name 
         """
         return self._sqlite_connection.insert("moneys", {"name" : name,
                                                          "full_name" : full_name}).lastrowid
@@ -417,8 +417,8 @@ class sqlite_model(common_model):
     def tacreate_money(self, name, full_name = None):
         """transacted wrapper for create_money
         Arguments:
-        - `name`:
-        - `full_name`:
+        \param name 
+        \param full_name 
         """
         pass
 
@@ -426,7 +426,7 @@ class sqlite_model(common_model):
     def get_money(self, name_or_id):
         """Returns money object by id or name
         Arguments:
-        - `name_or_id`:
+        \param name_or_id 
         """
         if isinstance(name_or_id, basestring):
             ret = self._sqlite_connection.execute_select("select * from moneys where name = ?", [name_or_id]).fetchall()
@@ -441,7 +441,7 @@ class sqlite_model(common_model):
     def remove_money(self, name_or_id):
         """Removes money by name or by id
         Arguments:
-        - `name_or_id`:
+        \param name_or_id 
         """
         pass
 
@@ -454,10 +454,10 @@ class sqlite_model(common_model):
     def create_point(self, paper_id, money_id, point, step):
         """Creates point explanation and return it's id
         Arguments:
-        - `paper_id`:
-        - `money_id`:
-        - `point`:
-        - `step`:
+        \param paper_id 
+        \param money_id 
+        \param point 
+        \param step 
         """
         ret = self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step}).lastrowid
         for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
@@ -472,8 +472,8 @@ class sqlite_model(common_model):
     def tacreate_point(self, *args, **kargs):
         """transacted wrapper for create point
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        \param *args 
+        \param **kargs 
         """
         pass
 
@@ -481,8 +481,8 @@ class sqlite_model(common_model):
     def list_points(self, money_id = None, order_by = []):
         """Return list of points
         Arguments:
-        - `money_id`:
-        - `order_by`:
+        \param money_id 
+        \param order_by 
         """
         q = "select * from points"
         if money_id != None:
@@ -497,8 +497,8 @@ class sqlite_model(common_model):
     def get_point(self, id_or_paper_id, money_id = None):
         """Returns point explanation by id or by paper_id and money_id
         Arguments:
-        - `id_or_paper_id`:
-        - `money_id`:
+        \param id_or_paper_id 
+        \param money_id 
         """
         if money_id != None:
             ret = self._sqlite_connection.execute_select("select * from points where paper_id = ? and money_id = ?", [id_or_paper_id, money_id]).fetchall()
@@ -509,8 +509,8 @@ class sqlite_model(common_model):
     def remove_point(self, id_or_paper_id, money_id = None):
         """Removes point of this paper / money or by id
         Arguments:
-        - `id_or_paper_id`:
-        - `money_id`:
+        \param id_or_paper_id 
+        \param money_id 
         """
         if money_id != None:
             self._sqlite_connection.execute("delete from points where paper_id = ? and money_id = ?", [id_or_paper_id, money_id])
@@ -532,8 +532,8 @@ class sqlite_model(common_model):
     def taremove_point(self, *args, **kargs):
         """transacted wrapper for remove point
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        \param *args 
+        \param **kargs 
         """
         pass
 
@@ -543,10 +543,10 @@ class sqlite_model(common_model):
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
         Arguments:
-        - `name`:
-        - `money_id_or_name`:
-        - `money_count`:
-        - `comment`:
+        \param name 
+        \param money_id_or_name 
+        \param money_count 
+        \param comment 
         """
         if isinstance(money_id_or_name, basestring):
             mid = gethash(self.get_money(money_id_or_name), "id")
@@ -566,10 +566,10 @@ class sqlite_model(common_model):
     def tacreate_account(self, *args, **kargs):
         """transacted wrapper for create account
         Arguments:
-        - `name`:
-        - `money_id_or_name`:
-        - `money_count`:
-        - `comment`:
+        \param name 
+        \param money_id_or_name 
+        \param money_count 
+        \param comment 
         """
         pass
 
@@ -577,10 +577,10 @@ class sqlite_model(common_model):
     def change_account(self, aid, money_id_or_name = None, money_count = None, comment = None):
         """changes existing account
         Arguments:
-        - `aid`:
-        - `money_id_or_name`:
-        - `money_count`:
-        - `comment`:
+        \param aid 
+        \param money_id_or_name 
+        \param money_count 
+        \param comment 
         """
         sets = {}
         if money_id_or_name != None:
@@ -604,8 +604,8 @@ class sqlite_model(common_model):
     def tachange_account(self, *args, **kargs):
         """transacted wrapper for change account function
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        \param *args 
+        \param **kargs 
         """
         pass
 
@@ -618,7 +618,7 @@ class sqlite_model(common_model):
     def remove_account(self, name_or_id):
         """Removes account by name or by id
         Arguments:
-        - `name_or_id`:
+        \param name_or_id 
         """
         pass
 
@@ -629,8 +629,8 @@ class sqlite_model(common_model):
     def taremove_account(self, *args, **kargs):
         """transacted wrapper for remove account
         Arguments:
-        - `*args`:
-        - `**kargs`:
+        \param *args 
+        \param **kargs 
         """
         pass
 
@@ -638,7 +638,7 @@ class sqlite_model(common_model):
     def get_account(self, aid):
         """
         Arguments:
-        - `aid`:
+        \param aid 
         """
         aa = self._sqlite_connection.execute_select("select * from accounts where id = ?", [aid]).fetchall()
         if len(aa) > 0:
@@ -650,8 +650,8 @@ class sqlite_model(common_model):
     def create_deal(self, account_id, deal, do_recalc = True):
         """creates one or more deal with attributes, return id of last created
         Arguments:
-        - `account_id`:
-        - `deal`: list of or one hash table with deal
+        \param account_id 
+        \param deal  list of or one hash table with deal
         """
         did = None
         deals = (isinstance(deal, dict) and [deal] or deal)
@@ -690,8 +690,8 @@ class sqlite_model(common_model):
     def tacreate_deal(self, *args, **kargs):
         """wrapper for create deal
         Arguments:
-        - `account_id`:
-        - `deal`: list of or one hash table with deal
+        \param account_id 
+        \param deal  list of or one hash table with deal
         """
         pass
 
@@ -699,9 +699,9 @@ class sqlite_model(common_model):
     def list_deals(self, account_id = None, paper_id = None, order_by = []):
         """Return cursor iterating on deals
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `order_by`:
+        \param account_id 
+        \param paper_id 
+        \param order_by 
         """
         conds = []
         if account_id != None:
@@ -713,7 +713,7 @@ class sqlite_model(common_model):
     def remove_deal(self, deal_id):
         """remove one or more deal by id
         Arguments:
-        - `deal_id`:
+        \param deal_id 
         """
         x = map(lambda a: (a, ), (isinstance(deal_id, int) and [deal_id] or deal_id))
         self._sqlite_connection.executemany("delete from deals where id = ?", x)
@@ -767,14 +767,14 @@ class sqlite_model(common_model):
     def taremove_deal(self, *args, **kargs):
         """
         Arguments:
-        - `deal_id`:
+        \param deal_id 
         """
         pass
 
     def get_user_deal_attributes(self, deal_id):
         """return hash of attributes
         Arguments:
-        - `deal_id`:
+        \param deal_id 
         """
         ret = {}
         for at in self._sqlite_connection.execute_select_cond("user_deal_attributes", wheres = [("=", ["deal_id"], deal_id)]):
@@ -785,7 +785,7 @@ class sqlite_model(common_model):
         """return hash of stored attributes
         
         Arguments:
-        - `deal_id`:
+        \param deal_id 
         """
         ret = {}
         for at in self._sqlite_connection.execute_select_cond("stored_deal_attributes", wheres = [("=", ["deal_id"], deal_id)]):
@@ -796,7 +796,7 @@ class sqlite_model(common_model):
         """just create position in database 
         
         Arguments:
-        - `position`: hash table, keys may be "user_attributes", "stored_attributes", "deals_assigned" and fields of table positions. It can be list of this hashes
+        \param position  hash table, keys may be "user_attributes", "stored_attributes", "deals_assigned" and fields of table positions. It can be list of this hashes
         """
         pss = (isinstance(position, (list, tuple)) and position or [position])
         paper_position = None             # {paper_id : (position_id, close_datetime, open_datetime)}
@@ -827,12 +827,12 @@ class sqlite_model(common_model):
     def create_position_hash(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
         """return hash to insert by _create_position_raw
         Arguments:
-        - `open_group_id`:
-        - `close_group_id`:
-        - `user_attributes`:
-        - `stored_attributes`:
-        - `manual_made`:
-        - `do_not_delete`:
+        \param open_group_id 
+        \param close_group_id 
+        \param user_attributes 
+        \param stored_attributes 
+        \param manual_made 
+        \param do_not_delete 
         """
         for field in ["paper_id", "account_id"]:
             odids = self._sqlite_connection.execute("select count(*) from (select distinct d.{0} from deals d inner join deal_group_assign dg on dg.deal_id = d.id inner join deal_groups g on dg.group_id = g.id where g.id = ? or g.id = ?)".format(field), [open_group_id, close_group_id]).fetchone()[0]
@@ -881,8 +881,8 @@ class sqlite_model(common_model):
     def create_position(self, open_group_id, close_group_id, user_attributes = {}, stored_attributes = {}, manual_made = None, do_not_delete = None):
         """Return position id built from groups
         Arguments:
-        - `open_group_id`:
-        - `close_group_id`:
+        \param open_group_id 
+        \param close_group_id 
         """
         pid = self._create_position_raw(self.create_position_hash(open_group_id, close_group_id, user_attributes, stored_attributes, manual_made, do_not_delete))
         return pid
@@ -890,9 +890,9 @@ class sqlite_model(common_model):
     def list_positions(self, account_id = None, paper_id = None, order_by = []):
         """return cursor for getting position descriptions
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `order_by`:
+        \param account_id 
+        \param paper_id 
+        \param order_by 
         """
         conds = []
         if account_id <> None:
@@ -905,22 +905,22 @@ class sqlite_model(common_model):
     def get_position_user_attributes(self, position_id, order_by = []):
         """return cursor for user position attributes
         Arguments:
-        - `position_id`:
+        \param position_id 
         """
         return self._sqlite_connection.execute_select_cond("user_position_attributes", wheres = [("=", ["position_id"], position_id)], order_by = order_by)
                                                                                                  
     def get_stored_position_attributes(self, position_id, order_by = []):
         """return cursor for stcored position attributes
         Arguments:
-        - `position_id`:
-        - `order_by`:
+        \param position_id 
+        \param order_by 
         """
         return self._sqlite_connection.execute_select_cond("stored_position_attributes", wheres = [("=", ["position_id"], position_id)], order_by = order_by)
 
     def create_group(self, deal_id):
         """return id the group maked from deals
         Arguments:
-        - `deal_id`: int or list of ints
+        \param deal_id  int or list of ints
         """
         paper_id = None
         account_id = None
@@ -945,8 +945,8 @@ class sqlite_model(common_model):
     def add_to_group(self, group_id, deal_id):
         """add deals to group
         Arguments:
-        - `group_id`:
-        - `deal_id`:
+        \param group_id 
+        \param deal_id 
         """
         g = self._sqlite_connection.execute_select("select * from deal_groups where id = ?", [group_id]).fetchall()[0]
         for di in (isinstance(deal_id, int) and [deal_id] or deal_id):
@@ -960,9 +960,9 @@ class sqlite_model(common_model):
     def calculate_deals(self, account_id, deal_id = None):
         """Recalculate temporary table deals_view starting from deal_id 
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `deal_id`:
+        \param account_id 
+        \param paper_id 
+        \param deal_id 
         """
         # if deal_id == None:
         cur = self._sqlite_connection.execute_select("select d.* from deals d where d.account_id = ? and not exists(select dd.* from deals dd where dd.parent_deal_id = d.id) order by d.datetime", [account_id])
@@ -978,9 +978,9 @@ class sqlite_model(common_model):
     def _calculate_deals_with_initial(self, cursor, money, paper_ballance):
         """calculates deals given in cursor
         Arguments:
-        - `cursor`:
-        - `money`: net before the deals returned by cursor
-        - `paper_ballance`:hash table {paper id : ballance for paper}
+        \param cursor 
+        \param money  net before the deals returned by cursor
+        \param paper_ballance hash table {paper id : ballance for paper}
         """
         def addition(h, m, p):
             h["datetime_formated"] = h["datetime"].isoformat()
@@ -1025,8 +1025,8 @@ class sqlite_model(common_model):
     def recalculate_deals(self, account_id, deal_id = None):
         """removes and recalculate additional table for deals
         Arguments:
-        - `account_id`:
-        - `paper_id`:
+        \param account_id 
+        \param paper_id 
         """
         # if deal_id == None:
         self._sqlite_connection.execute("delete from deals_view where account_id = ?", [account_id])
@@ -1050,9 +1050,9 @@ class sqlite_model(common_model):
     def make_groups(self, account_id, paper_id, time_distance = 5):
         """
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `time_distance`:max time difference between deals in one group
+        \param account_id 
+        \param paper_id 
+        \param time_distance max time difference between deals in one group
         """
         gid = None
         for dd in self._sqlite_connection.execute_select("select d.* from deals d inner join deals_view dd on dd.deal_id = d.id where d.position_id is null and d.account_id = ? and d.paper_id = ? order by d.datetime", [account_id, paper_id]):
@@ -1068,9 +1068,9 @@ class sqlite_model(common_model):
     def remake_groups(self, account_id, paper_id, time_distance = 5):
         """delete all groups and remake it again
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `time_distance`:
+        \param account_id 
+        \param paper_id 
+        \param time_distance 
         """
         self._sqlite_connection.execute("delete from deal_groups where id in (select distinct g.id from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id where d.account_id = ? and d.paper_id = ?)", [account_id, paper_id])
         self._sqlite_connection.execute("delete from deal_groups where account_id = ? and paper_id = ?", [account_id, paper_id])
@@ -1079,8 +1079,8 @@ class sqlite_model(common_model):
     def list_groups(self, account_id, paper_id):
         """
         Arguments:
-        - `account_id`:
-        - `paper_id`:
+        \param account_id 
+        \param paper_id 
         """
         return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ? group by g.id", [account_id, paper_id])
 
@@ -1088,11 +1088,11 @@ class sqlite_model(common_model):
     def __remake_groups__(self, account_id, paper_id, time_distance = 5, *args, **kargs):
         """
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `time_distance`:
-        - `*args`:
-        - `**kargs`:
+        \param account_id 
+        \param paper_id 
+        \param time_distance 
+        \param *args 
+        \param **kargs 
         """
         self.remake_groups(account_id, paper_id, time_distance)
 
@@ -1100,9 +1100,9 @@ class sqlite_model(common_model):
     def make_positions(self, account_id, paper_id, time_distance = 5):
         """automatically makes positions
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `time_distance`: time distance for make_groups
+        \param account_id 
+        \param paper_id 
+        \param time_distance  time distance for make_groups
         """
         self.remake_groups(account_id, paper_id, time_distance)
         hashes = []
@@ -1131,9 +1131,9 @@ class sqlite_model(common_model):
     def tamake_positions(self, *args, **kargs):
         """transacted wrapper oround make_positions
         Arguments:
-        - `account_id`:
-        - `paper_id`:
-        - `time_distance`: time distance for make_groups
+        \param account_id 
+        \param paper_id 
+        \param time_distance  time distance for make_groups
         """
         pass
 
@@ -1142,8 +1142,8 @@ class sqlite_model(common_model):
         """if count of papers for gid1 and gid2 is the same then just return gid1 and gid2,
         else just split gid1 or gid2 to the minimal count papers and return splited gids
         Arguments:
-        - `gid1`: group_id
-        - `gid2`:
+        \param gid1  group_id
+        \param gid2 
         """
         (c1, c2) = map(lambda a: self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [a]).fetchone()[0], [gid1, gid2])
         assert(c1 > 0 and c2 > 0)
@@ -1171,8 +1171,8 @@ class sqlite_model(common_model):
         """return tuple (gid1, gid2)
         if count >= sum of counts all deals assigned to group `gid` then gid2 = None
         Arguments:
-        - `gid`: Group id split to
-        - `count`: count of papers of papers assigned to gid1
+        \param gid  Group id split to
+        \param count  count of papers of papers assigned to gid1
         """
         (c, ) = self._sqlite_connection.execute("select sum(d.count) from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ? group by dg.group_id", [gid]).fetchone()
         if c <= count:
@@ -1194,8 +1194,8 @@ class sqlite_model(common_model):
     def remove_from_group(self, deal_id):
         """remove deal(s) from group
         Arguments:
-        - `gid`:
-        - `deal_id`:
+        \param gid 
+        \param deal_id 
         """
         deals = map(lambda a: (a,), (isinstance(deal_id, int) and [deal_id] or deal_id))
         self._sqlite_connection.executemany("delete from deal_group_assign where deal_id = ?", deals)
@@ -1204,9 +1204,9 @@ class sqlite_model(common_model):
     def __recalculate_deals_by_id__(self, deal_id, *args, **kargs):
         """get account_id and paper_id from deal and pass to __recalculate_deals__
         Arguments:
-        - `deal_id`:
-        - `*args`:
-        - `**kargs`:
+        \param deal_id 
+        \param *args 
+        \param **kargs 
         """
         (aid, paid) = self._sqlite_connection.execute("select account_id, paper_id from deals where id = ?", [deal_id]).fetchone()
         self.__recalculate_deals__(aid, paid)
@@ -1215,8 +1215,8 @@ class sqlite_model(common_model):
         """return tuple with 2 deal_id. One is the deal with `count` papers, second with remainder
         if count of deal is less or equal to `count` then return tuple (deal_id, None)
         Arguments:
-        - `deal_id`:
-        - `count`: needed count of papers for deal
+        \param deal_id 
+        \param count  needed count of papers for deal
         """
         deal = self._sqlite_connection.execute_select("select * from deals where id = ?",[deal_id]).fetchall()[0]
         if count >= deal["count"]:
@@ -1240,7 +1240,7 @@ class sqlite_model(common_model):
     def start_action(self, action_name):
         """starts new action with an action name
         Arguments:
-        - `action_name`:
+        \param action_name 
         """
         ab = self._sqlite_connection.execute("select count(h1.id) from hystory_steps h1, current_hystory_position ch where h1.id > ch.step_id").fetchone()[0]
         if ab > 0:
@@ -1271,7 +1271,7 @@ class sqlite_model(common_model):
     def set_current_action(self, action_id = None):
         """set current action to action_id
         Arguments:
-        - `action_id`:
+        \param action_id 
         """
         if action_id == None:
             self._sqlite_connection.execute("delete from current_hystory_position")
@@ -1286,9 +1286,9 @@ class sqlite_model(common_model):
     def calculate_positions(self, aid, pid = None):
         """
         Arguments:
-        - `aid`:
-        - `paid`:
-        - `pid`:
+        \param aid 
+        \param paid 
+        \param pid 
         """
         # if pid == None:
         cur = self._sqlite_connection.execute_select("select * from positions order by close_datetime, open_datetime")
@@ -1304,9 +1304,9 @@ class sqlite_model(common_model):
     def _calculate_positions_with_initial(self, cursor, net, gross):
         """
         Arguments:
-        - `cursor`:
-        - `net`: net start from
-        - `gross`: gross start from
+        \param cursor 
+        \param net  net start from
+        \param gross  gross start from
         """
         def do_the_work(post, netx, grossx):
             post["direction_formated"] = (post["direction"] > 0 and "S" or "L")
@@ -1378,9 +1378,9 @@ class sqlite_model(common_model):
     def recalculate_positions(self, aid, position_id = None):
         """
         Arguments:
-        - `aid`: account id
-        - `paid`: paper id
-        - `position_id`: id of position recalculate from
+        \param aid  account id
+        \param paid  paper id
+        \param position_id  id of position recalculate from
         """
         # if position_id == None:
         self._sqlite_connection.execute("delete from positions_view where account_id = ?", [aid])
@@ -1393,7 +1393,7 @@ class sqlite_model(common_model):
     def go_to_action(self, action_id):
         """roll back or forward to the action
         Arguments:
-        - `action_id`:
+        \param action_id 
         """
         a = self.get_current_action()
         if a <> None and action_id == a["id"]:
@@ -1426,8 +1426,8 @@ class sqlite_model(common_model):
     def _redo_to_action(self, start_id, end_id):
         """redo all actions from the first action after the `start_id` to the `end_id` including
         Arguments:
-        - `start_id`:
-        - `end_id`:
+        \param start_id 
+        \param end_id 
         """
         self.set_current_action()
         maked = None
@@ -1441,7 +1441,7 @@ class sqlite_model(common_model):
     def _redo_action(self, action_id):
         """executes all queries for this action in direct order
         Arguments:
-        - `action_id`:id of action execute queries from
+        \param action_id id of action execute queries from
         """
         # print("========== REDOING action {0} ===========".format(action_id))
         for (q, ) in self._sqlite_connection.execute("select query from redo_queries where step_id = ? order by id", [action_id]):
@@ -1451,8 +1451,8 @@ class sqlite_model(common_model):
     def _undo_to_action(self, start_id, end_id):
         """undo all actions from `start_id` to the first action after `end_id` including in reverse order
         Arguments:
-        - `start_id`:
-        - `end_id`:
+        \param start_id 
+        \param end_id 
         """
         self.set_current_action()
         maked = None
@@ -1466,7 +1466,7 @@ class sqlite_model(common_model):
     def _undo_action(self, action_id):
         """execute queries assigned to action in reverse order
         Arguments:
-        - `action_id`:
+        \param action_id 
         """
     #    print("============= UNDOING action {0} ==============".format(action_id))
         for (q, ) in self._sqlite_connection.execute("select query from undo_queries where step_id = ? order by id desc", [action_id]):

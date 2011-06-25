@@ -13,7 +13,7 @@ class application(object):
         
         
         Arguments:
-        - `view`: the instance of view
+        \param view  the instance of view
         """
         assert(isinstance(view, common_view))
         self._view = view
@@ -22,7 +22,7 @@ class application(object):
         """starts the application
         
         Arguments:
-        - `model`:posible model to open with view
+        \param model posible model to open with view
         """
         if model:
             assert(isinstance(model, common_model))
@@ -47,7 +47,7 @@ class application(object):
         
         
         Arguments:
-        - `model`:common_model child instance
+        \param model common_model child instance
         """
         assert(isinstance(model, common_model))
         self._view.set_model(model)
