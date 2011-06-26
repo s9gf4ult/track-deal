@@ -7,7 +7,19 @@ from modifying_tab_control import modifying_tab_control
 from common_methods import *
 
 class main_window_controller(object):
+    """
+    \if russian
+    \brief Контрол для окна
+
+    Нужен для обработки событий открытия закрытия базы, обновления заголовка окна/
+    \endif
+    """
     def __init__(self, parent):
+        """
+        \if russian
+        \param parent представление gtk_view
+        \endif
+        """
         self._parent = parent
         self._builder = parent._builder
         def shorter(name, signal, *method):

@@ -7,6 +7,11 @@ from combo_control import combo_control
 from common_methods import *
 
 class account_edit_control:
+    """
+    \if russian
+    \brief Контрол формы редактирования счета
+    \endif
+    """
     def __init__(self, builder):
         self.builder = builder
         def shobject(name):

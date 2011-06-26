@@ -11,7 +11,7 @@ from accounts_tab_controller import accounts_tab_controller
 class gtk_view(common_view):
     """
     \if russian
-    Класс для рисования интерфейса на Gtk создает и управляет всеми контролами.
+    Класс для рисования интерфейса на Gtk создает контролы и хранит их.
     \else
     Open deals Gtk view class (gtk interface for open-deals)
     \endif
@@ -43,12 +43,14 @@ class gtk_view(common_view):
         self._accounts.update()
 
     def connected(self, ):
-        """return true if model exist and connected
+        """\retval True if model exist and connected
         """
         return self._model <> None and self._model.connected()
 
     def disconnect(self, ):
-        """return true if disconnected successfully
+        """
+        \retval True if disconnected successfully
+        \retval False if did not disconnected
         """
         if self.connected():
             try:
@@ -65,7 +67,7 @@ class gtk_view(common_view):
 
     def create_new_sqlite(self, filename):
         """connect to new sqlite model and create new database in it
-        \param filename 
+        \param filename file to create database in
         """
         self._model = sqlite_model()
         self._model.create_new(filename)

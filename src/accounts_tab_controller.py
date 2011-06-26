@@ -5,9 +5,14 @@ from list_view_sort_control import list_view_sort_control
 import gtk
 from common_methods import *
 import sqlite3
-import account_edit_control
+from account_edit_control import account_edit_control
 
 class accounts_tab_controller(object):
+    """
+    \if russian
+    \brief Контрол для таба со счетами
+    \endif
+    """
     def __init__(self, parent):
         self._parent = parent
         self._builder = parent._builder
