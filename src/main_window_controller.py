@@ -21,7 +21,7 @@ class main_window_controller(object):
         \endif
         """
         self._parent = parent
-        self._builder = parent._builder
+        self._builder = parent.builder
         def shorter(name, signal, *method):
             self._builder.get_object(name).connect(signal, *method)
 

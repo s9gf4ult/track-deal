@@ -16,15 +16,16 @@ class gtk_view(common_view):
     Open deals Gtk view class (gtk interface for open-deals)
     \endif
     """
-    _builder = None
+    ## \brief GtkBuilder instance
+    builder = None
     _window = None
     _model = None
     
     def __init__(self, ):
         """initialize gtk view
         """
-        self._builder = gtk.Builder()
-        self._builder.add_from_file("main_ui.glade")
+        self.builder = gtk.Builder()
+        self.builder.add_from_file("main_ui.glade")
         self._window = main_window_controller(self)
         self._accounts = accounts_tab_controller(self)
 
@@ -57,7 +58,7 @@ class gtk_view(common_view):
                 self._model.disconnect()
                 self._model = None
             except Exception as e:
-                show_error(e.__str__(), self._builder.get_object("main_window"))
+                show_error(e.__str__(), self.builder.get_object("main_window"))
                 print(traceback.format_exc())
                 return False
             else:
