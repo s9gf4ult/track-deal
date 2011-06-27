@@ -17,19 +17,31 @@ class gtk_view(common_view):
     """
     ## \brief GtkBuilder instance.
     builder = None
-    ## \brief main_window_controller instance.
+    ## \brief \ref main_window_controller.main_window_controller instance.
     # \~russian
     # \par
     # Экземпляр контрола главного окна. Хранится сдесь для вызова метода обновления виджетов
     # которыми управляет контрол
     window = None
+    ## \brief instance of implementor of \ref common_model.common_model
     model = None
+    ## \brief instance of \ref currency_edit_control.currency_edit_control
+    # \~russian
+    # 
+    # Экземпляр диалога для редактирования валют
+    currency = None
     
     def __init__(self, ):
         """initialize gtk view
+        \~russian
+        \todo Нужно перенести создание всех контролов диалогов в этот конструктор.
+        При создании каждого контрола передавать только \c self чтобы каждый контрол имел
+        доступ к модели и сам мог обновлять свое состояние по вызову, а также мог вызывать
+        методы других котролов через открытые члены этого self.
         """
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
+        self.currency = currency_edit_control(self)
         self.window = main_window_controller(self)
         self._accounts = accounts_tab_controller(self)
 
