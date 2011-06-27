@@ -18,35 +18,35 @@ class gtk_view(common_view):
     """
     ## \brief GtkBuilder instance
     builder = None
-    _window = None
-    _model = None
+    window = None
+    model = None
     
     def __init__(self, ):
         """initialize gtk view
         """
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
-        self._window = main_window_controller(self)
+        self.window = main_window_controller(self)
         self._accounts = accounts_tab_controller(self)
 
     
     def run(self, ):
         """show main window and initialize all the necessary
         """
-        self._window.run()
+        self.window.run()
         gtk.main()
         
         
     def call_update_callback(self, ):
         """try send update signal to the all controllers
         """
-        self._window.update()
+        self.window.update()
         self._accounts.update()
 
     def connected(self, ):
         """\retval True if model exist and connected
         """
-        return self._model <> None and self._model.connected()
+        return self.model <> None and self.model.connected()
 
     def disconnect(self, ):
         """
@@ -55,8 +55,8 @@ class gtk_view(common_view):
         """
         if self.connected():
             try:
-                self._model.disconnect()
-                self._model = None
+                self.model.disconnect()
+                self.model = None
             except Exception as e:
                 show_error(e.__str__(), self.builder.get_object("main_window"))
                 print(traceback.format_exc())
@@ -70,15 +70,15 @@ class gtk_view(common_view):
         """connect to new sqlite model and create new database in it
         \param filename file to create database in
         """
-        self._model = sqlite_model()
-        self._model.create_new(filename)
+        self.model = sqlite_model()
+        self.model.create_new(filename)
 
     def open_existing_sqlite(self, filename):
         """connect to existing sqlite file
         \param filename 
         """
-        self._model = sqlite_model()
-        self._model.open_existing(filename)
+        self.model = sqlite_model()
+        self.model.open_existing(filename)
 
     def quit(self, ):
         """quit from gtk main loop

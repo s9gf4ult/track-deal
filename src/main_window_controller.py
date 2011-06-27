@@ -21,9 +21,8 @@ class main_window_controller(object):
         \endif
         """
         self._parent = parent
-        self._builder = parent.builder
         def shorter(name, signal, *method):
-            self._builder.get_object(name).connect(signal, *method)
+            self._parent.builder.get_object(name).connect(signal, *method)
 
         shorter("quit", "activate", self.quit_activate)
         shorter("create_database", "activate", self.create_database_activate)
@@ -46,12 +45,12 @@ class main_window_controller(object):
     def save_as(self):
         if not self._parent.connected():
             return
-        win = self._builder.get_object("main_window")
-        # ch = self._parent._model.get_changes()
+        win = self._parent.builder.get_object("main_window")
+        # ch = self._parent.model.get_changes()
         # if ch > 0:
         #     show_error(u'Перед сохранением нужно завершить транзакцию выполните Rollback или Commit', win)
         #     return
-        filename = self._parent._model._connection_string
+        filename = self._parent.model._connection_string
         if filename == ":memory:":
             return
         dial = gtk.FileChooserDialog(title = u'Сохранить как', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE, buttons = (gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
@@ -61,7 +60,7 @@ class main_window_controller(object):
             if self._parent.disconnect():
                 try:
                     shutil.copyfile(filename, dstfile)
-                    self._parent._model.open_existing(dstfile)
+                    self._parent.model.open_existing(dstfile)
                     self.call_update_callback()
                 except Exception as e:
                     show_and_print_error(e, win)
@@ -73,10 +72,10 @@ class main_window_controller(object):
         self.import_from_old_database()
 
     def import_from_old_database(self):
-        if self._parent._model.connection == None:
+        if self._parent.model.connection == None:
             return
-        win = self._builder.get_object("main_window")
-        ch = self._parent._model.get_changes()
+        win = self._parent.builder.get_object("main_window")
+        ch = self._parent.model.get_changes()
         if ch > 0:
             show_error(u'Перед импортом нужно завершить транзакцию выполните Rollback или Commit', win)
             return
@@ -88,7 +87,7 @@ class main_window_controller(object):
         diag.set_filter(fl)
         if diag.run() == gtk.RESPONSE_ACCEPT:
             try:
-                self._parent._model.load_from_old_version(diag.get_filename())
+                self._parent.model.load_from_old_version(diag.get_filename())
             except Exception as e:
                 show_and_print_error(e, win)
         diag.destroy()
@@ -98,15 +97,15 @@ class main_window_controller(object):
         self.transaction_commit()
 
     def transaction_commit(self):
-        if self._parent._model.connection:
-            self._parent._model.commit()
+        if self._parent.model.connection:
+            self._parent.model.commit()
 
     def transaction_rollback_activate(self, action):
         self.transaction_rollback()
 
     def transaction_rollback(self):
         if self._parent.connected():
-            self._parent._model.rollback()
+            self._parent.model.rollback()
             self.call_update_callback()
 
     def close_activate(self, action):
@@ -121,7 +120,7 @@ class main_window_controller(object):
 
     def open_database(self):
         if self._parent.disconnect():
-            win = self._builder.get_object("main_window")
+            win = self._parent.builder.get_object("main_window")
             diag = gtk.FileChooserDialog(title = u'Открыть базу', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
             diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
             diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
@@ -132,14 +131,14 @@ class main_window_controller(object):
                 try:
                     self._parent.open_existing_sqlite(diag.get_filename())
                 except Exception as e:
-                    show_error(e.__str__(), self._builder.get_object("main_window"))
+                    show_error(e.__str__(), self._parent.builder.get_object("main_window"))
                     print(traceback.format_exc())
             self._parent.call_update_callback()
             diag.destroy()
             fl.destroy()
         
     def set_main_title(self, title):
-        self._builder.get_object("main_window").set_title(title)
+        self._parent.builder.get_object("main_window").set_title(title)
 
 
     def quit_activate(self, action):
@@ -162,7 +161,7 @@ class main_window_controller(object):
         
     def create_database_in_file(self):
         if self._parent.disconnect():
-            win = self._builder.get_object("main_window")
+            win = self._parent.builder.get_object("main_window")
             diag = gtk.FileChooserDialog(title = u'Новая база', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE)
             diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
             diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
@@ -170,7 +169,7 @@ class main_window_controller(object):
                 try:
                     self._parent.create_new_sqlite(diag.get_filename())
                 except Exception as e:
-                    show_error(e.__str__(), self._builder.get_object("main_window"))
+                    show_error(e.__str__(), self._parent.builder.get_object("main_window"))
                     print(traceback.format_exc())
             diag.destroy()
             self._parent.call_update_callback()
@@ -183,16 +182,16 @@ class main_window_controller(object):
         """update main window
         """
         if self._parent.connected():
-            if self._parent._model._connection_string == ":memory:":
+            if self._parent.model._connection_string == ":memory:":
                 self.set_main_title(u'База данных в памяти')
             else:
-                self.set_main_title(self._parent._model._connection_string)
+                self.set_main_title(self._parent.model._connection_string)
         else:
             self.set_main_title("Open Deals")
             
     def run(self, ):
         """show main window
         """
-        win = self._builder.get_object("main_window")
+        win = self._parent.builder.get_object("main_window")
         win.show_all()
         
