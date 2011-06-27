@@ -12,6 +12,7 @@ class combo_control(value_returner_control):
     В основном боксов со строкой редактирования и простыми раскрывающимися
     списками
     \todo Класс ComboBoxEntry считается устаревшим и не рекомендуется к использованию
+    \todo Переделать работу со стандартным ComboBox если свойство \c has_entry выставлено
     \else
     controls combobox and comboedit with one interface
     you can easly update rows in combobox with update_widget

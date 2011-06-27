@@ -15,17 +15,15 @@ class accounts_tab_controller(object):
     """
     def __init__(self, parent):
         self._parent = parent
-        self._builder = parent._builder
-        self.account_edit = account_edit_control(self._builder)
         def shorter(name, *method):
-            self._builder.get_object(name).connect("activate", *method)
+            self._parent._builder.get_object(name).connect("activate", *method)
         shorter("add_account", self.add_account_activate)
         shorter("delete_account", self.delete_account_activate)
         shorter("modify_account", self.modify_account_activate)
         shorter("set_current_account", self.set_current_account_activate)
-        self.accounts_list = list_view_sort_control(self._builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererSpin(), int)])
-        self.account_list = list_view_sort_control(self._builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
-        self._builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
+        self.accounts_list = list_view_sort_control(self._parent._builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererSpin(), int)])
+        self.account_list = list_view_sort_control(self._parent._builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
+        self._parent._builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
 
     def accounts_view_row_activated(self, tw, path, col):
         self.set_current_account()
@@ -43,9 +41,9 @@ class accounts_tab_controller(object):
     def update_account_label(self):
         if self._model.connection != None:
             (acname, ) = self._model.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"),)).fetchone() or (None, )
-            self._builder.get_object("current_account_name_label").set_text(acname != None and acname or "")
+            self._parent._builder.get_object("current_account_name_label").set_text(acname != None and acname or "")
         else:
-            self._builder.get_object("current_account_name_label").set_text("")
+            self._parent._builder.get_object("current_account_name_label").set_text("")
 
     def update_account_list(self):
         """update list of properties and statistics of selected account"""
@@ -71,9 +69,9 @@ class accounts_tab_controller(object):
                     self._model.make_account(ret['name'], ret['first_money'], ret['currency'])
                     self.update_accounts_list()
                 except sqlite3.IntegrityError:
-                    show_error(u'Счет с таким именем уже существует', self._builder.get_object("main_window"))
+                    show_error(u'Счет с таким именем уже существует', self._parent._builder.get_object("main_window"))
                 except Exception as e:
-                    show_error(e.__str__(), self._builder.get_object("main_window"))
+                    show_error(e.__str__(), self._parent._builder.get_object("main_window"))
                     print(traceback.format_exc())
                     
                     
@@ -84,12 +82,12 @@ class accounts_tab_controller(object):
     def delete_account(self):
         """delete selected account"""
         if self._model.connection:
-            c = self._builder.get_object("accounts_view")
+            c = self._parent._builder.get_object("accounts_view")
             (mod, it) = c.get_selection().get_selected()
             if it != None:
                 acname = mod.get_value(it, 0)
                 if self._model.connection.execute("select count(d.id) from deals d inner join accounts a on d.account_id = a.id where a.name = ?", (acname, )).fetchone()[0] > 0:
-                    dial = gtk.Dialog(title = u'Удалить счет', parent = self._builder.get_object("main_window"), flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+                    dial = gtk.Dialog(title = u'Удалить счет', parent = self._parent._builder.get_object("main_window"), flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
                     dial.get_content_area().pack_start(gtk.Label(u'Удалить сделки привязанные к данному счету ?'))
                     dial.show_all()
                     ret = dial.run()
@@ -109,7 +107,7 @@ class accounts_tab_controller(object):
     def modify_account(self):
         """runs account dialog and modifies selected account"""
         if self._model.connection:
-            c = self._builder.get_object("accounts_view")
+            c = self._parent._builder.get_object("accounts_view")
             (mod, it) =  c.get_selection().get_selected()
             if it != None:
                 acname = mod.get_value(it, 0)
@@ -125,7 +123,7 @@ class accounts_tab_controller(object):
                         self.call_update_callback()
 
     def set_current_account(self):
-        tw = self._builder.get_object("accounts_view")
+        tw = self._parent._builder.get_object("accounts_view")
         (mod, it) = tw.get_selection().get_selected()
         if it != None and self._model.connection != None:
             (self.global_data["current_account"], ) = self._model.connection.execute("select id from accounts where name = ?", (tw.get_model().get_value(it, 0), )).fetchone() or (None, )

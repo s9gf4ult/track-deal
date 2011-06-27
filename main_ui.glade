@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="2.16"/>
+  <requires lib="gtk+" version="2.24"/>
   <object class="GtkAction" id="about_dialog_show">
     <property name="stock_id">gtk-about</property>
   </object>
@@ -15,6 +15,9 @@
   <object class="GtkAction" id="add_position">
     <property name="label">Создать позицию</property>
     <property name="stock_id">gtk-add</property>
+  </object>
+  <object class="GtkAction" id="call_filter">
+    <property name="label">Фильтр</property>
   </object>
   <object class="GtkAction" id="call_points">
     <property name="label" translatable="yes">Пункты</property>
@@ -110,6 +113,7 @@
       <object class="GtkBox" id="dialog-vbox3">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="dialog-action_area3">
@@ -200,7 +204,24 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkComboBox" id="account_edit_currency">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="has_entry">True</property>
+                <child internal-child="entry">
+                  <object class="GtkEntry" id="combobox-entry">
+                    <property name="can_focus">False</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="x_options">GTK_FILL</property>
+                <property name="y_options">GTK_FILL</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -214,9 +235,6 @@
   </object>
   <object class="GtkTextBuffer" id="blog_buffer"/>
   <object class="GtkTextBuffer" id="buffer"/>
-  <object class="GtkAction" id="call_filter">
-    <property name="label">Фильтр</property>
-  </object>
   <object class="GtkListStore" id="date_store">
     <columns>
       <!-- column-name open_date -->
