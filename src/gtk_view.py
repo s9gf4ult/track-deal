@@ -10,14 +10,18 @@ from accounts_tab_controller import accounts_tab_controller
 
 class gtk_view(common_view):
     """
-    \if russian
+    \~russian
     Класс для рисования интерфейса на Gtk создает контролы и хранит их.
-    \else
+    \~english
     Open deals Gtk view class (gtk interface for open-deals)
-    \endif
     """
-    ## \brief GtkBuilder instance
+    ## \brief GtkBuilder instance.
     builder = None
+    ## \brief main_window_controller instance.
+    # \~russian
+    # \par
+    # Экземпляр контрола главного окна. Хранится сдесь для вызова метода обновления виджетов
+    # которыми управляет контрол
     window = None
     model = None
     

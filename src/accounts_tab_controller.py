@@ -9,9 +9,8 @@ from account_edit_control import account_edit_control
 
 class accounts_tab_controller(object):
     """
-    \if russian
+    \~russian
     \brief Контрол для таба со счетами
-    \endif
     """
     def __init__(self, parent):
         self._parent = parent

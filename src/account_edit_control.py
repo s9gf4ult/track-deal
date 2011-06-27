@@ -8,9 +8,8 @@ from common_methods import *
 
 class account_edit_control:
     """
-    \if russian
+    \~russian
     \brief Контрол формы редактирования счета
-    \endif
     """
     def __init__(self, builder):
         self.builder = builder

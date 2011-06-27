@@ -8,17 +8,15 @@ from common_methods import *
 
 class main_window_controller(object):
     """
-    \if russian
+    \~russian
     \brief Контрол для окна
-
+    \par
     Нужен для обработки событий открытия закрытия базы, обновления заголовка окна/
-    \endif
     """
     def __init__(self, parent):
         """
-        \if russian
+        \~russian
         \param parent представление gtk_view
-        \endif
         """
         self._parent = parent
         def shorter(name, signal, *method):
