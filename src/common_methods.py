@@ -52,7 +52,14 @@ def gethash(fhash, key):
         return None
 
 def find_in_model(tmodel, findfunc):
-    """returns path of found row in model"""
+    """\brief returns path of found row in model
+    \param tmodel TreeModel instance
+    \param findfunc function with two parameters:\n
+    \c model TreeModel instance\n
+    \c iterator TreeModelIter instance
+    \retval None did not found
+    \retval TreeModelIter instance - iterator on which function \c findfunc returned \c True
+    """
     it = tmodel.get_iter_first()
     while it != None:
         if findfunc(tmodel, it):
@@ -64,6 +71,12 @@ def is_null_or_empty(obj):
     return obj == None or len(obj) == 0
 
 def reduce_by_string(reductor, seq):
+    """
+    \~russian
+    \param reductor строка будет вставлена между элементами seq
+    \param seq список или кортеж элементов
+    \return строка с элементами из \c seq между которыми \c reductor
+    """
     if len(seq) > 0:
         return reduce(lambda a, b: u'{0}{1}{2}'.format(a, reductor, b),
                       seq)
@@ -71,6 +84,12 @@ def reduce_by_string(reductor, seq):
         return ""
 
 def seconds_to_time_distance(seconds):
+    """
+    \~russian
+    \param seconds время в секундах
+    \brief Переводит секунды во время
+    \return Хеш таблица с ключами days, hours, minutes, seconds
+    """
     ret = {}
     for (key, mlt) in [("days", 24 * 3600),
                        ("hours", 3600),
@@ -81,6 +100,12 @@ def seconds_to_time_distance(seconds):
     return ret
 
 def time_distance_to_seconds(tdist):
+    """
+    \~russian
+    \brief Переводит время в часах минутах секундах в секунды
+    \param tdist хеш таблица с ключами days, hours, minutes, seconds
+    \return integer соличество секунд
+    """
     ret = reduce(lambda a, b: a + b,
                  map(lambda x, y: x * y,
                      [24 * 3600, 3600, 60, 1],
@@ -89,6 +114,15 @@ def time_distance_to_seconds(tdist):
     return ret
 
 def solve_lower_upper(plus, conds, field_name, l, h):
+    """
+    \~russian
+    \brief вспомогательная функция для генерации запросов
+    \param [out] plus список. Во время выполнения в него добавляются параметры запроса
+    \param [out] conds список, во время выполнения в него добавляются условия запроса
+    \param field_name имя поля участвующего в запросе
+    \param l нижняя граница значения поля
+    \param h верхняя граница значения поля
+    """
     if l and h:
         if l < h:
             conds.append(u'({0} between ? and ?)'.format(field_name))
@@ -107,19 +141,34 @@ def solve_lower_upper(plus, conds, field_name, l, h):
         plus.append(h)
 
 def show_and_print_error(error, window):
+    """
+    \~russian
+    \brief Показывает диалог с сообщением об ошибке и печатает стектрейс в stderr
+    \param error объект ошибки
+    \param window родительское окно для диалога
+    """
     show_error(error.__str__(), window)
     print(traceback.format_exc())
 
 def no_reaction(func):
-    """decorator which blocks an execution of the method of object which has `react` member, if react is False methid will not executed, before execution of the method `react` sets to False"""
+    """\~english \brief decorator
+
+    which blocks an execution of the method of object which has `__do_react__` member, if __do_react__ is False methid will not executed, before execution of the method `__do_react__` sets to False
+    \~russian
+    \brief Декоратор
+
+    Если атрибут __do_react__ объекта, чей метод декорируется, равен False - метод не выполняется, Если True выполняется при этом перед выполнением __do_react__ выставляется в False а после выполнения в True
+    """
     def ret(*args, **kargs):
         if not args[0].__do_react__:
             return
+        rtt = None
         try:
             args[0].__do_react__ = False
-            func(*args, **kargs)
+            rtt = func(*args, **kargs)
         finally:
             args[0].__do_react__ = True
+        return rtt
     return ret
 
 def if_database(func):
@@ -130,9 +179,7 @@ def if_database(func):
     return ret
 
 def raise_db_closed(func):
-    """Decorator makes function to raise Exception when
-    self._sqlite_connection is null
-    Arguments:
+    """Decorator makes function to raise Exception when self._sqlite_connection is null
     \param func 
     """
     def ret(*args, **kargs):
@@ -151,7 +198,6 @@ def raise_db_closed(func):
     
 def raise_db_opened(func):
     """Decorator raises exception of databse is still opened
-    Arguments:
     \param func 
     """
     def ret(*args, **kargs):
@@ -169,10 +215,17 @@ def raise_db_opened(func):
 
 def in_transaction(func):
     """
+    \~english
     Decorator makes method executing in transaction, if error occures then transaction will be rolled back
     and exception will be passed up
-    Arguments:
-    \param func 
+    \param func
+    \~russian
+    \brief Декоратор, выполняет метод в транзакции.
+
+    Если во время выполнения метода возникает необработанное исключение - транзакция откатывается, в противном случае
+     - commit.
+    \param func декорируемый метод
+    \note класс должен реализовывать методы \c begin_transaction, \c rollback и \c commit
     """
     def ret(*args, **kargs):
         self = args[0]
@@ -191,22 +244,35 @@ def in_transaction(func):
     return ret
 
 class remover_decorator(object):
-    """Makes method remove objects
-    Attributes:
-    
+    """
+    \~english
+    Makes method remove objects
+    \~russian
+    \brief Декоратор метода для удаления записей из базы.
+
+    В конце метода выполняется код который удаляет записи из базы
     """
     def __init__(self, table_name, class_field):
         """
-        Arguments:
+        \~english
         \param table_name  string with name of table delete entries from
         \param class_field  hash like {argument_type: table field}
+        \~russian
+        \param table_name имя таблицы из которой будут удалятся объекты
+        \param class_field хеш таблица {тип_первого_аргумента : поле_в_таблице}\n
+        Первый аргумент метода будет проверятся на соответствие типу \c тип_первого_аргумента,
+        если тип совпадает, то значение аргумета будет сравнено со значением поля \c поле_в_таблице. То есть будет сгенерирован
+        такой запрос\n
+        \verbatim
+        delete from table_name where поле_в_таблице = первый_аргумент
+        \endverbatim
+        Все это нужно для того чтобы можно было удалять обекты по id, и например по уникальному имени, которое является строкой
         """
         self._table_name = table_name
         self._class_field = class_field
 
     def __call__(self, method):
         """
-        Arguments:
         \param method 
         """
         def ret(*args, **kargs):
@@ -224,7 +290,6 @@ class remover_decorator(object):
 
 def order_by_print(order_list = []):
     """generates string with `order by` definition
-    Arguments:
     \param order_list 
     """
     if len(order_list) > 0:
@@ -234,7 +299,6 @@ def order_by_print(order_list = []):
 
 def remhash(hasht, key):
     """removes key from hashtable if exits
-    Arguments:
     \param hasht 
     \param key 
     """
@@ -243,7 +307,6 @@ def remhash(hasht, key):
 
 def format_where_part(wherepart, reductor = "and"):
     """return tuple of text for query and arguments for query
-    Arguments:
     \param wherepart  [(= | < | > | ... | 'between', [field_name], exp2, exp3 ...)]
     \param reductor  `and` or `or` word for condition
     """
@@ -283,8 +346,6 @@ def format_where_part(wherepart, reductor = "and"):
 
 def format_select_part(select_part):
     """return string with select part
-    
-    Arguments:
     \param select_part  [* | field name | expression | (field name | expression, alias)]
     """
     rlist = []
@@ -307,7 +368,6 @@ class safe_execution(object):
 
     def __call__(self, func):
         """
-        Arguments:
         \param func 
         """
         def ret(*args, **kargs):
@@ -324,14 +384,12 @@ class makes_insafe(object):
     """
     def __init__(self, attribute):
         """
-        Arguments:
         \param attribute 
         """
         self._attribute = attribute
         
     def __call__(self, func):
         """
-        Arguments:
         \param func 
         """
         def ret(*args, **kargs):
@@ -349,7 +407,6 @@ class makes_insafe(object):
 
 def add_hash(h1, h2):
     """adds and replaces keys and vals of h2 to h1
-    Arguments:
     \param h1 
     \param h2 
     """
@@ -358,7 +415,6 @@ def add_hash(h1, h2):
 
 def any_to_time(seconds):
     """turn seconds to time
-    Arguments:
     \param seconds 
     """
     seconds = int(seconds)
@@ -371,7 +427,6 @@ def any_to_time(seconds):
 
 def argument_value(name, value):
     """return string in format "name = value"
-    Arguments:
     \param name 
     \param value 
     """
@@ -390,7 +445,6 @@ class string_reduce(object):
     _ret = ""
     def step(self, argument):
         """
-        Arguments:
         \param argument 
         """
         if not is_null_or_empty(argument):
@@ -408,14 +462,12 @@ class string_reduce(object):
 
 def any_to_datetime(value):
     """return datetime
-    Arguments:
     \param value  any type convertable to float
     """
     return datetime.datetime.fromtimestamp(float(value))
 
 def any_to_date(value):
     """turn value to date
-    Arguments:
     \param value 
     """
     return datetime.date.fromtimestamp(float(value))
@@ -425,14 +477,12 @@ class in_action(object):
     """
     def __init__(self, action_name):
         """
-        Arguments:
         \param action_name 
         """
         self._action_name = action_name
         
     def __call__(self, method):
         """
-        Arguments:
         \param method 
         """
         def ret(*args, **kargs):
@@ -451,14 +501,12 @@ class confirm_safety(object):
     """
     def __init__(self, *attributes):
         """
-        Arguments:
         \param *attributes 
         """
         self._attributes = attributes
         
     def __call__(self, method):
         """
-        Arguments:
         \param method 
         """
         def ret(*args, **kargs):
@@ -473,14 +521,12 @@ class pass_to_method(object):
     """
     def __init__(self, method):
         """
-        Arguments:
         \param method  method to call after decorated, and return value of
         """
         self._method = method
 
     def __call__(self, func):
         """
-        Arguments:
         \param func 
         """
         def ret(*args, **kargs):
@@ -492,7 +538,6 @@ class pass_to_method(object):
 def any_to_timedelta(value):
     """
     return timedelta from anything convertable to int
-    Arguments:
     \param value 
     """
     return datetime.timedelta(0, int(value))
@@ -506,7 +551,6 @@ class signal_fetcher(object):
     """
     def __init__(self, builder_name, object_name, signal_name, *userattrs):
         """
-        Arguments:
         \param builder_name 
         \param object_name 
         \param signal_name 
@@ -519,7 +563,6 @@ class signal_fetcher(object):
         
     def __call__(self, func):
         """
-        Arguments:
         \param func 
         """
         myclass = func.im_class
