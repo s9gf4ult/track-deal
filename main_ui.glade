@@ -58,6 +58,11 @@
     <property name="label">Удалить позиции</property>
     <property name="stock_id">gtk-remove</property>
   </object>
+  <object class="GtkAction" id="edit_currencies">
+    <property name="label" translatable="yes">Редактировать валюту</property>
+    <property name="short_label" translatable="yes">Редактировать</property>
+    <property name="stock_id">gtk-edit</property>
+  </object>
   <object class="GtkAction" id="import_from_old_database">
     <property name="label">Загрзить из другой базы</property>
   </object>
@@ -83,6 +88,8 @@
   </object>
   <object class="GtkAction" id="set_current_account">
     <property name="label">Текущий</property>
+    <property name="short_label" translatable="yes">Текущий</property>
+    <property name="stock_id">gtk-jump-to</property>
   </object>
   <object class="GtkAction" id="transaction_commit">
     <property name="label">Commit</property>
@@ -136,7 +143,7 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="n_rows">4</property>
-            <property name="n_columns">2</property>
+            <property name="n_columns">3</property>
             <child>
               <object class="GtkLabel" id="label23">
                 <property name="visible">True</property>
@@ -158,7 +165,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
+                <property name="right_attach">3</property>
                 <property name="y_options">GTK_FILL</property>
               </packing>
             </child>
@@ -184,7 +191,7 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
+                <property name="right_attach">3</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
                 <property name="y_options">GTK_FILL</property>
@@ -197,26 +204,6 @@
                 <property name="label" translatable="yes">Валюта</property>
               </object>
               <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-                <property name="x_options">GTK_FILL</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBox" id="account_edit_currency">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="has_entry">True</property>
-                <child internal-child="entry">
-                  <object class="GtkEntry" id="combobox-entry">
-                    <property name="can_focus">False</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
                 <property name="top_attach">2</property>
                 <property name="bottom_attach">3</property>
                 <property name="x_options">GTK_FILL</property>
@@ -249,9 +236,39 @@
               </object>
               <packing>
                 <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
+                <property name="right_attach">3</property>
                 <property name="top_attach">3</property>
                 <property name="bottom_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button2">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="related_action">edit_currencies</property>
+                <property name="use_stock">True</property>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="right_attach">3</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="x_options">GTK_FILL</property>
+                <property name="y_options">GTK_FILL</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="account_edit_currency">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="y_options">GTK_FILL</property>
               </packing>
             </child>
           </object>
@@ -3756,6 +3773,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="related_action">add_account</property>
+                            <property name="use_stock">True</property>
                           </object>
                           <packing>
                             <property name="x_options">GTK_FILL</property>
@@ -3768,6 +3786,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="related_action">delete_account</property>
+                            <property name="use_stock">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -3782,6 +3801,7 @@
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="related_action">modify_account</property>
+                            <property name="use_stock">True</property>
                           </object>
                           <packing>
                             <property name="top_attach">1</property>

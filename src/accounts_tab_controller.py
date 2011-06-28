@@ -10,9 +10,13 @@ from account_edit_control import account_edit_control
 class accounts_tab_controller(object):
     """
     \~russian
-    \brief Контрол для таба со счетами
+    \brief Контрол для вкладки со счетами
     """
     def __init__(self, parent):
+        """
+        \param parent instance of gtk_view
+        """
+        assert(isinstance(parent, gtk_view))
         self._parent = parent
         def shorter(name, *method):
             self._parent.builder.get_object(name).connect("activate", *method)

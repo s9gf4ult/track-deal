@@ -7,6 +7,7 @@ from common_view import common_view
 from main_window_controller import main_window_controller
 from sqlite_model import sqlite_model
 from accounts_tab_controller import accounts_tab_controller
+from account_edit_control import account_edit_control
 
 class gtk_view(common_view):
     """
@@ -30,6 +31,14 @@ class gtk_view(common_view):
     # 
     # Экземпляр диалога для редактирования валют
     currency = None
+    ## \brief instance of \ref accounts_tab_controller.accounts_tab_controller
+    # Экземпляр контрола для таба со счетами. (Обработка событий нажатия кнопок и управление
+    # списками на этой вкладке)
+    accounts = None
+    ## \brief instance of \ref account_edit_control.account_edit_control
+    # \~russian \par Контрол формы редактирования счета
+    account_edit = None
+    
     
     def __init__(self, ):
         """initialize gtk view
@@ -42,8 +51,9 @@ class gtk_view(common_view):
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
         self.currency = currency_edit_control(self)
+        self.acount_edit = account_edit_control(self)
+        self.accounts = accounts_tab_controller(self)
         self.window = main_window_controller(self)
-        self._accounts = accounts_tab_controller(self)
 
     
     def run(self, ):
@@ -57,7 +67,7 @@ class gtk_view(common_view):
         """try send update signal to the all controllers
         """
         self.window.update()
-        self._accounts.update()
+        self.accounts.update()
 
     def connected(self, ):
         """\retval True if model exist and connected
