@@ -4,14 +4,43 @@
 import gtk
 
 class list_view_sort_control:
+    """
+    \~russian
+    \brief Контрол для управления списком элементов.
+    
+    Реализует сортировку при нажатии на заголовки колонок списка,
+    возможен обратный вызов на сортировку, чтобы обновить данные в модели так,
+    как это требуется.
+    """
     def __init__(self, treeview, columns, self_sorting = True, sort_callback = None):
-        """columns must be list of tuples with name, renderer, optionally type,
+        """
+        \~english
+        \param treeview instance of gtk.TreeView
+        \param columns must be list of tuples with name, renderer, optionally type,
         and optionally other data assigned to column order of tuple in the list
         determines the order of columns in TreeView
-        sort_callback must be like that lambda column, order, parameters:
+        \param self_sorting can be True or False.
+        If True then control will sort list independently. Else sort_callback will be called
+        to reload data into model in right order.
+        \param sort_callback must be like that lambda column, order, parameters:
                                                column - column which clicked on,
                                                order - gtk.SORT_ASCENDING or gtk.SORT_DESCENDING
                                                parameters - columns[n][3:] where n is a number of column clicked on
+        \~russian
+        \param treeview TreeView экземпляр
+        \param columns список кортежей следующего содержания (name, renderer, type, rest) Где:\n
+        \c name - это имя столбца, оно будет отображаться в заголовке TreeView\n
+        \c renderer gtk.CellRenderer - рендератор которым будут рисоваться данные в соответствующем столбце TreeView\n
+        \c type - тип данных для соответствуюдего столбца модели, будет передаваться в конструктоп ListStore\n
+        \c rest - остальные аргументы относящиеся к данному столбцу, будут передаваться в \c sort_callback.
+        \param self_sorting - булевое значение. Если истинно, то обработка нажатия на заголовок TreeView будет отрабатываться
+        контролом самостоятельно путем выставления sort_column_id в модели.
+        \param sort_callback - функция следующих аргументов:\n
+        \c column - gtk.TreeViewColumn на которую нажал пользователь\n
+        \c order - gtk.SORT_ASCENDING или gtk.SORT_DESCENDING когда нужно отсортировать по возрастанию или по убыванию соответственно\n
+        \c rest - остальные аргументы из соответствующего кортежа из \c columns
+        \note Если \c self_sorting положительна, то sort_callback может остаться Null
+       
         """
         def get3ordefault(tpl, default):
             if len(tpl) < 3:
@@ -54,10 +83,14 @@ class list_view_sort_control:
             self.treeview.append_column(c)
             
     def make_model(self):
+        """\brief make new model and attach it to TreeView"""
         m = self.get_new_store()
         self.treeview.set_model(m)
 
     def get_new_store(self):
+        """\brief create new model
+        \return empty ListStore with columns specified in constructor of this class
+        """
         return gtk.ListStore(*self.model_columns)
         
     def column_clicked(self, column, col_id, params):
@@ -74,6 +107,15 @@ class list_view_sort_control:
             column.set_sort_indicator(False)
 
     def toggle_sort_indicator(self, col_id):
+        """
+        \~russian
+        \brief Переключает состояние стрелочки в заголовке TreeView
+        \param col_id номер столбца начиная с 0
+        \retval gtk.SORT_ASCENDING стрелочка теперь в состоянии сортировки по возрастанию
+        \retval gtk.SORT_DESCENDING по убыванию
+        \retval None без сортировки
+        \note Этот метод не делает ничего кроме переключения стрелочки, он не сортирует данные
+        """
         for col in xrange(0, len(self.treeview.get_columns())):
             if col != col_id:
                 self.treeview.get_column(col).set_sort_indicator(False)
@@ -88,21 +130,36 @@ class list_view_sort_control:
                 
 
     def update_rows(self, rows):
+        """
+        \~russian
+        \brief Заменяет данные в модели
+        \param rows список кортежей с данными
+        \note метод создает новую модель и привязывает к ней TreeView
+        """
         m = self.get_new_store()
         for row in rows:
             m.append(row)
         self.treeview.set_model(m)
 
     def add_rows(self, rows):
+        """
+        \~russian
+        \brief добавляет данные к модели, предварительно отвязвая ее от TreeView
+        \param rows список кортежей с данными для модели
+        """
         if not self.treeview.get_model():
             self.make_model()
-        m = self.treeview.get_model()
+        m = self.get_model()
         self.treeview.set_model(None)
         for row in rows:
             m.append(row)
         self.treeview.set_model(m)
 
     def get_model(self):
+        """
+        \~russian
+        \brief возвращает модель привязанную к TreeView
+        """
         return self.treeview.get_model()
 
     def _get_rows_with_filter(self, filterfunc):
