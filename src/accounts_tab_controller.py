@@ -69,7 +69,7 @@ class accounts_tab_controller(object):
     def add_account(self):
         """runs account adder dialog and adds account to the database"""
         if self._parent.connected():
-            self.account_edit.update_widget(map(lambda a: a[0], self._model.connection.execute("select distinct currency from accounts order by currency")))
+            #self._parent.account_edit.update_widget(map(lambda a: a[0], self._model.connection.execute("select distinct currency from accounts order by currency")))
             ret = self.account_edit.run()
             if ret != None:
                 try:

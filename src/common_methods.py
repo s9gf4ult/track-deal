@@ -222,8 +222,7 @@ def in_transaction(func):
     \~russian
     \brief Декоратор, выполняет метод в транзакции.
 
-    Если во время выполнения метода возникает необработанное исключение - транзакция откатывается, в противном случае
-     - commit.
+    Если во время выполнения метода возникает необработанное исключение - транзакция откатывается, в противном случае - commit.
     \param func декорируемый метод
     \note класс должен реализовывать методы \c begin_transaction, \c rollback и \c commit
     """
@@ -290,7 +289,8 @@ class remover_decorator(object):
 
 def order_by_print(order_list = []):
     """generates string with `order by` definition
-    \param order_list 
+    \param order_list
+    \retval "" if order_list is empty
     """
     if len(order_list) > 0:
         return " order by {0}".format(reduce_by_string(", ", order_list))
@@ -298,7 +298,7 @@ def order_by_print(order_list = []):
         return ""
 
 def remhash(hasht, key):
-    """removes key from hashtable if exits
+    """\brief removes key from hashtable if exits
     \param hasht 
     \param key 
     """
@@ -309,6 +309,7 @@ def format_where_part(wherepart, reductor = "and"):
     """return tuple of text for query and arguments for query
     \param wherepart  [(= | < | > | ... | 'between', [field_name], exp2, exp3 ...)]
     \param reductor  `and` or `or` word for condition
+    \return (str, list)
     """
     exprlist = []
     arglist = []
@@ -347,6 +348,7 @@ def format_where_part(wherepart, reductor = "and"):
 def format_select_part(select_part):
     """return string with select part
     \param select_part  [* | field name | expression | (field name | expression, alias)]
+    \return str
     """
     rlist = []
     for sp in select_part:
@@ -359,6 +361,7 @@ def format_select_part(select_part):
 class safe_execution(object):
     """Decorator executes given method if given attribute of the class is True
     and set this attribute to False after that, in any way decorated method will be executed
+    \deprecated this is not usable anymore
     """
     def __init__(self, method, *attributes):
         """
@@ -381,6 +384,7 @@ class safe_execution(object):
     
 class makes_insafe(object):
     """Decorator set attribute of object to true after the correct execution of decorated method
+    \deprecated
     """
     def __init__(self, attribute):
         """
@@ -407,7 +411,7 @@ class makes_insafe(object):
 
 def add_hash(h1, h2):
     """adds and replaces keys and vals of h2 to h1
-    \param h1 
+    \param [out] h1 table to add pairs in
     \param h2 
     """
     for k in h2.keys():
@@ -415,7 +419,8 @@ def add_hash(h1, h2):
 
 def any_to_time(seconds):
     """turn seconds to time
-    \param seconds 
+    \param seconds
+    \return datetime.time instance
     """
     seconds = int(seconds)
     h = trunc(seconds / 3600)
@@ -426,9 +431,10 @@ def any_to_time(seconds):
     return datetime.time(h, m, s)
 
 def argument_value(name, value):
-    """return string in format "name = value"
+    """return string in format "name = value" or just "name" if value == None
     \param name 
-    \param value 
+    \param value
+    \return str
     """
     if name != None:
         if value != None:
@@ -441,6 +447,8 @@ def argument_value(name, value):
 class string_reduce(object):
     """class for sqlite aggregate
     return string of splited by comma
+    \~russian
+    \brief SQlite агрегатор, разделяет запятой все объекты и возвращает строку
     """
     _ret = ""
     def step(self, argument):
@@ -454,8 +462,6 @@ class string_reduce(object):
                 self._ret = "{0}, {1}".format(self._ret, argument)
 
     def finalize(self, ):
-        """
-        """
         return self._ret
     
 
@@ -463,6 +469,7 @@ class string_reduce(object):
 def any_to_datetime(value):
     """return datetime
     \param value  any type convertable to float
+    \return datetime.datetime instance
     """
     return datetime.datetime.fromtimestamp(float(value))
 
@@ -474,6 +481,12 @@ def any_to_date(value):
 
 class in_action(object):
     """Decorator makes method executing in action
+    \~russian
+    \brief Декоратор исполняет метод внутри "действия"
+    
+    Создает "действие" в специальной таблице действий, если метод отрабатывает без ошибок
+    действие завершается
+    \note класс должен реализовывать \c start_action и \c end_action
     """
     def __init__(self, action_name):
         """
@@ -498,6 +511,7 @@ class in_action(object):
     
 class confirm_safety(object):
     """Decorator set database attributes to false after execution of method
+    \deprecated
     """
     def __init__(self, *attributes):
         """
@@ -518,6 +532,8 @@ class confirm_safety(object):
 
 class pass_to_method(object):
     """Decorator call `method` after the body of decorated method and return value of `method`
+    \~russian
+    \brief Декоратор, вызывает метод - аргумет после декорируемого метода и возвращает то, что вернул первый.
     """
     def __init__(self, method):
         """
@@ -527,7 +543,7 @@ class pass_to_method(object):
 
     def __call__(self, func):
         """
-        \param func 
+        \param func decorated method
         """
         def ret(*args, **kargs):
             func(*args, **kargs)
@@ -538,7 +554,8 @@ class pass_to_method(object):
 def any_to_timedelta(value):
     """
     return timedelta from anything convertable to int
-    \param value 
+    \param value
+    \return datetime.timedelta
     """
     return datetime.timedelta(0, int(value))
 
@@ -546,30 +563,30 @@ def format_abs_value(val):
     return (val < 0 and "({0})" or "{0}").format(abs(val))
 
 
-class signal_fetcher(object):
-    """Decorator makes method the handler of signal received from widget
-    """
-    def __init__(self, builder_name, object_name, signal_name, *userattrs):
-        """
-        \param builder_name 
-        \param object_name 
-        \param signal_name 
-        \param *userattrs 
-        """
-        self._builder_name = builder_name
-        self._object_name = object_name
-        self._signal_name = signal_name
-        self._userattrs = userattrs
+# class signal_fetcher(object):
+#     """Decorator makes method the handler of signal received from widget
+#     """
+#     def __init__(self, builder_name, object_name, signal_name, *userattrs):
+#         """
+#         \param builder_name 
+#         \param object_name 
+#         \param signal_name 
+#         \param *userattrs 
+#         """
+#         self._builder_name = builder_name
+#         self._object_name = object_name
+#         self._signal_name = signal_name
+#         self._userattrs = userattrs
         
-    def __call__(self, func):
-        """
-        \param func 
-        """
-        myclass = func.im_class
-        def newinit(myself, *args, **kargs):
-            r = myself.__init__(*args, **kargs)
-            getattr(myself, self._builder_name).get_object(self._object_name).connect(self._signal_name, func, *self._userattrs)
-            return r
-        newinit.__doc__ = myclass.__init__.__doc__
-        setattr(myclass, "__init__", newinit)
-        return func
+#     def __call__(self, func):
+#         """
+#         \param func 
+#         """
+#         myclass = func.im_class
+#         def newinit(myself, *args, **kargs):
+#             r = myself.__init__(*args, **kargs)
+#             getattr(myself, self._builder_name).get_object(self._object_name).connect(self._signal_name, func, *self._userattrs)
+#             return r
+#         newinit.__doc__ = myclass.__init__.__doc__
+#         setattr(myclass, "__init__", newinit)
+#         return func
