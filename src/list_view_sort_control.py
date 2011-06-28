@@ -170,6 +170,11 @@ class list_view_sort_control:
         return ret
 
     def get_rows(self):
+        """
+        \~russian
+        \breif Возвращает все данные из модели в виде списка кортежей
+        \return список кортежей с данными для модели. Такого же вида как принимает метод \ref update_rows
+        """
         def all_columns(model, path, it):
             l = model.get_n_columns()
             p = []

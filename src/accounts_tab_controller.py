@@ -29,6 +29,10 @@ class accounts_tab_controller(object):
         self._parent.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
 
     def accounts_view_row_activated(self, tw, path, col):
+        """
+        \~russian
+        \brief обработчик двойного нажатия на списке со счетами
+        """
         self.set_current_account()
         self.call_update_callback()
 
@@ -126,6 +130,10 @@ class accounts_tab_controller(object):
                         self.call_update_callback()
 
     def set_current_account(self):
+        """
+        \~russian
+        \brief Устанавливает выделенный в списке счет текущим
+        """
         tw = self._parent.builder.get_object("accounts_view")
         (mod, it) = tw.get_selection().get_selected()
         if it != None and self._model.connection != None:

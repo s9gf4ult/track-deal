@@ -9,6 +9,12 @@ import datetime
 
 
 def show_error(message, parent):
+    """
+    \~russian
+    \brief Отображает диалог в ошибкой
+    \param message строка с описанием
+    \param parent родительское окно диалога
+    """
     win = parent
     dial = gtk.MessageDialog(type=gtk.MESSAGE_ERROR, buttons = gtk.BUTTONS_OK, flags=gtk.DIALOG_MODAL, parent = win)
     dial.props.text = message
@@ -16,12 +22,30 @@ def show_error(message, parent):
     dial.destroy()
 
 def find_in_list(findfunc, flist):
+    """
+    \~russian
+    \brief поиск по списку
+    \param функия поиска одного аргумента. Если функия вернет True - это означает что нужный элемент найден
+    \param flist список (или кортеж) элементов
+    \retval None не нашел ни одного элемента
+    \retval integer индекс найденного элемента с 0
+    """
     for x in xrange(0, len(flist)):
         if findfunc(flist[x]):
             return x
     return None
 
 def gethash(fhash, key):
+    """
+    \~russian
+    \brief возвращает элемент хеш таблицы или None
+    \param fhash таблица
+    \param key ключ таблицы
+    \retval None Нет такого элемента
+    \retval Not-None значение \c fhash[key]
+    \note Если значение \c fhash[key] == None то функция вернет None, нет возможности проверить
+    наличия пары в хеш таблице при помощи этой функции
+    """
     if fhash.has_key(key):
         return fhash[key]
     else:
