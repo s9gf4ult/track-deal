@@ -126,7 +126,3 @@ class accounts_tab_controller(object):
         (mod, it) = tw.get_selection().get_selected()
         if it != None and self._model.connection != None:
             (self.global_data["current_account"], ) = self._model.connection.execute("select id from accounts where name = ?", (tw.get_model().get_value(it, 0), )).fetchone() or (None, )
-            
-
-    
-    
