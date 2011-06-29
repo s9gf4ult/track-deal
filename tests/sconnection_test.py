@@ -124,6 +124,18 @@ class sconnection_test(unittest.TestCase):
         self.conn.execute("insert into aa(id, val) values (?, ?)", ["arg2", 200])
         self.assertEqual("arg1 = 100, arg2 = 200", self.conn.execute("select string_reduce(x) from (select argument_value(id, val) as x from aa order by val)").fetchone()[0])
 
+    def test_fetchone_fetchall(self, ):
+        """\brief test fetchone and fetchall methods
+        """
+        self.conn.execute("insert into aa(id, val) values (?, ?)", [1, "one"])
+        a = self.conn.execute_select("select * from aa where id = ?", [1]).fetchone()
+        b = self.conn.execute_select("select * from aa where id = ?", [2]).fetchone()
+        self.assertEqual(a, {"id" : 1, "val" : "one"})
+        self.assertEqual(b, None)
+        c = self.conn.execute_select("select * from aa where id = ?", [1]).fetchall()
+        self.assertEqual(len(c), 1)
+        self.assertEqual(c[0], a)
+
 
 
 if __name__ == '__main__':

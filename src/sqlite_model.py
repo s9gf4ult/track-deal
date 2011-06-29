@@ -597,15 +597,19 @@ class sqlite_model(common_model):
         pass
 
 
-    def get_account(self, aid):
+    def get_account(self, aid_or_name):
         """
-        \param aid 
+        \param aid account id or account name
+        \retval hash table with fields id, name, comments, money_id, money_count
+        \retval None if no one account with this id or name
+        \exception exceptions.od_exception when aid_or_name is not of type (str, int, long)
         """
-        aa = self._sqlite_connection.execute_select("select * from accounts where id = ?", [aid]).fetchall()
-        if len(aa) > 0:
-            return aa[0]
+        if (isinstance(aid_or_name, basestring)):
+            return self._sqlite_connection.execute_select("select * from accounts where name = ?", [aid_or_name]).fetchone()
+        elif (isinstance(aid_or_name, (int, long))):
+            return self._sqlite_connection.execute_select("select * from accounts where id = ?", [aid_or_name]).fetchone()
         else:
-            return None
+            raise od_exception()
 
             
     def create_deal(self, account_id, deal, do_recalc = True):

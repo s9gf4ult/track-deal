@@ -9,7 +9,6 @@ import time
 
 class scon_cursor(object):
     """
-    Attributes:
     _query = None
     _connection = None
     _arguments = None
@@ -32,12 +31,21 @@ class scon_cursor(object):
         for x in self:
             ret.append(x)
         return ret
+    
+    def fetchone(self, ):
+        """\brief fetch one argument or return None if no one exists
+        """
+        ret = None
+        try:
+            cur = self.__iter__()
+            ret = cur.next()
+        except StopIteration as e:
+            ret = None
+        return ret
 
     
     def __init__(self, connection, query, arguments):
         """initializes cursor
-        
-        Arguments:
         \param cursor 
         """
         self._arguments = arguments
@@ -54,18 +62,10 @@ class scon_cursor(object):
 
 class scon_iter(object):
     """iterator returning hashes on query results
-    Attributes:
-    _cursor = None
     """
-    ##############
-    # Attributes #
-    ##############
     _cursor = None
     _names = []
     _iter = None
-    ###########
-    # Methods #
-    ###########
     
     def __init__(self, cursor):
         """
@@ -95,21 +95,9 @@ class scon_iter(object):
 class sconnection(sqlite3.Connection):
     """wrapper over sqlite connection
     implementing some usefull things
-    Attributes:
-    
     """
-    ##############
-    # Attributes #
-    ##############
-    
-    
-    ###########
-    # Methods #
-    ###########
     def __init__(self, connect_string):
         """initializes connection and makes some other things
-        
-        Arguments:
         \param connect_string 
         """
         sqlite3.register_adapter(str, lambda a: a.decode(u'utf-8'))
