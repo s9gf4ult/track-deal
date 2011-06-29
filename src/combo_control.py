@@ -81,10 +81,13 @@ class combo_control(value_returner_control):
         if isinstance(self.combobox, gtk.ComboBoxEntry):
             self.combobox.child.set_text((data == None and "" or data))
         elif isinstance(self.combobox, gtk.ComboBox):
+            m = self.combobox.get_model()
+            if m == None:
+                m = gtk.ListStore(str)
+                self.combobox.set_model(m)
             if data == None:
                 self.combobox.set_active(-1)
                 return
-            m = self.combobox.get_model()
             it = m.get_iter_first()
             while it != None:
                 if m.get_value(it, 0).decode("utf-8") == data.decode("utf-8"):

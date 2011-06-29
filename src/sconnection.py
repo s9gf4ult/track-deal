@@ -9,20 +9,12 @@ import time
 
 class scon_cursor(object):
     """
-    _query = None
-    _connection = None
-    _arguments = None
+    \brief cursor to iterate on sqltie query result.
+    Iteration will return hash tables with key = field name and value = value
     """
-    ##############
-    # Attributes #
-    ##############
     _query = None
     _connection = None
     _arguments = None
-    
-    ###########
-    # Methods #
-    ###########
 
     def fetchall(self, ):
         """fetch all hash tables

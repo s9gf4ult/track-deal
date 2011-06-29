@@ -542,14 +542,17 @@ class sqlite_model(common_model):
         pass
 
 
-    def change_account(self, aid, money_id_or_name = None, money_count = None, comment = None):
+    def change_account(self, aid, name = None, money_id_or_name = None, money_count = None, comment = None):
         """changes existing account
-        \param aid 
-        \param money_id_or_name 
-        \param money_count 
-        \param comment 
+        \param aid
+        \param name new name or None
+        \param money_id_or_name new money or None 
+        \param money_count new initial money amount or None
+        \param comment new comment or None
         """
         sets = {}
+        if name != None:
+            sets["name"] = name
         if money_id_or_name != None:
             m = self.get_money(money_id_or_name)
             sets["money_id"] = m["id"]
@@ -1420,15 +1423,6 @@ class sqlite_model(common_model):
             self.recalculate_deals(aid)
             self.recalculate_positions(aid)
 
-    @in_transaction
-    @in_action(lambda ion: "set {0} as current account".format(ion))
-    @pass_to_method(set_current_account)
-    def taset_current_account(self, id_or_name):
-        """\brief wrapper around \ref set_current_account
-        \param id_or_name
-        """
-        pass
-
     
     def set_current_account(self, id_or_name):
         """\brief set given account as current
@@ -1440,6 +1434,16 @@ class sqlite_model(common_model):
         if acc == None:
             raise od_exception("There is not account {0}".format(id_or_name))
         self.add_global_data({"current_account" : acc["id"]})
+        
+    @in_transaction
+    @in_action(lambda ion: "set {0} as current account".format(ion))
+    @pass_to_method(set_current_account)
+    def taset_current_account(self, id_or_name):
+        """\brief wrapper around \ref set_current_account
+        \param id_or_name
+        """
+        pass
+
 
     def get_current_account(self, ):
         """\brief get current account
@@ -1451,3 +1455,9 @@ class sqlite_model(common_model):
             return None
         return self.get_account(aid)
 
+    def list_view_accounts(self, order_by = []):
+        """\brief list the output of accounts_view
+        \param order_by order by list
+        \return iterator returning list list of hashes with keys account_id, name, money_name, first_money, current_money, deals, positions
+        """
+        return self._sqlite_connection.execute_select("select * from accounts_view {0}".format(order_by_print(order_by)))

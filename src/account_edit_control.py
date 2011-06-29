@@ -21,6 +21,31 @@ class account_edit_control:
     first_money = None
     ## gtk.TextView instance with comment
     comment = None
+
+    def set_comment(self, text):
+        """\brief set comment field
+        \param text
+        """
+        self.comment.set_text(text)
+
+    def set_name(self, name):
+        """\brief set name field
+        \param name
+        """
+        self.name.set_test(name)
+
+    def set_currency(self, currency):
+        """\brief set currency field
+        \param currency
+        """
+        self.currency_combo.set_value(currency)
+
+    def set_first_money(self, money_amount):
+        """\brief set money amount field
+        \param money_amount
+        """
+        self.first_money.set_value(money_amount)
+
     
     def __init__(self, parent):
         self._parent = parent
