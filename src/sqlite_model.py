@@ -149,7 +149,9 @@ class sqlite_model(common_model):
 
     def get_global_data(self, name):
         """returns value of global data or None if there is no one
-        \param name 
+        \param name
+        \retval value of param
+        \retval None if not exists parameter with this name
         """
         ret = self._sqlite_connection.execute_select("select value from global_data where name = ?", [name]).fetchall()
         if len(ret) > 0:
@@ -591,15 +593,14 @@ class sqlite_model(common_model):
     @pass_to_method(remove_account)
     def taremove_account(self, *args, **kargs):
         """transacted wrapper for remove account
-        \param *args 
-        \param **kargs 
+        \param name_or_id name or id of account
         """
         pass
 
 
     def get_account(self, aid_or_name):
         """
-        \param aid account id or account name
+        \param aid_or_name account id or account name
         \retval hash table with fields id, name, comments, money_id, money_count
         \retval None if no one account with this id or name
         \exception exceptions.od_exception when aid_or_name is not of type (str, int, long)
@@ -1204,7 +1205,6 @@ class sqlite_model(common_model):
 
     def set_current_action(self, action_id = None):
         """set current action to action_id
-        Arguments:
         \param action_id 
         """
         if action_id == None:
@@ -1420,4 +1420,34 @@ class sqlite_model(common_model):
             self.recalculate_deals(aid)
             self.recalculate_positions(aid)
 
+    @in_transaction
+    @in_action(lambda ion: "set {0} as current account".format(ion))
+    @pass_to_method(set_current_account)
+    def taset_current_account(self, id_or_name):
+        """\brief wrapper around \ref set_current_account
+        \param id_or_name
+        """
+        pass
+
     
+    def set_current_account(self, id_or_name):
+        """\brief set given account as current
+        \param id_or_name id or name
+        \exception exceptions.od_exception there is not account with that name or id
+        \note this method must not be used by view, view must use \ref taset_current_account
+        """
+        acc = self.get_account(id_or_name)
+        if acc == None:
+            raise od_exception("There is not account {0}".format(id_or_name))
+        self.add_global_data({"current_account" : acc["id"]})
+
+    def get_current_account(self, ):
+        """\brief get current account
+        \retval hash table with account (like get_account does)
+        \retval None if no one account selected as current
+        """
+        aid = self.get_global_data("current_account")
+        if aid == None:
+            return None
+        return self.get_account(aid)
+

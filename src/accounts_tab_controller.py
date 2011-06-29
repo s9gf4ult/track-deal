@@ -91,19 +91,18 @@ class accounts_tab_controller(object):
             (mod, it) = c.get_selection().get_selected()
             if it != None:
                 acname = mod.get_value(it, 0)
-                if self._model.connection.execute("select count(d.id) from deals d inner join accounts a on d.account_id = a.id where a.name = ?", (acname, )).fetchone()[0] > 0:
+                if self._parent.model.get_account(acname) != None:
                     dial = gtk.Dialog(title = u'Удалить счет', parent = self._parent.builder.get_object("main_window"), flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
-                    dial.get_content_area().pack_start(gtk.Label(u'Удалить сделки привязанные к данному счету ?'))
+                    dial.get_content_area().pack_start(gtk.Label(u'Правда хотите удалить счет ?'))
                     dial.show_all()
                     ret = dial.run()
                     dial.destroy()
                     if ret != gtk.RESPONSE_NO and ret != gtk.RESPONSE_YES:
                         return
                     if  ret == gtk.RESPONSE_YES:
-                        self._model.connection.execute("delete from deals where account_id in (select id from accounts where name = ?)", (acname, ))
-                self._model.connection.execute("delete from accounts where name = ?", (acname, ))
+                        self._parent.model.taremove_account(acname)
                 self.set_current_account()
-                self.call_update_callback()
+                self._parent.call_update_callback()
                 
 
     def modify_account_activate(self, action):
@@ -132,7 +131,9 @@ class accounts_tab_controller(object):
         \~russian
         \brief Устанавливает выделенный в списке счет текущим
         """
+        if not self._parent.connected():
+            return
         tw = self._parent.builder.get_object("accounts_view")
         (mod, it) = tw.get_selection().get_selected()
-        if it != None and self._model.connection != None:
-            (self.global_data["current_account"], ) = self._model.connection.execute("select id from accounts where name = ?", (tw.get_model().get_value(it, 0), )).fetchone() or (None, )
+        if it != None:
+            self._parent.model.taset_current_account(tw.get_model().get_value(it, 0))
