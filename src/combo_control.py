@@ -13,6 +13,7 @@ class combo_control(value_returner_control):
     списками
     \todo Класс ComboBoxEntry считается устаревшим и не рекомендуется к использованию
     \todo Переделать работу со стандартным ComboBox если свойство \c has_entry выставлено
+    \todo Сделать возможность отображать в боксе одни данные а программно работать с другими (напрмер отображать названия а возвращать и устанавливать значение по id)
     \~english
     controls combobox and comboedit with one interface
     you can easly update rows in combobox with update_widget
@@ -53,27 +54,36 @@ class combo_control(value_returner_control):
 
         Если комбобокс с редактируемым полем, то возвращает значение этого поля
         В противном случае вернет выбранный элемент или \c None если не выбран ни один элемент списка
+        \retval None элемент не выбран
+        \retval not-None выбранный элемент
         """
         if isinstance(self.combobox, gtk.ComboBoxEntry):
             return self.return_value(self.combobox.child.get_text())
         # elif isinstance(self.combobox, gtk.ComboBoxText):
         #     return self.return_value(self.combobox.get_active_text())
         else:
-            return self.return_value(self.combobox.get_model().get_value(self.combobox.get_active_iter(), 0))
+            cit = self.combobox.get_active_iter()
+            if cit != None:
+                return self.return_value(self.combobox.get_model().get_value(cit, 0))
+            else:
+                return None
 
     def set_value(self, data):
         """
         \~russian
         \brief Устанавливает значение комбобокса
-        \param data значение
+        \param data значение или None чтобы снять активное значение
 
         Если комбобокс с редактируемым полем устанавливает значение этого поля в \c data
         в противном случае находит в списке значение указанное в \c data и выбирает это значение.
         Если в списке нет значения \c data то сначала добавляет его в список а потом выбирает
         """
         if isinstance(self.combobox, gtk.ComboBoxEntry):
-            self.combobox.child.set_text(data)
+            self.combobox.child.set_text((data == None and "" or data))
         elif isinstance(self.combobox, gtk.ComboBox):
+            if data == None:
+                self.combobox.set_active(-1)
+                return
             m = self.combobox.get_model()
             it = m.get_iter_first()
             while it != None:

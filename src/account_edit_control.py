@@ -11,19 +11,34 @@ class account_edit_control:
     \~russian
     \brief Контрол формы редактирования счета
     """
-    def __init__(self, builder):
-        self.builder = builder
+    ## name gtk.Entry
+    name = None
+    ## top window Gtk.Dialog instance
+    window = None
+    ## combo_control.combo_control instance with currency available to select
+    currency_combo = None
+    ## gtk.SpinButton instance with initial money amount
+    first_money = None
+    ## gtk.TextView instance with comment
+    comment = None
+    
+    def __init__(self, parent):
+        self._parent = parent
         def shobject(name):
-            return self.builder.get_object(name)
+            return self._parent.builder.get_object(name)
         self.window = shobject("account_edit")
-        self.window.add_buttons(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+        self.window.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.currency_combo = combo_control(shobject("account_edit_currency"))
         self.first_money = shobject("account_edit_money")
         self.first_money.get_adjustment().set_all(lower = 0, upper = sys.float_info.max, step_increment = 1, page_increment = 100)
         self.first_money.set_digits(4)
         self.name = shobject("account_edit_name")
+        self.comment = shobject("account_edit_comment").get_buffer()
 
     def update_widget(self, currencies):
+        """
+        \param currencies list of names of currencies
+        """
         self.currency_combo.update_widget(currencies)
 
     def run(self):
@@ -44,7 +59,7 @@ class account_edit_control:
         if self.first_money.get_value() <= 0:
             errs.append(u'Нужно указать не нулевой начальный счет')
         vv = self.currency_combo.get_value()
-        if vv == None or len(vv) <= 0:
+        if is_null_or_empty(vv):
             errs.append(u'Нужно указать название валюты')
         if len(errs) > 0:
             show_error(reduce(lambda a, b:u'{0}\n{1}'.format(a, b), errs), self.window)
@@ -52,10 +67,39 @@ class account_edit_control:
         return True
 
     def get_data(self):
+        """
+        \return hash table with keys \c name, \c money_name, \c money_count and \c comment
+        """
         ret = {'name' : self.name.get_text(),
-               'first_money' : self.first_money.get_value(),
-               'currency' : self.currency_combo.get_value()}
+               'money_count' : self.first_money.get_value(),
+               'money_name' : self.currency_combo.get_value()}
+        if self.comment.get_char_count() > 0:
+            ret["comment"] = self.comment.get_text(self.comment.get_start_iter(), self.comment.get_end_iter())
+
         return ret
+
+    def reset_widget(self, ):
+        """\brief clear all fields and update currency combobox
+        """
+        self.clear_all()
+        self.update_currency()
+
+    def clear_all(self, ):
+        """\brief clear all fields of widget
+        """
+        self.name.set_text("")
+        self.comment.set_text("")
+        self.currency_combo.set_value(None)
+        self.currency_combo.update_widget([])
+        self.first_money.set_value(0)
+
+    def update_currency(self, ):
+        """\brief update currency_combo with posible values
+        """
+        mm = self._parent.model.list_moneys()
+        self.update_widget(map(lambda a: a["name"], mm))
+
+
 
     def load_to_widget(self, data):
         if data.has_key("name"):

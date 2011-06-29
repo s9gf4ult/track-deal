@@ -8,6 +8,7 @@ from main_window_controller import main_window_controller
 from sqlite_model import sqlite_model
 from accounts_tab_controller import accounts_tab_controller
 from account_edit_control import account_edit_control
+from currency_edit_control import currency_edit_control
 
 class gtk_view(common_view):
     """
@@ -51,7 +52,7 @@ class gtk_view(common_view):
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
         self.currency = currency_edit_control(self)
-        self.acount_edit = account_edit_control(self)
+        self.account_edit = account_edit_control(self)
         self.accounts = accounts_tab_controller(self)
         self.window = main_window_controller(self)
 

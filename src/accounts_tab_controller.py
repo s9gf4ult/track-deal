@@ -6,6 +6,7 @@ import gtk
 from common_methods import *
 import sqlite3
 from account_edit_control import account_edit_control
+import gtk_view
 
 class accounts_tab_controller(object):
     """
@@ -16,7 +17,7 @@ class accounts_tab_controller(object):
         """
         \param parent instance of gtk_view
         """
-        assert(isinstance(parent, gtk_view))
+        assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
         def shorter(name, *method):
             self._parent.builder.get_object(name).connect("activate", *method)
@@ -69,17 +70,14 @@ class accounts_tab_controller(object):
     def add_account(self):
         """runs account adder dialog and adds account to the database"""
         if self._parent.connected():
-            #self._parent.account_edit.update_widget(map(lambda a: a[0], self._model.connection.execute("select distinct currency from accounts order by currency")))
-            ret = self.account_edit.run()
+            self._parent.account_edit.reset_widget()
+            ret = self._parent.account_edit.run()
             if ret != None:
                 try:
-                    self._model.make_account(ret['name'], ret['first_money'], ret['currency'])
-                    self.update_accounts_list()
-                except sqlite3.IntegrityError:
-                    show_error(u'Счет с таким именем уже существует', self._parent.builder.get_object("main_window"))
+                    data = self._parent.acount_edit.get_data()
+                    self._parent.model.tacreate_account(data["name"], data["money_name"], data["money_count"], gethash(data, "comment"))
                 except Exception as e:
-                    show_error(e.__str__(), self._parent.builder.get_object("main_window"))
-                    print(traceback.format_exc())
+                    show_and_print_error(e, self._parent.builder.get_object("main_window"))
                     
                     
 
@@ -88,7 +86,7 @@ class accounts_tab_controller(object):
 
     def delete_account(self):
         """delete selected account"""
-        if self._model.connection:
+        if self._parent.connected():
             c = self._parent.builder.get_object("accounts_view")
             (mod, it) = c.get_selection().get_selected()
             if it != None:
