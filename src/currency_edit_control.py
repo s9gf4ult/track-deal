@@ -11,4 +11,4 @@ class currency_edit_control(object):
         \param instance of \ref gtk_view.gtk_view
         """
         self._parent = parent
-        
+        self.
