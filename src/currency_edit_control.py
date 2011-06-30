@@ -95,10 +95,42 @@ class currency_edit_control(object):
         
     def run(self, ):
         """\brief run the dialog
+        \retval gtk.RESPONSE_ACCEPT - data has been saved
+        \retval gtk.RESPONSE_CANCEL - cancel button was clicked
         """
         ret =  self.window.run()
+        while ret == gtk.RESPONSE_ACCEPT:
+            if self.check_data():
+                self.save_data()
+                break
+            else:
+                ret = self.window.run()
         self.window.hide()
         return ret
+
+    def check_data(self, ):
+        """\brief check if data can be saved in the database
+        \retval True - data can be saved
+        \retval False
+        """
+        rows = map(lambda a: a[1], self.currency_list.get_rows())
+        srows = set(rows)
+        if len(srows) <> len(rows):
+            show_error("Существуют не уникальные имена", self.window)
+            return False
+        for nn in rows:
+            if is_blank(nn):
+                show_error("Имя \"{0}\" состоит из пустых символов".format(nn), self.window)
+                return False
+        return True
+
+    def save_data(self, ):
+        """\brief save dialog data into the database
+        """
+        rows = self.currency_list.get_rows()
+        show_error(reduce_by_string(", ", map(lambda a: a[0], rows)), self.window)
+
+
 
     def save_name(self, ):
         """\brief try save name from field to selected row
