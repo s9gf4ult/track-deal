@@ -6,7 +6,7 @@ from math import trunc
 import traceback
 from exceptions import *
 import datetime
-
+import re
 
 def show_error(message, parent):
     """
@@ -563,30 +563,13 @@ def format_abs_value(val):
     return (val < 0 and "({0})" or "{0}").format(abs(val))
 
 
-# class signal_fetcher(object):
-#     """Decorator makes method the handler of signal received from widget
-#     """
-#     def __init__(self, builder_name, object_name, signal_name, *userattrs):
-#         """
-#         \param builder_name 
-#         \param object_name 
-#         \param signal_name 
-#         \param *userattrs 
-#         """
-#         self._builder_name = builder_name
-#         self._object_name = object_name
-#         self._signal_name = signal_name
-#         self._userattrs = userattrs
-        
-#     def __call__(self, func):
-#         """
-#         \param func 
-#         """
-#         myclass = func.im_class
-#         def newinit(myself, *args, **kargs):
-#             r = myself.__init__(*args, **kargs)
-#             getattr(myself, self._builder_name).get_object(self._object_name).connect(self._signal_name, func, *self._userattrs)
-#             return r
-#         newinit.__doc__ = myclass.__init__.__doc__
-#         setattr(myclass, "__init__", newinit)
-#         return func
+def is_blank(value):
+    """\brief check if string consists of blank simbols or empty
+    \param value string to check
+    \retval True string does not contain not blank simbols or empty
+    \retval False string has not blank simbols
+    """
+    if re.search("\S", value) == None:
+        return True
+    else:
+        return False

@@ -17,15 +17,6 @@
     <property name="label">Создать позицию</property>
     <property name="stock_id">gtk-add</property>
   </object>
-  <object class="GtkAction" id="deals_load_open_ru">
-    <property name="label">Загрузить из файла с отчетом</property>
-  </object>
-  <object class="GtkAction" id="delete_account">
-    <property name="label">Удалить</property>
-    <property name="stock_id">gtk-remove</property>
-  </object>
-  <object class="GtkTextBuffer" id="blog_buffer"/>
-  <object class="GtkTextBuffer" id="buffer"/>
   <object class="GtkAction" id="call_filter">
     <property name="label">Фильтр</property>
   </object>
@@ -52,6 +43,13 @@
     <property name="label">Создать базу данных в памяти</property>
     <property name="icon_name">computer</property>
     <signal name="activate" handler="on_create_database_in_memory_activate" swapped="no"/>
+  </object>
+  <object class="GtkAction" id="deals_load_open_ru">
+    <property name="label">Загрузить из файла с отчетом</property>
+  </object>
+  <object class="GtkAction" id="delete_account">
+    <property name="label">Удалить</property>
+    <property name="stock_id">gtk-remove</property>
   </object>
   <object class="GtkAction" id="delete_deals">
     <property name="label">Удалить сделки</property>
@@ -247,11 +245,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button2">
+              <object class="GtkButton" id="account_edit_change">
+                <property name="label">gtk-edit</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="related_action">edit_currencies</property>
+                <property name="use_action_appearance">False</property>
                 <property name="use_stock">True</property>
               </object>
               <packing>
@@ -286,6 +285,8 @@
       </object>
     </child>
   </object>
+  <object class="GtkTextBuffer" id="blog_buffer"/>
+  <object class="GtkTextBuffer" id="buffer"/>
   <object class="GtkDialog" id="currency_edit">
     <property name="can_focus">False</property>
     <property name="border_width">5</property>

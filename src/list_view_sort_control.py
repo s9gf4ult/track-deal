@@ -61,31 +61,38 @@ class list_view_sort_control:
         self.sort_callback = sort_callback
         self.treeview = treeview
         self.model_columns = []
+        self.view_model_columns_map = {}
+        view_columns_count = 0
+        model_columns_count = 0
         for k in xrange(0, len(columns)):
             if isinstance(columns[k], tuple):
+                self.view_model_columns_map[view_columns_count] = model_columns_count
                 prop = {}
                 if isinstance(columns[k][1], gtk.CellRendererText):
-                    prop["text"] = k
+                    prop["text"] = model_columns_count
                     if isinstance(columns[k][1], gtk.CellRendererSpin):
                         self.model_columns.append(get3ordefault(columns[k], float))
                     else:
                         self.model_columns.append(get3ordefault(columns[k], str))
                 elif isinstance(columns[k][1], gtk.CellRendererProgress):
-                    prop["value"] = k
+                    prop["value"] = model_columns_count
                     self.model_columns.append(get3ordefault(columns[k], float))
                 elif isinstance(columns[k][1], gtk.CellRendererToggle):
-                    prop["active"] = k
+                    prop["active"] = model_columns_count
                     self.model_columns.append(get3ordefault(columns[k], bool))
                 elif isinstance(columns[k][1], gtk.CellRendererPixbuf):
-                    prop["pixbuf"] = k
+                    prop["pixbuf"] = model_columns_count
                     self.model_columns.append(get3ordefault(columns[k], gtk.gdk.Pixbuf))
                 c = gtk.TreeViewColumn(columns[k][0], columns[k][1], **prop)
                 c.set_clickable(True)
-                c.connect("clicked", self.column_clicked, k, getparams(columns[k]))
+                c.connect("clicked", self.column_clicked, view_columns_count, getparams(columns[k]))
                 self.treeview.append_column(c)
+                view_columns_count += 1
+                model_columns_count += 1
             elif isinstance(columns[k], list):
                 self.model_columns.append(columns[k][1])
-                
+                model_columns_count += 1
+        self.make_model()
             
     def make_model(self):
         """\brief make new model and attach it to TreeView"""
@@ -160,6 +167,59 @@ class list_view_sort_control:
             m.append(row)
         self.treeview.set_model(m)
 
+    def add_row(self, row):
+        """\brief add one row
+        \param row
+        \return gtk.TreeIter instance pointing to new row
+        """
+        m = self.get_model()
+        return m.append(row)
+
+    def select_by_iter(self, iter):
+        """\brief select tree element by tree iter
+        \param iter gtk.TreeIter instance
+        """
+        path = self.get_model().get_path(iter)
+        self.select_by_path(path)
+
+    def select_by_path(self, path):
+        """\brief select tree element by tree path
+        \param path
+        """
+        self.treeview.set_cursor(path, None, False)
+
+    def delete_selected(self, ):
+        """\brief delete selected row from tree model
+        """
+        sl = self.treeview.get_selection()
+        if sl.get_mode() == gtk.SELECTION_SINGLE:
+            (model, it) = sl.get_selected()
+            if it <> None:
+                model.remove(it)
+        elif sl.get_mode() == gtk.SELECTION_MULTIPLE:
+            (model, its) = sl.get_selected_rows()
+            if len(its) > 0:
+                for it in its:
+                    model.remove(it)
+
+    def get_selected_row(self, ):
+        """\brief return data of selected row
+        \retval tuple with row data
+        \retval None if no one selected
+        \note do nothing when treeview has gtk.SELECTION_MULTIPLE selection
+        """
+        sl = self.treeview.get_selection()
+        if sl.get_mode() == gtk.SELECTION_SINGLE:
+            (model, it) = sl.get_selected()
+            if it <> None:
+               l = model.get_n_columns()
+               ret = []
+               for x in xrange(0, l):
+                   ret.append(model.get_value(it, x))
+               return ret
+            return None
+
+
     def get_model(self):
         """
         \~russian
@@ -187,7 +247,18 @@ class list_view_sort_control:
                 p.append(model.get_value(it, x))
             return tuple(p)
         return self._get_rows_with_filter(all_columns)
-            
+
+    def save_value_in_selected(self, column_id, value):
+        """\brief save value to selected row
+        \param column_id id of column in model
+        \param value
+        \note works just if selection in mode gtk.SELECTION_SINGLE
+        """
+        ls = self.treeview.get_selection()
+        if ls.get_mode() == gtk.SELECTION_SINGLE:
+            (model, it) = ls.get_selected()
+            if it <> None:
+                model.set_value(it, column_id, value)
         
 
 if __name__ == "__main__":

@@ -60,6 +60,15 @@ class account_edit_control:
         self.first_money.set_digits(4)
         self.name = shobject("account_edit_name")
         self.comment = shobject("account_edit_comment").get_buffer()
+        shobject("account_edit_change").connect("clicked", self.change_clicked)
+
+    def change_clicked(self, button):
+        """\brief change currency button clicked handler
+        \param button
+        """
+        if self._parent.currency.run() == gtk.RESPONSE_ACCEPT:
+            self.update_currency()
+
 
     def update_widget(self, currencies):
         """
