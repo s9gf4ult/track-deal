@@ -52,6 +52,7 @@ class account_edit_control:
         def shobject(name):
             return self._parent.builder.get_object(name)
         self.window = shobject("account_edit")
+        self.window.set_transient_for(shobject("main_window"))
         self.window.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.currency_combo = combo_control(shobject("account_edit_currency"))
         self.first_money = shobject("account_edit_money")

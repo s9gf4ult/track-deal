@@ -8,7 +8,6 @@ class currency_edit_control(object):
     """
     def __init__(self, parent):
         """
-        \param instance of \ref gtk_view.gtk_view
+        \param parent instance of \ref gtk_view.gtk_view
         """
         self._parent = parent
-        self.
