@@ -32,7 +32,8 @@ class list_view_sort_control:
         \c name - это имя столбца, оно будет отображаться в заголовке TreeView\n
         \c renderer gtk.CellRenderer - рендератор которым будут рисоваться данные в соответствующем столбце TreeView\n
         \c type - тип данных для соответствуюдего столбца модели, будет передаваться в конструктоп ListStore\n
-        \c rest - остальные аргументы относящиеся к данному столбцу, будут передаваться в \c sort_callback.
+        \c rest - остальные аргументы относящиеся к данному столбцу, будут передаваться в \c sort_callback.\n
+        Если вместо кортежа список то он должен быть таким [name, type] что означает что это скрытое поле, для него не будет создан столбец в представлении, но в модели он представлен будет
         \param self_sorting - булевое значение. Если истинно, то обработка нажатия на заголовок TreeView будет отрабатываться
         контролом самостоятельно путем выставления sort_column_id в модели.
         \param sort_callback - функция следующих аргументов:\n
@@ -40,7 +41,7 @@ class list_view_sort_control:
         \c order - gtk.SORT_ASCENDING или gtk.SORT_DESCENDING когда нужно отсортировать по возрастанию или по убыванию соответственно\n
         \c rest - остальные аргументы из соответствующего кортежа из \c columns
         \note Если \c self_sorting положительна, то sort_callback может остаться Null
-       
+        \todo Сделать возможноть скрытых полей
         """
         def get3ordefault(tpl, default):
             if len(tpl) < 3:
@@ -61,26 +62,30 @@ class list_view_sort_control:
         self.treeview = treeview
         self.model_columns = []
         for k in xrange(0, len(columns)):
-            prop = {}
-            if isinstance(columns[k][1], gtk.CellRendererText):
-                prop["text"] = k
-                if isinstance(columns[k][1], gtk.CellRendererSpin):
+            if isinstance(columns[k], tuple):
+                prop = {}
+                if isinstance(columns[k][1], gtk.CellRendererText):
+                    prop["text"] = k
+                    if isinstance(columns[k][1], gtk.CellRendererSpin):
+                        self.model_columns.append(get3ordefault(columns[k], float))
+                    else:
+                        self.model_columns.append(get3ordefault(columns[k], str))
+                elif isinstance(columns[k][1], gtk.CellRendererProgress):
+                    prop["value"] = k
                     self.model_columns.append(get3ordefault(columns[k], float))
-                else:
-                    self.model_columns.append(get3ordefault(columns[k], str))
-            elif isinstance(columns[k][1], gtk.CellRendererProgress):
-                prop["value"] = k
-                self.model_columns.append(get3ordefault(columns[k], float))
-            elif isinstance(columns[k][1], gtk.CellRendererToggle):
-                prop["active"] = k
-                self.model_columns.append(get3ordefault(columns[k], bool))
-            elif isinstance(columns[k][1], gtk.CellRendererPixbuf):
-                prop["pixbuf"] = k
-                self.model_columns.append(get3ordefault(columns[k], gtk.gdk.Pixbuf))
-            c = gtk.TreeViewColumn(columns[k][0], columns[k][1], **prop)
-            c.set_clickable(True)
-            c.connect("clicked", self.column_clicked, k, getparams(columns[k]))
-            self.treeview.append_column(c)
+                elif isinstance(columns[k][1], gtk.CellRendererToggle):
+                    prop["active"] = k
+                    self.model_columns.append(get3ordefault(columns[k], bool))
+                elif isinstance(columns[k][1], gtk.CellRendererPixbuf):
+                    prop["pixbuf"] = k
+                    self.model_columns.append(get3ordefault(columns[k], gtk.gdk.Pixbuf))
+                c = gtk.TreeViewColumn(columns[k][0], columns[k][1], **prop)
+                c.set_clickable(True)
+                c.connect("clicked", self.column_clicked, k, getparams(columns[k]))
+                self.treeview.append_column(c)
+            elif isinstance(columns[k], list):
+                self.model_columns.append(columns[k][1])
+                
             
     def make_model(self):
         """\brief make new model and attach it to TreeView"""
