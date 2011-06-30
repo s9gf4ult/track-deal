@@ -98,6 +98,7 @@ class currency_edit_control(object):
         \retval gtk.RESPONSE_ACCEPT - data has been saved
         \retval gtk.RESPONSE_CANCEL - cancel button was clicked
         """
+        self.update_fields()
         ret =  self.window.run()
         while ret == gtk.RESPONSE_ACCEPT:
             if self.check_data():
@@ -107,6 +108,13 @@ class currency_edit_control(object):
                 ret = self.window.run()
         self.window.hide()
         return ret
+
+    def update_fields(self, ):
+        """\brief update fields from database
+        \todo need realization
+        """
+        pass
+
 
     def check_data(self, ):
         """\brief check if data can be saved in the database
@@ -126,10 +134,10 @@ class currency_edit_control(object):
 
     def save_data(self, ):
         """\brief save dialog data into the database
+        \todo need realization
         """
         rows = self.currency_list.get_rows()
-        show_error(reduce_by_string(", ", map(lambda a: a[0], rows)), self.window)
-
+        
 
 
     def save_name(self, ):
