@@ -38,7 +38,7 @@ class currency_edit_control(object):
         shobject("currency_edit_add").connect("clicked", self.add_clicked)
         shobject("currency_edit_delete").connect("clicked", self.delete_clicked)
         shobject("currency_edit_save").connect("clicked", self.save_clicked)
-        self.currency_list = list_view_sort_control(shobject("currency_edit_list"), [["id", str],
+        self.currency_list = list_view_sort_control(shobject("currency_edit_list"), [["id", int],
                                                                                      ("Имя", gtk.CellRendererText()),
                                                                                      ["full_name", str]])
         
@@ -69,7 +69,7 @@ class currency_edit_control(object):
 
 
     def new_currency(self, ):
-        """\brief create new currency and focus curson on it
+        """\brief create new currency
         """
         if is_blank(self.name.get_text()):
             return
@@ -90,6 +90,8 @@ class currency_edit_control(object):
         if row == None:
             return 
         try:
+            if self._parent.model.assigned_to_money_accounts(row[0]) > 0:
+                query_yes_no("Есть привязанные счета"
             self._parent.model.remove_money(row[0])
         except sqlite3.IntegrityError:
             pass
@@ -114,7 +116,10 @@ class currency_edit_control(object):
         self._parent.model.start_transacted_action("edit some money objects")
         ret =  self.window.run()
         self.window.hide()
-        self._parent.model.commit_transacted_action()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self._parent.model.commit_transacted_action()
+        else:
+            self._parent.model.rollback()
         return ret
 
 

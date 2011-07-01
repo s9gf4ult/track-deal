@@ -81,7 +81,7 @@ class accounts_tab_controller(object):
                     self._parent.model.tacreate_account(data["name"], data["money_name"], data["money_count"], gethash(data, "comment"))
                 except Exception as e:
                     show_and_print_error(e, self._parent.builder.get_object("main_window"))
-                self._parent.call_update_callback()
+            self._parent.call_update_callback()
                     
 
     def delete_account_activate(self, action):
@@ -129,7 +129,7 @@ class accounts_tab_controller(object):
                     if ret == gtk.RESPONSE_ACCEPT:
                         dd = self._parent.account_edit.get_data()
                         self._parent.model.tachange_account(acc["id"], dd["name"], dd["money_name"], dd["money_count"], dd["comment"])
-                        self._parent.call_update_callback()
+                    self._parent.call_update_callback()
 
     def set_current_account(self):
         """

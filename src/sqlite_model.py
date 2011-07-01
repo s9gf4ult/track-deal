@@ -1540,7 +1540,8 @@ class sqlite_model(common_model):
         if not is_null_or_empty(full_name):
             sets["full_name"] = full_name
 
-        self._sqlite_connection.update("moneys", sets, "id = ?", self.get_money(id_or_name)["id"])
+        money = self.get_money(id_or_name)
+        self._sqlite_connection.update("moneys", sets, "id = ?", [money["id"]])
 
     @raise_db_closed
     @in_transaction
