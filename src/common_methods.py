@@ -68,7 +68,7 @@ def find_in_model(tmodel, findfunc):
     return None
 
 def is_null_or_empty(obj):
-    return obj == None or len(obj) == 0
+    return obj == None or (hasattr(obj, "__len__") and len(obj)) == 0
 
 def reduce_by_string(reductor, seq):
     """
