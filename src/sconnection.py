@@ -61,8 +61,6 @@ class scon_iter(object):
     
     def __init__(self, cursor):
         """
-        
-        Arguments:
         \param cursor 
         """
         self._cursor = cursor
@@ -111,10 +109,9 @@ class sconnection(sqlite3.Connection):
 
     def insert(self, table, fields):
         """inserts data in fields into table
-        
-        Arguments:
         \param table 
         \param fields  must be hash like that {"field_name" : data_to_insert} or list of that hashes
+        \return id of last inserted row
         """
         assert(isinstance(fields, dict) or hasattr(fields, "__iter__"))
         names = set()
@@ -140,8 +137,6 @@ class sconnection(sqlite3.Connection):
     def execute_select(self, query, arguments = None):
         """execute's query and returns iterable
         object which returns hash tables like that {"field_name" : data}
-        
-        Arguments:
         \param query 
         \param arguments 
         """
@@ -150,8 +145,6 @@ class sconnection(sqlite3.Connection):
 
     def update(self, table, set_fields, where_part = None, where_arguments = []):
         """executes update on all `set_fields` where `where_part`
-        
-        Arguments:
         \param table 
         \param set_fields  hash like {"id" : value}
         \param where_part  string
@@ -177,8 +170,7 @@ class sconnection(sqlite3.Connection):
         self.execute("begin transaction")
 
     def execute_select_cond(self, tablename, selects = ["*"], wheres = [], order_by = []):
-        """generates query for execute_select pass it to
-        Arguments:
+        """\breif generates query for execute_select pass it to
         \param tablename  string with table name
         \param selects  [* | field name | expression | (field name | expression, alias)]
         \param wheres  [(= | < | > | ... | 'between', exp1, exp2, exp3 ...)]

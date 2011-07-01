@@ -381,20 +381,41 @@ class sqlite_model(common_model):
     def create_money(self, name, full_name = None):
         """Creates new money and return it's id
         \param name 
-        \param full_name 
+        \param full_name
+        \note in the view must be used \ref tacreate_money
+        return id of the new created money object
         """
         return self._sqlite_connection.insert("moneys", {"name" : name,
                                                          "full_name" : full_name}).lastrowid
+    
     @raise_db_closed
     @in_transaction
     @in_action(lambda self, name, *args, **kargs: "add money {0}".format(name))
     @pass_to_method(create_money)
     def tacreate_money(self, name, full_name = None):
-        """transacted wrapper for create_money
+        """transacted wrapper for \ref create_money
         \param name 
         \param full_name 
         """
         pass
+
+    def create_money_list(self, money_list):
+        """\brief create many money objects
+        \param money_list list of hashes with keys "name" and "full_name"
+        \note view must use \ref tacreate_money_list insted
+        """
+        self._sqlite_connection.insert("moneys", money_list)
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, mlist: "create {0} money objects".format(len(mlist)))
+    @pass_to_method(create_money)
+    def tacreate_money_list(self, ):
+        """\brief wrapper around \ref create_money_list 
+        \param money_list list of hashes with keys "name" and "full_name"
+        """
+        pass
+
 
 
     def get_money(self, name_or_id):
@@ -1434,9 +1455,10 @@ class sqlite_model(common_model):
         if acc == None:
             raise od_exception("There is not account {0}".format(id_or_name))
         self.add_global_data({"current_account" : acc["id"]})
-        
+
+    @raise_db_closed
     @in_transaction
-    @in_action(lambda ion: "set {0} as current account".format(ion))
+    @in_action(lambda self, ion: "set {0} as current account".format(ion))
     @pass_to_method(set_current_account)
     def taset_current_account(self, id_or_name):
         """\brief wrapper around \ref set_current_account
