@@ -7,7 +7,8 @@ unique(name));
 CREATE TABLE moneys(
 id integer primary key not null,
 name text not null,
-full_name text);
+full_name text,
+unique(name));
 
 CREATE TABLE accounts(
 id integer primary key not null,

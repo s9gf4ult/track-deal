@@ -32,7 +32,7 @@ class account_edit_control:
         """\brief set name field
         \param name
         """
-        self.name.set_test(name)
+        self.name.set_text(name)
 
     def set_currency(self, currency):
         """\brief set currency field

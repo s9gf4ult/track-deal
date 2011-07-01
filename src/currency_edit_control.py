@@ -5,6 +5,7 @@
 from list_view_sort_control import list_view_sort_control
 import gtk
 from common_methods import *
+import sqlite3
 
 class currency_edit_control(object):
     """\~russian
@@ -31,31 +32,30 @@ class currency_edit_control(object):
         self.window.set_transient_for(shobject("main_window"))
         self.window.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.name = shobject("currency_edit_name")
-        self.name.connect("focus-out-event", self.name_focus_leave)
         fn = shobject("currency_edit_full_name")
-        fn.connect("focus-out-event", self.full_name_focus_leave)
         self.full_name = fn.get_buffer()
         shobject("currency_edit_list").connect("cursor-changed", self.list_cursor_changed)
         shobject("currency_edit_add").connect("clicked", self.add_clicked)
         shobject("currency_edit_delete").connect("clicked", self.delete_clicked)
+        shobject("currency_edit_save").connect("clicked", self.save_clicked)
         self.currency_list = list_view_sort_control(shobject("currency_edit_list"), [["id", str],
                                                                                      ("Имя", gtk.CellRendererText()),
                                                                                      ["full_name", str]])
         
-    def name_focus_leave(self, widget, event):
-        """\brief name field focus leav handler
-        \param widget
-        \param event
-        """
-        return self.save_name()
+    # def name_focus_leave(self, widget, event):
+    #     """\brief name field focus leav handler
+    #     \param widget
+    #     \param event
+    #     """
+    #     return self.save_name()
 
-    def full_name_focus_leave(self, widget, event):
-        """\brief full name focus leave handler
-        \param widget
-        \param event
-        """
-        self.currency_list.save_value_in_selected(2, self.full_name.get_text(self.full_name.get_start_iter(), self.full_name.get_end_iter()))
-        return False
+    # def full_name_focus_leave(self, widget, event):
+    #     """\brief full name focus leave handler
+    #     \param widget
+    #     \param event
+    #     """
+    #     self.currency_list.save_value_in_selected(2, self.full_name.get_text(self.full_name.get_start_iter(), self.full_name.get_end_iter()))
+    #     return False
 
     def add_clicked(self, button):
         """\brief add button clicked handler
@@ -75,23 +75,42 @@ class currency_edit_control(object):
         """
         self.update_fields()
 
+    def save_clicked(self, button):
+        """\brief save button handler
+        \param button
+        """
+        self.save_current()
+
+
     def new_currency(self, ):
         """\brief create new currency and focus curson on it
         """
+        if is_blank(self.name.get_text()):
+            return
         mid = None
+        name = self.name.get_text()
+        full_name = self.full_name.get_text(self.full_name.get_start_iter(), self.full_name.get_end_iter())
         try:
-            mid = self._parent.model.create_money("dummy")
-        except:
+            mid = self._parent.model.create_money(name, full_name)
+        except sqlite3.IntegrityError:
             pass
         else:
-            it = self.currency_list.add_row((mid, "dummy", ""))
-            self.currency_list.select_by_iter(it)
-        
+            self.currency_list.add_row((mid, name, full_name))
+            
     def delete_row(self, ):
         """\brief delete selected row from currency list
         """
-        self.currency_list.delete_selected()
-
+        row = self.currency_list.get_selected_row()
+        if row == None:
+            return 
+        try:
+            self._parent.model.remove_money(row[0])
+        except sqlite3.IntegrityError:
+            pass
+        else:
+            self.currency_list.delete_selected()
+        
+        
     def update_fields(self, ):
         """\brief update fields according to selected row
         """
@@ -140,23 +159,23 @@ class currency_edit_control(object):
         
 
 
-    def save_name(self, ):
-        """\brief try save name from field to selected row
-        \retval False return always
-        """
-        row = self.currency_list.get_selected_row()
-        if row <> None:
-            if is_blank(row[1]):
-                show_error("Имя пустое. Так незя", self.window)
-                return False
-            try:
-                self._parent.model.change_money(row[0], name = self.name.get_text())
-            except sqlite3.IntegrityError:
-                pass
-            except Exception as e:
-                show_and_print_error(e)
-            else:
-                self.currency_list.save_value_in_selected(1, self.name.get_text())
+    # def save_name(self, ):
+    #     """\brief try save name from field to selected row
+    #     \retval False return always
+    #     """
+    #     row = self.currency_list.get_selected_row()
+    #     if row <> None:
+    #         if is_blank(row[1]):
+    #             show_error("Имя пустое. Так незя", self.window)
+    #             return False
+    #         try:
+    #             self._parent.model.change_money(row[0], name = self.name.get_text())
+    #         except sqlite3.IntegrityError:
+    #             pass
+    #         except Exception as e:
+    #             show_and_print_error(e)
+    #         else:
+    #             self.currency_list.save_value_in_selected(1, self.name.get_text())
 
                 
         # names = map(lambda a: a[1], self.currency_list.get_rows())
@@ -184,3 +203,20 @@ class currency_edit_control(object):
         if self._parent.connected():
             mns = self._parent.model.list_moneys(["name"])
             self.currency_list.update_rows(map(lambda a: (a["id"], a["name"], a["full_name"]), mns))
+
+    def save_current(self, ):
+        """\brief save data into current row
+        """
+        row = self.currency_list.get_selected_row()
+        if row == None:
+            return
+
+        name = self.name.get_text()
+        full_name = self.full_name.get_text(self.full_name.get_start_iter(), self.full_name.get_end_iter())
+        try:
+            self._parent.model.change_money(row[0], name = name, full_name = full_name)
+        except sqlite3.IntegrityError:
+            pass
+        else:
+            self.currency_list.save_value_in_selected(1, name)
+            self.currency_list.save_value_in_selected(2, full_name)
