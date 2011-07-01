@@ -434,9 +434,31 @@ class sqlite_model(common_model):
     @remover_decorator("moneys", {int : "id", basestring : "name"})
     def remove_money(self, name_or_id):
         """Removes money by name or by id
-        \param name_or_id 
+        \param name_or_id
+        \note assigned accounts will be removed automatically by constraint
         """
         pass
+
+    def assigned_to_money_accounts(self, name_or_id):
+        """\brief return count fo accounts assigned to money
+        \param name_or_id name or id of money object
+        \return int - count
+        """
+        (c,) = self._sqlite_connection.execute("select count(a.id) from accounts a inner join moneys m on a.money_id = m.id where m.id = ?", [self.get_money(name_or_id)["id"]])
+        return c
+
+    def start_transacted_action(self, action_name):
+        """\brief start transaction and action
+        \param action_name
+        """
+        self.begin_transaction()
+        self.start_action(action_name)
+
+    def commit_transacted_action(self, ):
+        """\brief finish action and commit
+        """
+        self.end_action()
+        self.commit()
 
     def list_moneys(self, order_by = []):
         """return list of moneys
@@ -1504,3 +1526,30 @@ class sqlite_model(common_model):
         \return iterator returning list list of hashes with keys account_id, name, money_name, first_money, current_money, deals, positions
         """
         return self._sqlite_connection.execute_select("select * from accounts_view {0}".format(order_by_print(order_by)))
+
+    def change_money(self, id_or_name, name = None, full_name = None):
+        """\brief change existing money 
+        \param id_or_name
+        \param name new name to set or None
+        \param full_name new full name to set or None
+        \note view must use \ref tachange_money insted
+        """
+        sets = {}
+        if not is_null_or_empty(name):
+            sets["name"] = name
+        if not is_null_or_empty(full_name):
+            sets["full_name"] = full_name
+
+        self._sqlite_connection.update("moneys", sets, "id = ?", self.get_money(id_or_name)["id"])
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, id_or_name, *args, **kargs: "change money with {0}".format(id_or_name))
+    @pass_to_method(change_money)
+    def tachange_money(self, *args, **kargs):
+        """\brief transacted wrapper to \ref change_money
+        \param id_or_name
+        \param name new name to set or None
+        \param full_name new full name to set or None
+        """
+        pass

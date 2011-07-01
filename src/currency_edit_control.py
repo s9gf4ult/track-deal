@@ -78,8 +78,14 @@ class currency_edit_control(object):
     def new_currency(self, ):
         """\brief create new currency and focus curson on it
         """
-        it = self.currency_list.add_row(("", "", ""))
-        self.currency_list.select_by_iter(it)
+        mid = None
+        try:
+            mid = self._parent.model.create_money("dummy")
+        except:
+            pass
+        else:
+            it = self.currency_list.add_row((mid, "dummy", ""))
+            self.currency_list.select_by_iter(it)
         
     def delete_row(self, ):
         """\brief delete selected row from currency list
@@ -100,41 +106,37 @@ class currency_edit_control(object):
         """
         self.reset_fields()
         self.load_currency()
+        self._parent.model.start_transacted_action("edit some money objects")
         ret =  self.window.run()
-        while ret == gtk.RESPONSE_ACCEPT:
-            if self.check_data():
-                self.save_data()
-                break
-            else:
-                ret = self.window.run()
         self.window.hide()
+        self._parent.model.commit_transacted_action()
         return ret
 
-    def check_data(self, ):
-        """\brief check if data can be saved in the database
-        \retval True - data can be saved
-        \retval False
-        """
-        rows = map(lambda a: a[1], self.currency_list.get_rows())
-        srows = set(rows)
-        if len(srows) <> len(rows):
-            show_error("Существуют не уникальные имена", self.window)
-            return False
-        for nn in rows:
-            if is_blank(nn):
-                show_error("Имя \"{0}\" состоит из пустых символов".format(nn), self.window)
-                return False
-        return True
+    # def check_data(self, ):
+    #     """\brief check if data can be saved in the database
+    #     \retval True - data can be saved
+    #     \retval False
+    #     """
+    #     rows = map(lambda a: a[1], self.currency_list.get_rows())
+    #     srows = set(rows)
+    #     if len(srows) <> len(rows):
+    #         show_error("Существуют не уникальные имена", self.window)
+    #         return False
+    #     for nn in rows:
+    #         if is_blank(nn):
+    #             show_error("Имя \"{0}\" состоит из пустых символов".format(nn), self.window)
+    #             return False
+    #     return True
 
-    def save_data(self, ):
-        """\brief save dialog data into the database
-        """
-        if self._parent.connected():
-            rows = self.currency_list.get_rows()
-            rwids = set(filter(lambda x: isinstance(x, (int, long)), map(lambda a: a[0], rows)))
-            self._parent.model.tashrink_money_by_id(rwids)
-            new = map(lambda x: {"name" : x[1], "full_name" : x[2]}, filter(lambda a: is_null_or_empty(a[0]), rows))
-            self._parent.model.tacreate_money_list(new)
+    # def save_data(self, ):
+    #     """\brief save dialog data into the database
+    #     """
+    #     if self._parent.connected():
+    #         rows = self.currency_list.get_rows()
+    #         rwids = set(filter(lambda x: isinstance(x, (int, long)), map(lambda a: a[0], rows)))
+    #         self._parent.model.tashrink_money_by_id(rwids)
+    #         new = map(lambda x: {"name" : x[1], "full_name" : x[2]}, filter(lambda a: is_null_or_empty(a[0]), rows))
+    #         self._parent.model.tacreate_money_list(new)
         
 
 
@@ -143,17 +145,31 @@ class currency_edit_control(object):
         \retval False return always
         """
         row = self.currency_list.get_selected_row()
-        names = map(lambda a: a[1], self.currency_list.get_rows())
-        txt = self.name.get_text()
-        if is_blank(txt) and row <> None and row[1] <> txt:
-            show_error("Имя пустое", self.window)
-            return False
-        elif txt in names and row <> None and row[1] <> txt:
-            show_error("Имя уже существует", self.window)
-            return False
-        else:
-            self.currency_list.save_value_in_selected(1, self.name.get_text())
-            return False
+        if row <> None:
+            if is_blank(row[1]):
+                show_error("Имя пустое. Так незя", self.window)
+                return False
+            try:
+                self._parent.model.change_money(row[0], name = self.name.get_text())
+            except sqlite3.IntegrityError:
+                pass
+            except Exception as e:
+                show_and_print_error(e)
+            else:
+                self.currency_list.save_value_in_selected(1, self.name.get_text())
+
+                
+        # names = map(lambda a: a[1], self.currency_list.get_rows())
+        # txt = self.name.get_text()
+        # if is_blank(txt) and row <> None and row[1] <> txt:
+        #     show_error("Имя пустое", self.window)
+        #     return False
+        # elif txt in names and row <> None and row[1] <> txt:
+        #     show_error("Имя уже существует", self.window)
+        #     return False
+        # else:
+        #     self.currency_list.save_value_in_selected(1, self.name.get_text())
+        #     return False
 
     def reset_fields(self, ):
         """\brief reset all fields and currency list
