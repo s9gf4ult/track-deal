@@ -89,7 +89,6 @@ class currency_edit_control(object):
     def update_fields(self, ):
         """\brief update fields according to selected row
         """
-        print("update fields !")
         r = self.currency_list.get_selected_row()
         self.name.set_text(r[1])
         self.full_name.set_text(r[2])
@@ -99,6 +98,8 @@ class currency_edit_control(object):
         \retval gtk.RESPONSE_ACCEPT - data has been saved
         \retval gtk.RESPONSE_CANCEL - cancel button was clicked
         """
+        self.reset_fields()
+        self.load_currency()
         ret =  self.window.run()
         while ret == gtk.RESPONSE_ACCEPT:
             if self.check_data():
@@ -150,5 +151,16 @@ class currency_edit_control(object):
             self.currency_list.save_value_in_selected(1, self.name.get_text())
             return False
 
+    def reset_fields(self, ):
+        """\brief reset all fields and currency list
+        """
+        self.name.set_text("")
+        self.full_name.set_text("")
+        self.currency_list.make_model()
 
-
+    def load_currency(self, ):
+        """\brief load currency list from the database
+        """
+        if self._parent.connected():
+            mns = self._parent.model.list_moneys(["name"])
+            self.currency_list.update_rows(map(lambda a: (a["id"], a["name"], a["full_name"]), mns))

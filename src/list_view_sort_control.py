@@ -95,7 +95,9 @@ class list_view_sort_control:
         self.make_model()
             
     def make_model(self):
-        """\brief make new model and attach it to TreeView"""
+        """\brief make new model and attach it to TreeView
+        \note cat be used to just reset the list data
+        """
         m = self.get_new_store()
         self.treeview.set_model(m)
 
