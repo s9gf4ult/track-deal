@@ -146,6 +146,7 @@ def show_and_print_error(error, window):
     \brief Показывает диалог с сообщением об ошибке и печатает стектрейс в stderr
     \param error объект ошибки
     \param window родительское окно для диалога
+    \todo на самом деле он печатает в stdout надо сделать чтобы печатал в stderr
     """
     show_error(error.__str__(), window)
     print(traceback.format_exc())
@@ -531,9 +532,15 @@ class confirm_safety(object):
         return ret
 
 class pass_to_method(object):
-    """Decorator call `method` after the body of decorated method and return value of `method`
+    """
+    \~english
+    Decorator call `method` after the body of decorated method and return value of `method`
     \~russian
-    \brief Декоратор, вызывает метод - аргумет после декорируемого метода и возвращает то, что вернул первый.
+    \brief Декоратор, вызывает метод - аргумет после декорируемого метода и возвращает то, что вернул метод аргумент
+
+    Используется для передачи параметров другому методу, удобно для создания декорированных методов - оберток.
+    Реализация самого декорируемого метода при этом можно опустить, или добавить некоторые действия, которые будут выполнены
+    перед основным рабочим методом
     """
     def __init__(self, method):
         """

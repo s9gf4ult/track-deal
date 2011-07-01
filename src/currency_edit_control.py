@@ -128,7 +128,6 @@ class currency_edit_control(object):
 
     def save_data(self, ):
         """\brief save dialog data into the database
-        \todo need realization
         """
         if self._parent.connected():
             rows = self.currency_list.get_rows()

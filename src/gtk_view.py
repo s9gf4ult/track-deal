@@ -67,6 +67,7 @@ class gtk_view(common_view):
     def call_update_callback(self, ):
         """try send update signal to the all controllers
         """
+        print("update !")
         self.window.update()
         self.accounts.update()
 

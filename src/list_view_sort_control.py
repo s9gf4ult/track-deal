@@ -41,7 +41,6 @@ class list_view_sort_control:
         \c order - gtk.SORT_ASCENDING или gtk.SORT_DESCENDING когда нужно отсортировать по возрастанию или по убыванию соответственно\n
         \c rest - остальные аргументы из соответствующего кортежа из \c columns
         \note Если \c self_sorting положительна, то sort_callback может остаться Null
-        \todo Сделать возможноть скрытых полей
         """
         def get3ordefault(tpl, default):
             if len(tpl) < 3:

@@ -77,15 +77,19 @@ class account_edit_control:
         self.currency_combo.update_widget(currencies)
 
     def run(self):
+        """\brief run the dialog
+        \retval gtk.RESPONSE_ACCEPT save button pressed
+        \retval gtk.RESPONSE_CANCEL cancel pressed
+        """
         ret = self.window.run()
         while ret == gtk.RESPONSE_ACCEPT:
             if not self.check_correctness():
                 ret = self.window.run()
             else:
                 self.window.hide()
-                return self.get_data()
+                return ret
         self.window.hide()
-        return None
+        return ret
             
     def check_correctness(self):
         errs = []
@@ -102,7 +106,7 @@ class account_edit_control:
         return True
 
     def get_data(self):
-        """
+        """\brief return the data in dialog
         \return hash table with keys \c name, \c money_name, \c money_count and \c comment
         """
         ret = {'name' : self.name.get_text(),

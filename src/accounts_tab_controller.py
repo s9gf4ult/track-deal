@@ -63,9 +63,9 @@ class accounts_tab_controller(object):
     def update_accounts_list(self):
         """update list of accounts"""
         if self._parent.connected():
-            self.accounts_list.update_rows(map(lambda a: (a["name"], a["first_money"], a["current_money"], a["money_name"], a["deals"]), self._parent.model.list_view_accounts(["name"]).fetchall()))
+            self.accounts_list.update_rows(map(lambda a: (a["name"], a["first_money"], a["current_money"], a["money_name"], a["deals"]), self._parent.model.list_view_accounts(["name"])))
         else:
-            self.accounts_list.update_rows([])
+            self.accounts_list.make_model()
             
     def add_account_activate(self, action):
         self.add_account()
@@ -75,13 +75,13 @@ class accounts_tab_controller(object):
         if self._parent.connected():
             self._parent.account_edit.reset_widget()
             ret = self._parent.account_edit.run()
-            if ret != None:
+            if ret == gtk.RESPONSE_ACCEPT:
                 try:
-                    data = self._parent.acount_edit.get_data()
+                    data = self._parent.account_edit.get_data()
                     self._parent.model.tacreate_account(data["name"], data["money_name"], data["money_count"], gethash(data, "comment"))
                 except Exception as e:
                     show_and_print_error(e, self._parent.builder.get_object("main_window"))
-                    
+                self._parent.call_update_callback()
                     
 
     def delete_account_activate(self, action):
@@ -126,7 +126,7 @@ class accounts_tab_controller(object):
                     self._parent.account_edit.set_currency(self._parent.model.get_money(acc["money_id"])["name"])
                     self._parent.account_edit.set_first_money(acc["money_count"])
                     ret = self._parent.account_edit.run()
-                    if ret != None:
+                    if ret == gtk.RESPONSE_ACCEPT:
                         dd = self._parent.account_edit.get_data()
                         self._parent.model.tachange_account(acc["id"], dd["name"], dd["money_name"], dd["money_count"], dd["comment"])
                         self._parent.call_update_callback()
@@ -135,6 +135,7 @@ class accounts_tab_controller(object):
         """
         \~russian
         \brief Устанавливает выделенный в списке счет текущим
+        \note it does not call \ref gtk_view.call_update_callback to update view
         """
         if not self._parent.connected():
             return
