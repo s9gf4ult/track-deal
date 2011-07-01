@@ -410,7 +410,7 @@ class sqlite_model(common_model):
     @in_transaction
     @in_action(lambda self, mlist: "create {0} money objects".format(len(mlist)))
     @pass_to_method(create_money)
-    def tacreate_money_list(self, ):
+    def tacreate_money_list(self, *args, **kargs):
         """\brief wrapper around \ref create_money_list 
         \param money_list list of hashes with keys "name" and "full_name"
         """
@@ -1456,7 +1456,7 @@ class sqlite_model(common_model):
             raise od_exception("There is not account {0}".format(id_or_name))
         self.add_global_data({"current_account" : acc["id"]})
 
-    @raise_db_closed
+    @raise_d
     @in_transaction
     @in_action(lambda self, ion: "set {0} as current account".format(ion))
     @pass_to_method(set_current_account)
@@ -1476,6 +1476,27 @@ class sqlite_model(common_model):
         if aid == None:
             return None
         return self.get_account(aid)
+
+    def shrink_money_by_id(self, id_list):
+        """\brief delete all money objects which id is not in list
+        \param id_list list of id's
+        \note \ref tashrink_money_by_id must be used by view instead
+        """
+        self._sqlite_connection.execute("delete from moneys where id not in ({0})".format(reduce_by_string(", ", id_list)))
+
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, id_list: "delete {0} money objects".format(len(id_list)))
+    @pass_to_method(shrink_money_by_id)
+    def tashrink_money_by_id(self, *args, **kargs):
+        """\brief wrapper around \ref shrink_money_by_id
+        \param id_list list of id's
+        """
+        pass
+
+        
+
 
     def list_view_accounts(self, order_by = []):
         """\brief list the output of accounts_view
