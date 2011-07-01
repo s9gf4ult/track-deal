@@ -409,7 +409,7 @@ class sqlite_model(common_model):
     @raise_db_closed
     @in_transaction
     @in_action(lambda self, mlist: "create {0} money objects".format(len(mlist)))
-    @pass_to_method(create_money)
+    @pass_to_method(create_money_list)
     def tacreate_money_list(self, *args, **kargs):
         """\brief wrapper around \ref create_money_list 
         \param money_list list of hashes with keys "name" and "full_name"
@@ -1456,7 +1456,7 @@ class sqlite_model(common_model):
             raise od_exception("There is not account {0}".format(id_or_name))
         self.add_global_data({"current_account" : acc["id"]})
 
-    @raise_d
+    @raise_db_closed
     @in_transaction
     @in_action(lambda self, ion: "set {0} as current account".format(ion))
     @pass_to_method(set_current_account)

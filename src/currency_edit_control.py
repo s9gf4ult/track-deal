@@ -132,9 +132,9 @@ class currency_edit_control(object):
         """
         if self._parent.connected():
             rows = self.currency_list.get_rows()
-            rwids = set(filter(lambda x: isinstance(x, (int, long)), map(lambda a: a["id"], rows)))
+            rwids = set(filter(lambda x: isinstance(x, (int, long)), map(lambda a: a[0], rows)))
             self._parent.model.tashrink_money_by_id(rwids)
-            new = map(lambda x: {"name" : x[1], "full_name" : x[2]}, filter(lambda a: is_null_or_empty(a["id"]), rows))
+            new = map(lambda x: {"name" : x[1], "full_name" : x[2]}, filter(lambda a: is_null_or_empty(a[0]), rows))
             self._parent.model.tacreate_money_list(new)
         
 
