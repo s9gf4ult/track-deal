@@ -9,6 +9,7 @@ from sqlite_model import sqlite_model
 from accounts_tab_controller import accounts_tab_controller
 from account_edit_control import account_edit_control
 from currency_edit_control import currency_edit_control
+from deals_tab_controller import deals_tab_controller
 
 class gtk_view(common_view):
     """
@@ -39,6 +40,8 @@ class gtk_view(common_view):
     ## \brief instance of \ref account_edit_control.account_edit_control
     # \~russian \par Контрол формы редактирования счета
     account_edit = None
+    ## \brief instance of \ref deals_tab_controller.deals_tab_controller
+    deals_tab = None
     
     
     def __init__(self, ):
@@ -55,6 +58,7 @@ class gtk_view(common_view):
         self.account_edit = account_edit_control(self)
         self.accounts = accounts_tab_controller(self)
         self.window = main_window_controller(self)
+        self.deals_tab = deals_tab_controller(self)
 
     
     def run(self, ):

@@ -664,7 +664,21 @@ class sqlite_model(common_model):
     def create_deal(self, account_id, deal, do_recalc = True):
         """creates one or more deal with attributes, return id of last created
         \param account_id 
-        \param deal  list of or one hash table with deal
+        \param deal list of or one hash table with keys:\n
+        sha1 - optional unique field\n
+        manual_made - not None means deals inserted by hand\n
+        parent_deal_id - id of parent deal (must not be used for new deals)\n
+        account_id - this will be replaced by first parameter\n
+        position_id - this will be calculated automatically\n
+        paper_id - id of paper deal assigned to\n
+        count - count of lots\n
+        direction - (-1) means BY, 1 means SELL\n
+        points - price in points\n
+        commission - summarized commission\n
+        datetime - datetime.datetime instance
+        \param do_recalc if True recalculation of temporarry tables will be executed
+        
+        \note \ref tacreate_deal must be used instead by the view
         """
         did = None
         deals = (isinstance(deal, dict) and [deal] or deal)
@@ -701,9 +715,21 @@ class sqlite_model(common_model):
     @in_action(lambda self, account_id, deal, *args, **kargs: (isinstance(deal, (tuple, list)) and "create {0} deals".format(len(deal)) or "create deal with paper id {0}".format(deal["paper_id"])))
     @pass_to_method(create_deal)
     def tacreate_deal(self, *args, **kargs):
-        """wrapper for create deal
+        """wrapper for \ref create_deal
         \param account_id 
-        \param deal  list of or one hash table with deal
+        \param deal list of or one hash table with keys:\n
+        sha1 - optional unique field\n
+        manual_made - not None means deals inserted by hand\n
+        parent_deal_id - id of parent deal (must not be used for new deals)\n
+        account_id - this will be replaced by first parameter\n
+        position_id - this will be calculated automatically\n
+        paper_id - id of paper deal assigned to\n
+        count - count of lots\n
+        direction - (-1) means BY, 1 means SELL\n
+        points - price in points\n
+        commission - summarized commission\n
+        datetime - datetime.datetime instance
+        \param do_recalc if True recalculation of temporarry tables will be executed
         """
         pass
 
@@ -722,8 +748,9 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select_cond("deals", wheres = conds, order_by = order_by)
         
     def remove_deal(self, deal_id):
-        """remove one or more deal by id
-        \param deal_id 
+        """\brief remove one or more deal by id
+        \param deal_id
+        \note \ref taremove_deal must be used insted
         """
         x = map(lambda a: (a, ), (isinstance(deal_id, int) and [deal_id] or deal_id))
         self._sqlite_connection.executemany("delete from deals where id = ?", x)
@@ -775,8 +802,8 @@ class sqlite_model(common_model):
     @in_action(lambda self, deal_id, *args, **kargs: "remove deals(s)".format(deal_id))
     @pass_to_method(remove_deal)
     def taremove_deal(self, *args, **kargs):
-        """
-        \param deal_id 
+        """\brief wrapper around \ref remove_deal
+        \param deal_id int or list of ints
         """
         pass
 
