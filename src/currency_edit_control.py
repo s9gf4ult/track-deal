@@ -82,6 +82,8 @@ class currency_edit_control(object):
             pass
         else:
             self.currency_list.add_row((mid, name, full_name))
+            self.name.set_text("")
+            self.full_name.set_text("")
             
     def delete_row(self, ):
         """\brief delete selected row from currency list

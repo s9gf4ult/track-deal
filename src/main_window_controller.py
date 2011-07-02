@@ -167,8 +167,7 @@ class main_window_controller(object):
                 try:
                     self._parent.create_new_sqlite(diag.get_filename())
                 except Exception as e:
-                    show_error(e.__str__(), self._parent.builder.get_object("main_window"))
-                    print(traceback.format_exc())
+                    show_and_print_error(e, self._parent.builder.get_object("main_window"))
             diag.destroy()
             self._parent.call_update_callback()
 

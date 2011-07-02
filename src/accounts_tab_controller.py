@@ -7,6 +7,7 @@ from common_methods import *
 import sqlite3
 from account_edit_control import account_edit_control
 import gtk_view
+from exceptions import *
 
 class accounts_tab_controller(object):
     """
@@ -51,6 +52,8 @@ class accounts_tab_controller(object):
             cac = self._parent.model.get_current_account()
             if cac != None:
                 self._parent.builder.get_object("current_account_name_label").set_text(cac["name"])
+            else:
+                self._parent.builder.get_object("current_account_name_label").set_text("")
         else:
             self._parent.builder.get_object("current_account_name_label").set_text("")
 
@@ -95,17 +98,12 @@ class accounts_tab_controller(object):
             if it != None:
                 acname = mod.get_value(it, 0)
                 if self._parent.model.get_account(acname) != None:
-                    dial = gtk.Dialog(title = u'Удалить счет', parent = self._parent.builder.get_object("main_window"), flags = gtk.DIALOG_MODAL, buttons = (gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
-                    dial.get_content_area().pack_start(gtk.Label(u'Правда хотите удалить счет ?'))
-                    dial.show_all()
-                    ret = dial.run()
-                    dial.destroy()
-                    if ret != gtk.RESPONSE_NO and ret != gtk.RESPONSE_YES:
-                        return
-                    if  ret == gtk.RESPONSE_YES:
-                        self._parent.model.taremove_account(acname)
-                self.set_current_account()
-                self._parent.call_update_callback()
+                    if self._parent.model.assigned_account_deals(acname) > 0 or self._parent.model.assigned_account_positions(acname) > 0:
+                        ret = query_yes_no("У счета есть сделки и/или позиции, удалить счет вместе с ними ?", self._parent.builder.get_object("main_window"))
+                        if  ret <> gtk.RESPONSE_YES:
+                            return
+                    self._parent.model.taremove_account(acname)
+                    self._parent.call_update_callback()
                 
 
     def modify_account_activate(self, action):

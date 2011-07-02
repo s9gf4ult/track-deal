@@ -130,12 +130,6 @@ class sqlite_model(common_model):
         """
         pass
 
-    def get_current_account(self, ):
-        """return id of current account
-        """
-        (ret, ) = self._sqlite_connection.execute("select value from global_data where name = 'current_account'").fetchone() or (None, )
-        return ret
-
 
     @raise_db_closed
     @in_transaction
@@ -163,7 +157,7 @@ class sqlite_model(common_model):
 
     def remove_global_data(self, name):
         """Removes global parameters
-        \param name  string or list of strings to remove
+        \param name string or list of strings to remove global data
         """
         if isinstance(name, basestring):
             name = [(name, )]
@@ -177,7 +171,7 @@ class sqlite_model(common_model):
     @pass_to_method(remove_global_data)
     def taremove_global_data(self, name):
         """
-        \param name 
+        \param name string or list of strings to remove global data
         """
         pass
 
@@ -443,8 +437,12 @@ class sqlite_model(common_model):
         """\brief return count fo accounts assigned to money
         \param name_or_id name or id of money object
         \return int - count
+        \exception od_exception_db_error if there is no such money
         """
-        (c,) = self._sqlite_connection.execute("select count(a.id) from accounts a inner join moneys m on a.money_id = m.id where m.id = ?", [self.get_money(name_or_id)["id"]])
+        mm = self.get_money(name_or_id)
+        if mm == None:
+            raise od_exception_db_error("There is no moneys \"{0}\"".format(name_or_id))
+        (c,) = self._sqlite_connection.execute("select count(a.id) from accounts a inner join moneys m on a.money_id = m.id where m.id = ?", [mm["id"]]).fetchone()
         return c
 
     def start_transacted_action(self, action_name):
@@ -628,10 +626,14 @@ class sqlite_model(common_model):
 
     @remover_decorator("accounts", {int : "id", basestring : "name"})
     def remove_account(self, name_or_id):
-        """Removes account by name or by id
+        """Removes account by name or by id and set current account to None deleted current
         \param name_or_id 
         """
-        pass
+        acc = self.get_account(name_or_id)
+        cacc = self.get_current_account()
+        if acc <> None and cacc <> None:
+            if acc["id"] == cacc["id"]:
+                self.set_current_account(None)
 
     @raise_db_closed
     @in_transaction
@@ -1251,7 +1253,7 @@ class sqlite_model(common_model):
 
     def set_current_action(self, action_id = None):
         """set current action to action_id
-        \param action_id 
+        \param action_id id of action to set or None to delete current action
         """
         if action_id == None:
             self._sqlite_connection.execute("delete from current_hystory_position")
@@ -1469,10 +1471,13 @@ class sqlite_model(common_model):
     
     def set_current_account(self, id_or_name):
         """\brief set given account as current
-        \param id_or_name id or name
+        \param id_or_name id or name or None to remove current account property
         \exception exceptions.od_exception there is not account with that name or id
         \note this method must not be used by view, view must use \ref taset_current_account
         """
+        if id_or_name == None:
+            self.remove_global_data("current_account")
+            return
         acc = self.get_account(id_or_name)
         if acc == None:
             raise od_exception("There is not account {0}".format(id_or_name))
@@ -1484,7 +1489,7 @@ class sqlite_model(common_model):
     @pass_to_method(set_current_account)
     def taset_current_account(self, id_or_name):
         """\brief wrapper around \ref set_current_account
-        \param id_or_name
+        \param id_or_name id or name or None to remove current account property
         """
         pass
 
@@ -1554,3 +1559,28 @@ class sqlite_model(common_model):
         \param full_name new full name to set or None
         """
         pass
+
+    def assigned_account_deals(self, id_or_name):
+        """\brief return count of assigned deals to account
+        \param id_or_name name or id of account
+        \return int - count of deals
+        \exception od_exception_db_error if there is no such account
+        """
+        acc = self.get_account(id_or_name)
+        if acc == None:
+            raise od_exception_db_error("There is no such account \"{0}\"".format(id_or_name))
+        (c, ) = self._sqlite_connection.execute("select count(d.id) from deals d inner join accounts a on d.account_id = a.id where a.id = ?", [acc["id"]]).fetchone()
+        return c
+
+
+    def assigned_account_positions(self, id_or_name):
+        """\brief return count of assigned positions to account
+        \param id_or_name
+        \return int - count of positions
+        \exception od_exception_db_error if there is no such account
+        """
+        acc = self.get_account(id_or_name)
+        if acc == None:
+            raise od_exception_db_error("There is no such account \"{0}\"".format(id_or_name))
+        (c, ) = self._sqlite_connection.execute("select count(p.id) from positions p inner join accounts a on p.account_id = a.id where a.id = ?", [acc["id"]]).fetchone()
+        return c

@@ -98,6 +98,9 @@ class gtk_view(common_view):
         """connect to new sqlite model and create new database in it
         \param filename file to create database in
         """
+        if self.connected():
+            if not self.disconnect():
+                return
         self.model = sqlite_model()
         self.model.create_new(filename)
 
@@ -105,6 +108,9 @@ class gtk_view(common_view):
         """connect to existing sqlite file
         \param filename 
         """
+        if self.connected():
+            if not self.disconnect():
+                return
         self.model = sqlite_model()
         self.model.open_existing(filename)
 
