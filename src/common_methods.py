@@ -580,3 +580,15 @@ def is_blank(value):
         return True
     else:
         return False
+
+def query_yes_no(query, window):
+    """\brief ask the query in dialog
+    \param query str with query
+    \param window parent window for dialog
+    \retval gtk.RESPONSE_YES
+    \retval gtk.RESPONSE_NO
+    """
+    dial = gtk.MessageDialog(parent = window, flags = gtk.DIALOG_MODAL, type = gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, message_format = query)
+    ret = dial.run()
+    dial.destroy()
+    return ret

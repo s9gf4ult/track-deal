@@ -91,7 +91,8 @@ class currency_edit_control(object):
             return 
         try:
             if self._parent.model.assigned_to_money_accounts(row[0]) > 0:
-                query_yes_no("Есть привязанные счета"
+                if query_yes_no("Есть привязанные к валюте счета. Удалить вместе со счетами ?", self.window) <> gtk.RESPONSE_YES:
+                    return
             self._parent.model.remove_money(row[0])
         except sqlite3.IntegrityError:
             pass
