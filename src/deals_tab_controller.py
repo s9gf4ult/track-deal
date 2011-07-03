@@ -145,17 +145,10 @@ class deals_tab_controller(object):
     def deals_load_open_ru_activate(self, action):
         if not self._parent.connected():
             return
-        a = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys())
-        self.report_importer.update_widget(accounts = self._parent.model.connection.execute("select id, name from accounts").fetchall(),
-                                           report_types = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys()))
-        ret = self.report_importer.run()
-        if ret != None:
-            rt = self.report_importer.get_report_type()
-            if isinstance(rt, str):
-                rt = rt.decode('utf-8')
-            if gethash(sources.classes, rt) != None:
-                if sources.classes[rt] == sources.xml_parser:
-                    self.load_open_ru(self.report_importer.get_account_id(), self.report_importer.get_file_name())
+        self._parent.report_importer.update_importer()
+        ret = self._parent.report_importer.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self._parent.call_update_callback()
                 
 
     def sorted_callback(self, column, order, params):
