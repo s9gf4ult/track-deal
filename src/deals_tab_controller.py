@@ -29,8 +29,7 @@ class deals_tab_controller(object):
                                                   (u'Цена', gtk.CellRendererSpin(), float, "price"),
                                                   (u'Количество', gtk.CellRendererSpin(), int, "quantity"),
                                                   (u'Объем', gtk.CellRendererSpin(), float, "volume"),
-                                                  (u'Комиссия брокера', gtk.CellRendererSpin(), float, "broker_comm"),
-                                                  (u'Комиссия биржи', gtk.CellRendererSpin(), float, "stock_comm"),
+                                                  (u'Комиссия', gtk.CellRendererSpin(), float, "broker_comm"),
                                                   (u'Тэги', gtk.CellRendererText(), str, "attributes")],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
@@ -45,16 +44,18 @@ class deals_tab_controller(object):
     def deals_view_row_activated(self, treeview, path, column):
         self.change_deals()
 
-    @if_database
     def change_deals(self):
+        if not self._parent.connected():
+            return
         d = self._parent.builder.get_object("deals_view").get_selection().count_selected_rows()
         if d > 1:
             self.change_multiple_deals()
         elif d == 1:
             self.change_one_deal()
             
-    @if_database
     def change_multiple_deals(self):
+        if not self._parent.connected():
+            return
         d = self._parent.builder.get_object("deals_view")
         (mod, paths) = d.get_selection().get_selected_rows()
         if paths != None and len(paths) > 1:
@@ -73,8 +74,9 @@ class deals_tab_controller(object):
             
             
 
-    @if_database
     def change_one_deal(self):
+        if not self._parent.connected():
+            return
         d = self._parent.builder.get_object("deals_view")
         (mod, it) = d.get_selection().get_selected_rows()
         if it != None and len(it) == 1:
@@ -123,12 +125,12 @@ class deals_tab_controller(object):
 
     def add_deal(self):
         """
-        \brief run dialog and save deal to database if save pressed
+        \brief run dialog and save deal to database if "save" pressed
         """
         if not self._parent.connected():
             return
-        self._parent.deal_adder.reset_fields()
-        self._parent.deal_adder.update_widget()
+        self._parent.deal_adder.reset_fields() # clean all fields
+        self._parent.deal_adder.update_widget() # set the posible accounts and so on
         self._parent.deal_adder.set_current_datetime()
         ret = self._parent.deal_adder.run()
         if ret == gtk.RESPONSE_YES:
@@ -138,10 +140,11 @@ class deals_tab_controller(object):
 
 
     def update_deals_tab_activate(self, action):
-        self.update_widget()
+        self.update()
 
-    @if_database
     def deals_load_open_ru_activate(self, action):
+        if not self._parent.connected():
+            return
         a = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys())
         self.report_importer.update_widget(accounts = self._parent.model.connection.execute("select id, name from accounts").fetchall(),
                                            report_types = map(lambda a, b: (a, b), sources.classes.keys(), sources.classes.keys()))
@@ -158,11 +161,12 @@ class deals_tab_controller(object):
     def sorted_callback(self, column, order, params):
         if params != None:
             self.sort_order = params[0] + (order == gtk.SORT_DESCENDING and " desc" or "")
-            self.update_widget()
+            self.update()
         
 
-    @if_database
     def load_open_ru(self, account, filename):
+        if not self._parent.connected():
+            return
         try:
             xs = sources.xml_parser(filename)
             xs.check_file()
@@ -176,15 +180,16 @@ class deals_tab_controller(object):
         self.call_filter()
 
     def call_filter(self):
+        if not self._parent.connected():
+            return
         self._parent.deals_filter.run()
         self._parent.call_update_callback()
 
-    def update_widget(self):
-        if not self._parent.model.connection:
-            self.deals_view.update_rows([])
+    def update(self):
+        if not self._parent.connected():
+            self.deals_view.make_model() # clean list of deals
             return
-        self.filter._prepare_filter()
-        self.filter._regen_selected()
-        self.deals_view.update_rows(self.filter.get_ids(self.sort_order, fields = ["id", "formated_date", "formated_time", "security_name", "security_type", "buy_sell_formated", "price", "quantity", "volume", "broker_comm", "stock_comm", "attributes"]))
+        self._parent.deals_filter.update_filter()
+        self.deals_view.update_rows(map(lambda a: (a["deal_id"], a["date_formated"], a["time_formated"], a["paper_name"], a["paper_class"], a["direction_formated"], a["price_formated"], a["count"], a["volume_formated"], a["commission"], a["user_attributes_formated"]),  self._parent.deals_filter.get_rows(self.sort_order)))
                 
         
