@@ -60,16 +60,13 @@ class deals_tab_controller(object):
         (mod, paths) = d.get_selection().get_selected_rows()
         if paths != None and len(paths) > 1:
             dids = map(lambda it: mod.get_value(it, 0), map(lambda p: mod.get_iter(p), paths))
-            self.deal_editor.update_accounts(self._parent.model.connection.execute("select id, name from accounts").fetchall())
-            self.deal_editor.update_instruments(map(lambda a: a[0], self._parent.model.connection.execute("select distinct security_name from deals").fetchall()))
-            self.deal_editor.update_markets(map(lambda a: a[0], self._parent.model.connection.execute("select distinct security_type from deals").fetchall()))
-            ret = self.deal_editor.run()
-            if ret != None:
-                dhash = self.deal_editor.get_updating_hash()
-                if len(dhash) == 0:
+            self._parent.deal_editor.update_editor()
+            ret = self._parent.deal_editor.run()
+            if ret == gtk.RESPONSE_ACCEPT:
+                dhash = self.deal_editor.get_data()
+                if is_null_or_empty(dhash):
                     return
-                for did in dids:
-                    self._parent.model._update_from_hash("deals", did, dhash)
+                self._parent.model.tachange_deals(dids, dhash)
                 self._parent.call_update_callback()
             
             
@@ -77,27 +74,17 @@ class deals_tab_controller(object):
     def change_one_deal(self):
         if not self._parent.connected():
             return
-        d = self._parent.builder.get_object("deals_view")
-        (mod, it) = d.get_selection().get_selected_rows()
-        if it != None and len(it) == 1:
-            dh = {}
-            did = mod.get_value(mod.get_iter(it[0]), 0)
-            for (val, key) in map(lambda a, b: (a, b),
-                                  self._parent.model.connection.execute("select datetime, deal_sign, account_id, security_name, security_type, price, quantity, broker_comm, stock_comm from deals where id = ?", (did, )).fetchone(),
-                                  ["datetime", "deal_sign", "account_id", "security_name", "security_type", "price", "quantity", "broker_comm", "stock_comm"]):
-                dh[key] = val
-            dh["attributes"] = self._parent.model.connection.execute("select name, value from deal_attributes where deal_id = ?", (did, )).fetchall()
-            self.adder.update_widget(map(lambda a: a[0], self._parent.model.connection.execute("select distinct security_name from deals order by security_name")),
-                                     map(lambda a: a[0], self._parent.model.connection.execute("select distinct security_type from deals order by security_type")),
-                                     self._parent.model.connection.execute("select id, name from accounts order by name").fetchall())
-                                     
-            self.adder.load_from_hash(dh)
-            ret = self.adder.run()
-            if ret != None:
-                ret["id"] = did
-                self._parent.model.get_update_deal_from_hash(ret)
+        row = self.deals_view.get_selected_rows()
+        if not is_null_or_empty(row) and len(row) == 1:
+            self._parent.deal_adder.load_from_deal(row[0][0])
+            ret = self._parent.deal_adder.run()
+            if ret == gtk.RESPONSE_ACCEPT:
+                data = self._parent.deal_adder.get_data()
+                self._parent.model.tachange_deals(row[0][0], data)
                 self._parent.call_update_callback()
-
+            
+        
+        
     def delete_deals_activate(self, action):
         self.delete_deals()
 

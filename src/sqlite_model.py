@@ -759,7 +759,11 @@ class sqlite_model(common_model):
         self.fix_positions()
 
     def fix_groups(self, ):
-        """fixes broken groups by deleting
+        """\brief fixes broken groups by deleting
+        \~russian
+
+        Если в группе находятся не сбалансированное количество сделок или нет ни одной привязанной к группе сделки то группа удаляется
+        \todo добавить удаление групп данные в ктороых не соответствуют данным в сделках
         """
         self._sqlite_connection.execute("""delete from deal_groups where id in (
         select id from (
@@ -782,7 +786,11 @@ class sqlite_model(common_model):
         where sum <> 0)""")
 
     def fix_positions(self, ):
-        """fixes broken positions by deleting
+        """\brief fixes broken positions by deleting
+        \~russian
+
+        Удаляются позиции по с не сбалансированным количеством сделок и/или позиции к которым не привязана ни одна позиция
+        \todo добавить удаление позиций с некорректными данными (тоесть количество сбалансированное, но данные в позициях не соответствуют данным в сделках)
         """
         self._sqlite_connection.execute("""
         delete from positions where id in (
@@ -1611,3 +1619,57 @@ class sqlite_model(common_model):
             raise od_exception_db_error("There is no such account \"{0}\"".format(id_or_name))
         (c, ) = self._sqlite_connection.execute("select count(p.id) from positions p inner join accounts a on p.account_id = a.id where a.id = ?", [acc["id"]]).fetchone()
         return c
+
+    def change_deals(self, deal_id, fields, do_recalc = True):
+        """\brief change one or more deal
+        \param deal_id int or list of int with deal id's
+        \param fields hash table with one or more keys:\n
+        sha1\n
+        manual_made - None or not None\n
+        parent_deal_id - None or int\n
+        account_id - int\n
+        position_id - None or int\n
+        paper_id - int\n
+        count - int\n
+        direction - -1 means BUY, 1 means SELL\n
+        points - float\n
+        commission - float\n
+        datetime - datetime.datetime instance
+        \param do_recalc - if True (default), after changing deal all temporary tables will be recalculated
+        \note view must use \ref tachange_deals instead
+        \todo make do_recalc behaviour more smart: if paper changes then reclculate data for previous paper and for current, if does not then recalculate just for this paper (may be it is not need at all)
+        """
+        if is_null_or_empty(deal_id):
+            raise od_exception("deal_id can not be empty")
+        
+        ids = (isinstance(deal_id, (int, long)) and [deal_id] or deal_id)
+        if is_null_or_empty(fields):
+            return
+        self._sqlite_connection.update("deals", fields, "id = ?", ids)
+        fix_groups()
+        fix_positions()
+        if do_recalc:
+            self.recalculate_all_temporary()
+        
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, did, *args, **kargs: (isinstance(did, (int, long)) and "change deal with id {0}".format(did) or "change {0} deals".format(len(did))))
+    @pass_to_method(change_deals)
+    def tachange_deals(self, *args, **kargs):
+        """\brief wrapper around \ref change_deals
+        \param deal_id int or list of int with deal id's
+        \param fields hash table with one or more keys:\n
+        sha1\n
+        manual_made - None or not None\n
+        parent_deal_id - None or int\n
+        account_id - int\n
+        position_id - None or int\n
+        paper_id - int\n
+        count - int\n
+        direction - -1 means BUY, 1 means SELL\n
+        points - float\n
+        commission - float\n
+        datetime - datetime.datetime instance
+        \param do_recalc - if True (default), after changing deal all temporary tables will be recalculated
+        """
+        pass

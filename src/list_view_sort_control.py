@@ -220,6 +220,26 @@ class list_view_sort_control:
                return ret
             return None
 
+    def get_selected_rows(self, ):
+        """\brief return list with data of selected row
+        \retval list of tuples with data
+        \retval [] if no one selected
+        \retval None if selection mode is not gtk.SELECTION_MULTIPLE
+        \note do nothins if selection mode is gtk.SELECTION_SINGLE
+        """
+        sl = self.treeview.get_selection()
+        ret = None
+        if sl.get_mode() == gtk.SELECTION_MULTIPLE:
+            (model, paths) = sl.get_selected_rows()
+            ret = []
+            for path in paths:
+                r = []
+                it = model.get_iter(path)
+                for col in xrange(0, model.get_n_columns()):
+                    r.append(model.get_value(it, col))
+                ret.append(tuple(r))
+        return ret
+
 
     def get_model(self):
         """
