@@ -34,10 +34,18 @@ class attributes_control:
             self.val_entry.set_text(mod.get_value(it, 1))
 
     def get_attributes(self):
+        """
+        \todo need implementation
+        \return hash table with attributes {key : value}
+        """
         return self.attributes.get_rows()
 
             
     def set_attributes(self, attributes):
+        """
+        \todo need implementation
+        \param attributes has table {key : value}
+        """
         self.attributes.update_rows(attributes)
 
     def flush(self):

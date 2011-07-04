@@ -65,33 +65,43 @@ class deal_adder_control:
         w.hide()
         return ret
 
-    def get_deal_hash(self):
+    def get_data(self):
+        """
+        \return hash table with keys:\n
+        \c datetime\n
+        \c paper_id - id of paper\n
+        \c points - price in points\n
+        \c count - count of contracts\n
+        \c direction - (-1) or 1\n
+        \c commission\n
+        \c account_id selected account\n
+        \c attributes - hash table like {name : value}
+        """
         return {"datetime" : self.datetime.get_datetime(),
-                "security_name" : self.instrument.get_value(),
-                "security_type" : self.market.get_value(),
-                "price" : self.price.get_value(),
-                "quantity" : self.count.get_value(),
-                "deal_sign" : self.direction.get_value(),
-                "broker_comm" : self.broker_comm.get_value(),
-                "stock_comm" : self.commission.get_value(),
-                "broker_comm_nds" : 0,
-                "stock_comm_nds" : 0,
+                "paper_id" : self.instrument.get_value(),
+                "points" : self.price.get_value(),
+                "count" : self.count.get_value(),
+                "direction" : self.direction.get_value(),
+                "commission" : self.commission.get_value(),
                 "account_id" : self.account.get_value(),
-                "volume" : self.count.get_value() * self.price.get_value(),
-                "attributes" : self.attributes.get_attributes()}
+                "user_attributes" : self.attributes.get_attributes()}
 
-    def load_from_hash(self, data):
+    def load_from_deal(self, data):
+        """\brief load data from deal into widget
+        \param data - int, deal id
+        """
+        d = self._parent.model.get_deal(data)
+        if d == None:
+            return
         for (setter, key) in [(self.datetime.set_datetime, "datetime"),
-                              (self.direction.set_value, "deal_sign"),
+                              (self.direction.set_value, "direction"),
                               (self.account.set_value, "account_id"),
-                              (self.instrument.set_value, "security_name"),
-                              (self.market.set_value, "security_type"),
-                              (self.price.set_value, "price"),
-                              (self.count.set_value, "quantity"),
-                              (self.broker_comm.set_value, "broker_comm"),
-                              (self.commission.set_value, "stock_comm"),
-                              (self.attributes.set_attributes, "attributes")]:
-            m = gethash(data, key)
+                              (self.instrument.set_value, "paper_id"),
+                              (self.price.set_value, "points"),
+                              (self.count.set_value, "count"),
+                              (self.commission.set_value, "commission"),
+                              (self.attributes.set_attributes, "user_attributes")]:
+            m = gethash(d, key)
             if m != None:
                 setter(m)
 
@@ -100,32 +110,33 @@ class deal_adder_control:
         
 
     def check_correctness(self):
-        def notempty(str):
-            return str and len(str) > 0
-        def show_message(message):
-            w = gtk.MessageDialog(parent = self._parent.builder.get_object("deal_adder"), flags = gtk.DIALOG_MODAL, type = gtk.MESSAGE_WARNING, buttons = gtk.BUTTONS_OK, message_format = message)
-            w.run()
-            w.hide()
-            w.destroy()
+        """\brief check if all data inserted correctly
+        \retval True all data corect
+        \retval False some data incorrect
+
+        When checking, displey message about input mistakes if exists
+        """
         mss = []
-        if not notempty(self.instrument.get_value()):
+        if self.instrument.get_value() == -1:
             mss.append(u'Вы должны указать инструмент')
         if self.price.get_value() <= 0:
             mss.append(u'Вы должны указать цену контракта')
         if self.count.get_value() <= 0:
             mss.append(u'вы должны указать количество котрактов')
         if len(mss) > 0:
-            show_message(reduce(lambda a, b: u'{0}\n{1}'.format(a, b), mss))
+            show_error(reduce(lambda a, b: u'{0}\n{1}'.format(a, b), mss), self._parent.builder.get_object("deal_adder"))
             return False
         else:
             return True
 
-    def update_widget(self, security_names, security_types, accounts = None):
-        self.instrument.update_widget(security_names)
-        self.market.update_widget(security_types)
-        self.account.update_answers(accounts, none_answer = -1)
+    # def update_widget(self, security_names, security_types, accounts = None):
+    #     self.instrument.update_widget(security_names)
+    #     self.market.update_widget(security_types)
+    #     self.account.update_answers(accounts, none_answer = -1)
 
     def set_current_datetime(self):
+        """\brief set current datetime to datetime widget
+        """
         self.datetime.set_current_datetime()
 
             

@@ -677,7 +677,7 @@ class sqlite_model(common_model):
         commission - summarized commission\n
         datetime - datetime.datetime instance
         \param do_recalc if True recalculation of temporarry tables will be executed
-        
+        \return int - deal id
         \note \ref tacreate_deal must be used instead by the view
         """
         did = None
@@ -729,6 +729,7 @@ class sqlite_model(common_model):
         points - price in points\n
         commission - summarized commission\n
         datetime - datetime.datetime instance
+        \return int - deal id
         \param do_recalc if True recalculation of temporarry tables will be executed
         """
         pass
