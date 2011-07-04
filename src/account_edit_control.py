@@ -16,6 +16,7 @@ class account_edit_control:
     ## top window Gtk.Dialog instance
     window = None
     ## combo_control.combo_control instance with currency available to select
+    # \todo replace with \ref combo_select_control.combo_select_control because more suitable
     currency_combo = None
     ## gtk.SpinButton instance with initial money amount
     first_money = None

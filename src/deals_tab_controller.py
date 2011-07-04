@@ -23,14 +23,13 @@ class deals_tab_controller(object):
                                                  [(u"id", gtk.CellRendererSpin(), int, "id"),
                                                   (u'Дата', gtk.CellRendererText(), str, "datetime"),
                                                   (u'Время', gtk.CellRendererText(), str, "time"),
-                                                  (u'Инструмент', gtk.CellRendererText(), str, "security_name"),
-                                                  (u'Класс', gtk.CellRendererText(), str, "security_type"),
-                                                  (u'Направление', gtk.CellRendererText(), str, "deal_sign"),
+                                                  (u'Инструмент', gtk.CellRendererText(), str, "paper_name"),
+                                                  (u'Направление', gtk.CellRendererText(), str, "direction"),
                                                   (u'Цена', gtk.CellRendererSpin(), float, "price"),
-                                                  (u'Количество', gtk.CellRendererSpin(), int, "quantity"),
+                                                  (u'Количество', gtk.CellRendererSpin(), int, "count"),
                                                   (u'Объем', gtk.CellRendererSpin(), float, "volume"),
-                                                  (u'Комиссия', gtk.CellRendererSpin(), float, "broker_comm"),
-                                                  (u'Тэги', gtk.CellRendererText(), str, "attributes")],
+                                                  (u'Комиссия', gtk.CellRendererSpin(), float, "commission"),
+                                                  (u'Тэги', gtk.CellRendererText(), str, "user_attributes_formated")],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
         dd = self._parent.builder.get_object("deals_view")
@@ -63,14 +62,12 @@ class deals_tab_controller(object):
             self._parent.deal_editor.update_editor()
             ret = self._parent.deal_editor.run()
             if ret == gtk.RESPONSE_ACCEPT:
-                dhash = self.deal_editor.get_data()
+                dhash = self._parent.deal_editor.get_data()
                 if is_null_or_empty(dhash):
                     return
                 self._parent.model.tachange_deals(dids, dhash)
                 self._parent.call_update_callback()
             
-            
-
     def change_one_deal(self):
         if not self._parent.connected():
             return
@@ -83,7 +80,6 @@ class deals_tab_controller(object):
                 self._parent.model.tachange_deals(row[0][0], data)
                 self._parent.call_update_callback()
             
-        
         
     def delete_deals_activate(self, action):
         self.delete_deals()

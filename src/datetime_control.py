@@ -11,9 +11,22 @@ from common_methods import *
             
 
 class datetime_control(value_returner_control):
+    """
+    \brief control to set and get datetime
+    """
     __do_react__ = True
     value = datetime.datetime.now()
     def __init__(self, calendar, time_control, checkbutton = None, year = None, month = None, day = None, update_callback = None):
+        """
+        \param calendar - gtk.Calendar instance
+        \param time_control - \ref time_control.time_control instance
+        \param checkbutton - gtk.ToggleButton instance
+        \param year - gtk.SpinButton
+        \param month - gtk.SpinButton
+        \param day - gtk.SpinButton
+        \param update_callback - no parameter function to call when date or time is changed
+        \note any of \c checkbutton, \c year, \c month or \c day widgets may be empty.
+        """
         self.calendar = calendar
         self.year = year
         self.month = month
@@ -102,12 +115,24 @@ class datetime_control(value_returner_control):
         
 
     def get_date(self):
+        """
+        \retval None if checkbox is not active
+        \retval datetime.date instance
+        """
         return self.return_value(self.value.date())
 
     def get_time(self):
+        """
+        \retval None if checkbox is not active
+        \retval datetime.time value
+        """
         return self.return_value(self.time_control.get_time())
 
     def get_datetime(self):
+        """
+        \retval None if checkbox is not active
+        \retval datetime.datetime value
+        """
         t = self.time_control.get_time()
         tt = datetime.time.min
         return self.return_value(datetime.datetime.combine(self.value.date(), t != None and t or tt))
@@ -121,6 +146,9 @@ class datetime_control(value_returner_control):
 
     @no_reaction
     def set_time(self, time):
+        """
+        \param time datetime.time instance
+        """
         self._set_time(time)
 
     def _set_time(self, time):

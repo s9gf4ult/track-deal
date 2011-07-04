@@ -18,9 +18,9 @@ class report_importer_control:
 
     def update_widget(self, accounts = None, report_types = None):
         if accounts != None and len(accounts) > 0:
-            self.account.update_widget(accounts, none_answer = -1)
+            self.account.update_answers(accounts, none_answer = -1)
         if report_types != None and len(report_types) > 0:
-            self.report.update_widget(report_types)
+            self.report.update_answers(report_types)
             if len(report_types) > 0:
                 self.report.set_value(report_types[0][0])
         self.file.unselect_all()

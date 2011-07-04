@@ -4,19 +4,36 @@ import gtk
 from hide_control import value_returner_control
 
 class select_control(value_returner_control):
+    """
+    \par
+
+    Used to return some value when selected some RadioButton
+    """
     def __init__(self, answers, checkbutton = None):
+        """
+        \param answers - hash table {value, gtk.RadioButton instance}
+        \param checkbutton - gtk.ToggleButton instance
+        """
         self.answers = answers
         self.checkbutton = checkbutton
 
     def get_value(self):
+        """
+        \retval None if checkbutton is not active
+        \retval value assigned to selected RadioButton
+        """
         ret = None
-        for k in self.answers:
+        for k in self.answers.keys():
             if self.answers[k].get_active():
                 ret = k
                 break
         return self.return_value(ret)
 
     def set_value(self, val):
+        """
+        \brief activate RadioButton by value
+        \param val - value assigned to RadioButton
+        """
         self.answers[val].set_active(True)
             
 if __name__ == "__main__":

@@ -824,7 +824,7 @@
                     <property name="can_focus">False</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkSpinButton" id="deal_adder_broker_comm">
+                      <object class="GtkSpinButton" id="deal_adder_comm">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">●</property>

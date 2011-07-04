@@ -9,6 +9,7 @@ from select_control import select_control
 from combo_control import combo_control
 from number_range_control import number_control
 from combo_select_control import combo_select_control
+from common_methods import *
 
 class deal_editor_control:
     def __init__(self, builder):
@@ -68,7 +69,7 @@ class deal_editor_control:
 
     def update_accounts(self, accounts):
         """accounts must be the list of tupples like this (account_id, account_name)"""
-        self.account.update_widget(answers = accounts, none_answer = -1)
+        self.account.update_answers(answers = accounts, none_answer = -1)
 
     def update_instruments(self, instruments):
         """instruments is a list of strings"""
@@ -85,7 +86,7 @@ class deal_editor_control:
                                (self.market.set_value, "security_type"),
                                (self.price.set_value, "price"),
                                (self.count.set_value, "quantity"),
-                               (self.broker_comm.set_value, "broker_comm")
+                               (self.broker_comm.set_value, "broker_comm"),
                                (self.stock_comm.set_value, "stock_comm")]:
             m = gethash(data, key)
             if m != None:

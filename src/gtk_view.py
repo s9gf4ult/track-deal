@@ -10,6 +10,10 @@ from accounts_tab_controller import accounts_tab_controller
 from account_edit_control import account_edit_control
 from currency_edit_control import currency_edit_control
 from deals_tab_controller import deals_tab_controller
+from deal_adder_control import deal_adder_control
+from deal_editor_control import deal_editor_control
+from common_methods import *
+
 
 class gtk_view(common_view):
     """
@@ -42,7 +46,10 @@ class gtk_view(common_view):
     account_edit = None
     ## \brief instance of \ref deals_tab_controller.deals_tab_controller
     deals_tab = None
-    
+    ## \brief instance of \ref deal_adder_control.deal_adder_control
+    deal_adder = None
+    ## \brief instance of \ref deal_editor_control.deal_editor_control
+    deal_editor = None
     
     def __init__(self, ):
         """initialize gtk view
@@ -59,7 +66,8 @@ class gtk_view(common_view):
         self.accounts = accounts_tab_controller(self)
         self.window = main_window_controller(self)
         self.deals_tab = deals_tab_controller(self)
-
+        self.deal_adder = deal_adder_control(self)
+        self.deal_editor = deal_editor_control(self)
     
     def run(self, ):
         """show main window and initialize all the necessary
@@ -74,6 +82,7 @@ class gtk_view(common_view):
         print("update !")
         self.window.update()
         self.accounts.update()
+        self.deals_tab.update()
 
     def connected(self, ):
         """\retval True if model exist and connected
@@ -122,3 +131,4 @@ class gtk_view(common_view):
         """quit from gtk main loop
         """
         gtk.main_quit()
+ 

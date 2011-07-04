@@ -8,15 +8,22 @@ from select_control import *
 from combo_select_control import *
 from common_methods import *
 from attributes_control import *
+from gtk_view import gtk_view
 import sys
 
 class deal_adder_control:
-    def __init__(self, builder):
-        self.builder = builder
+    """\brief control for dialog for adding or editing one deal
+    """
+    def __init__(self, parent):
+        """
+        \param parent \ref gtk_view.gtk_view instance
+        """
+        assert(isinstance(parent, gtk_view))
+        self._parent = parent
         def shorter(name):
-            return self.builder.get_object("deal_adder_{0}".format(name))
-        w = self.builder.get_object("deal_adder")
-        w.add_buttons(gtk.STOCK_ADD, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+            return self._parent.builder.get_object("deal_adder_{0}".format(name))
+        w = self._parent.builder.get_object("deal_adder")
+        w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.datetime = datetime_control(shorter("calendar"),
                                          time_control(shorter("hour"),
                                                       shorter("min"),
@@ -25,8 +32,8 @@ class deal_adder_control:
                                          month = shorter("month"),
                                          day = shorter("day"))
         self.account = combo_select_control(shorter("account"))
-        self.instrument = combo_control(shorter("stock"))
-        self.market = combo_control(shorter("market"))
+        self.instrument = combo_select_control(shorter("stock"))
+        # self.market = combo_control(shorter("market"))
         self.price = number_control(shorter("price"), step_incr = 0.1, digits = 4)
         self.price.set_lower_limit(0)
         self.price.set_upper_limit(sys.float_info.max)
@@ -35,16 +42,18 @@ class deal_adder_control:
         self.count.set_upper_limit(sys.maxint)
         self.direction = select_control({ -1 : shorter("buy_rb"),
                                           1 : shorter("sell_rb")})
-        self.broker_comm = number_control(shorter("broker_comm"), step_incr = 0.1, digits = 4)
-        self.broker_comm.set_lower_limit(0)
-        self.broker_comm.set_upper_limit(sys.float_info.max)
-        self.stock_comm = number_control(shorter("stock_comm"), step_incr = 0.1, digits = 4)
-        self.stock_comm.set_lower_limit(0)
-        self.stock_comm.set_upper_limit(sys.float_info.max)
+        self.commission = number_control(shorter("comm"), step_incr = 0.1, digits = 4)
+        self.commission.set_lower_limit(0)
+        self.commission.set_upper_limit(sys.float_info.max)
         self.attributes = attributes_control(shorter("attributes"), shorter("attr_name"), shorter("attr_val"), shorter("attr_add"), shorter("attr_del"))
 
     def run(self):
-        w = self.builder.get_object("deal_adder")
+        """
+        \brief run the dialog
+        \retval gtk.RESPONSE_CANCEL if cancel pressed
+        \retval gtk.RESPONSE_ACCEPT if save pressed
+        """
+        w = self._parent.builder.get_object("deal_adder")
         w.show_all()
         ret = w.run()
         while ret == gtk.RESPONSE_ACCEPT:
@@ -52,9 +61,9 @@ class deal_adder_control:
                 ret = w.run()
             else:
                 w.hide()
-                return self.get_deal_hash()
+                return ret
         w.hide()
-        return None
+        return ret
 
     def get_deal_hash(self):
         return {"datetime" : self.datetime.get_datetime(),
@@ -64,7 +73,7 @@ class deal_adder_control:
                 "quantity" : self.count.get_value(),
                 "deal_sign" : self.direction.get_value(),
                 "broker_comm" : self.broker_comm.get_value(),
-                "stock_comm" : self.stock_comm.get_value(),
+                "stock_comm" : self.commission.get_value(),
                 "broker_comm_nds" : 0,
                 "stock_comm_nds" : 0,
                 "account_id" : self.account.get_value(),
@@ -80,7 +89,7 @@ class deal_adder_control:
                               (self.price.set_value, "price"),
                               (self.count.set_value, "quantity"),
                               (self.broker_comm.set_value, "broker_comm"),
-                              (self.stock_comm.set_value, "stock_comm"),
+                              (self.commission.set_value, "stock_comm"),
                               (self.attributes.set_attributes, "attributes")]:
             m = gethash(data, key)
             if m != None:
@@ -94,7 +103,7 @@ class deal_adder_control:
         def notempty(str):
             return str and len(str) > 0
         def show_message(message):
-            w = gtk.MessageDialog(parent = self.builder.get_object("deal_adder"), flags = gtk.DIALOG_MODAL, type = gtk.MESSAGE_WARNING, buttons = gtk.BUTTONS_OK, message_format = message)
+            w = gtk.MessageDialog(parent = self._parent.builder.get_object("deal_adder"), flags = gtk.DIALOG_MODAL, type = gtk.MESSAGE_WARNING, buttons = gtk.BUTTONS_OK, message_format = message)
             w.run()
             w.hide()
             w.destroy()
@@ -114,7 +123,7 @@ class deal_adder_control:
     def update_widget(self, security_names, security_types, accounts = None):
         self.instrument.update_widget(security_names)
         self.market.update_widget(security_types)
-        self.account.update_widget(accounts, none_answer = -1)
+        self.account.update_answers(accounts, none_answer = -1)
 
     def set_current_datetime(self):
         self.datetime.set_current_datetime()
