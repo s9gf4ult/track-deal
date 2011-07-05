@@ -113,7 +113,7 @@ class deals_tab_controller(object):
         if not self._parent.connected():
             return
         self._parent.deal_adder.reset_fields() # clean all fields
-        self._parent.deal_adder.update_widget() # set the posible accounts and so on
+        self._parent.deal_adder.update_adder() # set the posible accounts and so on
         self._parent.deal_adder.set_current_datetime()
         ret = self._parent.deal_adder.run()
         if ret == gtk.RESPONSE_YES:

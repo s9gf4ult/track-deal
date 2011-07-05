@@ -9,6 +9,7 @@ class combo_select_control:
     \brief control for selecting value by representing string
 
     Uses combobox to display string and when this string is selected assigned value can be returned
+    \todo add support of checkbutton to return some value
     """
     def __init__(self, combobox, answers = None, none_answer = None):
         """
