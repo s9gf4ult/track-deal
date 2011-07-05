@@ -44,6 +44,18 @@
     <property name="icon_name">computer</property>
     <signal name="activate" handler="on_create_database_in_memory_activate" swapped="no"/>
   </object>
+  <object class="GtkListStore" id="date_store">
+    <columns>
+      <!-- column-name open_date -->
+      <column type="gchararray"/>
+      <!-- column-name close_date -->
+      <column type="gchararray"/>
+      <!-- column-name count -->
+      <column type="guint"/>
+      <!-- column-name id -->
+      <column type="gint"/>
+    </columns>
+  </object>
   <object class="GtkAction" id="deals_load_open_ru">
     <property name="label">Загрузить из файла с отчетом</property>
   </object>
@@ -464,18 +476,6 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkListStore" id="date_store">
-    <columns>
-      <!-- column-name open_date -->
-      <column type="gchararray"/>
-      <!-- column-name close_date -->
-      <column type="gchararray"/>
-      <!-- column-name count -->
-      <column type="guint"/>
-      <!-- column-name id -->
-      <column type="gint"/>
-    </columns>
   </object>
   <object class="GtkDialog" id="deal_adder">
     <property name="can_focus">False</property>
@@ -1624,7 +1624,7 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkCheckButton" id="deal_editor_change_stock_comm">
+                  <object class="GtkCheckButton" id="deal_editor_change_commission">
                     <property name="label" translatable="yes">Сменить комиссию биржи</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
