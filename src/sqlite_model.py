@@ -1660,17 +1660,54 @@ class sqlite_model(common_model):
         """\brief wrapper around \ref change_deals
         \param deal_id int or list of int with deal id's
         \param fields hash table with one or more keys:\n
-        sha1\n
-        manual_made - None or not None\n
-        parent_deal_id - None or int\n
-        account_id - int\n
-        position_id - None or int\n
-        paper_id - int\n
-        count - int\n
-        direction - -1 means BUY, 1 means SELL\n
-        points - float\n
-        commission - float\n
-        datetime - datetime.datetime instance
+        \c sha1\n
+        \c manual_made - None or not None\n
+        \c parent_deal_id - None or int\n
+        \c account_id - int\n
+        \c position_id - None or int\n
+        \c paper_id - int\n
+        \c count - int\n
+        \c direction - -1 means BUY, 1 means SELL\n
+        \c points - float\n
+        \c commission - float\n
+        \c datetime - datetime.datetime instance
         \param do_recalc - if True (default), after changing deal all temporary tables will be recalculated
         """
         pass
+
+    def get_deal(self, deal_id):
+        """\brief get deal_id from the database
+        \param deal_id id of the deal
+        \retval None if there is not deal with such id
+        \retval hash table with keys:\n
+        \c id - int, id\n
+        \c sha1\n
+        \c manual_made - None or not None\n
+        \c parent_deal_id - None or int\n
+        \c account_id - int\n
+        \c position_id - None or int\n
+        \c paper_id - int\n
+        \c count - int\n
+        \c direction - -1 means BUY, 1 means SELL\n
+        \c points - float\n
+        \c commission - float\n
+        \c datetime - datetime.datetime instance\n
+        \c user_attributes - hash table {key : value} with user attributes assigned to deal or without key if does not exists\n
+        \c stored_attributes - hash table with not user attributes or without key if does not exists
+        """
+        ret = self._sqlite_connection.execute_select("select * from deals where id = ?", [deal_id]).fetchone()
+        if ret <> None:
+            uat = self._sqlite_connection.execute_select("select name, value from user_deal_attributes where deal_id = ?", [deal_id]).fetchall() # the list of hash tables
+            if len(uat) > 0:
+                ats = {}
+                for k in uat:
+                    ats[k["name"]] = k["value"]
+                ret["user_attributes"] = ats
+            sat = self._sqlite_connection.execute_select("select type, value from stored_deal_attributes where deal_id = ?", [deal_id])
+            if len(sat) > 0:
+                ats = {}
+                for k in sat:
+                    ats[k["type"]] = k["value"]
+                ret["stored_attributes"] = ats
+        return ret
+                    

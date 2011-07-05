@@ -1120,7 +1120,7 @@
                     <property name="can_focus">False</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkComboBox" id="deals_adder_instrument">
+                      <object class="GtkComboBox" id="deal_adder_instrument">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                       </object>
@@ -1186,7 +1186,7 @@
           <object class="GtkTable" id="table12">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="n_rows">5</property>
+            <property name="n_rows">4</property>
             <property name="n_columns">2</property>
             <child>
               <object class="GtkFrame" id="frame19">
@@ -1414,66 +1414,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFrame" id="frame20">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment12">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkCheckButton" id="deal_editor_change_instrument">
-                    <property name="label" translatable="yes">Сменить инструмент</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFrame" id="frame21">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment13">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkCheckButton" id="deal_editor_cnahge_stock">
-                    <property name="label" translatable="yes">Сменить биржу</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">2</property>
-                <property name="bottom_attach">3</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkFrame" id="frame22">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -1556,88 +1496,6 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFrame" id="frame24">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment16">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                    <child>
-                      <object class="GtkSpinButton" id="deal_adder_broker_comm1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="invisible_char">●</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="secondary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">True</property>
-                        <property name="secondary_icon_sensitive">True</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkCheckButton" id="deal_editor_change_broker_comm">
-                    <property name="label" translatable="yes">Сменить комиссию брокера</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkFrame" id="frame25">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <child>
-                  <object class="GtkAlignment" id="alignment17">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="left_padding">12</property>
-                    <child>
-                      <object class="GtkSpinButton" id="deal_adder_stock_comm1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="invisible_char">●</property>
-                        <property name="primary_icon_activatable">False</property>
-                        <property name="secondary_icon_activatable">False</property>
-                        <property name="primary_icon_sensitive">True</property>
-                        <property name="secondary_icon_sensitive">True</property>
-                      </object>
-                    </child>
-                  </object>
-                </child>
-                <child type="label">
-                  <object class="GtkCheckButton" id="deal_editor_change_stock_comm">
-                    <property name="label" translatable="yes">Сменить комиссию биржи</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="use_action_appearance">False</property>
-                    <property name="draw_indicator">True</property>
-                  </object>
-                </child>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
-                <property name="top_attach">4</property>
-                <property name="bottom_attach">5</property>
-                <property name="y_options">GTK_FILL</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkFrame" id="frame26">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -1699,6 +1557,8 @@
                 </child>
               </object>
               <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
                 <property name="y_options">GTK_FILL</property>
@@ -1734,10 +1594,86 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">1</property>
-                <property name="right_attach">2</property>
                 <property name="top_attach">1</property>
                 <property name="bottom_attach">2</property>
+                <property name="y_options">GTK_FILL</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="frame25">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <child>
+                  <object class="GtkAlignment" id="alignment17">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="left_padding">12</property>
+                    <child>
+                      <object class="GtkSpinButton" id="deal_adder_stock_comm1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="invisible_char">●</property>
+                        <property name="invisible_char_set">True</property>
+                        <property name="primary_icon_activatable">False</property>
+                        <property name="secondary_icon_activatable">False</property>
+                        <property name="primary_icon_sensitive">True</property>
+                        <property name="secondary_icon_sensitive">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkCheckButton" id="deal_editor_change_stock_comm">
+                    <property name="label" translatable="yes">Сменить комиссию биржи</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="right_attach">2</property>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
+                <property name="y_options">GTK_FILL</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFrame" id="frame1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label_xalign">0</property>
+                <child>
+                  <object class="GtkAlignment" id="alignment1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="left_padding">12</property>
+                    <child>
+                      <object class="GtkComboBox" id="deal_editor_instrument">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkCheckButton" id="deal_editor_change_instrument">
+                    <property name="label" translatable="yes">Сменить инструмент</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="top_attach">2</property>
+                <property name="bottom_attach">3</property>
                 <property name="y_options">GTK_FILL</property>
               </packing>
             </child>

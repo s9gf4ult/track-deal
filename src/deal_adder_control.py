@@ -8,7 +8,7 @@ from select_control import *
 from combo_select_control import *
 from common_methods import *
 from attributes_control import *
-from gtk_view import gtk_view
+import gtk_view
 import sys
 
 class deal_adder_control:
@@ -18,7 +18,7 @@ class deal_adder_control:
         """
         \param parent \ref gtk_view.gtk_view instance
         """
-        assert(isinstance(parent, gtk_view))
+        assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
         def shorter(name):
             return self._parent.builder.get_object("deal_adder_{0}".format(name))
@@ -32,7 +32,7 @@ class deal_adder_control:
                                          month = shorter("month"),
                                          day = shorter("day"))
         self.account = combo_select_control(shorter("account"))
-        self.instrument = combo_select_control(shorter("stock"))
+        self.instrument = combo_select_control(shorter("instrument"))
         # self.market = combo_control(shorter("market"))
         self.price = number_control(shorter("price"), step_incr = 0.1, digits = 4)
         self.price.set_lower_limit(0)
@@ -90,6 +90,8 @@ class deal_adder_control:
         """\brief load data from deal into widget
         \param data - int, deal id
         """
+        if not self._parent.connected():
+            return
         d = self._parent.model.get_deal(data)
         if d == None:
             return
@@ -139,11 +141,35 @@ class deal_adder_control:
         """
         self.datetime.set_current_datetime()
 
+    def reset_fields(self, ):
+        """\brief clean all fields
+        """
+        self.account.update_answers([], -1)
+        self.account.set_value(-1)
+        self.instrument.update_answers([], -1)
+        self.instrument.set_value(-1)
+        self.count.set_value(0)
+        self.price.set_value(0)
+        self.commission.set_value(0)
+        self.direction.set_value(-1)
+
+    def update_adder(self, ):
+        """\brief update posible values for account and instrument widget
+        """
+        if not self._parent.connected():
+            return
+        papers = self._parent.model.list_papers(["name"])
+        pps = map(lambda p: (p["id"], p["name"]), papers)
+        self.instrument.update_answers(pps, -1)
+        accs = self._parent.model.list_accounts(["name"])
+        acs = map(lambda ac: (ac["id"], ac["name"]), accs)
+        self.account.update_answers(acs, -1)
+        
+
+
             
 if __name__ == "__main__":
     b = gtk.Builder()
     b.add_from_file('main_ui.glade')
     con = deal_adder_control(b)
-    con.instrument.update_widget(["aaa", "bbbb", "ccc"])
-    con.market.update_widget(["mark1", "mark10", "supermark"])
     print(con.run())

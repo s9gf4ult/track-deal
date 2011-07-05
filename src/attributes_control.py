@@ -35,18 +35,25 @@ class attributes_control:
 
     def get_attributes(self):
         """
-        \todo need implementation
         \return hash table with attributes {key : value}
         """
-        return self.attributes.get_rows()
+        ret = {}
+        ats = self.attributes.get_rows()
+        for at in ats:
+            ret[at[0]] = at[1]
+        return ret
 
             
     def set_attributes(self, attributes):
         """
-        \todo need implementation
         \param attributes has table {key : value}
         """
-        self.attributes.update_rows(attributes)
+        u = []
+        x = attributes.keys()
+        x.sort()
+        for at in x:
+            u.append((at, attributes[at]))
+        self.attributes.update_rows(u)
 
     def flush(self):
         self.attributes.update_rows([])

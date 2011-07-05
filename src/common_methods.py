@@ -173,7 +173,8 @@ def no_reaction(func):
     return ret
 
 def if_database(func):
-    """decorated method will be executed if self.database.connection != None"""
+    """decorated method will be executed if self.database.connection != None
+    \deprecated"""
     def ret(*args, **kargs):
         if args[0].database.connection != None:
             func(*args, **kargs)
