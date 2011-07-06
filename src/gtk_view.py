@@ -50,6 +50,7 @@ class gtk_view(common_view):
     deal_adder = None
     ## \brief instance of \ref deal_editor_control.deal_editor_control
     deal_editor = None
+    ## \brief 
     
     def __init__(self, ):
         """initialize gtk view

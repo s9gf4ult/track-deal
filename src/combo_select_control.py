@@ -10,7 +10,6 @@ class combo_select_control(value_returner_control):
     \brief control for selecting value by representing string
 
     Uses combobox to display string and when this string is selected assigned value can be returned
-    \todo add support of checkbutton to return some value
     """
     def __init__(self, combobox, answers = None, none_answer = None, checkbutton = None):
         """
@@ -84,7 +83,9 @@ if __name__ == "__main__":
     p = w.get_content_area()
     b = gtk.ComboBox()
     p.pack_start(b)
-    con = combo_select_control(b, [(100, "hundred"), (200, "two hundred")], none_answer = -1)
+    bubu = gtk.CheckButton()
+    p.pack_start(bubu)
+    con = combo_select_control(b, [(100, "hundred"), (200, "two hundred")], none_answer = -1, checkbutton = bubu)
     bt = gtk.Button("push")
     p.pack_start(bt)
     def push(bt):
@@ -95,6 +96,13 @@ if __name__ == "__main__":
         con.set_value(200)
     btt.connect("clicked", btt_push)
     p.pack_start(btt)
+    lbl = gtk.Label()
+    def some_clicked(bt):
+        lbl.set_text(str(con.get_value()))
+    vub = gtk.Button("show")
+    vub.connect("clicked", some_clicked)
+    p.pack_start(lbl)
+    p.pack_start(vub)
     w.show_all()
     w.run()
     print(con.get_value())
