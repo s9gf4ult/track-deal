@@ -31,7 +31,7 @@ class deals_filter():
     
 
     def get_ids(self, order_by, parent = False, fields = ["id"]):
-        if self.database.connection == None:
+        if not self._parent.connected():
             return []
         self.plus = []
         fields = reduce_by_string(u', ', map(lambda a: u'd.{0}'.format(a), fields))
@@ -59,10 +59,23 @@ class deals_filter():
         
     def prepare(self, ):
         """\brief prepare filter values getting if need from the database
-        \todo need implementation
         """
-        raise NotImplementedError()
-
+        if not self._parent.connected():
+            return
+        papers = self._parent.model.list_papers(["name"])
+        upps = map(lambda a: (a["id"], a["name"]), papers)
+        accounts = self._parent.model.list_accounts(["name"])
+        uaccs = map(lambda a: (a["id"], a["name"]), accounts)
+        self.dialog.update_widget(count_range = self._parent.model.get_count_range(),
+                                  price_range = self._parent.model.get_price_range(),
+                                  comm_range = self._parent.model.get_commission_range(),
+                                  volume_range = self._parent.model.get_volume_range(),
+                                  stock_list = upps,
+                                  accounts_list = uaccs)
+        
+        
+        
+        
         
     def _regen_selected(self):
         if not self.database.connection:
@@ -75,14 +88,12 @@ class deals_filter():
             self.database.set_selected_accounts(map(lambda a: a[0], self.dialog.accounts.get_checked_rows()))
 
     
-    def __init__(self, global_data, builder, database):
-        self.builder = builder
-        self.database = database
-        self.global_data = global_data
-        self.dialog = deals_filter_control(builder)
-
+    def __init__(self, parent):
+        self._parent = parent
+        self.dialog = deals_filter_control(self._parent.builder)
+        
     def _prepare_filter(self):
-        if self.database.connection:
+        if self._parent.connected():
             sl = map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals"))
             also = {}
             for (key, val) in [("count_range", "quantity"),
@@ -107,8 +118,6 @@ class deals_filter():
         #################
         for (control, field_name) in [(self.dialog.count, "d.quantity"),
                                       (self.dialog.price, "d.price"),
-                                      (self.dialog.broker_comm, "d.broker_comm"),
-                                      (self.dialog.stock_comm, "d.stock_comm"),
                                       (self.dialog.comm, "d.comm"),
                                       (self.dialog.volume, "d.volume")]:
             lower_upper(field_name, control.get_lower_value(), control.get_upper_value())
@@ -147,12 +156,24 @@ class deals_filter():
             lower_upper("d.parent_deal_id", parent, parent)
 
         return len(conds) > 0 and reduce_by_string(' and ', conds) or None
-            
 
-    def get_rows(self, ):
-        """\brief get filtred rows
-        \return list of hash tables with keys like names in deals_view table of databse
+    def get_condition(self, ):
+        """\brief return string with where part
+        \retval "" if no conditions assigned with filter
+        \retval string with `where` part of the query
+        \note need implementation
         """
         raise NotImplementedError()
 
+    
+
+    def get_rows(self, order_by):
+        """\brief get filtred rows
+        \param order_by - list of fields to order by
+        \retval None if not connected
+        \retval list of hash tables with keys like names in deals_view table of databse
+        """
+        if not self._parent.connected():
+            return None
+        return self._parent.model.list_deals_view_with_condition(self.get_condition(), order_by)
 

@@ -50,7 +50,8 @@ class gtk_view(common_view):
     deal_adder = None
     ## \brief instance of \ref deal_editor_control.deal_editor_control
     deal_editor = None
-    ## \brief 
+    ## \brief \ref deals_filter.deals_filter instance
+    deals_filter = None
     
     def __init__(self, ):
         """initialize gtk view
@@ -65,6 +66,7 @@ class gtk_view(common_view):
         self.deals_tab = deals_tab_controller(self)
         self.deal_adder = deal_adder_control(self)
         self.deal_editor = deal_editor_control(self)
+        self.deals_filter = deals_filter(self)
     
     def run(self, ):
         """show main window and initialize all the necessary

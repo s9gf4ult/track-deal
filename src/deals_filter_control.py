@@ -157,6 +157,9 @@ class deals_filter_control:
         
             
     def run(self):
+        """
+        \brief blocking method to show main window
+        """
         w = self.builder.get_object("deals_filter")
         w.show_all()
         w.run()
@@ -164,6 +167,15 @@ class deals_filter_control:
 
     def update_widget(self, count_range = None, price_range = None, comm_range = None,
                       volume_range = None, stock_list = None, accounts_list = None):
+        """
+        \brief update the boundary conditions
+        \param count_range - tuple with minimal and maximal count
+        \param price_range - tuple with minimal and maximal price
+        \param comm_range - tuple .. commission
+        \param volume_range - tuple .. volume
+        \param stock_list - list of tuples (int - id of paper, str - name of paper)
+        \param accounts_list - list of tuples (int - id of account, str - name of account)
+        """
         for (control, rval) in [(self.count, count_range),
                                 (self.price, price_range),
                                 (self.comm, comm_range),

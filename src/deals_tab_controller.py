@@ -118,7 +118,7 @@ class deals_tab_controller(object):
         ret = self._parent.deal_adder.run()
         if ret == gtk.RESPONSE_ACCEPT:
             data = self._parent.deal_adder.get_data()
-            self._parent.model.tacreate_d`eal(data["account_id"], data)
+            self._parent.model.tacreate_deal(data["account_id"], data)
             self._parent.call_update_callback()
 
 
