@@ -90,7 +90,7 @@ class deals_filter_control:
         rev = self.builder.get_object("deals_filter_revers_bt")
         sel = self.builder.get_object("deals_filter_select_bt")
         desel = self.builder.get_object("deals_filter_deselect_bt")
-        self.instruments = check_control(dfv, u'', [(u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
+        self.instruments = check_control(dfv, u'', [['id', int], (u'Инструмент', gtk.CellRendererText())], reverse_button = rev, select_button = sel, deselect_button = desel)
 
         ##########################
         # check accounts control #
@@ -99,7 +99,7 @@ class deals_filter_control:
         acr = self.builder.get_object("deals_filter_account_reverse")
         acset = self.builder.get_object("deals_filter_account_set")
         acunset = self.builder.get_object("deals_filter_account_unset")
-        self.accounts = check_control(acv, u'', [(u'Счет', gtk.CellRendererText())], reverse_button = acr, select_button = acset, deselect_button = acunset)
+        self.accounts = check_control(acv, u'', [['id', int], (u'Счет', gtk.CellRendererText())], reverse_button = acr, select_button = acset, deselect_button = acunset)
             
 
         ###################
@@ -113,7 +113,6 @@ class deals_filter_control:
                                         self.builder.get_object("deals_filter_direction_cb"))
         self.account_current = select_control({"current" : self.builder.get_object("deals_filter_account_current"),
                                                "select" : self.builder.get_object("deals_filter_account_select"),
-                                               "none" : self.builder.get_object("deals_filter_account_none"),
                                                "all" : self.builder.get_object("deals_filter_acount_all")})
         
         ##################
@@ -129,16 +128,6 @@ class deals_filter_control:
                                           number_control(self.builder.get_object("deals_filter_price_upper_spin"),
                                                          self.builder.get_object("deals_filter_price_upper_cb"), step_incr = 0.01, digits = 4),
                                           self.builder.get_object("deals_filter_price_cb"))
-        # self.broker_comm = number_range_control(number_control(self.builder.get_object("deals_filter_broker_comm_lower_spin"),
-        #                                                        self.builder.get_object("deals_filter_broker_comm_lower_cb"), step_incr = 0.01, digits = 4),
-        #                                         number_control(self.builder.get_object("deals_filter_broker_comm_upper_spin"),
-        #                                                        self.builder.get_object("deals_filter_broker_comm_upper_cb"), step_incr = 0.01, digits = 4),
-        #                                         self.builder.get_object("deals_filter_broker_comm_cb"))
-        # self.stock_comm = number_range_control(number_control(self.builder.get_object("deals_filter_stock_comm_lower_spin"),
-        #                                                       self.builder.get_object("deals_filter_stock_comm_lower_cb"), step_incr = 0.01, digits = 4),
-        #                                        number_control(self.builder.get_object("deals_filter_stock_comm_upper_spin"),
-        #                                                       self.builder.get_object("deals_filter_stock_comm_upper_cb"), step_incr = 0.01, digits = 4),
-        #                                        self.builder.get_object("deals_filter_stock_comm_cb"))
         self.comm = number_range_control(number_control(self.builder.get_object("deals_filter_comm_lower_spin"),
                                                         self.builder.get_object("deals_filter_comm_lower_cb"), step_incr = 0.01, digits = 4),
                                          number_control(self.builder.get_object("deals_filter_comm_upper_spin"),

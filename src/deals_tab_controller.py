@@ -118,7 +118,7 @@ class deals_tab_controller(object):
         ret = self._parent.deal_adder.run()
         if ret == gtk.RESPONSE_ACCEPT:
             data = self._parent.deal_adder.get_data()
-            self._parent.model.tacreate_deal(data["account_id"], data)
+            self._parent.model.tacreate_d`eal(data["account_id"], data)
             self._parent.call_update_callback()
 
 
@@ -158,6 +158,7 @@ class deals_tab_controller(object):
     def call_filter(self):
         if not self._parent.connected():
             return
+        self._parent.deals_filter.prepare()
         self._parent.deals_filter.run()
         self._parent.call_update_callback()
 

@@ -7,7 +7,17 @@ import math
 import gtk
 
 class time_distance_control(value_returner_control):
+    """
+    \brief control for editing time value as secons count
+    """
     def __init__(self, day_spin = None, hour_spin = None, min_spin = None, sec_spin = None, checkbutton = None):
+        """
+        \param day_spin - gtk.SpinButton instance describing day
+        \param hour_spin - gtk.SpinButton instance describing hour
+        \param min_spin - gtk.SpinButton instance describing minute
+        \param sec_spin - gtk.SpinButton instance describing seconds
+        \param checkbutton - gtk.ToggleButton instance to control return value or do not
+        """
         self.checkbutton = checkbutton
         self.day = day_spin
         self.hour = hour_spin
@@ -50,7 +60,15 @@ class time_distance_control(value_returner_control):
                 seconds = seconds % mulator
 
 class time_distance_range_control(value_returner_control):
+    """
+    \brief control to work with two time_distance_control instances to get the distance between them
+    """
     def __init__(self, lower_control, upper_control, checkbutton = None):
+        """
+        \param lower_control - \ref time_distance_control instance - the lower limit of range
+        \param upper_control - \ref time_distance_control instance - the uppper limit of range
+        \param checkbutton - gtk.ToggleButton instance to control return value or do not
+        """
         self.lower = lower_control
         self.upper = upper_control
         self.checkbutton = checkbutton

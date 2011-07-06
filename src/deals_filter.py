@@ -5,27 +5,26 @@ import time
 from common_methods import *
 
 
-class iter_filter():
-    def __init__(self, cursor):
-        self.cursor = cursor
+# class iter_filter():
+#     def __init__(self, cursor):
+#         self.cursor = cursor
 
-    def next(self):
-        return self.cursor.next()[0]
+#     def next(self):
+#         return self.cursor.next()[0]
 
-class cursor_filter():
-    def __init__(self, query, connection):
-        # print(query)
-        self.query = query
-        self.connection = connection
+# class cursor_filter():
+#     def __init__(self, query, connection):
+#         # print(query)
+#         self.query = query
+#         self.connection = connection
 
-    def __iter__(self):
-        return iter_filter(self.connection.execute(self.query))
+#     def __iter__(self):
+#         return iter_filter(self.connection.execute(self.query))
 
 
 class deals_filter():
 
     def run(self):
-        self._prepare_filter()
         ret = self.dialog.run()
         self._regen_selected()
         return ret
@@ -58,8 +57,12 @@ class deals_filter():
     def get_order_part(self, orderfield):
         return u'd.{0}'.format(orderfield)
         
-        
-        
+    def prepare(self, ):
+        """\brief prepare filter values getting if need from the database
+        \todo need implementation
+        """
+        raise NotImplementedError()
+
         
     def _regen_selected(self):
         if not self.database.connection:
@@ -145,5 +148,11 @@ class deals_filter():
 
         return len(conds) > 0 and reduce_by_string(' and ', conds) or None
             
-        
+
+    def get_rows(self, ):
+        """\brief get filtred rows
+        \return list of hash tables with keys like names in deals_view table of databse
+        """
+        raise NotImplementedError()
+
 
