@@ -57,8 +57,8 @@ class deals_filter_control:
         for (cb, subcbs) in [("deals_filter_datetime_range_cb", ["deals_filter_datetime_lower_cb", "deals_filter_datetime_upper_cb"]),
                              ("deals_filter_count_cb", ["deals_filter_count_lower_cb", "deals_filter_count_upper_cb"]),
                              ("deals_filter_price_cb", ["deals_filter_price_lower_cb", "deals_filter_price_upper_cb"]),
-                             ("deals_filter_broker_comm_cb", ["deals_filter_broker_comm_lower_cb", "deals_filter_broker_comm_upper_cb"]),
-                             ("deals_filter_stock_comm_cb", ["deals_filter_stock_comm_lower_cb", "deals_filter_stock_comm_upper_cb"]),
+                             # ("deals_filter_broker_comm_cb", ["deals_filter_broker_comm_lower_cb", "deals_filter_broker_comm_upper_cb"]),
+                             # ("deals_filter_stock_comm_cb", ["deals_filter_stock_comm_lower_cb", "deals_filter_stock_comm_upper_cb"]),
                              ("deals_filter_comm_cb", ["deals_filter_comm_lower_cb", "deals_filter_comm_upper_cb"]),
                              ("deals_filter_volume_cb", ["deals_filter_volume_lower_cb", "deals_filter_volume_upper_cb"])]:
             self.subhcontrols.append(all_checked_control(self.builder.get_object(cb), map(lambda a: self.builder.get_object(a), subcbs)))
@@ -129,16 +129,16 @@ class deals_filter_control:
                                           number_control(self.builder.get_object("deals_filter_price_upper_spin"),
                                                          self.builder.get_object("deals_filter_price_upper_cb"), step_incr = 0.01, digits = 4),
                                           self.builder.get_object("deals_filter_price_cb"))
-        self.broker_comm = number_range_control(number_control(self.builder.get_object("deals_filter_broker_comm_lower_spin"),
-                                                               self.builder.get_object("deals_filter_broker_comm_lower_cb"), step_incr = 0.01, digits = 4),
-                                                number_control(self.builder.get_object("deals_filter_broker_comm_upper_spin"),
-                                                               self.builder.get_object("deals_filter_broker_comm_upper_cb"), step_incr = 0.01, digits = 4),
-                                                self.builder.get_object("deals_filter_broker_comm_cb"))
-        self.stock_comm = number_range_control(number_control(self.builder.get_object("deals_filter_stock_comm_lower_spin"),
-                                                              self.builder.get_object("deals_filter_stock_comm_lower_cb"), step_incr = 0.01, digits = 4),
-                                               number_control(self.builder.get_object("deals_filter_stock_comm_upper_spin"),
-                                                              self.builder.get_object("deals_filter_stock_comm_upper_cb"), step_incr = 0.01, digits = 4),
-                                               self.builder.get_object("deals_filter_stock_comm_cb"))
+        # self.broker_comm = number_range_control(number_control(self.builder.get_object("deals_filter_broker_comm_lower_spin"),
+        #                                                        self.builder.get_object("deals_filter_broker_comm_lower_cb"), step_incr = 0.01, digits = 4),
+        #                                         number_control(self.builder.get_object("deals_filter_broker_comm_upper_spin"),
+        #                                                        self.builder.get_object("deals_filter_broker_comm_upper_cb"), step_incr = 0.01, digits = 4),
+        #                                         self.builder.get_object("deals_filter_broker_comm_cb"))
+        # self.stock_comm = number_range_control(number_control(self.builder.get_object("deals_filter_stock_comm_lower_spin"),
+        #                                                       self.builder.get_object("deals_filter_stock_comm_lower_cb"), step_incr = 0.01, digits = 4),
+        #                                        number_control(self.builder.get_object("deals_filter_stock_comm_upper_spin"),
+        #                                                       self.builder.get_object("deals_filter_stock_comm_upper_cb"), step_incr = 0.01, digits = 4),
+        #                                        self.builder.get_object("deals_filter_stock_comm_cb"))
         self.comm = number_range_control(number_control(self.builder.get_object("deals_filter_comm_lower_spin"),
                                                         self.builder.get_object("deals_filter_comm_lower_cb"), step_incr = 0.01, digits = 4),
                                          number_control(self.builder.get_object("deals_filter_comm_upper_spin"),
@@ -173,12 +173,10 @@ class deals_filter_control:
         w.run()
         w.hide()
 
-    def update_widget(self, count_range = None, price_range = None, broker_comm_range = None, stock_comm_range = None,
-                      comm_range = None, volume_range = None, stock_list = None, accounts_list = None):
+    def update_widget(self, count_range = None, price_range = None, comm_range = None,
+                      volume_range = None, stock_list = None, accounts_list = None):
         for (control, rval) in [(self.count, count_range),
                                 (self.price, price_range),
-                                (self.broker_comm, broker_comm_range),
-                                (self.stock_comm, stock_comm_range),
                                 (self.comm, comm_range),
                                 (self.volume, volume_range)]:
             if rval != None:
@@ -194,5 +192,5 @@ if __name__ == "__main__":
     b = gtk.Builder()
     b.add_from_file('main_ui.glade')
     d = deals_filter_control(b)
-    d.update_widget(count_range = [0, 100], price_range = [10, 200], broker_comm_range = [0.1, 3], stock_comm_range = [0.01, 0.4], comm_range = [0.5, 0.6], volume_range = [100, 1000], stock_list = [u'Газик', u'Сберик', u'Полиметальчик'])
+    d.update_widget(count_range = [0, 100], price_range = [10, 200], comm_range = [0.5, 0.6], volume_range = [100, 1000], stock_list = [u'Газик', u'Сберик', u'Полиметальчик'])
     d.run()

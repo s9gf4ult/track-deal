@@ -4,10 +4,25 @@ import gtk
 from list_view_sort_control import *
 
 class check_control():
+    """
+    \brief controlls widget for checking several elements
+
+    treeview and some buttons to select and deselect one or more elements displayed in treeview, first column will display checkbuttons to select or deselect each element
+    """
     
     def __init__(self, treeview, first_column_name, columns, reverse_button = None, reverse_all_button = None, select_button = None, select_all_button = None, deselect_button = None, deselect_all_button = None, list_view_control_class = list_view_sort_control):
-        """columns must be a list of pairs with name and CellRenderer objects, but first
-        column will be checkbutton column"""
+        """
+        \param treeview - gtk.TreeView instance
+        \param first_column_name - str, name of column with checkbuttons
+        \param columns - list of tuples (name, gtk.CellRenderer instance)
+        \param reverse_button - gtk.Button instance, selected rows will be reverse selected if clicked
+        \param reverse_all_button - all rows will be reverse selected
+        \param select_button - selected rows will be selected
+        \param select_all_button - all rows will be selected
+        \param deselect_button - selected rows will be deselected
+        \param deselect_all_button - all rows will be deselected
+        \param list_view_control_class - class to use to control treeview
+        """
         c = gtk.CellRendererToggle()
         c.props.activatable = True
         c.connect("toggled", self.row_toggled)
@@ -64,7 +79,11 @@ class check_control():
             it = m.get_iter_first()
 
     def update_rows(self, rows, default_toggle = True):
-        """rows must be the list of tupples with row values except first column of each row"""
+        """
+        \brief update rows in treeview to display and select
+        \param rows - list of tuples to replace the rows in treeview with, first column (boolean signaling selected or not) of each row must be skiped 
+        \param default_toggle - boolean, toggle new created rows or do not
+        """
         if not self.list_control.get_model():
             self.list_control.make_model()
         rws = self.list_control.get_rows()
@@ -81,6 +100,11 @@ class check_control():
         self.list_control.update_rows(new)
 
     def get_checked_rows(self):
+        """
+        \brief return just selected rows
+        \retval None if no one row is selected
+        \retval list of tuples (selected - boolean signaling row is selected, *other data)
+        """
         def get_checked(model, path, it):
             if model.get_value(it, 0):
                 p = []
@@ -113,7 +137,7 @@ if __name__ == "__main__":
     bbt = gtk.Button("show checked")
     for wid in [sa, ss, da, dd, ra, rr, ub, ubb, t, bbt]:
         p.pack_start(wid, False)
-    con = check_control(v, "Yes?", [("Name", gtk.CellRendererText()), ("FUCK YOU", gtk.CellRendererText())], select_button = ss, select_all_button = sa, deselect_button = dd, deselect_all_button = da, reverse_button = rr, reverse_all_button = ra)
+    con = check_control(v, "Yes?", [("Name", gtk.CellRendererText()), ["FUCK YOU", str]], select_button = ss, select_all_button = sa, deselect_button = dd, deselect_all_button = da, reverse_button = rr, reverse_all_button = ra)
     con.list_control.update_rows([(True, "One", ""), (False, "Two", ""), (True, "2 + 2 = 4", ""), (False, "3*5 = 14", "is false"), (True, "jojojo", "camon camon")])
     ub.connect("clicked", update_rows, con, [("ROW 1", "hesell"), ("ROW 2", "fjfj"), ("row 3",""), ("row 4","")])
     ubb.connect("clicked", update_rows, con, [("ROW 1", "haskell"), ("ROW 2", "fjfj"), ("ROW 3","")])
