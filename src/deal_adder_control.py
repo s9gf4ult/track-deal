@@ -119,7 +119,9 @@ class deal_adder_control:
         When checking, displey message about input mistakes if exists
         """
         mss = []
-        if self.instrument.get_value() == -1:
+        if self.account.get_value() == None:
+            mss.append(u'Вы должны указать счет')
+        if self.instrument.get_value() == None:
             mss.append(u'Вы должны указать инструмент')
         if self.price.get_value() <= 0:
             mss.append(u'Вы должны указать цену контракта')
@@ -158,12 +160,12 @@ class deal_adder_control:
         """
         if not self._parent.connected():
             return
-        papers = self._parent.model.list_papers(["name"])
+        papers = self._parent.model.list_papers(["name"]).fetchall()
         pps = map(lambda p: (p["id"], p["name"]), papers)
-        self.instrument.update_answers(pps, -1)
-        accs = self._parent.model.list_accounts(["name"])
+        self.instrument.update_answers(pps)
+        accs = self._parent.model.list_accounts(["name"]).fetchall()
         acs = map(lambda ac: (ac["id"], ac["name"]), accs)
-        self.account.update_answers(acs, -1)
+        self.account.update_answers(acs)
         
 
 

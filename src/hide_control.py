@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import gtk
 
-class hide_control:
+class hide_control(object):
     """
     \~russian
     \brief Контрол, управляет видимостью виджетов
@@ -58,7 +58,7 @@ class hide_control:
             else:
                 self.set_sensitive_all(False)
 
-class all_checked_control:
+class all_checked_control(object):
     """
     \~russian
     \brief Управляет наследниками TobbleButton
@@ -88,7 +88,7 @@ class all_checked_control:
                 return
         self.parent_checkbutton.set_active(False)
         
-class value_returner_control:
+class value_returner_control(object):
     """
     \~russian
     \brief Контрол возвращающий значение

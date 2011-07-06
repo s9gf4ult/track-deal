@@ -17,8 +17,8 @@ class deal_editor_control:
         assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
         def shorter(name):
-            return self.builder.get_object(name)
-        w = self.builder.get_object("deal_editor")
+            return self._parent.builder.get_object(name)
+        w = self._parent.builder.get_object("deal_editor")
         w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         
         ##########
@@ -32,8 +32,8 @@ class deal_editor_control:
                            ("deal_editor_change_price", "deal_adder_price1"),
                            ("deal_editor_change_count", "deal_adder_count1"),
                            ("deal_editor_change_commission", "deal_editor_commission")]:
-            cb = self.builder.get_object(hcb)
-            bb = self.builder.get_object(box)
+            cb = self._parent.builder.get_object(hcb)
+            bb = self._parent.builder.get_object(box)
             self.hiders.append(hide_control(cb, [bb]))
             pass
 
@@ -49,7 +49,7 @@ class deal_editor_control:
                                          month = shorter("deal_editor_month"),
                                          day = shorter("deal_editor_day"))
 
-        self.instrument = combo_select_control(shorter("deal_adder_stock1"),
+        self.instrument = combo_select_control(shorter("deal_editor_instrument"),
                                                checkbutton = shorter("deal_editor_change_instrument"))
 
         self.price = number_control(shorter("deal_adder_price1"), shorter("deal_editor_change_price"), step_incr = 0.1, digits = 4)
@@ -59,7 +59,7 @@ class deal_editor_control:
             m = shorter(name)
             m.get_adjustment().set_all(lower = 0, upper = sys.float_info.max)
         self.account = combo_select_control(shorter("deal_adder_account1"),
-                                            checkbutton = shobject("deal_editor_change_account"))
+                                            checkbutton = shorter("deal_editor_change_account"))
         self.direction = select_control({-1 : shorter("deal_adder_buy_rb1"),
                                          1 : shorter("deal_adder_sell_rb1")}, shorter("deal_editor_change_direction"))
 
@@ -84,33 +84,40 @@ class deal_editor_control:
         self.update_accounts()
         
     def get_data(self):
+        """\brief return data from dialog
+        \return hash table with keys:\n
+        \c datetime - datetime.datetime instance\n
+        \c account_id - int, account id
+        \c direction - -1 or 1\n
+        \c paper_id - id of paper\n
+        \c points - price in points\n
+        \c count - count of contracts\n
+        \c commission
+        """
         ret = {}
         for (getter, key) in [(self.datetime.get_datetime, "datetime"),
-                              (self.direction.get_value, "deal_sign"),
-                              (self.instrument.get_value, "security_name"),
-                              (self.market.get_value, "security_type"),
-                              (self.price.get_value, "price"),
-                              (self.count.get_value, "quantity"),
-                              (self.broker_comm.get_value, "broker_comm"),
-                              (self.stock_comm.get_value, "stock_comm")]:
+                              (self.account.get_value, "account_id"),
+                              (self.direction.get_value, "direction"),
+                              (self.instrument.get_value, "paper_id"),
+                              (self.price.get_value, "points"),
+                              (self.count.get_value, "count"),
+                              (self.commission.get_value, "commission")]:
             m = getter()
             if m != None:
                 ret[key] = m
-        if self.change_account.get_active():
-            ret["account_id"] = self.account.get_value()
         return ret
         
 
     def run(self):
-        win = self.builder.get_object("deal_editor")
+        """
+        \retval gtk.RESPONSE_ACCEPT
+        \retval gtk.RESPONSE_CANCEL
+        """
+        win = self._parent.builder.get_object("deal_editor")
         win.show_all()
         ret = win.run()
         win.hide()
-        if ret == gtk.RESPONSE_ACCEPT:
-            return True
-        else:
-            return None
-
+        return ret
 
 if __name__ == "__main__":
     b = gtk.Builder()

@@ -131,9 +131,9 @@ class main_window_controller(object):
                 except Exception as e:
                     show_error(e.__str__(), self._parent.builder.get_object("main_window"))
                     print(traceback.format_exc())
-            self._parent.call_update_callback()
             diag.destroy()
             fl.destroy()
+            self._parent.call_update_callback()
         
     def set_main_title(self, title):
         self._parent.builder.get_object("main_window").set_title(title)

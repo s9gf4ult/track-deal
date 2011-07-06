@@ -301,10 +301,9 @@ class sqlite_model(common_model):
     def list_papers(self, order_by = []):
         """Returns list of papers
         """
-        q = "select * from papers"
-        if len(order_by) > 0:
-            q += "order by {0}".format(reduce_by_string(", ", order_by))
+        q = "select * from papers{0}".format(order_by_print(order_by))
         return self._sqlite_connection.execute_select(q)
+    
 
     def change_paper(self, paper_id, fields):
         """changes existing paper

@@ -3,20 +3,23 @@
 
 import gtk
 from common_methods import *
+from hide_control import value_returner_control
 
-class combo_select_control:
+class combo_select_control(value_returner_control):
     """
     \brief control for selecting value by representing string
 
     Uses combobox to display string and when this string is selected assigned value can be returned
     \todo add support of checkbutton to return some value
     """
-    def __init__(self, combobox, answers = None, none_answer = None):
+    def __init__(self, combobox, answers = None, none_answer = None, checkbutton = None):
         """
         \param combobox gtk.ComboBox instance
         \param answers list of tuples (value, string), string will be displayed in combobox, value will be returned by \ref get_value
         \param none_answer - value for returning if empty item is selected
+        \param checkbutton - gtk.ToggleButton instance
         """
+        self.checkbutton = checkbutton
         self.combobox = combobox
         self.none_answer = none_answer
         c = gtk.CellRendererText()
@@ -65,7 +68,7 @@ class combo_select_control:
     def get_value(self):
         """
         \brief get selected value
-        \retval None if no one answer is set for control or no one item is selected
+        \retavl None if checkbutton is not active
         \retval value assigned to selected in combobox string
         """
         if self.combobox.get_model() == None:
@@ -73,11 +76,8 @@ class combo_select_control:
         it = self.combobox.get_active_iter()
         if it != None:
             val = self.combobox.get_model().get_value(it, 0)
-            if self.none_answer != None and val == self.none_answer:
-                return None
-            else:
-                return val
-        return None
+            return self.return_value(val)
+        return self.return_value(self.none_answer)
 
 if __name__ == "__main__":
     w = gtk.Dialog()

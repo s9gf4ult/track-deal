@@ -44,21 +44,6 @@
     <property name="icon_name">computer</property>
     <signal name="activate" handler="on_create_database_in_memory_activate" swapped="no"/>
   </object>
-  <object class="GtkListStore" id="date_store">
-    <columns>
-      <!-- column-name open_date -->
-      <column type="gchararray"/>
-      <!-- column-name close_date -->
-      <column type="gchararray"/>
-      <!-- column-name count -->
-      <column type="guint"/>
-      <!-- column-name id -->
-      <column type="gint"/>
-    </columns>
-  </object>
-  <object class="GtkAction" id="deals_load_open_ru">
-    <property name="label">Загрузить из файла с отчетом</property>
-  </object>
   <object class="GtkAction" id="delete_account">
     <property name="label">Удалить</property>
     <property name="stock_id">gtk-remove</property>
@@ -476,6 +461,21 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkListStore" id="date_store">
+    <columns>
+      <!-- column-name open_date -->
+      <column type="gchararray"/>
+      <!-- column-name close_date -->
+      <column type="gchararray"/>
+      <!-- column-name count -->
+      <column type="guint"/>
+      <!-- column-name id -->
+      <column type="gint"/>
+    </columns>
+  </object>
+  <object class="GtkAction" id="deals_load_open_ru">
+    <property name="label">Загрузить из файла с отчетом</property>
   </object>
   <object class="GtkDialog" id="deal_adder">
     <property name="can_focus">False</property>
@@ -1610,7 +1610,7 @@
                     <property name="can_focus">False</property>
                     <property name="left_padding">12</property>
                     <child>
-                      <object class="GtkSpinButton" id="deal_adder_stock_comm1">
+                      <object class="GtkSpinButton" id="deal_editor_commission">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">●</property>
@@ -1643,12 +1643,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFrame" id="frame1">
+              <object class="GtkFrame" id="frame80">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label_xalign">0</property>
                 <child>
-                  <object class="GtkAlignment" id="alignment1">
+                  <object class="GtkAlignment" id="alignment80">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="left_padding">12</property>

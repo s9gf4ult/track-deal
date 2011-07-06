@@ -116,7 +116,7 @@ class deals_tab_controller(object):
         self._parent.deal_adder.update_adder() # set the posible accounts and so on
         self._parent.deal_adder.set_current_datetime()
         ret = self._parent.deal_adder.run()
-        if ret == gtk.RESPONSE_YES:
+        if ret == gtk.RESPONSE_ACCEPT:
             data = self._parent.deal_adder.get_data()
             self._parent.model.tacreate_deal(data["account_id"], data)
             self._parent.call_update_callback()
