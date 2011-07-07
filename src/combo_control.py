@@ -13,7 +13,6 @@ class combo_control(value_returner_control):
     списками
     \todo Класс ComboBoxEntry считается устаревшим и не рекомендуется к использованию
     \todo Переделать работу со стандартным ComboBox если свойство \c has_entry выставлено
-    \todo Сделать возможность отображать в боксе одни данные а программно работать с другими (напрмер отображать названия а возвращать и устанавливать значение по id)
     \~english
     controls combobox and comboedit with one interface
     you can easly update rows in combobox with update_widget
@@ -32,13 +31,16 @@ class combo_control(value_returner_control):
             cell = gtk.CellRendererText()
             self.combobox.pack_start(cell)
             self.combobox.add_attribute(cell, 'text', 0)
+            if self.combobox.has_entry():
+                self.set_entry_text_column(0)
+                
 
     def update_widget(self, rows):
         """
         \~russian
         \brief Обновляет список возможных значений в выпадающем списке
 
-        \param список строк. Старый список возможных значений теряется
+        \param rows список строк. Старый список возможных значений теряется
         """
         m = gtk.ListStore(str)
         for row in rows:
@@ -62,6 +64,9 @@ class combo_control(value_returner_control):
         # elif isinstance(self.combobox, gtk.ComboBoxText):
         #     return self.return_value(self.combobox.get_active_text())
         else:
+            if self.combobox.has_entry():
+                return self.combobox.pro
+            #######################################################################################
             cit = self.combobox.get_active_iter()
             if cit != None:
                 return self.return_value(self.combobox.get_model().get_value(cit, 0))
