@@ -5,28 +5,10 @@ import time
 from common_methods import *
 
 
-# class iter_filter():
-#     def __init__(self, cursor):
-#         self.cursor = cursor
-
-#     def next(self):
-#         return self.cursor.next()[0]
-
-# class cursor_filter():
-#     def __init__(self, query, connection):
-#         # print(query)
-#         self.query = query
-#         self.connection = connection
-
-#     def __iter__(self):
-#         return iter_filter(self.connection.execute(self.query))
-
-
 class deals_filter():
 
     def run(self):
         ret = self.dialog.run()
-        self._regen_selected()
         return ret
     
         

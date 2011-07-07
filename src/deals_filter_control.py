@@ -184,9 +184,9 @@ class deals_filter_control:
                 control.set_lower_limit(rval[0])
                 control.set_upper_limit(rval[1])
         if stock_list != None:
-            self.instruments.update_rows(map(lambda a: (a,), stock_list))
+            self.instruments.update_rows(stock_list)
         if accounts_list != None:
-            self.accounts.update_rows(map(lambda a: (a,), accounts_list))
+            self.accounts.update_rows(accounts_list)
     
                             
 if __name__ == "__main__":

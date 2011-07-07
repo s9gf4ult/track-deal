@@ -1719,10 +1719,11 @@ class sqlite_model(common_model):
         q = u'select * from deals_view'
         if not is_null_or_empty(condition):
             q += u' where {0}'.format(condition)
+        q += order_by_print(order_by)
         if not is_null_or_empty(condargs):
-            return self._sqlite_connection.execute_select(order_by_print(q, order_by), condargs)
+            return self._sqlite_connection.execute_select(q, condargs)
         else:
-            return self._sqlite_connection.execute_select(order_by_print(q, order_by))
+            return self._sqlite_connection.execute_select(q)
     
     def get_deals_count_range(self, ):
         """\brief return range of min / max of field "count" 
