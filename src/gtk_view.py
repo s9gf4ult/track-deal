@@ -12,6 +12,7 @@ from currency_edit_control import currency_edit_control
 from deals_tab_controller import deals_tab_controller
 from deal_adder_control import deal_adder_control
 from deal_editor_control import deal_editor_control
+from deals_filter import deals_filter
 from common_methods import *
 
 

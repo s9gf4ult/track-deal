@@ -593,3 +593,15 @@ def query_yes_no(query, window):
     ret = dial.run()
     dial.destroy()
     return ret
+
+def solve_field_in(args, conds, field_name, values):
+    """\brief generate query for check if \c field_name in one of \c values
+    \param args [out] - list of objects, will be appended by arguments
+    \param conds [out] - list of string, will be appended by condition
+    \param field_name - string, name of the field
+    \param values - list of objects to append to arguments list
+    """
+    if not is_null_or_empty(values):
+        q = "{0} in ({0})".format(field_name, reduce_by_string(", ", map(lambda a: "?", values)))
+        conds.append(q)
+        args.extend(values)

@@ -1710,12 +1710,58 @@ class sqlite_model(common_model):
                 ret["stored_attributes"] = ats
         return ret
                     
-    def list_deals_view_with_condition(self, condition, order_by = []):
+    def list_deals_view_with_condition(self, condition, condargs,  order_by = []):
         """\brief return iteration object to receive elements from deals_view
         \param condition - str, part of query after `where` keywork
+        \param condargs - list of arguments for query
         \param order_by - list of strings
         """
         q = u'select * from deals_view'
         if not is_null_or_empty(condition):
             q += u' where {0}'.format(condition)
-        return self._sqlite_connection.execute_select(order_by_print(q, order_by))
+        if not is_null_or_empty(condargs):
+            return self._sqlite_connection.execute_select(order_by_print(q, order_by), condargs)
+        else:
+            return self._sqlite_connection.execute_select(order_by_print(q, order_by))
+    
+    def get_deals_count_range(self, ):
+        """\brief return range of min / max of field "count" 
+        \return tuple (int - min, int - max)
+        """
+        rt = self._sqlite_connection.execute("select min(count), max(count) from deals_view").fetchone()
+        if rt == (None, None):
+            return (0, 0)
+        else:
+            return rt
+
+    def get_deals_price_range(self, ):
+        """\brief return min / max of "points" field from deals_view table
+        \return tuple (float, float)
+        """
+        rt = self._sqlite_connection.execute("select min(points), max(points) from deals_view").fetchone()
+        if rt == (None, None):
+            return (0, 0)
+        else:
+            return rt
+
+    def get_deals_commission_range(self, ):
+        """\brief return min / max of field commission of deals_view table
+        \return tuple (float, float)
+        """
+        rt = self._sqlite_connection.execute("select min(commission), max(commission) from deals_view").fetchone()
+        if rt == (None, None):
+            return (0, 0)
+        else:
+            return rt
+
+    def get_deals_volume_range(self, ):
+        """\brief return min / max of field volume of deals_view table
+        \return tuple (float, float)
+        """
+        rt = self._sqlite_connection.execute("select min(volume), max(volume) from deals_view").fetchone()
+        if rt == (None, None):
+            return (0, 0)
+        else:
+            return rt
+
+

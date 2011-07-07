@@ -35,7 +35,7 @@ class deals_tab_controller(object):
         dd = self._parent.builder.get_object("deals_view")
         dd.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         dd.connect("row-activated", self.deals_view_row_activated)
-        self.sort_order = "id"
+        self.sort_order = ["deal_id"]
 
     def change_deals_activate(self, action):
         self.change_deals()
@@ -136,7 +136,7 @@ class deals_tab_controller(object):
 
     def sorted_callback(self, column, order, params):
         if params != None:
-            self.sort_order = params[0] + (order == gtk.SORT_DESCENDING and " desc" or "")
+            self.sort_order = [params[0] + (order == gtk.SORT_DESCENDING and " desc" or "")]
             self.update()
         
 
@@ -158,7 +158,7 @@ class deals_tab_controller(object):
     def call_filter(self):
         if not self._parent.connected():
             return
-        self._parent.deals_filter.prepare()
+        self._parent.deals_filter.prepare_filter()
         self._parent.deals_filter.run()
         self._parent.call_update_callback()
 
@@ -166,7 +166,7 @@ class deals_tab_controller(object):
         if not self._parent.connected():
             self.deals_view.make_model() # clean list of deals
             return
-        self._parent.deals_filter.update_filter()
+        self._parent.deals_filter.prepare_filter()
         self.deals_view.update_rows(map(lambda a: (a["deal_id"], a["date_formated"], a["time_formated"], a["paper_name"], a["paper_class"], a["direction_formated"], a["price_formated"], a["count"], a["volume_formated"], a["commission"], a["user_attributes_formated"]),  self._parent.deals_filter.get_rows(self.sort_order)))
                 
         

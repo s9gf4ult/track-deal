@@ -29,35 +29,8 @@ class deals_filter():
         self._regen_selected()
         return ret
     
-
-    def get_ids(self, order_by, parent = False, fields = ["id"]):
-        if not self._parent.connected():
-            return []
-        self.plus = []
-        fields = reduce_by_string(u', ', map(lambda a: u'd.{0}'.format(a), fields))
-        fromf = self.get_from_part()
-        ret = u'select {0} from {1}'.format(fields, fromf)
-        wheref = self.get_where_part(parent)
-        if not is_null_or_empty(wheref):
-            ret += ' where {0}'.format(wheref)
-        orderf = self.get_order_part(order_by)
-        if not is_null_or_empty(orderf):
-            ret += ' order by {0}'.format(orderf)
-        if is_null_or_empty(self.plus):
-            return self.database.connection.execute(ret)
-        else:
-            return self.database.connection.execute(ret, self.plus)
-    
-    def get_from_part(self):
-        ret = "deals_view d inner join selected_stocks s on s.stock = d.security_name"
-        if self.dialog.account_current.get_value() == "select":
-            ret += " inner join selected_accounts a on d.account_id = a.account_id"
-        return ret
-            
-    def get_order_part(self, orderfield):
-        return u'd.{0}'.format(orderfield)
         
-    def prepare(self, ):
+    def prepare_filter(self, ):
         """\brief prepare filter values getting if need from the database
         """
         if not self._parent.connected():
@@ -66,106 +39,76 @@ class deals_filter():
         upps = map(lambda a: (a["id"], a["name"]), papers)
         accounts = self._parent.model.list_accounts(["name"])
         uaccs = map(lambda a: (a["id"], a["name"]), accounts)
-        self.dialog.update_widget(count_range = self._parent.model.get_count_range(),
-                                  price_range = self._parent.model.get_price_range(),
-                                  comm_range = self._parent.model.get_commission_range(),
-                                  volume_range = self._parent.model.get_volume_range(),
+        self.dialog.update_widget(count_range = self._parent.model.get_deals_count_range(),
+                                  price_range = self._parent.model.get_deals_price_range(),
+                                  comm_range = self._parent.model.get_deals_commission_range(),
+                                  volume_range = self._parent.model.get_deals_volume_range(),
                                   stock_list = upps,
                                   accounts_list = uaccs)
         
         
-        
-        
-        
-    def _regen_selected(self):
-        if not self.database.connection:
-            return
-        self.database.set_selected_stocks(map(lambda a: a[0], self.dialog.instruments.get_checked_rows()))
-        if self.dialog.account_current.get_value() == "current":
-            (name, ) = self.database.connection.execute("select name from accounts where id = ?", (gethash(self.global_data, "current_account"), )).fetchone() or (None, )
-            self.database.set_selected_accounts(name != None and [name] or None)
-        elif self.dialog.account_current.get_value() == "select":
-            self.database.set_selected_accounts(map(lambda a: a[0], self.dialog.accounts.get_checked_rows()))
-
-    
     def __init__(self, parent):
         self._parent = parent
         self.dialog = deals_filter_control(self._parent.builder)
         
-    def _prepare_filter(self):
-        if self._parent.connected():
-            sl = map(lambda a: a[0], self.database.connection.execute("select distinct security_name from deals"))
-            also = {}
-            for (key, val) in [("count_range", "quantity"),
-                               ("price_range", "price"),
-                               ("broker_comm_range", "broker_comm"),
-                               ("stock_comm_range", "stock_comm"),
-                               ("comm_range", "broker_comm + stock_comm"),
-                               ("volume_range", "volume")]:
-                also[key] = self.database.connection.execute("select min({0}), max({0}) from deals".format(val)).fetchone()
-            also["stock_list"] = sl
-            also["accounts_list"] = map(lambda a: a[0], self.database.connection.execute("select distinct name from accounts order by name"))
-            self.dialog.update_widget(**also)
 
-    def get_where_part(self, parent):
-        
-        conds = []
-        def lower_upper(field_name, l, h):
-            solve_lower_upper(self.plus, conds, field_name, l, h)
-            
-        #################
-        # number ranges #
-        #################
-        for (control, field_name) in [(self.dialog.count, "d.quantity"),
-                                      (self.dialog.price, "d.price"),
-                                      (self.dialog.comm, "d.comm"),
-                                      (self.dialog.volume, "d.volume")]:
-            lower_upper(field_name, control.get_lower_value(), control.get_upper_value())
-
-        #################
-        # date controls #
-        #################
-        ld = self.dialog.datetime_range.get_lower_datetime()
-        hd = self.dialog.datetime_range.get_upper_datetime()
-        lower_upper("d.datetime", ld, hd)
-
-        ################
-        # time control #
-        ################
-        lower_upper("d.time", self.dialog.time.get_lower_seconds(), self.dialog.time.get_upper_seconds())
-
-        ####################
-        # select controls  #
-        ####################
-        pp = self.dialog.position.get_value()
-        if pp != None:
-            if pp:
-                conds.append(u'd.position_id is not null')
-            else:
-                conds.append(u'd.position_id is null')
-
-        dd = self.dialog.direction.get_value()
-        if dd != None:
-            lower_upper("d.deal_sign", dd, dd)
-
-        if (gethash(self.global_data, "current_account") == None and self.dialog.account_current.get_value() == "current") or self.dialog.account_current.get_value() == "none":
-            conds.append("d.account_id is null")
-        elif self.dialog.account_current.get_value() == "current":
-            lower_upper("d.account_id", self.global_data["current_account"], self.global_data["current_account"])
-        if parent != None:
-            lower_upper("d.parent_deal_id", parent, parent)
-
-        return len(conds) > 0 and reduce_by_string(' and ', conds) or None
-
-    def get_condition(self, ):
+    def get_conditions(self, ):
         """\brief return string with where part
-        \retval "" if no conditions assigned with filter
-        \retval string with `where` part of the query
-        \note need implementation
+        \retval None if no one row must be displayed
+        \retval ("", []) tuple if no conditions
+        \retval (string with condition, list with arguments) if there is conditions for query
         """
-        raise NotImplementedError()
+        args = []
+        conds = []
+        # datetime conditions
+        solve_lower_upper(args, conds, "datetime",
+                          self.dialog.datetime_range.get_lower_datetime(),
+                          self.dialog.datetime_range.get_upper_datetime())
 
-    
+        # instruments selected
+        solve_field_in(args, conds, "paper_id",
+                       map(lambda a: a[1], self.dialog.instruments.get_checked_rows()))
+        
+        # numerical fields
+        for (field_name, control) in [("count", self.dialog.count),
+                                      ("points", self.dialog.price),
+                                      ("commission", self.dialog.comm),
+                                      ("volume", self.dialog.volume)]:
+            solve_lower_upper(args, conds, field_name,
+                              control.get_lower_value(),
+                              control.get_upper_value())
+
+        # position
+        inpos = self.dialog.position.get_value()
+        if inpos <> None:
+            if inpos:
+                conds.append("position_id is not null")
+            else:
+                conds.append("position_id is null")
+
+        # direction
+        direct = self.dialog.direction.get_value()
+        if direct <> None:
+            conds.append("direction = ?")
+            args.append(direct)
+
+        # accounts
+        cac = self._parent.model.get_current_account()
+        ss = self.dialog.account_current.get_value()
+        if ss == "current":
+            if cac == None:
+                return None             # we want to show deals from current account but current account is None
+            conds.append("account_id = ?")
+            args.append(cac["id"])
+        elif ss == "all":
+            pass
+        elif ss == "select":
+            selected = self.dialog.accounts.get_checked_rows()
+            solve_field_in(args, conds, 'account_id',
+                           map(lambda a: a[1], selected))
+
+        return (reduce_by_string(" and ", conds), args)
+        
 
     def get_rows(self, order_by):
         """\brief get filtred rows
@@ -175,5 +118,9 @@ class deals_filter():
         """
         if not self._parent.connected():
             return None
-        return self._parent.model.list_deals_view_with_condition(self.get_condition(), order_by)
+        cnds = self.get_conditions()
+        if cnds == None:
+            return []
+        else:
+            return self._parent.model.list_deals_view_with_condition(cnds[0], cnds[1], order_by)
 
