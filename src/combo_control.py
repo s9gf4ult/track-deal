@@ -12,7 +12,6 @@ class combo_control(value_returner_control):
     В основном боксов со строкой редактирования и простыми раскрывающимися
     списками
     \todo Класс ComboBoxEntry считается устаревшим и не рекомендуется к использованию
-    \todo Переделать работу со стандартным ComboBox если свойство \c has_entry выставлено
     \~english
     controls combobox and comboedit with one interface
     you can easly update rows in combobox with update_widget
@@ -28,11 +27,12 @@ class combo_control(value_returner_control):
         self.combobox = combobox
         self.checkbutton = checkbutton
         if not isinstance(self.combobox, gtk.ComboBoxEntry):
-            cell = gtk.CellRendererText()
-            self.combobox.pack_start(cell)
-            self.combobox.add_attribute(cell, 'text', 0)
-            if self.combobox.has_entry():
-                self.set_entry_text_column(0)
+            if self.combobox.get_has_entry():
+                self.combobox.set_entry_text_column(0)
+            else:
+                cell = gtk.CellRendererText()
+                self.combobox.pack_start(cell)
+                self.combobox.add_attribute(cell, 'text', 0)
                 
 
     def update_widget(self, rows):
@@ -63,15 +63,15 @@ class combo_control(value_returner_control):
             return self.return_value(self.combobox.child.get_text())
         # elif isinstance(self.combobox, gtk.ComboBoxText):
         #     return self.return_value(self.combobox.get_active_text())
-        else:
-            if self.combobox.has_entry():
-                return self.combobox.pro
-            #######################################################################################
-            cit = self.combobox.get_active_iter()
-            if cit != None:
-                return self.return_value(self.combobox.get_model().get_value(cit, 0))
+        elif isinstance(self.combobox, gtk.ComboBox):
+            if self.combobox.get_has_entry():
+                return self.return_value(self.combobox.get_child().get_text())
             else:
-                return None
+                cit = self.combobox.get_active_iter()
+                if cit != None:
+                    return self.return_value(self.combobox.get_model().get_value(cit, 0))
+                else:
+                    return None
 
     def set_value(self, data):
         """
@@ -116,8 +116,13 @@ if __name__ == "__main__":
     p.pack_start(cc)
     ccon = combo_control(cc)
     ccon.update_widget(["cococoar", "ejejr", "eijwiej"])
+    ccc = gtk.combo_box_new_with_entry()
+    p.pack_start(ccc)
+    cccon = combo_control(ccc)
+    cccon.update_widget(["some", "else", "and_other"])
     def pushed(bt):
         con.set_value("new_value")
+        cccon.set_value("again")
     bt = gtk.Button("push")
     p.pack_start(bt)
     bt.connect("clicked", pushed)
