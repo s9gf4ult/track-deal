@@ -602,6 +602,6 @@ def solve_field_in(args, conds, field_name, values):
     \param values - list of objects to append to arguments list
     """
     if not is_null_or_empty(values):
-        q = "{0} in ({0})".format(field_name, reduce_by_string(", ", map(lambda a: "?", values)))
+        q = "{0} in ({1})".format(field_name, reduce_by_string(", ", map(lambda a: "?", values)))
         conds.append(q)
         args.extend(values)

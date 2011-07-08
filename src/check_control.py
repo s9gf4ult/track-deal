@@ -103,7 +103,7 @@ class check_control():
         """
         \brief return just selected rows
         \retval None if no one row is selected
-        \retval list of tuples (selected - boolean signaling row is selected, *other data)
+        \retval list of tuples (*data fields)
         """
         def get_checked(model, path, it):
             if model.get_value(it, 0):

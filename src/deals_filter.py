@@ -49,7 +49,7 @@ class deals_filter():
 
         # instruments selected
         solve_field_in(args, conds, "paper_id",
-                       map(lambda a: a[1], self.dialog.instruments.get_checked_rows()))
+                       map(lambda a: a[0], self.dialog.instruments.get_checked_rows()))
         
         # numerical fields
         for (field_name, control) in [("count", self.dialog.count),
@@ -88,7 +88,6 @@ class deals_filter():
             selected = self.dialog.accounts.get_checked_rows()
             solve_field_in(args, conds, 'account_id',
                            map(lambda a: a[1], selected))
-
         return (reduce_by_string(" and ", conds), args)
         
 
@@ -104,5 +103,5 @@ class deals_filter():
         if cnds == None:
             return []
         else:
-            return self._parent.model.list_deals_view_with_condition(cnds[0], cnds[1], order_by)
+            return self._parent.model.list_deals_view_with_condition(cnds[0], cnds[1], order_by).fetchall()
 
