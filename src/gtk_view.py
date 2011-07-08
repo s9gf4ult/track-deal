@@ -13,6 +13,7 @@ from deals_tab_controller import deals_tab_controller
 from deal_adder_control import deal_adder_control
 from deal_editor_control import deal_editor_control
 from deals_filter import deals_filter
+from paper_adder import paper_adder
 from common_methods import *
 
 
@@ -53,6 +54,8 @@ class gtk_view(common_view):
     deal_editor = None
     ## \brief \ref deals_filter.deals_filter instance
     deals_filter = None
+    ## \ref paper_adder.paper_adder instance
+    paper_adder = None
     
     def __init__(self, ):
         """initialize gtk view
@@ -68,6 +71,7 @@ class gtk_view(common_view):
         self.deal_adder = deal_adder_control(self)
         self.deal_editor = deal_editor_control(self)
         self.deals_filter = deals_filter(self)
+        self.paper_adder = paper_adder(self)
     
     def run(self, ):
         """show main window and initialize all the necessary

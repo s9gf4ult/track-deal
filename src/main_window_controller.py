@@ -32,6 +32,7 @@ class main_window_controller(object):
         shorter("main_window", "delete-event", self.main_window_quit)
         # shorter("import_from_old_database", "activate", self.import_from_old_database_activate)
         shorter("save_as", "activate", self.save_as_activate)
+        shorter("add_papers", "activate", self.add_papers_activate)
         # shorter("call_points", "activate", self.call_points)
 
     def call_points(self, action):
@@ -191,4 +192,20 @@ class main_window_controller(object):
         """
         win = self._parent.builder.get_object("main_window")
         win.show_all()
+
+    def add_papers_activate(self, action):
+        """\brief add papers action activate handler
+        \param action
+        """
+
+        self.call_paper_adder()
+
+    def call_paper_adder(self, ):
+        """\brief call paper_padder dialog
+        """
+        if not self._parent.connected():
+            return
+
+        self._parent.paper_adder.run()
         
+

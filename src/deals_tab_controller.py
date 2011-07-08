@@ -167,6 +167,6 @@ class deals_tab_controller(object):
             self.deals_view.make_model() # clean list of deals
             return
         self._parent.deals_filter.prepare_filter()
-        self.deals_view.update_rows(map(lambda a: (a["deal_id"], a["date_formated"], a["time_formated"], a["paper_name"], a["paper_class"], a["direction_formated"], a["price_formated"], a["count"], a["volume_formated"], a["commission"], a["user_attributes_formated"]),  self._parent.deals_filter.get_rows(self.sort_order)))
+        self.deals_view.update_rows(map(lambda a: (a["deal_id"], a["date_formated"], a["time_formated"], a["paper_name"], a["paper_class"], a["direction_formated"], a["price_formated"], a["count"], a["volume_formated"], a["commission"], a["user_attributes_formated"]),  self._parent.deals_filter.get_rows(self.sort_order).fetchall()))
                 
         

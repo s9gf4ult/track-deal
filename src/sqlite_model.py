@@ -300,6 +300,13 @@ class sqlite_model(common_model):
 
     def list_papers(self, order_by = []):
         """Returns list of papers
+        \return hash table with keys:\n
+        \c id - int, id of paper\n
+        \c type - str, type of paper "stock", "option", "future" or so on\n
+        \c stock - str, name of stock\n
+        \c class - str, name of class if exists\n
+        \c name - str, name of this paper\n
+        \c full_name - str, full name or comment
         """
         q = "select * from papers{0}".format(order_by_print(order_by))
         return self._sqlite_connection.execute_select(q)
@@ -447,6 +454,7 @@ class sqlite_model(common_model):
     def start_transacted_action(self, action_name):
         """\brief start transaction and action
         \param action_name
+        \note action must be commited by \ref commit_transacted_action or rolled back by \ref rollback
         """
         self.begin_transaction()
         self.start_action(action_name)
