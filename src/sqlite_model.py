@@ -1648,6 +1648,7 @@ class sqlite_model(common_model):
         \param do_recalc - if True (default), after changing deal all temporary tables will be recalculated
         \note view must use \ref tachange_deals instead
         \todo make do_recalc behaviour more smart: if paper changes then reclculate data for previous paper and for current, if does not then recalculate just for this paper (may be it is not need at all)
+        \bug can not update multiple deals
         """
         if is_null_or_empty(deal_id):
             raise od_exception("deal_id can not be empty")
@@ -1658,6 +1659,8 @@ class sqlite_model(common_model):
         newfields = copy(fields)
         remhash(newfields, "user_attributes")
         remhash(newfields, "stored_attributes")
+        import pudb
+        pudb.set_trace()
         self._sqlite_connection.update("deals", newfields, "id = ?", ids)
 
         if fields.has_key("user_attributes"):
@@ -1676,6 +1679,7 @@ class sqlite_model(common_model):
                                                                     
         self.fix_groups()
         self.fix_positions()
+        self.recalculate_all_temporary()
         if do_recalc:
             self.recalculate_all_temporary()
         

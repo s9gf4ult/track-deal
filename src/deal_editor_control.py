@@ -74,7 +74,7 @@ class deal_editor_control:
         """instruments is a list of strings"""
         if not self._parent.connected():
             return
-        self.instrument.update_widget(map(lambda a: (a["id"], a["name"]), self._parent.model.list_papers(["name"])))
+        self.instrument.update_answers(map(lambda a: (a["id"], a["name"]), self._parent.model.list_papers(["name"])))
 
     def update_editor(self):
         """
