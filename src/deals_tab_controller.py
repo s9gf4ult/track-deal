@@ -73,6 +73,7 @@ class deals_tab_controller(object):
             return
         row = self.deals_view.get_selected_rows()
         if not is_null_or_empty(row) and len(row) == 1:
+            self._parent.deal_adder.update_adder()
             self._parent.deal_adder.load_from_deal(row[0][0])
             ret = self._parent.deal_adder.run()
             if ret == gtk.RESPONSE_ACCEPT:

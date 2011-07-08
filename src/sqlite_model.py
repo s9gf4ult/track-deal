@@ -1643,6 +1643,8 @@ class sqlite_model(common_model):
         points - float\n
         commission - float\n
         datetime - datetime.datetime instance
+        user_attributes - hash table, if exists then user attributes will be rewriten
+        stored_attributes - hash table, if exists then stored attributes will be rewriten
         \param do_recalc - if True (default), after changing deal all temporary tables will be recalculated
         \note view must use \ref tachange_deals instead
         \todo make do_recalc behaviour more smart: if paper changes then reclculate data for previous paper and for current, if does not then recalculate just for this paper (may be it is not need at all)
@@ -1653,9 +1655,27 @@ class sqlite_model(common_model):
         ids = (isinstance(deal_id, (int, long)) and [deal_id] or deal_id)
         if is_null_or_empty(fields):
             return
-        self._sqlite_connection.update("deals", fields, "id = ?", ids)
-        fix_groups()
-        fix_positions()
+        newfields = copy(fields)
+        remhash(newfields, "user_attributes")
+        remhash(newfields, "stored_attributes")
+        self._sqlite_connection.update("deals", newfields, "id = ?", ids)
+
+        if fields.has_key("user_attributes"):
+            atts = fields["user_attributes"]
+            self._sqlite_connection.execute("delete from user_deal_attributes where deal_id = ?", [deal_id])
+            ins_data = map(lambda k: {"deal_id" : deal_id, "name" : k, "value" : atts[k]}, atts.keys())
+            if not is_null_or_empty(ins_data):
+                self._sqlite_connection.insert("user_deal_attributes", ins_data)
+
+        if fields.has_key("stored_attributes"):
+            atts = fields["stored_attributes"]
+            self._sqlite_connection.execute("delete from stored_deal_attributes where deal_id = ?", [deal_id])
+            ins_data = map(lambda k: {"deal_id" : deal_id, "type" : k, "value" : atts[k]}, atts.keys())
+            if not is_null_or_empty(ins_data):
+                self._sqlite_connection.insert("stored_deal_attributes", ins_data)
+                                                                    
+        self.fix_groups()
+        self.fix_positions()
         if do_recalc:
             self.recalculate_all_temporary()
         
@@ -1710,7 +1730,7 @@ class sqlite_model(common_model):
                 for k in uat:
                     ats[k["name"]] = k["value"]
                 ret["user_attributes"] = ats
-            sat = self._sqlite_connection.execute_select("select type, value from stored_deal_attributes where deal_id = ?", [deal_id])
+            sat = self._sqlite_connection.execute_select("select type, value from stored_deal_attributes where deal_id = ?", [deal_id]).fetchall()
             if len(sat) > 0:
                 ats = {}
                 for k in sat:
