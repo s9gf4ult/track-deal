@@ -1628,7 +1628,7 @@
                 </child>
                 <child type="label">
                   <object class="GtkCheckButton" id="deal_editor_change_commission">
-                    <property name="label" translatable="yes">Сменить комиссию биржи</property>
+                    <property name="label" translatable="yes">Сменить комиссию</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
@@ -3521,6 +3521,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="related_action">add_papers</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
