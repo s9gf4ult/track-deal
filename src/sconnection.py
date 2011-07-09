@@ -143,26 +143,34 @@ class sconnection(sqlite3.Connection):
         assert(isinstance(query, basestring))
         return scon_cursor(self, query, arguments)
 
-    def update(self, table, set_fields, where_part = None, where_arguments = []):
+    def update(self, table, set_fields, where_part = None, where_arguments = tuple([])):
         """executes update on all `set_fields` where `where_part`
         \param table 
-        \param set_fields  hash like {"id" : value}
-        \param where_part  string
-        \param where_arguments  list of arguments in query for `where` part
+        \param set_fields hash like {"id" : value}
+        \param where_part string
+        \param where_arguments tuple with arguments or list with tuples with arguments
         """
-        assert(isinstance(set_fields, dict) or hasattr(set_fields, "__iter__"))
+        assert(isinstance(set_fields, dict))
+        assert(isinstance(where_arguments, (tuple, list)))
+        if is_null_or_empty(set_fields):
+            return
+        
         names = []
         data = []
-        for htb in (isinstance(set_fields, dict) and [set_fields] or set_fields):
-            nn = htb.keys()
-            names.append(nn)
-            data.append(map(lambda a: htb[a], nn) + where_arguments)
+        for k in set_fields.keys():
+            names.append(k)
+            data.append(set_fields[k])
 
-        for (name, dd) in map(lambda a, b: (a, b), names, data):
-            q = "update {0} set {1}".format(table, reduce_by_string(", ", map(lambda a: "{0} = ?".format(a), name)))
-            if not is_null_or_empty(where_part):
-                q += "where {0}".format(where_part)
-            self.execute(q, dd)
+        q = 'update {0} set {1}'.format(table, reduce_by_string(', ', map(lambda a: '{0} = ?'.format(a), names)))
+        if not is_null_or_empty(where_part):
+            q += ' where {0}'.format(where_part)
+            wargs = (isinstance(where_arguments, tuple) and [where_arguments] or where_arguments)
+            exargs = map(lambda warg: tuple(list(data) + list(warg)), wargs)
+            self.executemany(q, exargs)
+        else:
+            self.execute(q, data)
+            
+        
 
     def begin_transaction(self, ):
         """Begins transaction

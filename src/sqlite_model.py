@@ -314,13 +314,13 @@ class sqlite_model(common_model):
 
     def change_paper(self, paper_id, fields):
         """changes existing paper
-        \param paper_id 
+        \param paper_id - int, id of paper object
         \param fields  hash {"field" : value}
         """
         if len(fields) > 0:
             if self._sqlite_connection.execute("select count(*) from papers where id = ?", [paper_id]).fetchone()[0] > 0:
                 remhash(fields, "id")
-                self._sqlite_connection.update("papers", fields)
+                self._sqlite_connection.update("papers", fields, 'id = ?', (paper_id, ))
                 for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals where paper_id = ?", [paper_id]):
                     self.recalculate_deals(aid)
                 for (aid, ) in self._sqlite_connection.execute("select distinct account_id from positions where paper_id = ?", [paper_id]):
@@ -592,11 +592,12 @@ class sqlite_model(common_model):
 
     def change_account(self, aid, name = None, money_id_or_name = None, money_count = None, comment = None):
         """changes existing account
-        \param aid
-        \param name new name or None
-        \param money_id_or_name new money or None 
-        \param money_count new initial money amount or None
-        \param comment new comment or None
+        \param aid - int
+        \param name - str, new name or None
+        \param money_id_or_name - int or str, new money or None 
+        \param money_count - float, new initial money amount or None
+        \param comment - str, new comment or None
+        \note \ref tachange_account must be used by model instead
         """
         sets = {}
         if name != None:
@@ -609,7 +610,7 @@ class sqlite_model(common_model):
         if comment != None:
             sets["comments"] = comment
         if len(sets) > 0:
-            self._sqlite_connection.update("accounts", sets, "id = ?", [aid])
+            self._sqlite_connection.update("accounts", sets, "id = ?", (aid, ))
 
         if money_id_or_name <> None or money_count <> None:
             self.recalculate_deals(aid)
@@ -620,9 +621,12 @@ class sqlite_model(common_model):
     @in_action(lambda self, aid, *args, **kargs: "changed account with id {0}".format(aid))
     @pass_to_method(change_account)
     def tachange_account(self, *args, **kargs):
-        """transacted wrapper for change account function
-        \param *args 
-        \param **kargs 
+        """transacted wrapper for \ref change_account
+        \param aid - int
+        \param name - str, new name or None
+        \param money_id_or_name - int or str, new money or None 
+        \param money_count - float, new initial money amount or None
+        \param comment - str, new comment or None
         """
         pass
 
@@ -1589,7 +1593,7 @@ class sqlite_model(common_model):
             sets["full_name"] = full_name
 
         money = self.get_money(id_or_name)
-        self._sqlite_connection.update("moneys", sets, "id = ?", [money["id"]])
+        self._sqlite_connection.update("moneys", sets, "id = ?", (money["id"], ))
 
     @raise_db_closed
     @in_transaction
@@ -1654,13 +1658,12 @@ class sqlite_model(common_model):
             raise od_exception("deal_id can not be empty")
         
         ids = (isinstance(deal_id, (int, long)) and [deal_id] or deal_id)
+        ids = map(lambda a: (a, ), ids)
         if is_null_or_empty(fields):
             return
         newfields = copy(fields)
         remhash(newfields, "user_attributes")
         remhash(newfields, "stored_attributes")
-        import pudb
-        pudb.set_trace()
         self._sqlite_connection.update("deals", newfields, "id = ?", ids)
 
         if fields.has_key("user_attributes"):

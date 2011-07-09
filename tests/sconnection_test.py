@@ -52,15 +52,22 @@ class sconnection_test(unittest.TestCase):
         self.assertEqual(100, len(self.conn.execute_select("select * from aa").fetchall()))
         self.assertEqual(100, self.conn.execute_select("select count(*) as count from aa").fetchall()[0]["count"])
 
-    def test_udate(self, ):
+    def test_update(self, ):
         """tests update method
         """
         self.conn.executemany("insert into aa (id, val) values (?, ?)", map(lambda a, b: (a, b), xrange(200, 300), xrange(300, 400)))
-        self.conn.update("aa", {"val" : 0}, "id > ?", [200])
+        self.conn.update("aa", {"val" : 0}, "id > ?", (200, ))
         self.assertEqual(300, self.conn.execute("select sum(val) as sum from aa").fetchone()[0])
         self.conn.update("aa", {"val" : 0})
-        self.conn.update("aa", {"val": 1}, "id >= ?", [250])
+        self.conn.update("aa", {"val": 1}, "id >= ?", (250, ))
         self.assertEqual(50, self.conn.execute("select count(id) as count from aa where val <> 1").fetchone()[0])
+        self.conn.execute('delete from aa')
+        self.conn.executemany('insert into aa (id, val) values (?, ?)', map(lambda a, b: (a, b), xrange(0, 100), map(lambda x: 10, xrange(0, 100))))
+        self.assertEqual(100 * 10, self.conn.execute('select sum(val) from aa').fetchone()[0])
+        self.conn.update('aa', {'val' : 20}, 'id = ?', map(lambda a: (a,), xrange(0, 100)))
+        self.assertEqual(100 * 20, self.conn.execute('select sum(val) from aa').fetchone()[0])
+        
+                              
 
     def test_commit_and_rollback(self, ):
         """
