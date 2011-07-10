@@ -1652,7 +1652,6 @@ class sqlite_model(common_model):
         \param do_recalc - if True (default), after changing deal all temporary tables will be recalculated
         \note view must use \ref tachange_deals instead
         \todo make do_recalc behaviour more smart: if paper changes then reclculate data for previous paper and for current, if does not then recalculate just for this paper (may be it is not need at all)
-        \bug can not update multiple deals
         """
         if is_null_or_empty(deal_id):
             raise od_exception("deal_id can not be empty")
