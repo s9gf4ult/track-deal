@@ -12,6 +12,10 @@ from number_range_control import *
 from hiding_time_distance_range_control import *
 
 class deals_filter_control:
+    """
+    \brief control to handle events in filter dialog and control state of widgets in filter, no more.
+    \todo rewrite filter using "hiding" widgets as in \ref positions_filter_control.positions_filter_control done
+    """
     def __init__(self, builder):
         self.builder = builder
         w = self.builder.get_object("deals_filter")

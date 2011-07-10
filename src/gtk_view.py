@@ -14,6 +14,7 @@ from deal_adder_control import deal_adder_control
 from deal_editor_control import deal_editor_control
 from deals_filter import deals_filter
 from paper_adder import paper_adder
+from positions_tab_controller import positions_tab_controller
 from common_methods import *
 
 
@@ -56,6 +57,8 @@ class gtk_view(common_view):
     deals_filter = None
     ## \ref paper_adder.paper_adder instance
     paper_adder = None
+    ## \ref positions_tab_controller.positions_tab_controller instance
+    positions_tab = None
     
     def __init__(self, ):
         """initialize gtk view
@@ -72,6 +75,7 @@ class gtk_view(common_view):
         self.deal_editor = deal_editor_control(self)
         self.deals_filter = deals_filter(self)
         self.paper_adder = paper_adder(self)
+        self.positions_tab = positions_tab_controller(self)
     
     def run(self, ):
         """show main window and initialize all the necessary
@@ -87,6 +91,7 @@ class gtk_view(common_view):
         self.window.update()
         self.accounts.update()
         self.deals_tab.update()
+        self.positions_tab.update()
 
     def connected(self, ):
         """\retval True if model exist and connected

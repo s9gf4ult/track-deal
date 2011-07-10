@@ -7,6 +7,7 @@ import traceback
 from exceptions import *
 import datetime
 import re
+import sys
 
 def show_error(message, parent):
     """
@@ -146,10 +147,9 @@ def show_and_print_error(error, window):
     \brief Показывает диалог с сообщением об ошибке и печатает стектрейс в stderr
     \param error объект ошибки
     \param window родительское окно для диалога
-    \todo на самом деле он печатает в stdout надо сделать чтобы печатал в stderr
     """
     show_error(error.__str__(), window)
-    print(traceback.format_exc())
+    sys.stderr.write(traceback.format_exc())
 
 def no_reaction(func):
     """\~english \brief decorator

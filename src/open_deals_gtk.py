@@ -68,7 +68,7 @@ class main_ui():
         self.report_tab.update_widget()
         self.blog_tab.update_widget()
         self.main_window.update_widget()
-        self.positions_tab.update_widget()
+        self.positions_tab.update()
         self.statusbar.update_widget()
         
 if __name__ == "__main__":
