@@ -684,8 +684,41 @@ class sqlite_model_test(unittest.TestCase):
             self.assertNotAlmostEqual(self.model.get_account(dollac)["money_count"] + zcount + mucount,
                                       self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? order by close_datetime desc, open_datetime desc, id desc limit 1", [dollac]).fetchone()[0])
         
+    def test_create_position_from_data(self, ):
+        """function create_position_from_data test
+        """
+        self.model.disconnect()
+        self.model.create_new(':memory:')
+        mid = self.model.tacreate_money('ru')
+        aid = self.model.tacreate_account('superacc', mid, 1000)
+        paid = self.model.tacreate_paper('stock', 'sber', 'micex')
+        pid1 = self.model.tacreate_position_from_data(aid, {'paper_id' : paid,
+                                                            'count' : random.randint(1, 100),
+                                                            'direction' : (random.random() > 0.5 and 1 or -1),
+                                                            'commission' : random.random(),
+                                                            'open_datetime' : datetime(2010, 10, 10),
+                                                            'close_datetime' : datetime(2010, 10, 11),
+                                                            'open_points' : 50 + random.random() * 50,
+                                                            'close_points' : 50 + random.random() * 50})
+        self.assertEqual(2, self.model.assigned_account_deals(aid))
+        self.assertEqual(1, self.model.assigned_account_positions(aid))
+        pid2 = self.model.tacreate_position_from_data(aid, {'paper_id' : paid,
+                                                            'count' : random.randint(1, 100),
+                                                            'direction' : (random.random() > 0.5 and 1 or -1),
+                                                            'commission' : random.random(),
+                                                            'open_datetime' : datetime(2010, 11, 10),
+                                                            'close_datetime' : datetime(2010, 11, 11),
+                                                            'open_points' : 50 + random.random() * 50,
+                                                            'close_points' : 50 + random.random() * 50})
+        self.assertEqual(4, self.model.assigned_account_deals(aid))
+        self.assertEqual(2, self.model.assigned_account_positions(aid))
+        (accm, ) = self.model._sqlite_connection.execute('select net_after from positions_view order by close_datetime desc limit 1').fetchone()
+        self.model._sqlite_connection.execute('delete from positions')
+        self.model._sqlite_connection.execute('delete from positions_view')
+        self.model.tamake_positions_for_whole_account(aid)
+        (accm2, ) = self.model._sqlite_connection.execute('select net_after from positions_view order by close_datetime desc limit 1').fetchone()
+        self.assertAlmostEqual(accm, accm2) # test if positions maked from deals are same again
         
-
 
 if __name__ == '__main__':
     unittest.main()

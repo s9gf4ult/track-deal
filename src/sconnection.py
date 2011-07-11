@@ -129,9 +129,9 @@ class sconnection(sqlite3.Connection):
         nns = reduce_by_string(", ", names)
         query = "insert into {0}({1}) values ({2})".format(table, nns, qqs)
         if isinstance(fields, dict):
-            return self.execute(query, data)
+            return self.execute(query, data).lastrowid
         else:
-            return self.executemany(query, data)
+            return self.executemany(query, data).lastrowid
             
 
     def execute_select(self, query, arguments = None):

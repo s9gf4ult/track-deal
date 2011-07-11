@@ -244,7 +244,7 @@ class sqlite_model(common_model):
                                                          "stock" : stock,
                                                          "class" : class_name,
                                                          "name" : name,
-                                                         "full_name" : full_name}).lastrowid
+                                                         "full_name" : full_name})
 
     @raise_db_closed
     @in_transaction
@@ -386,7 +386,7 @@ class sqlite_model(common_model):
         return id of the new created money object
         """
         return self._sqlite_connection.insert("moneys", {"name" : name,
-                                                         "full_name" : full_name}).lastrowid
+                                                         "full_name" : full_name})
     
     @raise_db_closed
     @in_transaction
@@ -479,7 +479,7 @@ class sqlite_model(common_model):
         \param point 
         \param step 
         """
-        ret = self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step}).lastrowid
+        ret = self._sqlite_connection.insert("points", {"paper_id" : paper_id, "money_id" : money_id, "point" : point, "step" : step})
         for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
             self.recalculate_deals(aid)
             self.recalculate_positions(aid)
@@ -568,7 +568,7 @@ class sqlite_model(common_model):
                 raise od_exception("There is no such money {0}".format(money_id_or_name))
         else:
             mid = money_id_or_name
-        aid = self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count}).lastrowid
+        aid = self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count})
         if self.get_global_data("current_account") == None and self._sqlite_connection.execute("select count(*) from accounts").fetchone()[0] == 1:
             self.add_global_data({"current_account" : aid})
         return aid
@@ -705,7 +705,7 @@ class sqlite_model(common_model):
             remhash(dd, "user_attributes")
             remhash(dd, "stored_attributes")
             dd["account_id"] = account_id
-            did = self._sqlite_connection.insert("deals", dd).lastrowid
+            did = self._sqlite_connection.insert("deals", dd)
             if len(uat) > 0:
                 uk = uat.keys()
                 uv = map(lambda k: uat[k], uk)
@@ -761,7 +761,7 @@ class sqlite_model(common_model):
         
     def remove_deal(self, deal_id):
         """\brief remove one or more deal by id
-        \param deal_id
+        \param deal_id - int or list of int's
         \note \ref taremove_deal must be used insted
         """
         x = map(lambda a: (a, ), (isinstance(deal_id, int) and [deal_id] or deal_id))
@@ -861,7 +861,7 @@ class sqlite_model(common_model):
             remhash(xps, "stored_attributes")
             remhash(xps, "deals_assigned")
             remhash(xps, "id")
-            pid = self._sqlite_connection.insert("positions", xps).lastrowid
+            pid = self._sqlite_connection.insert("positions", xps)
             if isinstance(gethash(ps, "user_attributes"), dict):
                 self._sqlite_connection.insert("user_position_attributes", map(lambda k: {"position_id" : pid, "name" : k, "value" : ps["user_attributes"][k]}, ps["user_attributes"].keys()))
             if isinstance(gethash(ps, "stored_attributes"), dict):
@@ -938,6 +938,81 @@ class sqlite_model(common_model):
         pid = self._create_position_raw(self.create_position_hash(open_group_id, close_group_id, user_attributes, stored_attributes, manual_made, do_not_delete))
         return pid
 
+    def create_position_from_data(self, account_id_or_name, data):
+        """\brief create position object and proper deal objects
+        \param account_id_or_name - int or string
+        \param data - hash table with keys:\n
+        \c paper_id - int, id of paper object\n
+        \c count - int, count of contracts\n
+        \c direction - int, -1 - is LONG position, 1 - is SHORT\n
+        \c commission - float, summarized commission of position\n
+        \c open_datetime - datetime.datetime instance\n
+        \c close_datetime - datetime.datetime instance\n
+        \c open_points - float, price in points of opening deal\n
+        \c close_points - float, price in points of closing deal\n
+        \c manual_made - None or something, if not None then considered position and deals assigned made manually\n
+        \c do_not_delete - None or something, if not None then considered position will not deleted by some operations
+        \exception od_exception.od_exception when first argument is not int or str or has there is no such account
+        \return int - id of created position
+        \note \ref tacreate_position_from_data must be used instead
+        """
+        if isinstance(account_id_or_name, (int, long)):
+            aid = account_id_or_name
+        elif isinstance(account_id_or_name, basestring):
+            acc = self.get_account(account_id_or_name)
+            if acc <> None:
+                aid = acc['id']
+            else:
+                raise od_exception('There is no such account {0}'.format(account_id_or_name))
+        else:
+            raise od_exception('account_id_or_name must be int or str')
+        dd = copy(data)
+        dd['account_id'] = aid
+        pid = self._sqlite_connection.insert('positions', dd)
+        deal_data  = {'manual_made' : gethash(data, 'manual_made'),
+                      'account_id' : aid,
+                      'position_id' : pid,
+                      'paper_id' : data['paper_id'],
+                      'count' : data['count'],
+                      'commission' : data['commission'] / 2. }
+        dd1 = copy(deal_data)
+        dd1['datetime'] = data['open_datetime']
+        dd1['points'] = data['open_points']
+        dd1['direction'] = data['direction']
+        dd2 = copy(deal_data)
+        dd2['datetime'] = data['close_datetime']
+        dd2['points'] = data['close_points']
+        dd2['direction'] = (- data['direction'])
+        self._sqlite_connection.insert('deals', dd1)
+        self._sqlite_connection.insert('deals', dd2)
+        self.recalculate_all_temporary()
+                     
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, account_id_or_name, args, **kargs: u'add new position and proper deals in account {0}'.format(account_id_or_name))
+    @pass_to_method(create_position_from_data)
+    def tacreate_position_from_data(self, *args, **kargs):
+        """\brief wrapper for \ref create_position_from_data
+        \param account_id_or_name - int or string
+        \param data - hash table with keys:\n
+        \c paper_id - int, id of paper object\n
+        \c count - int, count of contracts\n
+        \c direction - int, -1 - is LONG position, 1 - is SHORT\n
+        \c commission - float, summarized commission of position\n
+        \c open_datetime - datetime.datetime instance\n
+        \c close_datetime - datetime.datetime instance\n
+        \c open_points - float, price in points of opening deal\n
+        \c close_points - float, price in points of closing deal\n
+        \c manual_made - None or something, if not None then considered position and deals assigned made manually\n
+        \c do_not_delete - None or something, if not None then considered position will not deleted by some operations
+        \exception od_exception.od_exception when first argument is not int or str or has there is no such account
+        \return int - id of created position
+        """
+        pass
+
+        
+
+
     def list_positions(self, account_id = None, paper_id = None, order_by = []):
         """return cursor for getting position descriptions
         \param account_id 
@@ -981,7 +1056,7 @@ class sqlite_model(common_model):
                 account_id = deal["account_id"]
                 gid = self._sqlite_connection.insert("deal_groups", {"paper_id" : paper_id,
                                                                      "account_id" : account_id,
-                                                                     "direction" : direction}).lastrowid
+                                                                     "direction" : direction})
             else:
                 assert(paper_id == deal["paper_id"])
                 assert(direction == deal["direction"])
@@ -1134,6 +1209,38 @@ class sqlite_model(common_model):
         """
         self.remake_groups(account_id, paper_id, time_distance)
 
+    def make_positions_for_whole_account(self, account_id_or_name, time_distance = 5):
+        """\brief makes posision objects for all papers for which deals exists in this account
+        \param account_id_or_name - int or str
+        \param time_distance - number, pass to \ref make_positions
+        \exception od_exception.od_exception when first argument is not a number or str
+        \note \ref tamake_positions_for_whole_account must be used instead by model
+        """
+        aid = None
+        if isinstance(account_id_or_name, (int, long)):
+            aid = account_id_or_name
+        elif isinstance(account_id_or_name, basestring):
+            acc = self.get_account(account_id_or_name)
+            if acc <> None:
+                aid = acc["id"]
+            else:
+                return
+        else:
+            raise od_exception("account_id_or_name must be int or str")
+        
+        for (paper, ) in self._sqlite_connection.execute('select distinct paper_id from deals where account_id = ?', [aid]):
+            self.make_positions(aid, paper, time_distance)
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, account_id_or_name, *args, **kargs: u'auto make positions for account {0}'.format(account_id_or_name))
+    @pass_to_method(make_positions_for_whole_account)
+    def tamake_positions_for_whole_account(self, *args, **kargs):
+        """\brief wrapper around \ref make_positions_for_whole_account
+        \param account_id_or_name - int or str
+        \param time_distance - number, pass to \ref make_positions
+        """
+        pass
 
     def make_positions(self, account_id, paper_id, time_distance = 5):
         """automatically makes positions
@@ -1172,6 +1279,26 @@ class sqlite_model(common_model):
         \param time_distance  time distance for make_groups
         """
         pass
+
+    def remove_position(self, pid):
+        """\brief remove one or more positions
+        \param pid - int or list of ints, position id one or more
+        \note \ref taremove_position must be used instead
+        """
+        pids = (isinstance(pid, (int, long)) and [pid] or pid)
+        self._sqlite_connection.executemany('delete from positions where id = ?', map(lambda a: (a,), pids))
+        self.recalculate_positions()
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, pid: (isinstance(pid, (int, long)) and u'remove position with id {0}'.format(pid) or u'remove {0} positions'.format(len(pid))))
+    @pass_to_method(remove_position)
+    def taremove_position(self, *args, **kargs):
+        """\brief wrapper for \ref remove_position 
+        """
+        pass
+
+    
 
 
     def try_make_ballanced_groups(self, gid1, gid2):
@@ -1276,7 +1403,7 @@ class sqlite_model(common_model):
         if ab > 0:
             raise od_exception_action_cannot_create(ab)
         aid = self._sqlite_connection.insert("hystory_steps", {"autoname" : action_name,
-                                                               "datetime" : datetime.now()}).lastrowid
+                                                               "datetime" : datetime.now()})
         self._sqlite_connection.insert("current_hystory_position", {"step_id" : aid})
         
     def end_action(self, ):
@@ -1408,8 +1535,8 @@ class sqlite_model(common_model):
         """
         Arguments:
         \param aid  account id
-        \param paid  paper id
         \param position_id  id of position recalculate from
+        \todo make position_id be realy usable argument
         """
         # if position_id == None:
         self._sqlite_connection.execute("delete from positions_view where account_id = ?", [aid])

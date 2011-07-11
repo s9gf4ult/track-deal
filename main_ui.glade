@@ -4949,7 +4949,7 @@
                   <object class="GtkLabel" id="label78">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Класс</property>
+                    <property name="label" translatable="yes">Счет</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -5545,22 +5545,27 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkComboBox" id="padder_instrument">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="right_attach">3</property>
+                <property name="top_attach">9</property>
+                <property name="bottom_attach">10</property>
+              </packing>
             </child>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
+              <object class="GtkComboBox" id="padder_account">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">3</property>
+                <property name="right_attach">6</property>
+                <property name="top_attach">9</property>
+                <property name="bottom_attach">10</property>
+              </packing>
             </child>
           </object>
           <packing>

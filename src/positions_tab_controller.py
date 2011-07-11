@@ -49,57 +49,44 @@ class positions_tab_controller(object):
         self.update_positions()
 
     def update_positions(self):
-        if self.database.connection == None or gethash(self.global_data, "current_account") == None:
+        if not self._parent.connected():
             return
-        self.database.delete_empty_positions()
-        self.database.delete_broken_positions(self.global_data["current_account"])
+        self._parent.model.recalculate_all_temporary()
         self.update()
 
     def add_position_activate(self, action):
         self.add_position()
 
     def add_position(self):
-        if self.database.connection == None or gethash(self.global_data, "current_account") == None:
+        if not self._parent.connected():
             return
-        self.position_adder.update_instruments(self.database.get_instruments())
-        self.position_adder.update_classes(self.database.get_classes())
-        ret = self.position_adder.run()
+        self._parent.position_adder.update_widget()
+        ret = self._parent.position_adder.run()
         if ret == gtk.RESPONSE_ACCEPT:
-            self.database.add_position(self.global_data["current_account"],
-                                       self.position_adder.instrument.get_value(),
-                                       self.position_adder.instrument_class.get_value(),
-                                       self.position_adder.long_short.get_value(),
-                                       self.position_adder.count.get_value(),
-                                       {"date" : self.position_adder.start_date.get_datetime(),
-                                        "price" : self.position_adder.price.get_lower_value(),
-                                        "broker_comm" : self.position_adder.broker_comm.get_lower_value(),
-                                        "stock_comm" : self.position_adder.stock_comm.get_lower_value()},
-                                       {"date" : self.position_adder.end_date.get_datetime(),
-                                        "price" : self.position_adder.price.get_upper_value(),
-                                        "broker_comm" : self.position_adder.broker_comm.get_upper_value(),
-                                        "stock_comm" : self.position_adder.stock_comm.get_upper_value()})
-            self.database.recalculate_position_attributes(self.global_data["current_account"])
-            self.call_update_callback()
+            try:
+                data = self._parent.position_adder.get_data()
+                self._parent.model.tacreate_position_from_data(data['account_id'],
+                                                               data)
+            except e:
+                show_and_print_error(e, self._parent.builder.get_object("main_window"))
+            else:
+                self._parent.call_update_callback()
 
     def delete_positions_activate(self, action):
         self.delete_positions()
 
     def delete_positions(self):
-        if self.database.connection == None:
+        if not self._parent.connected():
             return
-        (model, paths) = self._parent.builder.get_object("positions_view").get_selection().get_selected_rows()
-        if len(paths) > 0:
-            itrs = map(lambda pt: model.get_iter(pt), paths)
+        rows = self.positions_list.get_selected_rows()
+        if not is_null_or_empty(rows):
             try:
-                self.database.delete_positions_by_ids(map(lambda itr: model.get_value(itr, 0), itrs))
-                if gethash(self.global_data, "current_account") != None:
-                    self.database.join_deals_leaves(self.global_data["current_account"])
-                    self.database.delete_empty_deal_groups()
-                    self.database.recalculate_position_attributes(self.global_data["current_account"])
-                self.call_update_callback()
-            except Exception as e:
-                show_and_print_error(e, self._parent.builder.get_object("main_window"))
-
+                self._parent.taremove_position(map(lambda a: a[0], rows))
+            except sqlite3.IntegrityError:
+                pass
+            else:
+                self._parent.call_update_callback()
+            
     def make_positions_activate(self, action):
         self.make_positions()
 
@@ -108,42 +95,26 @@ class positions_tab_controller(object):
             return
         cacc = self._parent.model.get_current_account()
         if cacc <> None:
-            self._parent.model.make_positions_for_account(cacc["id"])
+            self._parent.model.tamake_positions_for_whole_account(cacc["id"])
             self._parent.call_update_callback()
     
     def filter_activate(self, action):
-        self.pfilter.run()
+        self._parent.positions_filter.run()
         self.update()
 
     def update(self):
-        if self.database.connection == None:
+        """\brief updte list with positions
+        \todo implement
+        """
+        if not self._parent.connected():
             self.positions_list.update_rows([])
             return
-        self.positions_list.update_rows(self.pfilter.get_ids(fields = ['id',
-                                                                       'open_date_formated',
-                                                                       'open_time_formated',
-                                                                       'close_date_formated',
-                                                                       'close_time_formated',
-                                                                       'formated_duration',
-                                                                       'ticket',
-                                                                       'count',
-                                                                       'direction_formated',
-                                                                       'open_coast',
-                                                                       'close_coast',
-                                                                       'coast_range_formated',
-                                                                       'gross_before',
-                                                                       'gross_after',
-                                                                       'pl_gross_range_formated',
-                                                                       'net_before',
-                                                                       'net_after',
-                                                                       'pl_net_range_formated',
-                                                                       'plnet_acc_formated'],
-                                                             order_by = self.order_by))
 
     def sort_callback(self, column, order, parameters):
         self.order_by = parameters[0]
         if order == gtk.SORT_DESCENDING:
             self.order_by += ' desc'
+        self.order_by = [self.order_by]
         self.update()
                                                                        
         
