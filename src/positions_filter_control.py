@@ -12,6 +12,9 @@ from check_control import *
 from hide_control import *
 
 class positions_filter_control:
+    """
+    \brief controls filter window's widgets not more.
+    """
     def __init__(self, builder):
         self.builder = builder
         w = self.builder.get_object("positions_filter")

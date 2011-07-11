@@ -7,7 +7,7 @@ from common_methods import *
 import gtk_view
 
 class positions_tab_controller(object):
-    order_by = ["position_id"]
+    order_by = []
     def __init__(self, parent):
         """
         \param parent \ref gtk_view.gtk_view instance as parent
@@ -17,25 +17,25 @@ class positions_tab_controller(object):
         def shorter(name, action, *method):
             self._parent.builder.get_object(name).connect(action, *method)
         self.positions_list = list_view_sort_control(self._parent.builder.get_object("positions_view"),
-                                                     [(u'id', gtk.CellRendererSpin(), int, u'id'),
+                                                     [[u'id', int],
                                                       (u'Дата Откр.', gtk.CellRendererText(), str, u'open_datetime'),
                                                       (u'время Откр.', gtk.CellRendererText(), str, u'open_time'),
                                                       (u'Дата Закр.', gtk.CellRendererText(), str, u'close_datetime'),
                                                       (u'Время Закр.', gtk.CellRendererText(), str, u'close_time'),
                                                       (u'В позиции', gtk.CellRendererText(), str, u'duration'),
-                                                      (u'Тикер', gtk.CellRendererText(), str, u'ticket'),
-                                                      (u'Кол-во', gtk.CellRendererSpin(), int, u'count'),
+                                                      (u'Инструмент', gtk.CellRendererText(), str, u'paper_name'),
+                                                      (u'Кол-во', gtk.CellRendererText(), str, u'count'),
                                                       (u'Тип', gtk.CellRendererText(), str, u'direction'),
-                                                      (u'Цена Откр.', gtk.CellRendererSpin(), float, u'open_coast'),
-                                                      (u'Цена Закр.', gtk.CellRendererSpin(), float, u'close_coast'),
-                                                      (u'Ход', gtk.CellRendererText(), str, u'coast_range'),
+                                                      (u'Цена Откр.', gtk.CellRendererText(), str, u'open_price'),
+                                                      (u'Цена Закр.', gtk.CellRendererText(), str, u'close_price'),
+                                                      (u'Ход', gtk.CellRendererText(), str, u'steps_range'),
                                                       (u'Gross Bfr.', gtk.CellRendererSpin(), float, u'gross_before'),
                                                       (u'Gross Aftr.', gtk.CellRendererSpin(), float, u'gross_after'),
-                                                      (u'P/L Gross', gtk.CellRendererText(), str, u'pl_gross_range'),
+                                                      (u'P/L Gross', gtk.CellRendererText(), str, u'pl_gross_abs'),
                                                       (u'Net Bfr.', gtk.CellRendererSpin(), float, u'net_before'),
                                                       (u'Net Aftr.', gtk.CellRendererSpin(), float, u'net_after'),
-                                                      (u'P/L Net', gtk.CellRendererText(), str, u'pl_net_range'),
-                                                      (u'% Изменения', gtk.CellRendererText(), str, u'plnet_acc')],
+                                                      (u'P/L Net', gtk.CellRendererText(), str, u'pl_net_abs'),
+                                                      (u'% Изменения', gtk.CellRendererText(), str, u'percent_range_abs')],
                                                      self_sorting = False,
                                                      sort_callback = self.sort_callback)
         self._parent.builder.get_object("positions_view").get_selection().set_mode(gtk.SELECTION_MULTIPLE)
@@ -104,11 +104,31 @@ class positions_tab_controller(object):
 
     def update(self):
         """\brief updte list with positions
-        \todo implement
         """
         if not self._parent.connected():
             self.positions_list.update_rows([])
             return
+
+        self.positions_list.update_rows(map(lambda a: (a['position_id'],
+                                                       a['open_date_formated'],
+                                                       a['open_time_formated'],
+                                                       a['close_date_formated'],
+                                                       a['close_time_formated'],
+                                                       a['duration_formated'],
+                                                       a['paper_name'],
+                                                       a['count'],
+                                                       a['direction_formated'],
+                                                       a['open_price_formated'],
+                                                       a['close_price_formated'],
+                                                       a['steps_range_abs_formated'],
+                                                       a['gross_before'],
+                                                       a['gross_after'],
+                                                       a['pl_gross_abs_formated'],
+                                                       a['net_before'],
+                                                       a['net_after'],
+                                                       a['pl_net_abs_formated'],
+                                                       a['percent_range_abs_formated']), self._parent.model.list_positions_view(self.order_by)))
+        
 
     def sort_callback(self, column, order, parameters):
         self.order_by = parameters[0]

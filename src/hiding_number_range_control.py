@@ -6,6 +6,16 @@ from number_range_control import *
 
 class hiding_number_range_control(number_range_control):
     def __init__(self, lower_spin, upper_spin, global_box = None, global_chbt = None, lower_chbt = None, upper_chbt = None, step_incr = 1, digits = 0):
+        """
+        \param lower_spin - gtk.SpinButton instance to display lower limit of range
+        \param upper_spin - gtk.SpinButton instance to display upper limit of range
+        \param global_box - gtk.Container with all widgets packed in to show or hide all the range-widget
+        \param global_chbt - gtk.ToggleButton to control global_box show state
+        \param lower_chbt - gtk.Container to control show state of lower range widget
+        \param upper_chbt - gtk.Container to control show state of upper range widget
+        \param step_incr - number, pass to \ref number_range_control.number_range_control
+        \param digits - int, the same
+        """
         self.hiders = []
         for (bt, box) in [(global_chbt, global_box),
                           (lower_chbt, lower_spin),
