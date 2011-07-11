@@ -173,14 +173,14 @@ class positions_filter_control:
         self.account_current = select_control({"current" : shorter("pfilter_account_current"),
                                                "all" : shorter("pfilter_account_all"),
                                                "select" : shorter("pfilter_account_select")})
-        self.check_accounts = check_control(shorter("pfilter_accounts_view"), "", [(u'Счет', gtk.CellRendererText())],
+        self.check_accounts = check_control(shorter("pfilter_accounts_view"), "", [['id', int], (u'Счет', gtk.CellRendererText())],
                                             reverse_button = shorter("pfilter_account_reverse"),
                                             select_button = shorter("pfilter_account_set"),
                                             deselect_button = shorter("pfilter_account_unset"))
         self.hiders = []
         self.hiders.append(hide_control(shorter("pfilter_account_select"),
                                         [shorter("pfilter_accounts_box")]))
-        self.check_instruments = check_control(shorter("pfilter_instruments"), "", [(u'Инструмент', gtk.CellRendererText())],
+        self.check_instruments = check_control(shorter("pfilter_instruments"), "", [['id', int], (u'Инструмент', gtk.CellRendererText())],
                                                reverse_button = shorter("pfilter_instrument_reverse"),
                                                select_button = shorter("pfilter_instrument_set"),
                                                deselect_button = shorter("pfilter_instrument_unset"))

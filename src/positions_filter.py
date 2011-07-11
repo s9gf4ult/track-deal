@@ -5,11 +5,9 @@ from common_methods import *
 
 class positions_filter:
     plus = []
-    def __init__(self, global_data, builder, database):
-        self.global_data = global_data
-        self.builder = builder
-        self.database = database
-        self.dialog = positions_filter_control(self.builder)
+    def __init__(self, parent):
+        self._parent = parent
+        self.dialog = positions_filter_control(self._parent.builder)
 
     def _prepare_filter(self):
         if self.database.connection != None:

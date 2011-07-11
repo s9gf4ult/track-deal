@@ -135,6 +135,4 @@ class positions_tab_controller(object):
         if order == gtk.SORT_DESCENDING:
             self.order_by += ' desc'
         self.order_by = [self.order_by]
-        self.update()
-                                                                       
-        
+        self.update()        
