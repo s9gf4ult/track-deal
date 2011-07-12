@@ -848,9 +848,10 @@ class sqlite_model(common_model):
 
     def _create_position_raw(self, position, do_recalc = True):
         """just create position in database 
-        
         \param position  hash table, keys may be "user_attributes", "stored_attributes", "deals_assigned" and fields of table positions. It can be list of this hashes
         """
+        if is_null_or_empty(position):
+            return
         pss = (isinstance(position, (list, tuple)) and position or [position])
         paper_position = None             # {paper_id : (position_id, close_datetime, open_datetime)}
         aid = None
@@ -1902,6 +1903,23 @@ class sqlite_model(common_model):
             return self._sqlite_connection.execute_select(q, condargs)
         else:
             return self._sqlite_connection.execute_select(q)
+
+    def list_positions_view_with_condition(self, condition, condargs, order_by = []):
+        """\brief return iteration object to receive elements from positions_view
+        \param condition - str, "where" part of query
+        \param condargs - list of arguments for query
+        \param order_by - list of string, order by construction for
+        """
+        q = u'select * from positions_view'
+        if not is_null_or_empty(condition):
+            q += u' where {0}'.format(condition)
+        q += order_by_print(order_by)
+        if not is_null_or_empty(condargs):
+            return self._sqlite_connection.execute_select(q, condargs)
+        else:
+            return self._sqlite_connection.execute_select(q)
+
+
     
     def get_deals_count_range(self, ):
         """\brief return range of min / max of field "count" 
@@ -1943,4 +1961,10 @@ class sqlite_model(common_model):
         else:
             return rt
 
+    def get_positions_view_limits(self, limit_name):
+        """\brief return low and high limit of the value in positions_view
+        \param limit_name - str, name of the field in the positions_view table
+        \return tuple, (lower_limit, upper_limit)
+        """
+        return self._sqlite_connection.execute('select min({0}), max({0}) from positions_view'.format(limit_name)).fetchone()
 

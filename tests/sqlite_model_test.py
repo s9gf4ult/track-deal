@@ -501,6 +501,19 @@ class sqlite_model_test(unittest.TestCase):
             self.assertEqual(p["count"], self.model._sqlite_connection.execute("select sum(d.count) from deals d where d.direction = 1 and d.position_id = ?", [p["id"]]).fetchone()[0])
         self.model.remake_groups(aid, paid)
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
+        self.model.disconnect()
+        
+        self.setUp()
+        (mid, aid, paid) = self.deals_init()
+        for x in xrange(10):
+            self.model.create_deal(aid, {'paper_id' : paid,
+                                         'count' : 10,
+                                         'direction' : -1,
+                                         'points' : 100,
+                                         'datetime' : datetime(2010, 10, 10)})
+        self.model.make_positions(aid, paid)
+                                     
+        
 
     def test_calculate_positions(self, ):
         """

@@ -9,37 +9,53 @@ class positions_filter:
         self._parent = parent
         self.dialog = positions_filter_control(self._parent.builder)
 
-    def _prepare_filter(self):
-        if self.database.connection != None:
-            for (wid, query) in [(self.dialog.check_accounts, "select distinct name from accounts"),
-                                 (self.dialog.check_instruments, "select distinct security_name from deals")]:
-                wid.update_rows(self.database.connection.execute(query))
-            for (wid, field) in [(self.dialog.count, "count"),
-                                 (self.dialog.price, "coast"),
-                                 (self.dialog.volume, "volume"),
-                                 (self.dialog.plnet_acc, "plnet_acc"),
-                                 (self.dialog.plnet_volume, "plnet_volume"),
-                                 (self.dialog.comm_plgross, "comm_pl_gross"),
-                                 (self.dialog.price_range, "coast_range"),
-                                 (self.dialog.plgross, "pl_gross_range"),
-                                 (self.dialog.plnet, "pl_net_range"),
-                                 (self.dialog.comm, "comm")]:
-                (mmin, mmax) = self.database.connection.execute("select min({0}), max({0}) from positions_view".format(field)).fetchone()
-                wid.set_lower_limit(mmin)
-                wid.set_upper_limit(mmax)
+    def update_filter(self, ):
+        """\brief update fields of the filter
+        """
+        self.update_digits()
+        self.update_instruments()
+        self.update_accounts()
 
-    def _regen_selected(self):
-        if self.database.connection != None:
-            self.database.pset_selected_stocks(map(lambda a: a[0], self.dialog.check_instruments.get_checked_rows()))
-            if self.dialog.account_current.get_value() == "current" and gethash(self.global_data, "current_account") != None:
-                self.database.pset_selected_accounts([self.database.connection.execute("select name from accounts where id = ? limit 1", (self.global_data["current_account"],)).fetchone()[0]])
-            elif self.dialog.account_current.get_value() == "select":
-                self.database.pset_selected_accounts(map(lambda a: a[0], self.dialog.check_accounts.get_checked_rows()))
-            
+
+    def update_digits(self, ):
+        """\brief update digit fields in the filter to correctly choose the proper range
+        """
+        if not self._parent.connected():
+            return
+        for (widget, limname) in [(self.dialog.count, "count"),
+                                  (self.dialog.price, "price"),
+                                  (self.dialog.volume, "volume"),
+                                  (self.dialog.plnet_acc, "percent_range"),
+                                  (self.dialog.plnet_volume, "percent_volume_range"),
+                                  (self.dialog.comm_plgross, "percent_comm_plgross"),
+                                  (self.dialog.price_range, "steps_range_abs"),
+                                  (self.dialog.plgross, "pl_gross_abs"),
+                                  (self.dialog.plnet, "pl_net_abs"),
+                                  (self.dialog.comm, "commission")]:
+            limits = self._parent.model.get_positions_view_limits(limname)
+            widget.set_lower_limit(limits[0])
+            widget.set_upper_limit(limits[1])
+        
+    def update_instruments(self, ):
+        """\brief update instrument check_control 
+        """
+        papers = self._parent.model.list_papers(['name'])
+        self.dialog.check_instruments.update_rows(map(lambda a: (a["id"], a["name"]), papers))
+
+    def update_accounts(self, ):
+        """\brief update account check_control
+        """
+        accs = self._parent.model.list_accounts(['name'])
+        self.dialog.check_accounts.update_rows(map(lambda a: (a["id"], a["name"]), accs))
 
     def run(self):
-        self._prepare_filter()
         self.dialog.run()
+
+    def get_data(self, ):
+        """\brief get data from the filter
+        """
+        len(filter(lambda a: a <> None, ["yeyeye", None, 12, 3434]))
+
         
     def get_ids(self, fields, order_by):
         if self.database.connection == None or (gethash(self.global_data, "current_account") == None and self.dialog.account_current.get_value() == "current"):

@@ -127,7 +127,7 @@ class positions_tab_controller(object):
                                                        a['net_before'],
                                                        a['net_after'],
                                                        a['pl_net_abs_formated'],
-                                                       a['percent_range_abs_formated']), self._parent.model.list_positions_view(self.order_by)))
+                                                       a['percent_range_abs_formated']), self._parent.model.list_positions_view_with_condition(None, None, self.order_by)))
         
 
     def sort_callback(self, column, order, parameters):
