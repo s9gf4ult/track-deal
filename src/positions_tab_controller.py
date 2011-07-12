@@ -5,6 +5,7 @@ from list_view_sort_control import *
 import gtk
 from common_methods import *
 import gtk_view
+import sqlite3
 
 class positions_tab_controller(object):
     order_by = []
@@ -81,7 +82,7 @@ class positions_tab_controller(object):
         rows = self.positions_list.get_selected_rows()
         if not is_null_or_empty(rows):
             try:
-                self._parent.taremove_position(map(lambda a: a[0], rows))
+                self._parent.model.taremove_position(map(lambda a: a[0], rows))
             except sqlite3.IntegrityError:
                 pass
             else:

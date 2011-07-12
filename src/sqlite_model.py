@@ -1288,7 +1288,8 @@ class sqlite_model(common_model):
         """
         pids = (isinstance(pid, (int, long)) and [pid] or pid)
         self._sqlite_connection.executemany('delete from positions where id = ?', map(lambda a: (a,), pids))
-        self.recalculate_positions()
+        for (acc, ) in self._sqlite_connection.execute('select id from accounts'):
+            self.recalculate_positions(acc)
 
     @raise_db_closed
     @in_transaction
