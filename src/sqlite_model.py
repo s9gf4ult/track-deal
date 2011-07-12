@@ -1459,7 +1459,6 @@ class sqlite_model(common_model):
 
     def _calculate_positions_with_initial(self, cursor, net, gross):
         """
-        Arguments:
         \param cursor 
         \param net  net start from
         \param gross  gross start from
@@ -1496,12 +1495,30 @@ class sqlite_model(common_model):
             post["pl_net"] = post["pl_gross"] - post["commission"]
             post["pl_net_abs"] = abs(post["pl_net"])
             post["pl_net_abs_formated"] = (post["pl_net"] < 0 and "({0})" or "{0}").format(post["pl_net_abs"])
-            post["steps_range"] = post["points_range"] / post["step"]
+            try:
+                post["steps_range"] = post["points_range"] / post["step"]
+            except ZeroDivisionError:
+                post["steps_range"] = 0
             post["steps_range_abs"] = abs(post["steps_range"])
             post["steps_range_abs_formated"] = format_abs_value(post["steps_range"])
-            post["percent_range"] = post["pl_net"] / netx * 100
+            try:
+                post["percent_range"] = post["pl_net"] / netx * 100
+            except ZeroDivisionError:
+                post["percent_range"] = 0
             post["percent_range_abs"] = abs(post["percent_range"])
             post["percent_range_abs_formated"] = format_abs_value(post["percent_range"])
+            try:
+                post['percent_volume_range'] = post['pl_net'] / post['open_volume'] * 100
+            except ZeroDivisionError:
+                post['percent_volume_range'] = 0
+            post['percent_volume_range_abs'] = abs(post['percent_volume_range'])
+            post['percent_volume_range_abs_formated'] = format_abs_value(post['percent_volume_range'])
+            try:
+                post['percent_comm_plgross'] = post['commission'] / post['pl_gross']
+            except ZeroDivisionError:
+                post['percent_comm_plgross'] = 0
+            post['percent_comm_plgross_abs'] = abs(post['percent_comm_plgross'])
+            post['percent_comm_plgross_abs_formated'] = format_abs_value(post['percent_comm_plgross'])
             post["net_before"] = netx
             post["net_after"] = netx + post["pl_net"]
             post["gross_before"] = grossx
