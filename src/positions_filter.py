@@ -54,8 +54,7 @@ class positions_filter:
     def get_data(self, ):
         """\brief get data from the filter
         """
-        len(filter(lambda a: a <> None, ["yeyeye", None, 12, 3434]))
-
+        
         
     def get_ids(self, fields, order_by):
         if self.database.connection == None or (gethash(self.global_data, "current_account") == None and self.dialog.account_current.get_value() == "current"):
