@@ -51,10 +51,21 @@ class positions_filter:
     def run(self):
         self.dialog.run()
 
-    def get_data(self, ):
+    def get_data(self, order_by = []):
         """\brief get data from the filter
         """
+        conds = self.get_conditions()
+        if not is_null_or_empty(conds):
+            return self._parent.model.list_positions_view_with_condition(conds[0], conds[1], order_by)
+
+    def get_conditions(self, ):
+        """\brief return conditions created from filter dialog data
+        \retval (str, list) where str is the "where" query part and list is a list of arguments for condition
+        \retval ("", []) if no conditions
+        """
         
+        
+
         
     def get_ids(self, fields, order_by):
         if self.database.connection == None or (gethash(self.global_data, "current_account") == None and self.dialog.account_current.get_value() == "current"):
