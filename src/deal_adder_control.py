@@ -166,10 +166,11 @@ class deal_adder_control:
         accs = self._parent.model.list_accounts(["name"]).fetchall()
         acs = map(lambda ac: (ac["id"], ac["name"]), accs)
         self.account.update_answers(acs)
+        if is_null_or_empty(self.account.get_value()):
+            cacc = self._parent.model.get_current_account()
+            if cacc <> None:
+                self.account.set_value(cacc['id'])
         
-
-
-            
 if __name__ == "__main__":
     b = gtk.Builder()
     b.add_from_file('main_ui.glade')

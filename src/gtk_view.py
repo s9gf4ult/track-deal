@@ -16,6 +16,7 @@ from deals_filter import deals_filter
 from paper_adder import paper_adder
 from positions_tab_controller import positions_tab_controller
 from positions_filter import positions_filter
+from position_adder_control import position_adder_control
 from common_methods import *
 
 
@@ -62,6 +63,8 @@ class gtk_view(common_view):
     positions_tab = None
     ## \ref positions_filter.positions_filter instance
     positions_filter = None
+    ## \ref position_adder_control.position_adder_control instance
+    position_adder = None
     
     def __init__(self, ):
         """initialize gtk view
@@ -80,6 +83,7 @@ class gtk_view(common_view):
         self.paper_adder = paper_adder(self)
         self.positions_tab = positions_tab_controller(self)
         self.positions_filter = positions_filter(self)
+        self.position_adder = position_adder_control(self)
     
     def run(self, ):
         """show main window and initialize all the necessary

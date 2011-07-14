@@ -956,6 +956,7 @@ class sqlite_model(common_model):
         \exception od_exception.od_exception when first argument is not int or str or has there is no such account
         \return int - id of created position
         \note \ref tacreate_position_from_data must be used instead
+        \todo add open_datetime and close_datetime in keys
         """
         if isinstance(account_id_or_name, (int, long)):
             aid = account_id_or_name
