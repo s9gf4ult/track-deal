@@ -23,11 +23,11 @@ class positions_filter:
         if not self._parent.connected():
             return
         for (widget, limname) in [(self.dialog.count, "count"),
-                                  (self.dialog.price, "price"),
-                                  (self.dialog.volume, "volume"),
+                                  (self.dialog.price, "price_avg"),
+                                  (self.dialog.volume, "volume_avg"),
                                   (self.dialog.plnet_acc, "percent_range"),
-                                  (self.dialog.plnet_volume, "percent_volume_range"),
-                                  (self.dialog.comm_plgross, "percent_comm_plgross"),
+                                  (self.dialog.plnet_volume, "percent_volume_range_abs"),
+                                  (self.dialog.comm_plgross, "percent_comm_plgross_abs"),
                                   (self.dialog.price_range, "steps_range_abs"),
                                   (self.dialog.plgross, "pl_gross_abs"),
                                   (self.dialog.plnet, "pl_net_abs"),
@@ -53,15 +53,19 @@ class positions_filter:
 
     def get_data(self, order_by = []):
         """\brief get data from the filter
+        \return list of hashes, each hash table has keys like in the table 'positions_view'
         """
         conds = self.get_conditions()
-        if not is_null_or_empty(conds):
+        if conds == None:
+            return []
+        else:
             return self._parent.model.list_positions_view_with_condition(conds[0], conds[1], order_by).fetchall()
 
     def get_conditions(self, ):
         """\brief return conditions created from filter dialog data
         \retval (str, list) where str is the "where" query part and list is a list of arguments for condition
         \retval ("", []) if no conditions
+        \retval None if no one position must be returned
         """
         conds = []
         args = []
@@ -99,14 +103,20 @@ class positions_filter:
                 conds.append('account_id = ?')
                 args.append(cacc['id'])
             else:
-                return ('', [])
+                return None
         elif acc == 'all':
             pass
         elif acc == 'select':
-            solve_field_in(args, conds, 'account_id', map(lambda a: a[0], self.dialog.check_accounts.get_checked_rows()))
+            chaccs = self.dialog.check_accounts.get_checked_rows()
+            if is_null_or_empty(chaccs):
+                return None
+            else:
+                solve_field_in(args, conds, 'account_id', map(lambda a: a[0], chaccs))
 
         instrs = self.dialog.check_instruments.get_checked_rows()
         if not is_null_or_empty(instrs):
             solve_field_in(args, conds, 'paper_id', map(lambda a: a[0], instrs))
+        else:
+            return None
         
         return (reduce_by_string(' and ', conds), args)

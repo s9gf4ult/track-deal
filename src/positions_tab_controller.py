@@ -100,6 +100,7 @@ class positions_tab_controller(object):
             self._parent.call_update_callback()
     
     def filter_activate(self, action):
+        self._parent.positions_filter.update_filter()
         self._parent.positions_filter.run()
         self.update()
 
@@ -109,7 +110,7 @@ class positions_tab_controller(object):
         if not self._parent.connected():
             self.positions_list.update_rows([])
             return
-
+        self._parent.positions_filter.update_filter()
         self.positions_list.update_rows(map(lambda a: (a['position_id'],
                                                        a['open_date_formated'],
                                                        a['open_time_formated'],

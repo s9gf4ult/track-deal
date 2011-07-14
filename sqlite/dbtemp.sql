@@ -179,6 +179,8 @@ percent_volume_range_abs_formated text,
 percent_comm_plgross float default 0, -- отношение комиссии к Pl/Gross
 percent_comm_plgross_abs float default 0,
 percent_comm_plgross_abs_formated text,
+price_avg float,
+volume_avg float,
 commission float,
 net_before float,
 net_after float,

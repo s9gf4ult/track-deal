@@ -1521,6 +1521,8 @@ class sqlite_model(common_model):
                 post['percent_comm_plgross'] = 0
             post['percent_comm_plgross_abs'] = abs(post['percent_comm_plgross'])
             post['percent_comm_plgross_abs_formated'] = format_abs_value(post['percent_comm_plgross'])
+            post['price_avg'] = (post['open_price'] + post['close_price']) / 2.
+            post['volume_avg'] = (post['open_volume'] + post['close_volume']) / 2.
             post["net_before"] = netx
             post["net_after"] = netx + post["pl_net"]
             post["gross_before"] = grossx

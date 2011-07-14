@@ -48,8 +48,12 @@ class deals_filter():
                           self.dialog.datetime_range.get_upper_datetime())
 
         # instruments selected
-        solve_field_in(args, conds, "paper_id",
-                       map(lambda a: a[0], self.dialog.instruments.get_checked_rows()))
+        instrs = self.dialog.instruments.get_checked_rows()
+        if is_null_or_empty(instrs):
+            return None
+        else:
+            solve_field_in(args, conds, "paper_id",
+                           map(lambda a: a[0], instrs))
         
         # numerical fields
         for (field_name, control) in [("count", self.dialog.count),
@@ -86,12 +90,15 @@ class deals_filter():
             pass
         elif ss == "select":
             selected = self.dialog.accounts.get_checked_rows()
-            solve_field_in(args, conds, 'account_id',
-                           map(lambda a: a[1], selected))
+            if is_null_or_empty(selected):
+                return None
+            else:
+                solve_field_in(args, conds, 'account_id',
+                               map(lambda a: a[1], selected))
         return (reduce_by_string(" and ", conds), args)
         
 
-    def get_rows(self, order_by):
+    def get_data(self, order_by):
         """\brief get filtred rows
         \param order_by - list of fields to order by
         \retval None if not connected
