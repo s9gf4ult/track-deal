@@ -94,7 +94,7 @@ class deals_filter():
                 return None
             else:
                 solve_field_in(args, conds, 'account_id',
-                               map(lambda a: a[1], selected))
+                               map(lambda a: a[0], selected))
         return (reduce_by_string(" and ", conds), args)
         
 

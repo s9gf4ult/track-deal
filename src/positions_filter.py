@@ -55,6 +55,8 @@ class positions_filter:
         """\brief get data from the filter
         \return list of hashes, each hash table has keys like in the table 'positions_view'
         """
+        if not self._parent.connected():
+            return
         conds = self.get_conditions()
         if conds == None:
             return []
