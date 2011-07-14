@@ -8111,7 +8111,7 @@
                     </child>
                     <child type="label">
                       <object class="GtkCheckButton" id="pfilter_price_range">
-                        <property name="label" translatable="yes">Абсолютный ход цены</property>
+                        <property name="label" translatable="yes">Абсолютный шаг цены</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>

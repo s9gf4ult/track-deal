@@ -19,6 +19,7 @@ class deals_filter_control:
     def __init__(self, builder):
         self.builder = builder
         w = self.builder.get_object("deals_filter")
+        w.set_transient_for(self.builder.get_object('main_window'))
         w.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_ACCEPT)
         ######################
         # hide controls init #

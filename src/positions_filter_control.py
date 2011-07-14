@@ -18,6 +18,7 @@ class positions_filter_control:
     def __init__(self, builder):
         self.builder = builder
         w = self.builder.get_object("positions_filter")
+        w.set_transient_for(self.builder.get_object('main_window'))
         w.add_buttons(gtk.STOCK_CLOSE, gtk.RESPONSE_CANCEL)
         def shorter(name):
             return self.builder.get_object(name)

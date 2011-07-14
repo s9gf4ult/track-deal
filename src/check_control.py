@@ -102,7 +102,7 @@ class check_control():
     def get_checked_rows(self):
         """
         \brief return just selected rows
-        \retval None if no one row is selected
+        \retval [] if no one row is selected
         \retval list of tuples (*data fields)
         """
         def get_checked(model, path, it):
