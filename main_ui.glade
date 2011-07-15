@@ -5712,6 +5712,8 @@
               <object class="GtkScrolledWindow" id="scrolledwindow11">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="hscrollbar_policy">automatic</property>
+                <property name="vscrollbar_policy">automatic</property>
                 <child>
                   <object class="GtkTreeView" id="points_points">
                     <property name="visible">True</property>
@@ -5737,7 +5739,7 @@
                       <object class="GtkLabel" id="label98">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Класс</property>
+                        <property name="label" translatable="yes">Валюта</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -5753,7 +5755,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBox" id="points_class">
+                  <object class="GtkComboBox" id="points_paper">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -5889,11 +5891,12 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="points_add">
-                    <property name="label" translatable="yes">Добавить</property>
+                    <property name="label">gtk-add</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
+                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -5903,16 +5906,32 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="points_delete">
-                    <property name="label" translatable="yes">Удалить</property>
+                    <property name="label">gtk-remove</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
+                    <property name="use_stock">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">10</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="points_modify">
+                    <property name="label">gtk-edit</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                    <property name="use_stock">True</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">11</property>
                   </packing>
                 </child>
               </object>

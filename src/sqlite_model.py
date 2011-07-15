@@ -13,6 +13,8 @@ from datetime import *
 class sqlite_model(common_model):
     """
     stores data in sqlite
+    \~russian
+    \todo сделать склейку сделок в случае удаления поз
     """
     ##############
     # Attributes #
