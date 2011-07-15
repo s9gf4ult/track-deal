@@ -1034,8 +1034,12 @@ class sqlite_model(common_model):
         """
         pass
 
-        
-
+    @raise_db_closed
+    def list_points_view(self, order_by = []):
+        """\brief return iterating object for points_view
+        \param order_by
+        """
+        return self._sqlite_connection.execute_select('select * from points_view{0}'.format(order_by_print(order_by)))
 
     def list_positions(self, account_id = None, paper_id = None, order_by = []):
         """return cursor for getting position descriptions

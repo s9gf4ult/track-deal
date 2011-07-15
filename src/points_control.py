@@ -19,7 +19,7 @@ class points_control(modifying_tab_control):
         w.set_transient_for(shorter('main_window'))
         w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.instrument = combo_select_control(shorter("points_instrument"))
-        self.paper = combo_select_control(shorter("points_paper"))
+        self.money = combo_select_control(shorter("points_paper"))
         self.point = shorter("points_point")
         self.step = shorter("points_step")
         for sp in [self.point, self.step]:
@@ -64,7 +64,7 @@ class points_control(modifying_tab_control):
         if row == None:
             return
         self.instrument.set_value(row[2])
-        self.paper.set_value(row[1])
+        self.money.set_value(row[1])
         self.step.set_value(row[4])
         self.point.set_value(row[3])
 
@@ -91,7 +91,7 @@ class points_control(modifying_tab_control):
         if not self._parent.connected():
             return
         try:
-            poid = self._parent.model.create_point(self.paper.get_value(),
+            poid = self._parent.model.create_point(self.money.get_value(),
                                                    self.instrument.get_value(),
                                                    self.point.get_value(),
                                                    self.step.get_value())
@@ -100,7 +100,9 @@ class points_control(modifying_tab_control):
         except Exception as e:
             show_and_print_error(e, self._parent.builder.get_object('points'))
         else:
-            self.points_list.add_row((poid, self.paper.get_value(), self.instrument.get_value(), self.point.get_value(), self.step.get_value()))
+            m = self._parent.model.get_money(self.money.get_value())
+            p = self._parent.model.get_paper(self.instrument.get_value())
+            self.points_list.add_row((poid, m['name'], p['name'], self.point.get_value(), self.step.get_value()))
 
     def modify_item(self, ):
         """\brief modify selected item with fields
@@ -112,7 +114,7 @@ class points_control(modifying_tab_control):
             return
         try:
             self._parent.model.change_point(row[0],
-                                            self.paper.get_value(),
+                                            self.money.get_value(),
                                             self.instrument.get_value(),
                                             self.point.get_value(),
                                             self.step.get_value())
@@ -121,8 +123,8 @@ class points_control(modifying_tab_control):
         except Exception as e:
             show_and_print_error(e, self._parent.builder.get_object('points'))
         else:
-            self.points_list.save_value_in_selected(1, self.paper.get_value())
-            self.points_list.save_value_in_selected(2, self.instrument.get_value())
+            self.points_list.save_value_in_selected(1, self._parent.model.get_money(self.money.get_value())['name'])
+            self.points_list.save_value_in_selected(2, self._parent.model.get_paper(self.instrument.get_value())['name'])
             self.points_list.save_value_in_selected(3, self.point.get_value())
             self.points_list.save_value_in_selected(4, self.step.get_value())
 
@@ -132,8 +134,9 @@ class points_control(modifying_tab_control):
         if not self._parent.connected():
             return
         self.instrument.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_accounts(['name'])))
-        self.paper.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_papers(['name'])))
-
+        self.money.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_papers(['name'])))
+        points = self._parent.model.list_points_view(['money_name', 'paper_name'])
+        self.points_list.update_rows(map(lambda a: (a['id'], a['money_name'], a['paper_name'], a['point'], a['step']), points.fetchall()))
 
     def run(self):
         """\brief run dialog and return result of running
@@ -144,16 +147,19 @@ class points_control(modifying_tab_control):
         if not self._parent.connected():
             return
         self.update_widget()
-        w = self._prent.builder.get_object('points')
+        w = self._parent.builder.get_object('points')
         try:
             self._parent.model.start_transacted_action('create some points')
             ret = w.run()
         except Exception as e:
             show_and_print_error(e, self._parent.builder.get_object('main_window'))
             self._parent.model.rollback()
+            w.hide()
             return gtk.RESPONSE_CANCEL
         if ret == gtk.RESPONSE_ACCEPT:
             self._parent.model.commit_transacted_action()
         else:
             self._parent.model.rollback()
+        w.hide()
+        return ret
         

@@ -256,6 +256,16 @@ FROM accounts a INNER JOIN moneys mm ON a.money_id = mm.id
 LEFT JOIN (select account_id as id, count(id) as deals, sum(direction * volume) - sum(commission) as profit from deals_view group by account_id) ds ON ds.id = a.id
 LEFT JOIN (select account_id as id, count(id) as positions from positions_view group by account_id) ps ON ps.id = a.id;
 
+CREATE TEMPORARY VIEW points_view AS
+SELECT
+p.*,
+m.name as money_name,
+pap.name as paper_name
+from
+points p
+inner join moneys m on p.money_id = m.id
+inner join papers pap on p.paper_id = pap.id;
+
 /*
 (genalltriggers '(("moneys" ("name" "full_name"))
                   ("candles" ("paper_id" "duration" "open_datetime" "close_datetime" "open_value" "close_value" "min_value" "max_value" "value_type"))

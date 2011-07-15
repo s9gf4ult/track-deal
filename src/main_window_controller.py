@@ -33,7 +33,15 @@ class main_window_controller(object):
         # shorter("import_from_old_database", "activate", self.import_from_old_database_activate)
         shorter("save_as", "activate", self.save_as_activate)
         shorter("add_papers", "activate", self.add_papers_activate)
+        shorter('edit_points', 'activate', self.edit_points_activate)
         # shorter("call_points", "activate", self.call_points)
+
+    def edit_points_activate(self, action):
+        """\brief 
+        \param action
+        """
+        self._parent.points.run()
+
 
     def call_points(self, action):
         self.points.run()
