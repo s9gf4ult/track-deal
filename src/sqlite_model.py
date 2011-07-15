@@ -946,7 +946,9 @@ class sqlite_model(common_model):
         \c paper_id - int, id of paper object\n
         \c count - int, count of contracts\n
         \c direction - int, -1 - is LONG position, 1 - is SHORT\n
-        \c commission - float, summarized commission of position\n
+        \c commission - float, summarized commission of position, used when \c open_commission and \c close_commission keys is absent\n
+        \c open_commission - float, if \c commission key is absent then it will be used as commission for opening deal\n
+        \c close_commission - float, if \c commission key is absent then it will be used as commission for opening deal\n
         \c open_datetime - datetime.datetime instance\n
         \c close_datetime - datetime.datetime instance\n
         \c open_points - float, price in points of opening deal\n
@@ -956,7 +958,6 @@ class sqlite_model(common_model):
         \exception od_exception.od_exception when first argument is not int or str or has there is no such account
         \return int - id of created position
         \note \ref tacreate_position_from_data must be used instead
-        \todo add open_datetime and close_datetime in keys
         """
         if isinstance(account_id_or_name, (int, long)):
             aid = account_id_or_name
@@ -968,15 +969,28 @@ class sqlite_model(common_model):
                 raise od_exception('There is no such account {0}'.format(account_id_or_name))
         else:
             raise od_exception('account_id_or_name must be int or str')
+        if data.has_key('commission'):
+            if data.has_key('open_commission') or data.has_key('close_commission'):
+                raise od_exception('"open_commission" or "close_commission" key must not appear with "commission" key in "data" parameter')
+        else:
+            if data.has_key('open_commission') <> data.has_key('close_commission'):
+                raise od_exception('"open_commission" must appear within "close_commission" and vise versa in "data" parameter')
         dd = copy(data)
         dd['account_id'] = aid
+        remhash(dd, 'commission')
+        remhash(dd, 'close_commission')
+        remhash(dd, 'open_commission')
+        if data.has_key('commission'):
+            dd['commission'] = data['commission']
+        elif data.has_key('open_commission'):
+            dd['commission']= data['open_commission'] + data['close_commission']
+
         pid = self._sqlite_connection.insert('positions', dd)
         deal_data  = {'manual_made' : gethash(data, 'manual_made'),
                       'account_id' : aid,
                       'position_id' : pid,
                       'paper_id' : data['paper_id'],
-                      'count' : data['count'],
-                      'commission' : data['commission'] / 2. }
+                      'count' : data['count']}
         dd1 = copy(deal_data)
         dd1['datetime'] = data['open_datetime']
         dd1['points'] = data['open_points']
@@ -985,6 +999,12 @@ class sqlite_model(common_model):
         dd2['datetime'] = data['close_datetime']
         dd2['points'] = data['close_points']
         dd2['direction'] = (- data['direction'])
+        if data.has_key('commission'):
+            dd1['commission'] = data['commission'] / 2.
+            dd2['commission'] = data['commission'] / 2.
+        elif data.has_key('open_commission'):
+            dd1['commission'] = data['open_commission']
+            dd2['commission'] = data['close_commission']
         self._sqlite_connection.insert('deals', dd1)
         self._sqlite_connection.insert('deals', dd2)
         self.recalculate_all_temporary()

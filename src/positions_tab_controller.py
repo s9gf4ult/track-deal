@@ -68,7 +68,7 @@ class positions_tab_controller(object):
                 data = self._parent.position_adder.get_data()
                 self._parent.model.tacreate_position_from_data(data['account_id'],
                                                                data)
-            except e:
+            except Exception as e:
                 show_and_print_error(e, self._parent.builder.get_object("main_window"))
             else:
                 self._parent.call_update_callback()

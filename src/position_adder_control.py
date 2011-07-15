@@ -52,7 +52,7 @@ class position_adder_control:
         self.count.set_lower_limit(0)
         self.count.set_upper_limit(sys.maxint)
 
-    def get_date(self, ):
+    def get_data(self, ):
         """\brief return data to insert into model
         """
         return {'account_id' : self.account.get_value(),
