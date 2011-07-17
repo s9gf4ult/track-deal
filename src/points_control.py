@@ -69,7 +69,6 @@ class points_control(modifying_tab_control):
         self.instrument.set_value(row[6])
         self.step.set_value(row[4])
         self.point.set_value(row[3])
-        print("done")
 
     def delete_item(self, ):
         """\brief delete selected item from list and from the database

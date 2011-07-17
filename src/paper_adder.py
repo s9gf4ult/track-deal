@@ -129,6 +129,9 @@ class paper_adder(object):
 
         row = self.list.get_selected_row()
         if row <> None:
+            cnt = self._parent.model.paper_assigned_deals(row[0])
+            if cnt > 0 and (query_yes_no(u'Имеется {0} сделок по данному инструменту, удалить вместе со сделками ?'.format(cnt), self.window) == gtk.RESPONSE_NO):
+                return
             try:
                 self._parent.model.remove_paper(row[0])
             except sqlite3.IntegrityError:

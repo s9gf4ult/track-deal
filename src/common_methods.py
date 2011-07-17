@@ -594,6 +594,22 @@ def query_yes_no(query, window):
     dial.destroy()
     return ret
 
+def query_yes_no_cancel(query, window):
+    """\brief ask the query in dialog
+    \param query str with query
+    \param window parent window for dialog
+    \retval gtk.RESPONSE_YES
+    \retval gtk.RESPONSE_NO
+    \retval gtk.RESPONSE_CANCEL
+    """
+    dial = gtk.Dialog()
+    dial.get_content_area().pack_start(gtk.Label(query))
+    dial.add_buttons(gtk.STOCK_YES, gtk.RESPONSE_YES, gtk.STOCK_NO, gtk.RESPONSE_NO, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+    ret = dial.run()
+    dial.destroy()
+    return ret
+
+
 def solve_field_in(args, conds, field_name, values):
     """\brief generate query for check if \c field_name in one of \c values
     \param args [out] - list of objects, will be appended by arguments

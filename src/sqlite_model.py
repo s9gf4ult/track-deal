@@ -2029,3 +2029,13 @@ class sqlite_model(common_model):
         \param step
         """
         pass
+
+    def paper_assigned_deals(self, paper_id):
+        """\brief return count of assigned deals for this paper
+        \param paper_id - int or str, id of paper object or name
+        \exception exceptions.od_exception when paper_id is not found
+        """
+        paper = self.get_paper(paper_id)
+        if paper == None:
+            raise od_exception('There is no such "paper" object {0}'.format(paper_id))
+        return self._sqlite_connection.execute('select count(*) from deals where paper_id = ?', [paper['id']]).fetchone()[0]

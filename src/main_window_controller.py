@@ -226,6 +226,9 @@ class main_window_controller(object):
         if not self._parent.connected():
             return
         self._parent.paper_adder.update_adder()
-        self._parent.paper_adder.run()
+        ret = self._parent.paper_adder.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self._parent.model.recalculate_all_temporary()
+            self._parent.call_update_callback()
         
 
