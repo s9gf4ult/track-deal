@@ -14,7 +14,7 @@
     <property name="stock_id">gtk-add</property>
   </object>
   <object class="GtkAction" id="add_papers">
-    <property name="label" translatable="yes">Добавить бумаги</property>
+    <property name="label" translatable="yes">Редактировать инструменты</property>
   </object>
   <object class="GtkAction" id="add_position">
     <property name="label">Создать позицию</property>
@@ -3502,24 +3502,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="menuitem3">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="related_action">transaction_commit</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="checkmenuitem1">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="related_action">transaction_rollback</property>
-                        <property name="use_underline">True</property>
-                        <property name="use_stock">True</property>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem17">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -3529,19 +3511,20 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem15">
+                      <object class="GtkImageMenuItem" id="imagemenuitem18">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="related_action">import_from_old_database</property>
+                        <property name="related_action">edit_points</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="imagemenuitem18">
+                      <object class="GtkImageMenuItem" id="imagemenuitem15">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="related_action">edit_points</property>
+                        <property name="related_action">edit_currencies</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -5693,6 +5676,7 @@
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="window_position">center-on-parent</property>
+    <property name="default_width">600</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox9">

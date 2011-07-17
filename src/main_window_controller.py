@@ -34,7 +34,19 @@ class main_window_controller(object):
         shorter("save_as", "activate", self.save_as_activate)
         shorter("add_papers", "activate", self.add_papers_activate)
         shorter('edit_points', 'activate', self.edit_points_activate)
+        shorter('edit_currencies', 'activate', self.edit_currencies_activate)
         # shorter("call_points", "activate", self.call_points)
+
+    def edit_currencies_activate(self, action):
+        """\brief edit currencies action handler
+        \param action
+        """
+        if not self._parent.connected():
+            return
+        ret = self._parent.currency.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self._parent.model.recalculate_all_temporary()
+            self._parent.call_update_callback()
 
     def edit_points_activate(self, action):
         """\brief 
@@ -213,7 +225,7 @@ class main_window_controller(object):
         """
         if not self._parent.connected():
             return
-
+        self._parent.paper_adder.update_adder()
         self._parent.paper_adder.run()
         
 

@@ -1998,3 +1998,34 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.execute('select min({0}), max({0}) from positions_view'.format(limit_name)).fetchone()
 
+    def change_point(self, point_id, money_id = None, paper_id = None, point = None, step = None):
+        """\brief change existing 'point' record
+        \param point_id
+        \param money_id
+        \param paper_id
+        \param point
+        \param step
+        """
+        flds = {}
+        for (name, val) in [('money_id', money_id),
+                            ('paper_id', paper_id),
+                            ('point', point),
+                            ('step', step)]:
+            if val <> None:
+                flds[name] = val
+        if len(flds) > 0:
+            self._sqlite_connection.update('points', flds, 'id = ?', (point_id, ))
+            
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, point_id, *args, **kargs: u'change point record {0}'.format(point_id))
+    @pass_to_method(change_point)
+    def tachange_point(self, *args, **kargs):
+        """\brief wrapper for \ref change_point
+        \param point_id
+        \param money_id
+        \param paper_id
+        \param point
+        \param step
+        """
+        pass

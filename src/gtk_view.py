@@ -34,16 +34,20 @@ class gtk_view(common_view):
     # \~russian
     # \par
     # Экземпляр контрола главного окна. Хранится сдесь для вызова метода обновления виджетов
-    # которыми управляет контрол
+    # которыми управляет контрол \ref main_window_controller.main_window_controller
     window = None
+    
     ## \brief instance of implementor of \ref common_model.common_model
     model = None
+    
     ## \brief instance of \ref currency_edit_control.currency_edit_control
-    # \~russian
-    # 
-    # Экземпляр диалога для редактирования валют
+
+    ## \~russian
+    ## Экземпляр диалога для редактирования валют \ref currency_edit_control.currency_edit_control
     currency = None
+    
     ## \brief instance of \ref accounts_tab_controller.accounts_tab_controller
+    # \~russian
     # Экземпляр контрола для таба со счетами. (Обработка событий нажатия кнопок и управление
     # списками на этой вкладке)
     accounts = None

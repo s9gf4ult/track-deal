@@ -36,7 +36,9 @@ class points_control(modifying_tab_control):
                                                        (u'Валюта', gtk.CellRendererText(), str),
                                                        (u'Инструмент', gtk.CellRendererText(), str),
                                                        (u'Пункт', gtk.CellRendererSpin(), float),
-                                                       (u'Шаг', gtk.CellRendererSpin(), float)])
+                                                       (u'Шаг', gtk.CellRendererSpin(), float),
+                                                       [u'money_id', int],
+                                                       [u'paper_id', int]])
         tw.connect("cursor-changed", self.points_cursor_changed)
 
     def add_clicked(self, bt):
@@ -63,10 +65,11 @@ class points_control(modifying_tab_control):
         row = self.points_list.get_selected_row()
         if row == None:
             return
-        self.instrument.set_value(row[2])
-        self.money.set_value(row[1])
+        self.money.set_value(row[5])
+        self.instrument.set_value(row[6])
         self.step.set_value(row[4])
         self.point.set_value(row[3])
+        print("done")
 
     def delete_item(self, ):
         """\brief delete selected item from list and from the database
@@ -91,18 +94,19 @@ class points_control(modifying_tab_control):
         if not self._parent.connected():
             return
         try:
-            poid = self._parent.model.create_point(self.money.get_value(),
-                                                   self.instrument.get_value(),
+            poid = self._parent.model.create_point(self.instrument.get_value(),
+                                                   self.money.get_value(),
                                                    self.point.get_value(),
                                                    self.step.get_value())
-        except sqlite3.IntegrityError:
+        except sqlite3.IntegrityError as e:
+            show_and_print_error(e, self._parent.builder.get_object('points'))
             pass
         except Exception as e:
             show_and_print_error(e, self._parent.builder.get_object('points'))
         else:
             m = self._parent.model.get_money(self.money.get_value())
             p = self._parent.model.get_paper(self.instrument.get_value())
-            self.points_list.add_row((poid, m['name'], p['name'], self.point.get_value(), self.step.get_value()))
+            self.points_list.add_row((poid, m['name'], p['name'], self.point.get_value(), self.step.get_value(), m['id'], p['id']))
 
     def modify_item(self, ):
         """\brief modify selected item with fields
@@ -123,20 +127,24 @@ class points_control(modifying_tab_control):
         except Exception as e:
             show_and_print_error(e, self._parent.builder.get_object('points'))
         else:
-            self.points_list.save_value_in_selected(1, self._parent.model.get_money(self.money.get_value())['name'])
-            self.points_list.save_value_in_selected(2, self._parent.model.get_paper(self.instrument.get_value())['name'])
+            m = self._parent.model.get_money(self.money.get_value())
+            p = self._parent.model.get_paper(self.instrument.get_value())
+            self.points_list.save_value_in_selected(1, m['name'])
+            self.points_list.save_value_in_selected(2, p['name'])
             self.points_list.save_value_in_selected(3, self.point.get_value())
             self.points_list.save_value_in_selected(4, self.step.get_value())
+            self.points_list.save_value_in_selected(5, m['id'])
+            self.points_list.save_value_in_selected(6, p['id'])
 
     def update_widget(self, ):
         """\brief update checkboxes
         """
         if not self._parent.connected():
             return
-        self.instrument.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_accounts(['name'])))
-        self.money.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_papers(['name'])))
+        self.instrument.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_papers(['name'])))
+        self.money.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_moneys(['name'])))
         points = self._parent.model.list_points_view(['money_name', 'paper_name'])
-        self.points_list.update_rows(map(lambda a: (a['id'], a['money_name'], a['paper_name'], a['point'], a['step']), points.fetchall()))
+        self.points_list.update_rows(map(lambda a: (a['id'], a['money_name'], a['paper_name'], a['point'], a['step'], a['money_id'], a['paper_id']), points.fetchall()))
 
     def run(self):
         """\brief run dialog and return result of running
@@ -158,6 +166,8 @@ class points_control(modifying_tab_control):
             return gtk.RESPONSE_CANCEL
         if ret == gtk.RESPONSE_ACCEPT:
             self._parent.model.commit_transacted_action()
+            self._parent.model.recalculate_all_temporary()
+            self._parent.call_update_callback()
         else:
             self._parent.model.rollback()
         w.hide()
