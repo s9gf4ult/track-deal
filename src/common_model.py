@@ -101,8 +101,9 @@ class common_model(object):
         if self._update_callback != None:
             self._update_callback()
 
-    def load_from_source(self, source):
+    def load_from_source(self, account_id, source):
         """\brief load deals from souce
+        \param account_id - int or str, id or name of account
         \param source \ref sources.common_source instance
         """
         raise NotImplementedError()

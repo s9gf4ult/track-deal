@@ -5,6 +5,7 @@ import datetime
 import hashlib
 from exceptions import *
 from common_methods import reduce_by_string
+from copy import copy
 
 
 class common_source(object):
@@ -88,7 +89,7 @@ class xml_parser(common_source):
         self.check_file()
 
     def receive(self):
-        return self.papers
+        return copy(self.papers)
 
     def check_file(self):
         if not (self.xml.childNodes.length == 1 and self.xml.childNodes[0].nodeName == "report"):

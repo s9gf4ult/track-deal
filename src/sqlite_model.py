@@ -10,6 +10,7 @@ from common_methods import *
 from exceptions import *
 from copy import copy
 from datetime import *
+import sqlite3
 
 class sqlite_model(common_model):
     """
@@ -2041,11 +2042,30 @@ class sqlite_model(common_model):
             raise od_exception('There is no such "paper" object {0}'.format(paper_id))
         return self._sqlite_connection.execute('select count(*) from deals where paper_id = ?', [paper['id']]).fetchone()[0]
 
-    def load_from_source(self, source):
+    def load_from_source(self, account_id, source):
         """\brief load deals from source
+        \param account_id - int or str, name or id of account
         \param source - \ref sources.common_source instance
         """
         assert(isinstance(source, sources.common_source))
-        
-        
-        pass
+        action_name = source.get_action_name()
+        papers = source.receive()
+        self.start_transacted_action(action_name)
+        acc = self.get_account(account_id)
+        if acc == None:
+            raise od_exception('There is no such account {0}'.format(account_id))
+        try:
+            for paper in papers:
+                p = self.get_paper(paper['type'], paper['name'])
+                if p == None:
+                    paper_id = self.create_paper(paper['type'], paper['name'], gethash(paper, 'stock'), gethash(paper, 'class'), gethash(paper, 'full_name'))
+                else:
+                    paper_id = p['id']
+                    
+                for deal in paper['deals']:
+                    deal['paper_id'] = paper_id
+                    try:
+                        self.create_deal(acc['id'], deal, False)
+                    except sqlite3.IntegrityError:
+                        pass
+                    
