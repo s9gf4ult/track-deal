@@ -187,8 +187,8 @@ class sources_xml_parser(unittest.TestCase):
 
     def test_check_sha1(self):
         """open.ru report parser gets equal sha1 every time"""
-        d = self.s.get_deals_list()
-        dd = self.ss.get_deals_list()
+        d = self.s.receive()
+        dd = self.ss.receive()
         self.assertEqual(len(d), len(dd))
         for (c, cc) in map(lambda a, b: (a, b), d, dd):
             self.assertEqual(c, cc)

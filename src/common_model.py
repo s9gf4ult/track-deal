@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 ## common_model ##
 
+from sources import common_source
+
 class common_model(object):
     """abstract model class
     """
@@ -99,6 +101,13 @@ class common_model(object):
         if self._update_callback != None:
             self._update_callback()
 
+    def load_from_source(self, source):
+        """\brief load deals from souce
+        \param source \ref sources.common_source instance
+        """
+        assert(isinstance(source, common_source))
+        
+        
 
 
 
