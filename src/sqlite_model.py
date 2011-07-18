@@ -11,6 +11,8 @@ from exceptions import *
 from copy import copy
 from datetime import *
 import sqlite3
+import traceback
+import sys
 
 class sqlite_model(common_model):
     """
@@ -2068,4 +2070,9 @@ class sqlite_model(common_model):
                         self.create_deal(acc['id'], deal, False)
                     except sqlite3.IntegrityError:
                         pass
-                    
+        except Exception as e:
+            self.rollback()
+            sys.stderr.write(traceback.format_exc())
+        else:
+            self.commit_transacted_action()
+            
