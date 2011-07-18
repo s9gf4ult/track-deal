@@ -3,22 +3,27 @@
 ## exceptions ##
 
 class od_exception(Exception):
-    """The common exception of open deals
+    """\brief The common exception of open deals
     """
     pass
 
+class od_exception_report_error(od_exception):
+    """\brief the common exception of imporing the report
+    """
+    pass
+        
 class od_exception_db_error(od_exception):
-    """The common database exception in open deals
+    """\breif The common database exception in open deals
     """
     pass
 
 class od_exception_db_closed(od_exception_db_error):
-    """Trys operation when database is closed
+    """\brief must be raised when try operation on database which is closed or does not exists
     """
     pass
 
 class od_exception_db_opened(od_exception_db_error):
-    """Try's open new database when there is opened one
+    """\brief must be raised when try open new database and there is opened one
     """
     pass
 
@@ -28,9 +33,15 @@ class od_exception_decorator(od_exception):
     pass
         
 class od_exception_action_error(od_exception):
+    """
+    \brief common action error
+    """
     pass
 
 class od_exception_action_cannot_create(od_exception_action_error):
+    """
+    \brief must be raised when trying create new action and the current state not in the end of actions list
+    """
     def __init__(self, actions_above):
         """
         \param actions_above 

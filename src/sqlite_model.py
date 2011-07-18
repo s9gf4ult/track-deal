@@ -2039,3 +2039,9 @@ class sqlite_model(common_model):
         if paper == None:
             raise od_exception('There is no such "paper" object {0}'.format(paper_id))
         return self._sqlite_connection.execute('select count(*) from deals where paper_id = ?', [paper['id']]).fetchone()[0]
+
+    def load_from_source(self, source):
+        """\brief load deals from source
+        \param source - \ref sources.common_source instance
+        """
+        pass

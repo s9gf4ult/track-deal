@@ -105,8 +105,7 @@ class common_model(object):
         """\brief load deals from souce
         \param source \ref sources.common_source instance
         """
-        assert(isinstance(source, common_source))
-        
+        raise NotImplementedError()
         
 
 

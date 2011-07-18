@@ -4,15 +4,14 @@ from xml.dom.minidom import parse
 import datetime
 import hashlib
 from exceptions import *
+from common_methods import reduce_by_string
 
 
 class common_source(object):
     """\brief common class for sources
     \par using:
     first initialize the object and open the source of deals, then pass this object to
-    \ref common_model.common_model.
-    
-    
+    \ref common_model.common_model.load_from_source method as parameter to load deals with papers into database
     """
     def __init__(self, ):
         """\brief 
@@ -76,9 +75,9 @@ class xml_parser(common_source):
     def get_action_name(self, ):
         """\brief return name of action to record in database
         """
-        if not hasattr(self, 'xml'):
-            raise od_exception(u'You must open file before getting action name')
-        return u'import {0} deals from report {1}'.format(len(self.common_deals), self.filename)
+        if not hasattr(self, 'xml') or not hasattr(self, 'papers'):
+            raise od_exception_report_error(u'You must open file before getting action name')
+        return u'import {0} deals from report {1}'.format(len(self.papers), self.filename)
 
     def open(self, filename):
         """\brief open the file with report
@@ -89,56 +88,57 @@ class xml_parser(common_source):
         self.check_file()
 
     def receive(self):
-        return self.common_deals
+        return self.papers
 
     def check_file(self):
         if not (self.xml.childNodes.length == 1 and self.xml.childNodes[0].nodeName == "report"):
-            raise od_exception(u'There is no tag report')
+            raise od_exception_report_error(u'There is no tag report')
         self.report = self.xml.childNodes[0]
         for name in ["common_deal", "account_totally_line"]:
             if self.report.getElementsByTagName(name).length != 1:
-                raise od_exception("there is no {0} in report or more that one found".format(name))
-        cd = self.report.getElementsByTagName("common_deal")[0].getElementsByTagName("item")
-        ta = self.report.getElementsByTagName("account_totally_line")[0].getElementsByTagName("item")
+                raise od_exception_report_error("there is no {0} in report or more that one found".format(name))
+        cd = self.report.getElementsByTagName("common_deal")[0].getElementsByTagName("item") # list of 'item' elements in 'common_deal' tag
+        ta = self.report.getElementsByTagName("account_totally_line")[0].getElementsByTagName("item") # list of 'item' elements in 'account_totally_line' tag
         self.total_account = ta
         if not (len(cd) > 0 and len(ta) > 1):
-            raise od_exception(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
-        self.common_deals = []
-        self.papers = []
-        
-        
-        for cod in cd:                  # идем по тегам тега common_deals
-            at = cod.attributes
-            deal = {}
-            dt = at.has_key('deal_time') and at['deal_time'].value or at['deal_date'].value
-            deal['datetime'] = datetime.datetime.strptime(dt, '%Y-%m-%dT%H:%M:%S')
-            for ( in ['security_type', 'security_name']:
-                deal[cc] = at.has_key(cc) and at[cc].value
-            for cc in ['price', 'quantity', 'volume', 'deal_sign', 'broker_comm', 'broker_comm_nds', 'stock_comm', 'stock_comm_nds']:
-                deal[cc] = at.has_key(cc) and float(at[cc].value) or 0
-            if deal['volume'] == 0:
-                deal['volume'] = deal['price'] * deal['quantity']
-            rdata = reduce(lambda a, b: u'{0}{1}'.format(a, b), [deal['security_name'],
-                                                                 deal['security_type'],
-                                                                 deal['datetime'].isoformat(),
-                                                                 deal['price'],
-                                                                 deal['quantity'],
-                                                                 deal['volume'],
-                                                                 deal['deal_sign'],
-                                                                 at['order_number'].value,
-                                                                 at['deal_number'].value]).encode('utf-8')
-            deal['sha1'] = hashlib.sha1(rdata).hexdigest()
-            self.common_deals.append(deal)
-            
-        if self.report.attributes['board_list'].value.find('FORTS') >= 0: # если в атрибуте тега report присутствует слово FORTS то расписываем суммарную коммисию поровну по всем сделкам пропрорционально объему
-            broker_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Вознаграждение Брокера', ta)[0].attributes['total_value'].value))
-            stock_comm = abs(float(filter(lambda a: a.attributes['total_description'].value == u'Биржевой сбор', ta)[0].attributes['total_value'].value))
-            summ_volume = sum(map(lambda a: a['volume'], self.common_deals))
-            for deal in self.common_deals:
-                deal['broker_comm'] = broker_comm / summ_volume * deal['volume']
-                deal['stock_comm'] = stock_comm / summ_volume * deal['volume']
+            raise od_exception_report_error(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
+        attributes = map(lambda a: a.attributes, cd) 
+        report_type = set(map(lambda a: a['security_type'], attributes)) # all the posible 'security_type' attributes in the report
+        if report_type == set(['FUT']): # if there is just 'FUT' type of the stock in the report
+            prices = reduce(lambda a, b: a + b, # summary of prices for all deals
+                            map(lambda b: b['price'], attributes))
+            commission = reduce(lambda a, b: a + b, # sum of commission from 'account_totally_line' tag
+                                filter(lambda c: c.attributes['total_description'] in (u'Вознаграждение Брокера', u'Биржевой сбор'), ta))
+            prices = commission / prices # now this is the commission value per one point
+            self.papers = list(set(map(lambda a: {'name' : a['security_name'], # get unique paper records from the report
+                                                  'type' : 'future',
+                                                  'stock' : a['board_name']}, attributes)))
+            for paper in self.papers: # fill each paper record with deals records
+                deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_date'], a['security_name'], a['expiration_date'], a['price'], a['quantity'], a['order_number'], a['deal_number'], a['deal_sign']))).hexdigest(),
+                                       'count' : a['quantity'],
+                                       'direction' : a['deal_sign'],
+                                       'points' : a['price'],
+                                       'commission' : prices * a['price'], # this is because the commission is stored in 'total_account' tag of the report
+                                       'datetime' : datetime.datetime.strptime(a['deal_date'], '%Y-%m-%dT%H:%M:%S')},
+                            filter(lambda b: paper['name'] == b['security_name'] and paper['stock'] == b['board_name'], attributes))
+                paper['deals'] = deals
                 
-        self.checked=True
-
+        elif report_type == set([u'Акции']): # if there is just 'Акции' type of the stock in the report
+            self.papers = list(set(map(lambda a: {'name' : a['security_name'], # get unique paper records from the report
+                                                  'stock' : a['board_name'],
+                                                  'type' : 'action'},
+                                       attributes)))
+            for paper in self.papers: # fill each paper record with deal records
+                deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'], a['security_name'], a['price'], a['quantity'], a['order_number'], a['deal_number'], a['deal_sign'], a['board_name'], a['broker_comm'], a['stock_comm']))).hexdigest(),
+                                       'count' : a['quantity'],
+                                       'direction' : a['deal_sign'],
+                                       'points' : a['price'],
+                                       'commission' : a['broker_comm'] + a['stock_comm'],
+                                       'datetime' : datetime.datetime.strptime(a['deal_time'], '%Y-%m-%dT%H:%M:%S')},
+                            filter(lambda b: paper['name'] == b['security_name'] and paper['stock'] == b['board_name'], attributes))
+                paper['deals'] = deals
+        else:
+            raise od_exception_report_error('This report is strange, dont know what type of report is it futures or stocks ?')
         
-classes = {u'Отчет брокерского дома "Открытие"' : xml_parser}
+        
+classes = {u'Отчет брокерского дома "Открытие"' : xml_parser} # this is global variable using to store name and class of importer
