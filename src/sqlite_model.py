@@ -5,6 +5,7 @@
 from common_model import common_model
 from common_view import common_view
 from sconnection import sconnection
+import sources
 from common_methods import *
 from exceptions import *
 from copy import copy
@@ -2044,4 +2045,7 @@ class sqlite_model(common_model):
         """\brief load deals from source
         \param source - \ref sources.common_source instance
         """
+        assert(isinstance(source, sources.common_source))
+        
+        
         pass
