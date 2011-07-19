@@ -10,9 +10,6 @@ class application(object):
     
     def __init__(self, view):
         """Creates new instance of application
-        
-        
-        Arguments:
         \param view  the instance of view
         """
         assert(isinstance(view, common_view))
@@ -20,8 +17,6 @@ class application(object):
 
     def start(self, model = None):
         """starts the application
-        
-        Arguments:
         \param model posible model to open with view
         """
         if model:
@@ -44,9 +39,6 @@ class application(object):
 
     def set_model(self, model):
         """Setter for property model
-        
-        
-        Arguments:
         \param model common_model child instance
         """
         assert(isinstance(model, common_model))
