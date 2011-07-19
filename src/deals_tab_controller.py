@@ -145,7 +145,7 @@ class deals_tab_controller(object):
         if not self._parent.connected():
             return
         try:
-            xs = sources.xml_parser(filename)
+            xs = sources.open_ru_report_source(filename)
             xs.check_file()
             self._parent.model.get_from_source_in_account(account, xs)
             self._parent.call_update_callback()

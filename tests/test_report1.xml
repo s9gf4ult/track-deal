@@ -5,10 +5,10 @@
     <item></item>
   </account_totally_line>
   <common_deal>
-    <item deal_time="2010-01-01T00:00:00" security_name="A" price="1" quantity="10" volume="10" deal_sign="-1" order_number="1" deal_number="2" ></item>
-    <item deal_time="2010-01-01T00:00:02" order_number="3" deal_number="34" security_name="A" price="1" quantity="10" volume="10" deal_sign="1" ></item>
-    <item deal_time="2010-01-01T00:00:03" order_number="4" deal_number="45" security_name="B" price="1" quantity="7" volume="7" deal_sign="-1" ></item>
-    <item deal_time="2010-01-01T00:00:04" order_number="8" deal_number="77" security_name="B" price="1" quantity="3" volume="3" deal_sign="-1" ></item>
-    <item deal_time="2010-01-01T00:00:05" order_number="889" deal_number="342" security_name="B" price="1" quantity="10" volume="10" deal_sign="1"/>
+    <item broker_comm="1" stock_comm="1" board_name="MICEX" security_type="Акции" deal_time="2010-01-01T00:00:00" security_name="A" price="1" quantity="10" volume="10" deal_sign="-1" order_number="1" deal_number="2" ></item>
+    <item broker_comm="1" stock_comm="1" board_name="MICEX" security_type="Акции" deal_time="2010-01-01T00:00:02" order_number="3" deal_number="34" security_name="A" price="1" quantity="10" volume="10" deal_sign="1" ></item>
+    <item broker_comm="1" stock_comm="1" board_name="MICEX" security_type="Акции" deal_time="2010-01-01T00:00:03" order_number="4" deal_number="45" security_name="B" price="1" quantity="7" volume="7" deal_sign="-1" ></item>
+    <item broker_comm="1" stock_comm="1" board_name="MICEX" security_type="Акции" deal_time="2010-01-01T00:00:04" order_number="8" deal_number="77" security_name="B" price="1" quantity="3" volume="3" deal_sign="-1" ></item>
+    <item broker_comm="1" stock_comm="1" board_name="MICEX" security_type="Акции" deal_time="2010-01-01T00:00:05" order_number="889" deal_number="342" security_name="B" price="1" quantity="10" volume="10" deal_sign="1"/>
   </common_deal>
 </report>

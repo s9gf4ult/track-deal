@@ -1,6 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-## exceptions ##
+## od_exceptions ##
 
 class od_exception(Exception):
     """\brief The common exception of open deals

@@ -4,7 +4,7 @@
 import gtk
 from math import trunc
 import traceback
-from exceptions import *
+from od_exceptions import *
 import datetime
 import re
 import sys

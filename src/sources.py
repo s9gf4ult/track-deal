@@ -3,9 +3,11 @@
 from xml.dom.minidom import parse
 import datetime
 import hashlib
-from exceptions import *
+from od_exceptions import *
 from common_methods import reduce_by_string
 from copy import copy
+from hashed_dict import hashed_dict
+import math
 
 
 class common_source(object):
@@ -57,7 +59,7 @@ class common_source(object):
         raise NotImplementedError()
 
 
-class xml_parser(common_source):
+class open_ru_report_source(common_source):
     """
     \brief open.ru report parser
     parse and return deals in hash form
@@ -103,43 +105,44 @@ class xml_parser(common_source):
         self.total_account = ta
         if not (len(cd) > 0 and len(ta) > 1):
             raise od_exception_report_error(u'Странное количество тегов item в отчете, либо отчет битый, либо это вобще не отчет')
-        attributes = map(lambda a: a.attributes, cd) 
-        report_type = set(map(lambda a: a['security_type'], attributes)) # all the posible 'security_type' attributes in the report
+        attributes = map(lambda a: a.attributes, cd)
+        report_type = set(map(lambda a: a['security_type'].nodeValue, attributes)) # all the posible 'security_type' attributes in the report
         if report_type == set(['FUT']): # if there is just 'FUT' type of the stock in the report
             prices = reduce(lambda a, b: a + b, # summary of prices for all deals
-                            map(lambda b: b['price'], attributes))
-            commission = reduce(lambda a, b: a + b, # sum of commission from 'account_totally_line' tag
-                                filter(lambda c: c.attributes['total_description'] in (u'Вознаграждение Брокера', u'Биржевой сбор'), ta))
+                            map(lambda b: float(b['price'].nodeValue), attributes))
+            commission = reduce(lambda a, b: abs(float(a.attributes['total_value'].nodeValue)) +
+                                abs(float(b.attributes['total_value'].nodeValue)), # sum of commission from 'account_totally_line' tag
+                                filter(lambda c: c.attributes['total_description'].nodeValue in (u'Вознаграждение Брокера', u'Биржевой сбор'), ta))
             prices = commission / prices # now this is the commission value per one point
-            self.papers = list(set(map(lambda a: {'name' : a['security_name'], # get unique paper records from the report
-                                                  'type' : 'future',
-                                                  'stock' : a['board_name']}, attributes)))
+            self.papers = list(set(map(lambda a: hashed_dict({'name' : a['security_name'].nodeValue, # get unique paper records from the report
+                                                              'type' : 'future',
+                                                              'stock' : a['board_name'].nodeValue}), attributes)))
             for paper in self.papers: # fill each paper record with deals records
-                deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_date'], a['security_name'], a['expiration_date'], a['price'], a['quantity'], a['order_number'], a['deal_number'], a['deal_sign']))).hexdigest(),
-                                       'count' : a['quantity'],
-                                       'direction' : a['deal_sign'],
-                                       'points' : a['price'],
-                                       'commission' : prices * a['price'], # this is because the commission is stored in 'total_account' tag of the report
-                                       'datetime' : datetime.datetime.strptime(a['deal_date'], '%Y-%m-%dT%H:%M:%S')},
-                            filter(lambda b: paper['name'] == b['security_name'] and paper['stock'] == b['board_name'], attributes))
+                deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_date'].nodeValue, a['security_name'].nodeValue, a['expiration_date'].nodeValue, a['price'].nodeValue, a['quantity'].nodeValue, a['order_number'].nodeValue, a['deal_number'].nodeValue, a['deal_sign'].nodeValue))).hexdigest(),
+                                       'count' : math.trunc(float(a['quantity'].nodeValue)),
+                                       'direction' : math.trunc(float(a['deal_sign'].nodeValue)),
+                                       'points' : float(a['price'].nodeValue),
+                                       'commission' : prices * float(a['price'].nodeValue), # this is because the commission is stored in 'total_account' tag of the report
+                                       'datetime' : datetime.datetime.strptime(a['deal_date'].nodeValue, '%Y-%m-%dT%H:%M:%S')},
+                            filter(lambda b: paper['name'] == b['security_name'].nodeValue and paper['stock'] == b['board_name'].nodeValue, attributes))
                 paper['deals'] = deals
                 
         elif report_type == set([u'Акции']): # if there is just 'Акции' type of the stock in the report
-            self.papers = list(set(map(lambda a: {'name' : a['security_name'], # get unique paper records from the report
-                                                  'stock' : a['board_name'],
-                                                  'type' : 'action'},
+            self.papers = list(set(map(lambda a: hashed_dict({'name' : a['security_name'].nodeValue, # get unique paper records from the report
+                                                              'stock' : a['board_name'].nodeValue,
+                                                              'type' : 'action'}),
                                        attributes)))
             for paper in self.papers: # fill each paper record with deal records
-                deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'], a['security_name'], a['price'], a['quantity'], a['order_number'], a['deal_number'], a['deal_sign'], a['board_name'], a['broker_comm'], a['stock_comm']))).hexdigest(),
-                                       'count' : a['quantity'],
-                                       'direction' : a['deal_sign'],
-                                       'points' : a['price'],
-                                       'commission' : a['broker_comm'] + a['stock_comm'],
-                                       'datetime' : datetime.datetime.strptime(a['deal_time'], '%Y-%m-%dT%H:%M:%S')},
-                            filter(lambda b: paper['name'] == b['security_name'] and paper['stock'] == b['board_name'], attributes))
+                deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'].nodeValue, a['security_name'].nodeValue, a['price'].nodeValue, a['quantity'].nodeValue, a['order_number'].nodeValue, a['deal_number'].nodeValue, a['deal_sign'].nodeValue, a['board_name'].nodeValue, a['broker_comm'].nodeValue, a['stock_comm'].nodeValue))).hexdigest(),
+                                       'count' : math.trunc(float(a['quantity'].nodeValue)),
+                                       'direction' : math.trunc(float(a['deal_sign'].nodeValue)),
+                                       'points' : float(a['price'].nodeValue),
+                                       'commission' : float(a['broker_comm'].nodeValue) + float(a['stock_comm'].nodeValue),
+                                       'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S')},
+                            filter(lambda b: paper['name'] == b['security_name'].nodeValue and paper['stock'] == b['board_name'].nodeValue, attributes))
                 paper['deals'] = deals
         else:
             raise od_exception_report_error('This report is strange, dont know what type of report is it futures or stocks ?')
         
         
-classes = {u'Отчет брокерского дома "Открытие"' : xml_parser} # this is global variable using to store name and class of importer
+classes = {u'Отчет брокерского дома "Открытие"' : open_ru_report_source} # this is global variable using to store name and class of importer

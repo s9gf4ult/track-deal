@@ -7,7 +7,7 @@ from common_methods import *
 import sqlite3
 from account_edit_control import account_edit_control
 import gtk_view
-from exceptions import *
+from od_exceptions import *
 
 class accounts_tab_controller(object):
     """

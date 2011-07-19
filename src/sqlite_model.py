@@ -7,7 +7,7 @@ from common_view import common_view
 from sconnection import sconnection
 import sources
 from common_methods import *
-from exceptions import *
+from od_exceptions import od_exception_report_error
 from copy import copy
 from datetime import *
 import sqlite3
