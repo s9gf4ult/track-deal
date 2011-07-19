@@ -25,17 +25,13 @@ class main_window_controller(object):
         shorter("quit", "activate", self.quit_activate)
         shorter("create_database", "activate", self.create_database_activate)
         shorter("open_database", "activate", self.open_database_activate)
-        # shorter("transaction_commit", "activate", self.transaction_commit_activate)
-        # shorter("transaction_rollback", "activate", self.transaction_rollback_activate)
         shorter("close_database", "activate", self.close_activate)
         shorter("create_database_in_memory", "activate", self.create_database_in_memory_activate)
         shorter("main_window", "delete-event", self.main_window_quit)
-        # shorter("import_from_old_database", "activate", self.import_from_old_database_activate)
         shorter("save_as", "activate", self.save_as_activate)
         shorter("add_papers", "activate", self.add_papers_activate)
         shorter('edit_points', 'activate', self.edit_points_activate)
         shorter('edit_currencies', 'activate', self.edit_currencies_activate)
-        # shorter("call_points", "activate", self.call_points)
 
     def edit_currencies_activate(self, action):
         """\brief edit currencies action handler
