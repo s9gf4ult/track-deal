@@ -185,8 +185,12 @@ class paper_adder(object):
         row = self.list.get_selected_row()
         if row <> None:
             paper = self._parent.model.get_paper(row[0])
-            self.name.set_text(paper["name"])
-            self.type.set_value(paper["type"])
-            self.full_name.set_text(paper["full_name"])
-            self.stock.set_value(paper["stock"])
-            self.class_field.set_value(paper["class"])
+            for set_meth, keyval in [(self.name.set_text, 'name'),
+                                     (self.type.set_value, 'type'),
+                                     (self.full_name.set_text, 'full_name'),
+                                     (self.stock.set_value, 'stock'),
+                                     (self.class_field.set_value, 'class')]:
+                if is_null_or_empty(paper[keyval]):
+                    set_meth('')
+                else:
+                    set_meth(paper[keyval])

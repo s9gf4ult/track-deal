@@ -1414,6 +1414,7 @@ class sqlite_model(common_model):
         else:
             nd1 = copy(deal)
             del nd1["id"]
+            remhash(nd1, 'sha1')
             nd1["parent_deal_id"] = deal["id"]
             nd2 = copy(nd1)
             nd1["count"] = count
