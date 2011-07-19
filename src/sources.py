@@ -35,7 +35,7 @@ class common_source(object):
         class - class of the stock
         full-name - full name of stock if exists
         stock - the market name of the stock
-        type - the type name 'action', 'future' or 'option'
+        type - the type name 'stock', 'future' or 'option'
         deals - list of hashes with deals with keys:
                     sha1 - optional unique field
                     count - count of lots
@@ -130,7 +130,7 @@ class open_ru_report_source(common_source):
         elif report_type == set([u'Акции']): # if there is just 'Акции' type of the stock in the report
             self.papers = list(set(map(lambda a: hashed_dict({'name' : a['security_name'].nodeValue, # get unique paper records from the report
                                                               'stock' : a['board_name'].nodeValue,
-                                                              'type' : 'action'}),
+                                                              'type' : 'stock'}),
                                        attributes)))
             for paper in self.papers: # fill each paper record with deal records
                 deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'].nodeValue, a['security_name'].nodeValue, a['price'].nodeValue, a['quantity'].nodeValue, a['order_number'].nodeValue, a['deal_number'].nodeValue, a['deal_sign'].nodeValue, a['board_name'].nodeValue, a['broker_comm'].nodeValue, a['stock_comm'].nodeValue))).hexdigest(),

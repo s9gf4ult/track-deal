@@ -2074,5 +2074,6 @@ class sqlite_model(common_model):
             self.rollback()
             sys.stderr.write(traceback.format_exc())
         else:
+            self.recalculate_all_temporary()
             self.commit_transacted_action()
             
