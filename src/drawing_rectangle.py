@@ -121,3 +121,26 @@ class drawing_rectangle(object):
 
         self.set_lower_x_limit(lower)
         self.set_upper_x_limit(upper)
+
+    def autoset_rectangle(self, data_charts):
+        """\brief automatically set all rectangle attributes
+        \param data_charts - list of \ref data_chart.data_chart instances
+        """
+        if is_null_or_empty(data_charts):
+            return
+        x_lower = 0
+        x_upper = 0
+        y_lower = 0
+        y_upper = 0
+        for data in self.data_charts:
+            rect = data.get_drawing_rectangle()
+            x_lower = min(x_lower, rect[0])
+            x_upper = max(x_upper, rect[1])
+            y_lower = min(y_lower, rect[2])
+            y_upper = max(y_upper, rect[3])
+
+        self.set_lower_x_limit(x_lower)
+        self.set_upper_x_limit(x_upper)
+        self.set_lower_y_limit(y_lower)
+        self.set_upper_y_limit(y_upper)
+        
