@@ -132,7 +132,7 @@ class drawing_rectangle(object):
         x_upper = 0
         y_lower = 0
         y_upper = 0
-        for data in self.data_charts:
+        for data in data_charts:
             rect = data.get_drawing_rectangle()
             x_lower = min(x_lower, rect[0])
             x_upper = max(x_upper, rect[1])
