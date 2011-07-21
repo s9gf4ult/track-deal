@@ -24,6 +24,7 @@ class cairo_canva(gtk.DrawingArea):
         """
         self._context.rectangle(event.area.x, event.area.y,
                                 event.area.width, event.area.height)
+        self._context.clip()
         self.redraw()
         return False
 
@@ -45,9 +46,23 @@ class cairo_canva(gtk.DrawingArea):
     def redraw(self, ):
         """\brief call method 'draw' for all drawers added
         """
+        rect = self.get_allocation()
         for drawer in self._drawers:
-            drawer.draw(self._context)
+            drawer.draw(self._context, rect)
         
 if __name__ == '__main__':
+    from math import pi
     w = gtk.Dialog()
     p = w.get_content_area()
+    class dummy(common_drawer):
+        def draw(self, context, rect):
+            rad = min(rect.height, rect.width) / 2.
+            xc = rect.x + (rect.width / 2.)
+            yc = rect.y + (rect.height / 2.)
+            context.arc(xc, yc, rad, 0, 2 * pi)
+            
+    dr = dummy()
+    canva = cairo_canva()
+    canva.add_drawer(dr)
+    p.pack_start(canva)
+    w.show_all()
