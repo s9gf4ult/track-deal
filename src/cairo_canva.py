@@ -5,6 +5,7 @@
 
 import gtk
 from common_drawer import common_drawer
+from common_methods import find_in_list
 
 class cairo_canva(gtk.DrawingArea):
     """\brief chart class to draw chart in window
@@ -14,7 +15,6 @@ class cairo_canva(gtk.DrawingArea):
         """
         gtk.DrawingArea.__init__(self, *args, **kargs)
         self.connect('expose-event', self.expose)
-        self._context = self.window.cairo_create()
         self._drawers = []
 
     def expose(self, widget, event):
@@ -22,6 +22,7 @@ class cairo_canva(gtk.DrawingArea):
         \param widget
         \param event
         """
+        self._context = self.window.cairo_create()
         self._context.rectangle(event.area.x, event.area.y,
                                 event.area.width, event.area.height)
         self._context.clip()
@@ -51,18 +52,35 @@ class cairo_canva(gtk.DrawingArea):
             drawer.draw(self._context, rect)
         
 if __name__ == '__main__':
+    import cairo
     from math import pi
-    w = gtk.Dialog()
-    p = w.get_content_area()
+    w = gtk.Window()
+    w.connect('delete-event', gtk.main_quit)
     class dummy(common_drawer):
         def draw(self, context, rect):
             rad = min(rect.height, rect.width) / 2.
             xc = rect.x + (rect.width / 2.)
             yc = rect.y + (rect.height / 2.)
+            context.set_source_rgb(0, 0, 0)
             context.arc(xc, yc, rad, 0, 2 * pi)
-            
+            context.fill()
+
+    class dummy2(common_drawer):
+        def draw(self, context, rect):
+            width = rect.width / 3.
+            height = rect.height / 3.
+            xc = rect.x + width
+            yc = rect.y + height
+            context.set_source_rgb(1, 0, 0)
+            context.set_line_width(3)
+            context.rectangle(xc, yc, width, height)
+            context.stroke()
+
+    dr2 = dummy2()
     dr = dummy()
     canva = cairo_canva()
     canva.add_drawer(dr)
-    p.pack_start(canva)
+    canva.add_drawer(dr2)
+    w.add(canva)
     w.show_all()
+    gtk.main()
