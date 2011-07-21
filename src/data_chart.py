@@ -74,4 +74,5 @@ class data_chart(object):
         (x_values, y_values) = zip(*self.get_data_list())
         return (min(x_values), max(x_values), min(y_values), max(y_values))
 
-    
+        
+
