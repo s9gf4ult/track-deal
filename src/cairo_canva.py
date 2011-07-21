@@ -53,7 +53,10 @@ class cairo_canva(gtk.DrawingArea):
         
 if __name__ == '__main__':
     import cairo
-    from math import pi
+    from math import pi, sin
+    from common_methods import map_to_context_coordinates
+    from drawing_rectangle import drawing_rectangle
+    from numpy import arange
     w = gtk.Window()
     w.connect('delete-event', gtk.main_quit)
     class dummy(common_drawer):
@@ -76,11 +79,28 @@ if __name__ == '__main__':
             context.rectangle(xc, yc, width, height)
             context.stroke()
 
+    class sinus(common_drawer):
+        def draw(self, context, rect):
+            context.set_source_rgb(0.1, 0.5, 0)
+            drc = drawing_rectangle(lower_x_limit=-10,
+                                    upper_x_limit=10,
+                                    lower_y_limit=-1,
+                                    upper_y_limit=1)
+            sin_data = map(lambda a: (a, sin(a)), arange(-10, 10, 0.1))
+            mapsin = map_to_context_coordinates(drc, rect, sin_data)
+            context.move_to(mapsin[0][0], mapsin[0][1])
+            for dsin in mapsin[1:]:
+                context.line_to(*dsin)
+            context.stroke()
+
+
     dr2 = dummy2()
     dr = dummy()
+    drsin = sinus()
     canva = cairo_canva()
     canva.add_drawer(dr)
     canva.add_drawer(dr2)
+    canva.add_drawer(drsin)
     w.add(canva)
     w.show_all()
     gtk.main()

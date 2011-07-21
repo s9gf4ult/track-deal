@@ -8,6 +8,8 @@ from od_exceptions import *
 import datetime
 import re
 import sys
+import time
+import numpy
 
 def show_error(message, parent):
     """
@@ -643,3 +645,36 @@ def make_builder(file_path):
     ret = gtk.Builder()
     ret.add_from_file(file_path)
     return ret
+
+def map_to_context_coordinates(drawing, context, data_list):
+    """\brief map coordinates from data_list to context coordinates
+    \param drawing \ref drawing_rectangle.drawing_rectangle instance
+    \param context rectangle object with fields x, y, width and height
+    \param data_list
+    \return list of tuples with 2 numeric elements
+    """
+    if len(data_list) == 0:
+        return []
+    data = numpy.matrix(map(lambda a: ([time.mktime(a.timetuple()), a[1], 1] if isinstance(a[0], datetime.datetime) else [a[0], a[1], 1]), data_list)) # vectors which must be transformed
+    x0 = drawing.get_lower_x_limit()
+    x0 = (time.mktime(x0.timetuple()) if isinstance(x0, datetime.datetime) else x0)
+    xx0 = drawing.get_upper_x_limit()
+    xx0 = (time.mktime(xx0.timetuple()) if isinstance(xx0, datetime.datetime) else xx0)
+    w0 = xx0 - x0
+    y0 = drawing.get_lower_y_limit()
+    h0 = drawing.get_upper_y_limit() - y0
+    x1 = context.x
+    w1 = context.width
+    y1 = context.y
+    h1 = context.height
+    move_zero = numpy.matrix([[1, 0, 0],
+                              [0, 1, 0],
+                              [-x0, -y0, 1]])
+    scale = numpy.matrix([[w1 / w0, 0, 0],
+                          [0, -h1 / h0, 0],
+                          [0, 0, 1]])
+    move_target = numpy.matrix([[1, 0, 0],
+                                [0, 1, 0],
+                                [x1, y1 + w1, 1]]) # w1 is because we already mirrored our scuare
+    transform = move_zero * scale * move_target
+    return map(lambda a: (a[0, 0], a[0, 1]), data * transform)

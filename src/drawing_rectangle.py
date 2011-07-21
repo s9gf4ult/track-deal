@@ -10,7 +10,7 @@ from common_methods import is_null_or_empty
 class drawing_rectangle(object):
     """\brief describes rectangle of drawing area
     """
-    def __init__(self, x_axis_type = datetime,
+    def __init__(self, x_axis_type = float,
                  y_axis_type = float,
                  lower_x_limit = 0,
                  upper_x_limit = 1,
@@ -26,34 +26,44 @@ class drawing_rectangle(object):
         """
         self._x_axis_type = x_axis_type
         self._y_axis_type = y_axis_type
-        self._lower_x_limit = lower_x_limit
-        self._upper_x_limit = upper_x_limit
-        self._lower_y_limit = lower_y_limit
-        self._upper_y_limit = upper_y_limit
-        
+        self._lower_x_limit = float(lower_x_limit)
+        self._upper_x_limit = float(upper_x_limit)
+        self._lower_y_limit = float(lower_y_limit)
+        self._upper_y_limit = float(upper_y_limit)
+
+    def get_x_axis_type(self):
+        """\brief Getter for property x_axis_type
+        """
+        return self._x_axis_type
+
+    def get_y_axis_type(self):
+        """\brief Getter for property y_axis_type
+        """
+        return self._y_axis_type
+    
     def set_lower_x_limit(self, lower_x_limit):
         """\brief Setter for property lower_x_limit
         \param lower_x_limit
         """
-        self._lower_x_limit = lower_x_limit
+        self._lower_x_limit = float(lower_x_limit)
 
     def set_upper_x_limit(self, upper_x_limit):
         """\brief Setter for property upper_x_limit
         \param upper_x_limit
         """
-        self._upper_x_limit = upper_x_limit
+        self._upper_x_limit = float(upper_x_limit)
 
     def set_lower_y_limit(self, lower_y_limit):
         """\brief Setter for property lower_y_limit
         \param lower_y_limit
         """
-        self._lower_y_limit = lower_y_limit
+        self._lower_y_limit = float(lower_y_limit)
 
     def set_upper_y_limit(self, upper_y_limit):
         """\brief Setter for property upper_y_limit
         \param upper_y_limit
         """
-        self._upper_y_limit = upper_y_limit
+        self._upper_y_limit = float(upper_y_limit)
         
     def get_lower_x_limit(self):
         """\brief Getter for property lower_x_limit
