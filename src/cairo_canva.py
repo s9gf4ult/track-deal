@@ -93,14 +93,29 @@ if __name__ == '__main__':
                 context.line_to(*dsin)
             context.stroke()
 
+    class somefunc(common_drawer):
+        def draw(self, context, rect):
+            context.set_source_rgb(0.5, 0.5, 1)
+            drc = drawing_rectangle(lower_x_limit = -10,
+                                    upper_x_limit = 10,
+                                    lower_y_limit = -10,
+                                    upper_y_limit = 20)
+            some_data = map(lambda a: (a, a ** 2 - 10), arange(-10, 10, 0.1))
+            maped_data = map_to_context_coordinates(drc, rect, some_data)
+            context.move_to(maped_data[0][0], maped_data[0][1])
+            for dd in maped_data[1:]:
+                context.line_to(dd[0], dd[1])
+            context.stroke()
 
     dr2 = dummy2()
     dr = dummy()
     drsin = sinus()
+    somedr = somefunc()
     canva = cairo_canva()
     canva.add_drawer(dr)
     canva.add_drawer(dr2)
     canva.add_drawer(drsin)
+    canva.add_drawer(somedr)
     w.add(canva)
     w.show_all()
     gtk.main()
