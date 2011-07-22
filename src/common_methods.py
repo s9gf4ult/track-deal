@@ -682,11 +682,19 @@ def map_to_context_coordinates(drawing, context, data_list):
     transform = move_zero * minus_y * scale * move_target
     return map(lambda a: (a[0, 0], a[0, 1]), data * transform)
 
-# def draw_chart(context, rect, draw_area, chart):
-#     """\brief draw the chart in context
-#     \param context - Cairo context
-#     \param rect - rectangle of context
-#     \param draw_area - draw area \ref drawing_rectangle.drawing_rectangle instance
-#     \param chart - \ref data_chart.data_chart instance
-#     """
+def draw_chart(context, rect, draw_area, chart):
+    """\brief draw the chart in context
+    \param context - Cairo context
+    \param rect - rectangle of context
+    \param draw_area - draw area \ref drawing_rectangle.drawing_rectangle instance
+    \param chart - \ref data_chart.data_chart instance
+    """
+    draw_data = draw_area.shrink_chart(chart) # list with shrinked data inside window
+    mapdraw_data = map_to_context_coordinates(draw_area, rect, draw_data)
+    context.set_source_rgb(*chart.get_color())
+    context.set_line_width(chart.get_line_width())
+    context.move_to(mapdraw_data[0][0], mapdraw_data[0][1])
+    for dts in mapdraw_data[1:]:
+        context.line_to(dts[0], dts[1])
+    context.stroke()
     

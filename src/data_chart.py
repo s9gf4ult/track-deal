@@ -7,13 +7,17 @@ from copy import copy
 class data_chart(object):
     """\brief object keeping the data of chart
     """
-    color = (0, 0, 0)
-    legend = ''
-    def __init__(self, data_list):
+    def __init__(self, data_list, color = (0, 0, 0), legend = '', line_width = 1):
         """
         \param data_list list of tuples with data (X axis data, Y axis data)
+        \param color = tuple with 3 float elements
+        \param legend = string with name
+        \param line_width = width of line to draw
         """
-        self._data_list = data_list
+        self.set_data_list(data_list)
+        self.set_color(color)
+        self.set_legend(legend)
+        self.set_line_width(line_width)
         
     def get_data_list(self):
         """\brief Getter for property data_list
@@ -60,7 +64,9 @@ class data_chart(object):
         """\brief Setter for property color
         \param color
         """
-        self._color = color
+        if len(color) <> 3:
+            raise ValueError('color must be 3 element tuple')
+        self._color = tuple(map(lambda a: float(a), color))
 
     def get_color(self):
         """\brief Getter for property color
@@ -74,5 +80,14 @@ class data_chart(object):
         (x_values, y_values) = zip(*self.get_data_list())
         return (min(x_values), max(x_values), min(y_values), max(y_values))
 
-        
+    def set_line_width(self, line_width):
+        """\brief Setter for property line_width
+        \param line_width
+        """
+        self._line_width = float(line_width)
 
+    def get_line_width(self):
+        """\brief Getter for property line_width
+        """
+        return self._line_width
+    
