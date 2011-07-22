@@ -645,14 +645,26 @@ def map_to_context_coordinates(drawing, context, data_list):
     w1 = context.width
     y1 = context.y
     h1 = context.height
+    minus_y = numpy.matrix([[1, 0, 0],
+                            [0, -1, 0],
+                            [0, 0, 1]])
     move_zero = numpy.matrix([[1, 0, 0],
                               [0, 1, 0],
                               [-x0, -y0, 1]])
     scale = numpy.matrix([[w1 / w0, 0, 0],
-                          [0, -h1 / h0, 0],
+                          [0, h1 / h0, 0],
                           [0, 0, 1]])
     move_target = numpy.matrix([[1, 0, 0],
                                 [0, 1, 0],
-                                [x1, y1 + w1, 1]]) # w1 is because we already mirrored our scuare
-    transform = move_zero * scale * move_target
+                                [x1, y1 + h1, 1]]) # here y1 + h1 is because the left bottom corner becomes the left top corner
+    transform = move_zero * minus_y * scale * move_target
     return map(lambda a: (a[0, 0], a[0, 1]), data * transform)
+
+# def draw_chart(context, rect, draw_area, chart):
+#     """\brief draw the chart in context
+#     \param context - Cairo context
+#     \param rect - rectangle of context
+#     \param draw_area - draw area \ref drawing_rectangle.drawing_rectangle instance
+#     \param chart - \ref data_chart.data_chart instance
+#     """
+    
