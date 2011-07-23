@@ -154,3 +154,8 @@ class drawing_rectangle(object):
         self.set_lower_y_limit(y_lower)
         self.set_upper_y_limit(y_upper)
         
+    def shrink_chart(self, chart):
+        """\brief return shrinked data
+        \param chart \ref data_chart.data_chart instance
+        """
+        return filter(lambda a: self.get_lower_x_limit() <= a[0] <= self.get_upper_x_limit, chart.get_data_list())

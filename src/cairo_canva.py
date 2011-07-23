@@ -102,7 +102,7 @@ if __name__ == '__main__':
                                     lower_y_limit = -10,
                                     upper_y_limit = 20)
             some_data = map(lambda a: (a, a ** 2 - 10), arange(-10, 10, 0.1))
-            chart = data_chart(some_data)
+            chart = data_chart(some_data, color = (0, 0, 1))
             draw_chart(context, rect, drc, chart)
 
     dr2 = dummy2()
