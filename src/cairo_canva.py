@@ -54,9 +54,10 @@ class cairo_canva(gtk.DrawingArea):
 if __name__ == '__main__':
     import cairo
     from math import pi, sin
-    from common_methods import map_to_context_coordinates
+    from common_methods import map_to_context_coordinates, draw_chart
     from drawing_rectangle import drawing_rectangle
     from numpy import arange
+    from data_chart import data_chart
     w = gtk.Window()
     w.connect('delete-event', gtk.main_quit)
     class dummy(common_drawer):
@@ -101,11 +102,8 @@ if __name__ == '__main__':
                                     lower_y_limit = -10,
                                     upper_y_limit = 20)
             some_data = map(lambda a: (a, a ** 2 - 10), arange(-10, 10, 0.1))
-            maped_data = map_to_context_coordinates(drc, rect, some_data)
-            context.move_to(maped_data[0][0], maped_data[0][1])
-            for dd in maped_data[1:]:
-                context.line_to(dd[0], dd[1])
-            context.stroke()
+            chart = data_chart(some_data)
+            draw_chart(context, rect, drc, chart)
 
     dr2 = dummy2()
     dr = dummy()
