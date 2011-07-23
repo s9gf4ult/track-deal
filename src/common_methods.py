@@ -669,6 +669,8 @@ def draw_chart(context, rect, draw_area, chart):
     """
     draw_data = draw_area.shrink_chart(chart) # list with shrinked data inside window
     mapdraw_data = map_to_context_coordinates(draw_area, rect, draw_data)
+    if len(mapdraw_data) == 0:
+        return
     context.set_source_rgb(*chart.get_color())
     context.set_line_width(chart.get_line_width())
     context.move_to(mapdraw_data[0][0], mapdraw_data[0][1])
@@ -676,3 +678,11 @@ def draw_chart(context, rect, draw_area, chart):
         context.line_to(dts[0], dts[1])
     context.stroke()
     
+def draw_mesh(context, rect, draw_area):
+    """\brief draw mesh in context and return the part of context where the chart must be drawen
+    \param context
+    \param rect
+    \param draw_area
+    \return \ref context_rectangle.context_rectangle instance
+    """
+    pass

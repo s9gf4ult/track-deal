@@ -31,19 +31,20 @@ class data_chart(object):
         if not isinstance(data_list, list):
             raise ValueError('data list must be list')
         for elt in data_list:
-            assert(len(elt) == 2, 'The length of elements in data list must be 2')
-        self._data_list = copy(data_list).sort()
+            assert len(elt) == 2
+        self._data_list = copy(data_list)
+        self._data_list.sort(lambda a, b: cmp(a[0], b[0]))
 
     def append_data(self, data):
         """\brief append data to data list and resort it
         \param data tuple with data or list of tuples
         """
         if isinstance(data, tuple):
-            assert(len(data) == 2, 'Length of tuple in data must be exactly 2')
+            assert len(data) == 2
             self._data_list.append(data)
         elif isinstance(data, list):
             for elt in data:
-                assert(len(elt) == 2, 'The length of tuples in data must be 2')
+                assert len(elt) == 2
             self._data_list.extend(data)
         else:
             raise ValueError('data must be tuple or list')
