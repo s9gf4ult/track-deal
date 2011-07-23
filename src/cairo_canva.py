@@ -105,15 +105,30 @@ if __name__ == '__main__':
             chart = data_chart(some_data, color = (0, 0, 1))
             draw_chart(context, rect, drc, chart)
 
+    class text_print(common_drawer):
+        def draw(self, context, rect):
+            context.set_source_rgb(1, 0.2, 0.1)
+            context.set_font_size(24)
+            context.select_font_face('Terminus', )
+            text = u'This is printed in the center'
+            xb, yb, fwidth, fheight, other, another = context.text_extents(text)
+            context.move_to((rect.width / 2.) + rect.x - (fwidth / 2.),
+                            (rect.height / 2.) + rect.y - (fheight / 2.))
+            context.show_text(text)
+            
+            
+            
     dr2 = dummy2()
     dr = dummy()
     drsin = sinus()
     somedr = somefunc()
+    text_dr = text_print()
     canva = cairo_canva()
     canva.add_drawer(dr)
     canva.add_drawer(dr2)
     canva.add_drawer(drsin)
     canva.add_drawer(somedr)
+    canva.add_drawer(text_dr)
     w.add(canva)
     w.show_all()
     gtk.main()
