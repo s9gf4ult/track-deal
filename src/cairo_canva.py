@@ -111,11 +111,21 @@ if __name__ == '__main__':
             context.set_font_size(24)
             context.select_font_face('Terminus', )
             text = u'This is printed in the center'
+            bottom = u'This is printed in the bottom'
+            top =u'This is printed in the top'
             xb, yb, fwidth, fheight, other, another = context.text_extents(text)
+            bttext = context.text_extents(bottom)
+            toptxt = context.text_extents(top)
+            xdc = context.font_extents()
             context.move_to((rect.width / 2.) + rect.x - (fwidth / 2.),
-                            (rect.height / 2.) + rect.y - (fheight / 2.))
+                            (rect.height / 2.) + rect.y + (fheight / 2.) - xdc[1])
             context.show_text(text)
-            
+            context.move_to((rect.width / 2.) + rect.x - (bttext[2] / 2.),
+                            rect.height + rect.y - xdc[1])
+            context.show_text(bottom)
+            context.move_to((rect.width / 2.) + rect.x - (toptxt[2] / 2.),
+                            rect.y + xdc[0])
+            context.show_text(top)
             
             
     dr2 = dummy2()
