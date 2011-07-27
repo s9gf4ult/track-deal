@@ -2,11 +2,6 @@
 <interface>
   <requires lib="gtk+" version="2.24"/>
   <!-- interface-naming-policy project-wide -->
-  <object class="GtkAction" id="about_dialog_show">
-    <property name="label" translatable="yes">_О программе</property>
-    <property name="short_label" translatable="yes">_О программе</property>
-    <property name="stock_id">gtk-about</property>
-  </object>
   <object class="GtkAction" id="add_account">
     <property name="label">Добавить</property>
     <property name="short_label" translatable="yes">Добавить</property>
@@ -86,10 +81,6 @@
     <property name="label" translatable="yes">Пункты</property>
     <property name="short_label" translatable="yes">Пункты</property>
   </object>
-  <object class="GtkAction" id="import_from_old_database">
-    <property name="label">Загрзить из другой базы</property>
-    <property name="short_label" translatable="yes">Загрзить из другой базы</property>
-  </object>
   <object class="GtkAction" id="modify_account">
     <property name="label">Изменить</property>
     <property name="short_label" translatable="yes">Изменить</property>
@@ -118,16 +109,6 @@
     <property name="label">Текущий</property>
     <property name="short_label" translatable="yes">Текущий</property>
     <property name="stock_id">gtk-jump-to</property>
-  </object>
-  <object class="GtkAction" id="transaction_commit">
-    <property name="label">Commit</property>
-    <property name="short_label" translatable="yes">Commit</property>
-    <property name="stock_id">gtk-apply</property>
-  </object>
-  <object class="GtkAction" id="transaction_rollback">
-    <property name="label">Rollback</property>
-    <property name="short_label" translatable="yes">Rollback</property>
-    <property name="stock_id">gtk-cancel</property>
   </object>
   <object class="GtkAction" id="update_deals_tab">
     <property name="label">_Обновить</property>
@@ -168,6 +149,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="related_action">create_database_in_memory</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -381,7 +363,6 @@
                       <object class="GtkImageMenuItem" id="imagemenuitem10">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="related_action">about_dialog_show</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
