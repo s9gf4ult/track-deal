@@ -1,0 +1,1042 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="2.24"/>
+  <!-- interface-naming-policy project-wide -->
+  <object class="GtkAction" id="about_dialog_show">
+    <property name="label" translatable="yes">_О программе</property>
+    <property name="short_label" translatable="yes">_О программе</property>
+    <property name="stock_id">gtk-about</property>
+  </object>
+  <object class="GtkAction" id="add_account">
+    <property name="label">Добавить</property>
+    <property name="short_label" translatable="yes">Добавить</property>
+    <property name="stock_id">gtk-add</property>
+  </object>
+  <object class="GtkAction" id="add_deal">
+    <property name="label">Добавить сделку</property>
+    <property name="short_label" translatable="yes">Добавить сделку</property>
+    <property name="stock_id">gtk-add</property>
+  </object>
+  <object class="GtkAction" id="add_papers">
+    <property name="label" translatable="yes">Редактировать инструменты</property>
+    <property name="short_label" translatable="yes">Редактировать инструменты</property>
+  </object>
+  <object class="GtkAction" id="add_position">
+    <property name="label">Создать позицию</property>
+    <property name="short_label" translatable="yes">Создать позицию</property>
+    <property name="stock_id">gtk-add</property>
+  </object>
+  <object class="GtkAction" id="call_filter">
+    <property name="label">Фильтр</property>
+    <property name="short_label" translatable="yes">Фильтр</property>
+  </object>
+  <object class="GtkAction" id="call_points">
+    <property name="label" translatable="yes">Пункты</property>
+    <property name="short_label" translatable="yes">Пункты</property>
+    <property name="tooltip" translatable="yes">Настроить величину пункта для каждого инструмента</property>
+  </object>
+  <object class="GtkAction" id="call_positions_filter">
+    <property name="label">Фильтр</property>
+    <property name="short_label" translatable="yes">Фильтр</property>
+  </object>
+  <object class="GtkAction" id="change_deals">
+    <property name="label">Изменить сделки</property>
+    <property name="short_label" translatable="yes">Изменить сделки</property>
+  </object>
+  <object class="GtkAction" id="close_database">
+    <property name="label" translatable="yes">_Закрыть</property>
+    <property name="short_label" translatable="yes">_Закрыть</property>
+    <property name="stock_id">gtk-close</property>
+  </object>
+  <object class="GtkAction" id="create_database">
+    <property name="label">Создать базу в файле</property>
+    <property name="short_label" translatable="yes">Создать базу в файле</property>
+    <property name="stock_id">gtk-new</property>
+  </object>
+  <object class="GtkAction" id="create_database_in_memory">
+    <property name="label">Создать базу данных в памяти</property>
+    <property name="short_label" translatable="yes">Создать базу данных в памяти</property>
+    <property name="icon_name">computer</property>
+  </object>
+  <object class="GtkAction" id="deals_load_open_ru">
+    <property name="label">Загрузить из файла с отчетом</property>
+    <property name="short_label" translatable="yes">Загрузить из файла с отчетом</property>
+  </object>
+  <object class="GtkAction" id="delete_account">
+    <property name="label">Удалить</property>
+    <property name="short_label" translatable="yes">Удалить</property>
+    <property name="stock_id">gtk-remove</property>
+  </object>
+  <object class="GtkAction" id="delete_deals">
+    <property name="label">Удалить сделки</property>
+    <property name="short_label" translatable="yes">Удалить сделки</property>
+    <property name="stock_id">gtk-remove</property>
+  </object>
+  <object class="GtkAction" id="delete_positions">
+    <property name="label">Удалить позиции</property>
+    <property name="short_label" translatable="yes">Удалить позиции</property>
+    <property name="stock_id">gtk-remove</property>
+  </object>
+  <object class="GtkAction" id="edit_currencies">
+    <property name="label" translatable="yes">Редактировать валюту</property>
+    <property name="short_label" translatable="yes">Редактировать</property>
+    <property name="stock_id">gtk-edit</property>
+  </object>
+  <object class="GtkAction" id="edit_points">
+    <property name="label" translatable="yes">Пункты</property>
+    <property name="short_label" translatable="yes">Пункты</property>
+  </object>
+  <object class="GtkAction" id="import_from_old_database">
+    <property name="label">Загрзить из другой базы</property>
+    <property name="short_label" translatable="yes">Загрзить из другой базы</property>
+  </object>
+  <object class="GtkAction" id="modify_account">
+    <property name="label">Изменить</property>
+    <property name="short_label" translatable="yes">Изменить</property>
+    <property name="stock_id">gtk-edit</property>
+  </object>
+  <object class="GtkAction" id="open_database">
+    <property name="label" translatable="yes">_Открыть</property>
+    <property name="short_label" translatable="yes">_Открыть</property>
+    <property name="stock_id">gtk-open</property>
+  </object>
+  <object class="GtkAction" id="positions_make">
+    <property name="label">Расписать сделки</property>
+    <property name="short_label" translatable="yes">Расписать сделки</property>
+  </object>
+  <object class="GtkAction" id="quit">
+    <property name="label" translatable="yes">В_ыход</property>
+    <property name="short_label" translatable="yes">В_ыход</property>
+    <property name="stock_id">gtk-quit</property>
+  </object>
+  <object class="GtkAction" id="save_as">
+    <property name="label">Сохранить как</property>
+    <property name="short_label" translatable="yes">Сохранить как</property>
+    <property name="stock_id">gtk-save-as</property>
+  </object>
+  <object class="GtkAction" id="set_current_account">
+    <property name="label">Текущий</property>
+    <property name="short_label" translatable="yes">Текущий</property>
+    <property name="stock_id">gtk-jump-to</property>
+  </object>
+  <object class="GtkAction" id="transaction_commit">
+    <property name="label">Commit</property>
+    <property name="short_label" translatable="yes">Commit</property>
+    <property name="stock_id">gtk-apply</property>
+  </object>
+  <object class="GtkAction" id="transaction_rollback">
+    <property name="label">Rollback</property>
+    <property name="short_label" translatable="yes">Rollback</property>
+    <property name="stock_id">gtk-cancel</property>
+  </object>
+  <object class="GtkAction" id="update_deals_tab">
+    <property name="label">_Обновить</property>
+    <property name="short_label" translatable="yes">_Обновить</property>
+    <property name="stock_id">gtk-refresh</property>
+  </object>
+  <object class="GtkAction" id="update_positions">
+    <property name="label">Обновить</property>
+    <property name="short_label" translatable="yes">Обновить</property>
+    <property name="stock_id">gtk-refresh</property>
+  </object>
+  <object class="GtkWindow" id="main_window">
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="role">open_deals_main_window</property>
+    <property name="default_width">600</property>
+    <property name="default_height">500</property>
+    <child>
+      <object class="GtkVBox" id="vbox1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkMenuBar" id="menubar1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="menuitem1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Файл</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem7">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">create_database_in_memory</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">create_database</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">open_database</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem16">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">save_as</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem6">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">close_database</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkSeparatorMenuItem" id="separatormenuitem1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem5">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">quit</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Сделки</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu4">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem3">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">deals_load_open_ru</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem8">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">call_filter</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem9">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">add_deal</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem14">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">update_deals_tab</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem6">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Позиции</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu5">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem4">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">positions_make</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem11">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">call_positions_filter</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem13">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">add_position</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem12">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">update_positions</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem2">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">База</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem17">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">add_papers</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem18">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">edit_points</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem15">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">edit_currencies</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="menuitem4">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="use_action_appearance">False</property>
+                <property name="label" translatable="yes">Справка</property>
+                <child type="submenu">
+                  <object class="GtkMenu" id="menu3">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem10">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="related_action">about_dialog_show</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox60">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkToolbar" id="toolbar1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_size">1</property>
+                <property name="icon_size_set">True</property>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="related_action">create_database_in_memory</property>
+                    <property name="label" translatable="yes">toggletoolbutton1</property>
+                    <property name="use_underline">True</property>
+                    <property name="icon_name">computer</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="related_action">create_database</property>
+                    <property name="label" translatable="yes">toolbutton2</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-new</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton4">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="related_action">open_database</property>
+                    <property name="label" translatable="yes">_Открыть</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-open</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton3">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="related_action">close_database</property>
+                    <property name="label" translatable="yes">toolbutton3</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-close</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparatorToolItem" id="toolbutton5">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="use_action_appearance">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkToolButton" id="toolbutton6">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="related_action">quit</property>
+                    <property name="label" translatable="yes">toolbutton6</property>
+                    <property name="use_underline">True</property>
+                    <property name="stock_id">gtk-quit</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="homogeneous">True</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkNotebook" id="notebook1">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child>
+              <object class="GtkHPaned" id="hpaned2">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="position">350</property>
+                <property name="position_set">True</property>
+                <child>
+                  <object class="GtkVBox" id="vbox9">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkScrolledWindow" id="scrolledwindow2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
+                        <child>
+                          <object class="GtkTreeView" id="accounts_view">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkTable" id="table11">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="n_rows">2</property>
+                        <property name="n_columns">3</property>
+                        <child>
+                          <object class="GtkButton" id="button4">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">add_account</property>
+                            <property name="use_stock">True</property>
+                          </object>
+                          <packing>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">delete_account</property>
+                            <property name="use_stock">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button6">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">modify_account</property>
+                            <property name="use_stock">True</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button7">
+                            <property name="label" translatable="yes">Текущий</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">set_current_account</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options">GTK_FILL</property>
+                            <property name="y_options">GTK_FILL</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="current_account_name_label">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">
+</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label29">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Текущий счет:</property>
+                            <property name="ellipsize">start</property>
+                            <attributes>
+                              <attribute name="scale" value="1"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="resize">False</property>
+                    <property name="shrink">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow7">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <object class="GtkTreeView" id="account_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="resize">True</property>
+                    <property name="shrink">True</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label22">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Счета</property>
+              </object>
+              <packing>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox5">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow4">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child>
+                      <object class="GtkTreeView" id="deals_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="rubber_banding">True</property>
+                        <property name="enable_tree_lines">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox5">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkHButtonBox" id="hbuttonbox1">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">10</property>
+                        <property name="layout_style">start</property>
+                        <child>
+                          <object class="GtkButton" id="call_deals_filter">
+                            <property name="label" translatable="yes">Фильтр</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">call_filter</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="padding">5</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">5</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHButtonBox" id="hbuttonbox2">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">10</property>
+                        <property name="layout_style">end</property>
+                        <child>
+                          <object class="GtkButton" id="button3">
+                            <property name="label" translatable="yes">Добавить сделку</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">add_deal</property>
+                            <property name="use_underline">True</property>
+                            <accelerator key="n" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button8">
+                            <property name="label" translatable="yes">Изменить сделки</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">change_deals</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button1">
+                            <property name="label" translatable="yes">Удалить сделки</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">delete_deals</property>
+                            <property name="use_underline">True</property>
+                            <accelerator key="d" signal="clicked" modifiers="GDK_CONTROL_MASK"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">5</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label34">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Сделки</property>
+              </object>
+              <packing>
+                <property name="position">1</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkVBox" id="vbox12">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow10">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child>
+                      <object class="GtkTreeView" id="positions_view">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="rubber_banding">True</property>
+                        <property name="enable_tree_lines">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkHBox" id="hbox9">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkHButtonBox" id="hbuttonbox6">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="layout_style">start</property>
+                        <child>
+                          <object class="GtkButton" id="button9">
+                            <property name="label" translatable="yes">Фильтр</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">call_positions_filter</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkHButtonBox" id="hbuttonbox4">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="layout_style">end</property>
+                        <child>
+                          <object class="GtkButton" id="button11">
+                            <property name="label" translatable="yes">Расписать сделки</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">positions_make</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button12">
+                            <property name="label" translatable="yes">Создать позицию</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">add_position</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button13">
+                            <property name="label" translatable="yes">Удалить позиции</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="related_action">delete_positions</property>
+                            <property name="use_underline">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label1">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Позиции</property>
+              </object>
+              <packing>
+                <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkHBox" id="hbox24">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="spacing">20</property>
+            <child>
+              <object class="GtkLabel" id="main_status_db">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="main_status_cacc">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="main_status_deals">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="main_status_poss">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="main_status_unbal">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="main_status_changes">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="pack_type">end</property>
+                <property name="position">5</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
