@@ -688,3 +688,4 @@ def draw_plot_area(context, rect, draw_area):
     context.set_source_rgb(1,1,1)
     context.rectangle(rect.x, rect.y, rect.width, rect.height)
     context.fill()
+    
