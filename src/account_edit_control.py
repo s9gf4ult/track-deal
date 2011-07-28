@@ -151,11 +151,3 @@ class account_edit_control:
 
         if data.has_key('currency'):
             self.currency_combo.set_value(data['currency'])
-        
-        
-if __name__ == "__main__":
-    b = gtk.Builder()
-    b.add_from_file('main_ui.glade')
-    con = account_edit_control(b)
-    con.update_widget(['RUB', 'EURO', 'DOLLAR'])
-    print(con.run())

@@ -81,11 +81,3 @@ class report_importer_control:
             show_error(sh, self.builder.get_object("report_importer"))
             return False
         return True
-            
-
-if __name__ == "__main__":
-    b = gtk.Builder()
-    b.add_from_file('main_ui.glade')
-    con = report_importer_control(b)
-    con.update_importer([(0, "ak1"), (1, "ak2")], [(0, "type1"), (1, "type2")])
-    con.run()

@@ -29,8 +29,6 @@ class gtk_view(common_view):
     \~english
     Open deals Gtk view class (gtk interface for open-deals)
     """
-    ## \brief GtkBuilder instance.
-    builder = None
     ## \brief \ref main_window_controller.main_window_controller instance.
     # \~russian
     # \par
@@ -80,8 +78,6 @@ class gtk_view(common_view):
         """initialize gtk view
         \~russian
         """
-        self.builder = gtk.Builder()
-        self.builder.add_from_file("main_ui.glade")
         self.window = main_window_controller(self)
         self.currency = currency_edit_control(self)
         self.account_edit = account_edit_control(self)
@@ -107,7 +103,6 @@ class gtk_view(common_view):
     def call_update_callback(self, ):
         """try send update signal to the all controllers
         """
-        print("update !")
         self.window.update()
         self.accounts.update()
         self.deals_tab.update()

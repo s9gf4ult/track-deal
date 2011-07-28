@@ -172,9 +172,3 @@ class deal_adder_control:
             cacc = self._parent.model.get_current_account()
             if cacc <> None:
                 self.account.set_value(cacc['id'])
-        
-if __name__ == "__main__":
-    b = gtk.Builder()
-    b.add_from_file('main_ui.glade')
-    con = deal_adder_control(b)
-    print(con.run())

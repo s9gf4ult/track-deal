@@ -130,10 +130,3 @@ class position_adder_control:
             return False
         else:
             return True
-            
-            
-if __name__ == "__main__":
-    b = gtk.Builder()
-    b.add_from_file('main_ui.glade')
-    con = position_adder_control(b)
-    con.run()
