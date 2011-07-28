@@ -621,3 +621,11 @@ def solve_field_in(args, conds, field_name, values):
         q = "{0} in ({1})".format(field_name, reduce_by_string(", ", map(lambda a: "?", values)))
         conds.append(q)
         args.extend(values)
+
+def make_builder(file_path):
+    """\brief create and load gtk.Builder
+    \param file_path - str, path to UI definition file
+    """
+    ret = gtk.Builder()
+    ret.add_from_file(file_path)
+    return ret

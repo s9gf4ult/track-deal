@@ -21,14 +21,14 @@ class accounts_tab_controller(object):
         assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
         def shorter(name, *method):
-            self._parent.builder.get_object(name).connect("activate", *method)
+            self._parent.window.builder.get_object(name).connect("activate", *method)
         shorter("add_account", self.add_account_activate)
         shorter("delete_account", self.delete_account_activate)
         shorter("modify_account", self.modify_account_activate)
         shorter("set_current_account", self.set_current_account_activate)
-        self.accounts_list = list_view_sort_control(self._parent.builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererSpin(), int)])
-        self.account_list = list_view_sort_control(self._parent.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
-        self._parent.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
+        self.accounts_list = list_view_sort_control(self._parent.window.builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererSpin(), int)])
+        self.account_list = list_view_sort_control(self._parent.window.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
+        self._parent.window.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
 
     def accounts_view_row_activated(self, tw, path, col):
         """
@@ -51,11 +51,11 @@ class accounts_tab_controller(object):
         if self._parent.connected():
             cac = self._parent.model.get_current_account()
             if cac != None:
-                self._parent.builder.get_object("current_account_name_label").set_text(cac["name"])
+                self._parent.window.builder.get_object("current_account_name_label").set_text(cac["name"])
             else:
-                self._parent.builder.get_object("current_account_name_label").set_text("")
+                self._parent.window.builder.get_object("current_account_name_label").set_text("")
         else:
-            self._parent.builder.get_object("current_account_name_label").set_text("")
+            self._parent.window.builder.get_object("current_account_name_label").set_text("")
 
     def update_account_list(self):
         """update list of properties and statistics of selected account
@@ -83,7 +83,7 @@ class accounts_tab_controller(object):
                     data = self._parent.account_edit.get_data()
                     self._parent.model.tacreate_account(data["name"], data["money_name"], data["money_count"], gethash(data, "comment"))
                 except Exception as e:
-                    show_and_print_error(e, self._parent.builder.get_object("main_window"))
+                    show_and_print_error(e, self._parent.window.builder.get_object("main_window"))
             self._parent.call_update_callback()
                     
 
@@ -93,13 +93,13 @@ class accounts_tab_controller(object):
     def delete_account(self):
         """delete selected account"""
         if self._parent.connected():
-            c = self._parent.builder.get_object("accounts_view")
+            c = self._parent.window.builder.get_object("accounts_view")
             (mod, it) = c.get_selection().get_selected()
             if it != None:
                 acname = mod.get_value(it, 0)
                 if self._parent.model.get_account(acname) != None:
                     if self._parent.model.assigned_account_deals(acname) > 0 or self._parent.model.assigned_account_positions(acname) > 0:
-                        ret = query_yes_no("У счета есть сделки и/или позиции, удалить счет вместе с ними ?", self._parent.builder.get_object("main_window"))
+                        ret = query_yes_no("У счета есть сделки и/или позиции, удалить счет вместе с ними ?", self._parent.window.builder.get_object("main_window"))
                         if  ret <> gtk.RESPONSE_YES:
                             return
                     self._parent.model.taremove_account(acname)
@@ -112,7 +112,7 @@ class accounts_tab_controller(object):
     def modify_account(self):
         """runs account dialog and modifies selected account"""
         if self._parent.connected():
-            c = self._parent.builder.get_object("accounts_view")
+            c = self._parent.window.builder.get_object("accounts_view")
             (mod, it) =  c.get_selection().get_selected()
             if it != None:
                 acname = mod.get_value(it, 0)
@@ -137,7 +137,7 @@ class accounts_tab_controller(object):
         """
         if not self._parent.connected():
             return
-        tw = self._parent.builder.get_object("accounts_view")
+        tw = self._parent.window.builder.get_object("accounts_view")
         (mod, it) = tw.get_selection().get_selected()
         if it != None:
             self._parent.model.taset_current_account(tw.get_model().get_value(it, 0))

@@ -19,8 +19,9 @@ class main_window_controller(object):
         \param parent представление gtk_view
         """
         self._parent = parent
+        self.builder = make_builder('glade/main_window.glade')
         def shorter(name, signal, *method):
-            self._parent.builder.get_object(name).connect(signal, *method)
+            self.builder.get_object(name).connect(signal, *method)
 
         shorter("quit", "activate", self.quit_activate)
         shorter("create_database", "activate", self.create_database_activate)
@@ -60,7 +61,7 @@ class main_window_controller(object):
     def save_as(self):
         if not self._parent.connected():
             return
-        win = self._parent.builder.get_object("main_window")
+        win = self.builder.get_object("main_window")
         # ch = self._parent.model.get_changes()
         # if ch > 0:
         #     show_error(u'Перед сохранением нужно завершить транзакцию выполните Rollback или Commit', win)
@@ -89,7 +90,7 @@ class main_window_controller(object):
     def import_from_old_database(self):
         if self._parent.model.connection == None:
             return
-        win = self._parent.builder.get_object("main_window")
+        win = self.builder.get_object("main_window")
         ch = self._parent.model.get_changes()
         if ch > 0:
             show_error(u'Перед импортом нужно завершить транзакцию выполните Rollback или Commit', win)
@@ -135,7 +136,7 @@ class main_window_controller(object):
 
     def open_database(self):
         if self._parent.disconnect():
-            win = self._parent.builder.get_object("main_window")
+            win = self.builder.get_object("main_window")
             diag = gtk.FileChooserDialog(title = u'Открыть базу', parent = win, action = gtk.FILE_CHOOSER_ACTION_OPEN)
             diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
             diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
@@ -146,14 +147,14 @@ class main_window_controller(object):
                 try:
                     self._parent.open_existing_sqlite(diag.get_filename())
                 except Exception as e:
-                    show_error(e.__str__(), self._parent.builder.get_object("main_window"))
+                    show_error(e.__str__(), self.builder.get_object("main_window"))
                     print(traceback.format_exc())
             diag.destroy()
             fl.destroy()
             self._parent.call_update_callback()
         
     def set_main_title(self, title):
-        self._parent.builder.get_object("main_window").set_title(title)
+        self.builder.get_object("main_window").set_title(title)
 
 
     def quit_activate(self, action):
@@ -176,7 +177,7 @@ class main_window_controller(object):
         
     def create_database_in_file(self):
         if self._parent.disconnect():
-            win = self._parent.builder.get_object("main_window")
+            win = self.builder.get_object("main_window")
             diag = gtk.FileChooserDialog(title = u'Новая база', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE)
             diag.add_button(gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
             diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
@@ -184,7 +185,7 @@ class main_window_controller(object):
                 try:
                     self._parent.create_new_sqlite(diag.get_filename())
                 except Exception as e:
-                    show_and_print_error(e, self._parent.builder.get_object("main_window"))
+                    show_and_print_error(e, self.builder.get_object("main_window"))
             diag.destroy()
             self._parent.call_update_callback()
 
@@ -206,7 +207,7 @@ class main_window_controller(object):
     def run(self, ):
         """show main window
         """
-        win = self._parent.builder.get_object("main_window")
+        win = self.builder.get_object("main_window")
         win.show_all()
 
     def add_papers_activate(self, action):

@@ -9,7 +9,7 @@ class deals_tab_controller(object):
     def __init__(self, parent):
         self._parent = parent
         def shorter(objname, signal, method):
-            self._parent.builder.get_object(objname).connect(signal, method)
+            self._parent.window.builder.get_object(objname).connect(signal, method)
         shorter("call_filter", "activate", self.call_filter_activate)
         shorter("delete_deals", "activate", self.delete_deals_activate)
         shorter("add_deal", "activate", self.add_deal_activate)
@@ -19,7 +19,7 @@ class deals_tab_controller(object):
         ############################
         # make columns in the view #
         ############################
-        self.deals_view = list_view_sort_control(self._parent.builder.get_object("deals_view"),
+        self.deals_view = list_view_sort_control(self._parent.window.builder.get_object("deals_view"),
                                                  [[u"id", int],
                                                   (u'Дата', gtk.CellRendererText(), str, "datetime"),
                                                   (u'Время', gtk.CellRendererText(), str, "time"),
@@ -32,7 +32,7 @@ class deals_tab_controller(object):
                                                   (u'Тэги', gtk.CellRendererText(), str, "user_attributes_formated")],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
-        dd = self._parent.builder.get_object("deals_view")
+        dd = self._parent.window.builder.get_object("deals_view")
         dd.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         dd.connect("row-activated", self.deals_view_row_activated)
         self.sort_order = ["deal_id"]
@@ -46,7 +46,7 @@ class deals_tab_controller(object):
     def change_deals(self):
         if not self._parent.connected():
             return
-        d = self._parent.builder.get_object("deals_view").get_selection().count_selected_rows()
+        d = self._parent.window.builder.get_object("deals_view").get_selection().count_selected_rows()
         if d > 1:
             self.change_multiple_deals()
         elif d == 1:
@@ -55,7 +55,7 @@ class deals_tab_controller(object):
     def change_multiple_deals(self):
         if not self._parent.connected():
             return
-        d = self._parent.builder.get_object("deals_view")
+        d = self._parent.window.builder.get_object("deals_view")
         (mod, paths) = d.get_selection().get_selected_rows()
         if paths != None and len(paths) > 1:
             dids = map(lambda it: mod.get_value(it, 0), map(lambda p: mod.get_iter(p), paths))
@@ -91,8 +91,8 @@ class deals_tab_controller(object):
         """
         if not self._parent.connected():
             return
-        selected = self._parent.builder.get_object("deals_view").get_selection()
-        dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self._parent.builder.get_object("main_window"))
+        selected = self._parent.window.builder.get_object("deals_view").get_selection()
+        dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self._parent.window.builder.get_object("main_window"))
         dcount = selected.count_selected_rows()
         if dcount == 0:
             return
@@ -150,7 +150,7 @@ class deals_tab_controller(object):
             self._parent.model.get_from_source_in_account(account, xs)
             self._parent.call_update_callback()
         except Exception as e:
-            show_error(e.__str__(), self._parent.builder.get_object("main_window"))
+            show_error(e.__str__(), self._parent.window.builder.get_object("main_window"))
             print(traceback.format_exc())
 
     def call_filter_activate(self, action):

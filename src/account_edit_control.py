@@ -27,7 +27,7 @@ class account_edit_control:
         """\brief set comment field
         \param text
         """
-        self.comment.set_text(text)
+        self.comment.set_text('' if text == None else text)
 
     def set_name(self, name):
         """\brief set name field

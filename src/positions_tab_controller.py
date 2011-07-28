@@ -16,8 +16,8 @@ class positions_tab_controller(object):
         assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
         def shorter(name, action, *method):
-            self._parent.builder.get_object(name).connect(action, *method)
-        self.positions_list = list_view_sort_control(self._parent.builder.get_object("positions_view"),
+            self._parent.window.builder.get_object(name).connect(action, *method)
+        self.positions_list = list_view_sort_control(self._parent.window.builder.get_object("positions_view"),
                                                      [[u'id', int],
                                                       (u'Дата Откр.', gtk.CellRendererText(), str, u'open_datetime'),
                                                       (u'время Откр.', gtk.CellRendererText(), str, u'open_time'),
@@ -39,7 +39,7 @@ class positions_tab_controller(object):
                                                       (u'% Изменения', gtk.CellRendererText(), str, u'percent_range_abs')],
                                                      self_sorting = False,
                                                      sort_callback = self.sort_callback)
-        self._parent.builder.get_object("positions_view").get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        self._parent.window.builder.get_object("positions_view").get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         shorter("positions_make", "activate", self.make_positions_activate)
         shorter("call_positions_filter", "activate", self.filter_activate)
         shorter("delete_positions", "activate", self.delete_positions_activate)
@@ -69,7 +69,7 @@ class positions_tab_controller(object):
                 self._parent.model.tacreate_position_from_data(data['account_id'],
                                                                data)
             except Exception as e:
-                show_and_print_error(e, self._parent.builder.get_object("main_window"))
+                show_and_print_error(e, self._parent.window.builder.get_object("main_window"))
             else:
                 self._parent.call_update_callback()
 

@@ -82,10 +82,10 @@ class gtk_view(common_view):
         """
         self.builder = gtk.Builder()
         self.builder.add_from_file("main_ui.glade")
+        self.window = main_window_controller(self)
         self.currency = currency_edit_control(self)
         self.account_edit = account_edit_control(self)
         self.accounts = accounts_tab_controller(self)
-        self.window = main_window_controller(self)
         self.deals_tab = deals_tab_controller(self)
         self.deal_adder = deal_adder_control(self)
         self.deal_editor = deal_editor_control(self)
