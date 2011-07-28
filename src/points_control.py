@@ -13,10 +13,11 @@ from modifying_tab_control import modifying_tab_control
 class points_control(modifying_tab_control):
     def __init__(self, parent):
         self._parent = parent
+        self.builder = make_builder('glade/points.glade')
         def shorter(name):
-            return self._parent.builder.get_object(name)
+            return self.builder.get_object(name)
         w = shorter("points")
-        w.set_transient_for(shorter('main_window'))
+        w.set_transient_for(self._parent.window.builder.get_object('main_window'))
         w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.instrument = combo_select_control(shorter("points_instrument"))
         self.money = combo_select_control(shorter("points_paper"))
@@ -83,7 +84,7 @@ class points_control(modifying_tab_control):
         except sqlite3.IntegrityError:
             pass
         except Exception as e:
-            show_and_print_error(e, self._parent.builder.get_object('points'))
+            show_and_print_error(e, self.builder.get_object('points'))
         else:
             self.points_list.delete_selected()
 
@@ -98,10 +99,10 @@ class points_control(modifying_tab_control):
                                                    self.point.get_value(),
                                                    self.step.get_value())
         except sqlite3.IntegrityError as e:
-            show_and_print_error(e, self._parent.builder.get_object('points'))
+            show_and_print_error(e, self.builder.get_object('points'))
             pass
         except Exception as e:
-            show_and_print_error(e, self._parent.builder.get_object('points'))
+            show_and_print_error(e, self.builder.get_object('points'))
         else:
             m = self._parent.model.get_money(self.money.get_value())
             p = self._parent.model.get_paper(self.instrument.get_value())
@@ -124,7 +125,7 @@ class points_control(modifying_tab_control):
         except sqlite3.IntegrityError:
             pass
         except Exception as e:
-            show_and_print_error(e, self._parent.builder.get_object('points'))
+            show_and_print_error(e, self.builder.get_object('points'))
         else:
             m = self._parent.model.get_money(self.money.get_value())
             p = self._parent.model.get_paper(self.instrument.get_value())
@@ -154,12 +155,12 @@ class points_control(modifying_tab_control):
         if not self._parent.connected():
             return
         self.update_widget()
-        w = self._parent.builder.get_object('points')
+        w = self.builder.get_object('points')
         try:
             self._parent.model.start_transacted_action('create some points')
             ret = w.run()
         except Exception as e:
-            show_and_print_error(e, self._parent.builder.get_object('main_window'))
+            show_and_print_error(e, self.builder.get_object('main_window'))
             self._parent.model.rollback()
             w.hide()
             return gtk.RESPONSE_CANCEL
