@@ -10,11 +10,13 @@ import sources
 class report_importer_control:
     def __init__(self, parent):
         self._parent = parent
-        w = self._parent.builder.get_object("report_importer")
+        self.builder = make_builder('glade/report_importer.glade')
+        w = self.builder.get_object("report_importer")
         w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-        self.file = self._parent.builder.get_object("report_importer_file")
-        self.report_type = self._parent.builder.get_object("report_importer_type")
-        self.account_widget = self._parent.builder.get_object("report_importer_account")
+        w.set_transient_for(self._parent.window.builder.get_object('main_window'))
+        self.file = self.builder.get_object("report_importer_file")
+        self.report_type = self.builder.get_object("report_importer_type")
+        self.account_widget = self.builder.get_object("report_importer_account")
         self.report = combo_control(self.report_type)
         self.account = combo_select_control(self.account_widget)
 
@@ -44,7 +46,7 @@ class report_importer_control:
         \retval gtk.RESPONSE_ACCEPT if pressed save
         \retval gtk.RESPONSE_CANCEL if pressed cancel
         """
-        w = self._parent.builder.get_object("report_importer")
+        w = self.builder.get_object("report_importer")
         w.show_all()
         ret = w.run()
         while ret == gtk.RESPONSE_ACCEPT:
@@ -76,7 +78,7 @@ class report_importer_control:
             errs.append(u'Нужно указать счет для загрузки')
         if len(errs) > 0:
             sh = reduce(lambda a, b: u'{0}\n{1}'.format(a, b), errs)
-            show_error(sh, self._parent.builder.get_object("report_importer"))
+            show_error(sh, self.builder.get_object("report_importer"))
             return False
         return True
             
