@@ -125,6 +125,12 @@
     <property name="short_label">&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
     <property name="stock_id">gtk-refresh</property>
   </object>
+  <object class="GtkTreeStore" id="treestore1">
+    <columns>
+      <!-- column-name show -->
+      <column type="guchar"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main_window">
     <child>
       <object class="GtkVBox" id="vbox1">
@@ -155,6 +161,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">open_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -163,6 +170,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">create_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -171,6 +179,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">close_database</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -184,6 +193,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">quit</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -204,6 +214,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">deals_load_open_ru</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -212,6 +223,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">add_deal</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -220,6 +232,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">change_deals</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -228,6 +241,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">delete_deals</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -236,6 +250,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">call_filter</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -244,6 +259,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">update_deals_tab</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -264,6 +280,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">positions_make</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -272,6 +289,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">add_position</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -280,6 +298,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">delete_positions</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -288,6 +307,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">call_positions_filter</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -296,6 +316,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">update_positions</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -316,6 +337,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">add_papers</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -324,6 +346,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">edit_points</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -332,6 +355,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">edit_currencies</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -706,6 +730,37 @@
               </object>
               <packing>
                 <property name="position">2</property>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkHBox" id="hbox3">
+                <property name="visible">True</property>
+                <child>
+                  <object class="GtkTreeView" id="treeview1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="model">treestore1</property>
+                  </object>
+                  <packing>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label5">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">&#x413;&#x440;&#x430;&#x444;&#x438;&#x43A;&#x438;</property>
+              </object>
+              <packing>
+                <property name="position">3</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
