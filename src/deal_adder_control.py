@@ -19,10 +19,12 @@ class deal_adder_control:
         \param parent \ref gtk_view.gtk_view instance
         """
         assert(isinstance(parent, gtk_view.gtk_view))
+        self.builder = make_builder('glade/deal_adder.glade')
         self._parent = parent
         def shorter(name):
-            return self._parent.builder.get_object("deal_adder_{0}".format(name))
-        w = self._parent.builder.get_object("deal_adder")
+            return self.builder.get_object("deal_adder_{0}".format(name))
+        w = self.builder.get_object("deal_adder")
+        w.set_transient_for(self._parent.window.builder.get_object('main_window'))
         w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.datetime = datetime_control(shorter("calendar"),
                                          time_control(shorter("hour"),
@@ -53,7 +55,7 @@ class deal_adder_control:
         \retval gtk.RESPONSE_CANCEL if cancel pressed
         \retval gtk.RESPONSE_ACCEPT if save pressed
         """
-        w = self._parent.builder.get_object("deal_adder")
+        w = self.builder.get_object("deal_adder")
         w.show_all()
         ret = w.run()
         while ret == gtk.RESPONSE_ACCEPT:
@@ -128,7 +130,7 @@ class deal_adder_control:
         if self.count.get_value() <= 0:
             mss.append(u'вы должны указать количество котрактов')
         if len(mss) > 0:
-            show_error(reduce(lambda a, b: u'{0}\n{1}'.format(a, b), mss), self._parent.builder.get_object("deal_adder"))
+            show_error(reduce(lambda a, b: u'{0}\n{1}'.format(a, b), mss), self.builder.get_object("deal_adder"))
             return False
         else:
             return True
