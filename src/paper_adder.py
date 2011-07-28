@@ -19,8 +19,9 @@ class paper_adder(object):
         """
         assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
+        self.builder = make_builder('glade/paper_adder.glade')
         def shobject(name):
-            return self._parent.builder.get_object(name)
+            return self.builder.get_object(name)
         ## gtk.Window instance
         self.window = shobject("paper_adder")
         ## \ref list_view_sort_control.list_view_sort_control instance, represent list of papers
