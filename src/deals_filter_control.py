@@ -16,10 +16,11 @@ class deals_filter_control:
     \brief control to handle events in filter dialog and control state of widgets in filter, no more.
     \todo rewrite filter using "hiding" widgets as in \ref positions_filter_control.positions_filter_control done
     """
-    def __init__(self, builder):
-        self.builder = builder
+    def __init__(self, parent):
+        self.builder = make_builder('glade/deals_filter.glade')
+        self._parent = parent
         w = self.builder.get_object("deals_filter")
-        w.set_transient_for(self.builder.get_object('main_window'))
+        w.set_transient_for(self._parent.window.builder.get_object('main_window'))
         w.add_button(gtk.STOCK_CLOSE, gtk.RESPONSE_ACCEPT)
         ######################
         # hide controls init #
@@ -195,8 +196,6 @@ class deals_filter_control:
     
                             
 if __name__ == "__main__":
-    b = gtk.Builder()
-    b.add_from_file('main_ui.glade')
-    d = deals_filter_control(b)
+    d = deals_filter_control(None)
     d.update_widget(count_range = [0, 100], price_range = [10, 200], comm_range = [0.5, 0.6], volume_range = [100, 1000], stock_list = [u'Газик', u'Сберик', u'Полиметальчик'])
     d.run()

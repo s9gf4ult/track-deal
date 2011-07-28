@@ -31,7 +31,7 @@ class deals_filter():
         
     def __init__(self, parent):
         self._parent = parent
-        self.dialog = deals_filter_control(self._parent.builder)
+        self.dialog = deals_filter_control(self._parent)
         
 
     def get_conditions(self, ):
