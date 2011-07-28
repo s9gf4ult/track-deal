@@ -15,10 +15,11 @@ from select_control import *
 class position_adder_control:
     def __init__(self, parent):
         self._parent = parent
+        self.builder = make_builder('glade/padder.glade')
         def shorter(name):
-            return self._parent.builder.get_object(name)
+            return self.builder.get_object(name)
         w = shorter("padder")
-        w.set_transient_for(shorter('main_window'))
+        w.set_transient_for(self._parent.window.builder.get_object('main_window'))
         w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.hiders = [hide_control(shorter("padder_calendars"), [shorter("padder_lower_calendar"), shorter("padder_upper_calendar")], hide = True)]
         self.start_date = datetime_control(shorter("padder_lower_calendar"),
@@ -97,7 +98,7 @@ class position_adder_control:
         \retval gtk.RESPONSE_ACCEPT
         \retval gtk.RESPONSE_CANCEL
         """
-        w = self._parent.builder.get_object("padder")
+        w = self.builder.get_object("padder")
         self.start_date.set_current_datetime()
         self.end_date.set_current_datetime()
         w.show_all()
@@ -125,7 +126,7 @@ class position_adder_control:
         if len(errs) > 0:
             show_error(reduce(lambda a, b:u'{0}\n{1}'.format(a, b),
                               errs),
-                       self._parent.builder.get_object("padder"))
+                       self.builder.get_object("padder"))
             return False
         else:
             return True
