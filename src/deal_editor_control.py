@@ -16,9 +16,10 @@ class deal_editor_control:
     def __init__(self, parent):
         assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
+        self.builder = make_builder('glade/deal_editor.glade')
         def shorter(name):
-            return self._parent.builder.get_object(name)
-        w = self._parent.builder.get_object("deal_editor")
+            return self.builder.get_object(name)
+        w = self.builder.get_object("deal_editor")
         w.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         
         ##########
@@ -32,8 +33,8 @@ class deal_editor_control:
                            ("deal_editor_change_price", "deal_adder_price1"),
                            ("deal_editor_change_count", "deal_adder_count1"),
                            ("deal_editor_change_commission", "deal_editor_commission")]:
-            cb = self._parent.builder.get_object(hcb)
-            bb = self._parent.builder.get_object(box)
+            cb = self.builder.get_object(hcb)
+            bb = self.builder.get_object(box)
             self.hiders.append(hide_control(cb, [bb]))
             pass
 
@@ -113,7 +114,7 @@ class deal_editor_control:
         \retval gtk.RESPONSE_ACCEPT
         \retval gtk.RESPONSE_CANCEL
         """
-        win = self._parent.builder.get_object("deal_editor")
+        win = self.builder.get_object("deal_editor")
         win.show_all()
         ret = win.run()
         win.hide()
@@ -121,7 +122,7 @@ class deal_editor_control:
 
 if __name__ == "__main__":
     b = gtk.Builder()
-    b.add_from_file('main_ui.glade')
+    b.add_from_file('glade/deal_editor.glade')
     con = deal_editor_control(b)
     con.update_accounts([(1, "jfjfj"), (2, "ejfije")])
     con.run()
