@@ -7,7 +7,7 @@ class positions_filter:
     plus = []
     def __init__(self, parent):
         self._parent = parent
-        self.dialog = positions_filter_control(self._parent.builder)
+        self.dialog = positions_filter_control(self._parent)
 
     def update_filter(self, ):
         """\brief update fields of the filter

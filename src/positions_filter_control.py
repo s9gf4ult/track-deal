@@ -15,10 +15,11 @@ class positions_filter_control:
     """
     \brief controls filter window's widgets not more.
     """
-    def __init__(self, builder):
-        self.builder = builder
+    def __init__(self, parent):
+        self._parent = parent
+        self.builder = make_builder('glade/positions_filter.glade')
         w = self.builder.get_object("positions_filter")
-        w.set_transient_for(self.builder.get_object('main_window'))
+        w.set_transient_for(self._parent.window.builder.get_object('main_window'))
         w.add_buttons(gtk.STOCK_CLOSE, gtk.RESPONSE_CANCEL)
         def shorter(name):
             return self.builder.get_object(name)
