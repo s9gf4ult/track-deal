@@ -26,10 +26,11 @@ class currency_edit_control(object):
         \param parent instance of \ref gtk_view.gtk_view
         """
         self._parent = parent
+        self.builder = make_builder('glade/currency_edit.glade')
         def shobject(name):
-            return self._parent.builder.get_object(name)
+            return self.builder.get_object(name)
         self.window = shobject("currency_edit")
-        self.window.set_transient_for(shobject("main_window"))
+        self.window.set_transient_for(self._parent.window.builder.get_object('main_window'))
         self.window.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         self.name = shobject("currency_edit_name")
         fn = shobject("currency_edit_full_name")
