@@ -132,6 +132,9 @@
     </columns>
   </object>
   <object class="GtkWindow" id="main_window">
+    <property name="window_position">center</property>
+    <property name="default_width">600</property>
+    <property name="default_height">400</property>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
