@@ -40,7 +40,6 @@ class gtk_view(common_view):
     model = None
     
     ## \brief instance of \ref currency_edit_control.currency_edit_control
-
     ## \~russian
     ## Экземпляр диалога для редактирования валют \ref currency_edit_control.currency_edit_control
     currency = None
@@ -99,7 +98,6 @@ class gtk_view(common_view):
         self.window.run()
         gtk.main()
         
-        
     def call_update_callback(self, ):
         """try send update signal to the all controllers
         """
@@ -155,4 +153,3 @@ class gtk_view(common_view):
         """quit from gtk main loop
         """
         gtk.main_quit()
- 
