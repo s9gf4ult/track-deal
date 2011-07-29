@@ -178,6 +178,14 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem20">
+                        <property name="visible">True</property>
+                        <property name="related_action">save_as</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem4">
                         <property name="visible">True</property>
                         <property name="related_action">close_database</property>
@@ -741,10 +749,10 @@
                 <property name="visible">True</property>
                 <property name="orientation">vertical</property>
                 <child>
-                  <object class="GtkNotebook" id="notebook2">
+                  <object class="GtkNotebook" id="chart_notebook">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tab_pos">left</property>
+                    <property name="tab_pos">bottom</property>
                     <child>
                       <object class="GtkHBox" id="hbox4">
                         <property name="visible">True</property>
@@ -763,7 +771,7 @@
                                     <property name="visible">True</property>
                                     <property name="orientation">vertical</property>
                                     <child>
-                                      <object class="GtkRadioButton" id="radiobutton1">
+                                      <object class="GtkRadioButton" id="chart_0_all">
                                         <property name="label" translatable="yes">&#x412;&#x441;&#x435;</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -777,14 +785,14 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkRadioButton" id="radiobutton2">
+                                      <object class="GtkRadioButton" id="chart_0_filtered">
                                         <property name="label" translatable="yes">&#x41E;&#x442;&#x444;&#x438;&#x43B;&#x44C;&#x442;&#x440;&#x43E;&#x432;&#x430;&#x43D;&#x43D;&#x44B;&#x435;</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
                                         <property name="active">True</property>
                                         <property name="draw_indicator">True</property>
-                                        <property name="group">radiobutton1</property>
+                                        <property name="group">chart_0_all</property>
                                       </object>
                                       <packing>
                                         <property name="expand">False</property>
@@ -823,7 +831,7 @@
                                     <property name="n_rows">2</property>
                                     <property name="n_columns">2</property>
                                     <child>
-                                      <object class="GtkCheckButton" id="checkbutton1">
+                                      <object class="GtkCheckButton" id="chart_0_net">
                                         <property name="label" translatable="yes">Net</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -836,7 +844,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkCheckButton" id="checkbutton2">
+                                      <object class="GtkCheckButton" id="chart_0_gross">
                                         <property name="label" translatable="yes">Gross</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -851,7 +859,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkCheckButton" id="checkbutton3">
+                                      <object class="GtkCheckButton" id="chart_0_profit">
                                         <property name="label" translatable="yes">&#x41F;&#x440;&#x43E;&#x444;&#x438;&#x442;</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -866,7 +874,7 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkCheckButton" id="checkbutton4">
+                                      <object class="GtkCheckButton" id="chart_0_loss">
                                         <property name="label" translatable="yes">&#x41F;&#x440;&#x43E;&#x441;&#x430;&#x434;&#x43A;&#x430;</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
@@ -911,7 +919,115 @@
                       </packing>
                     </child>
                     <child>
-                      <placeholder/>
+                      <object class="GtkVBox" id="vbox6">
+                        <property name="visible">True</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkHBox" id="hbox5">
+                            <property name="visible">True</property>
+                            <child>
+                              <object class="GtkCheckButton" id="chart_1_net">
+                                <property name="label" translatable="yes">Net</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="chart_1_gross">
+                                <property name="label" translatable="yes">Gross</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="draw_indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkScrolledWindow" id="scrolledwindow5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="hscrollbar_policy">automatic</property>
+                            <property name="vscrollbar_policy">automatic</property>
+                            <child>
+                              <object class="GtkTreeView" id="chart_1_accounts">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHButtonBox" id="hbuttonbox1">
+                            <property name="visible">True</property>
+                            <property name="spacing">15</property>
+                            <property name="layout_style">center</property>
+                            <child>
+                              <object class="GtkButton" id="chart_1_select">
+                                <property name="label" translatable="yes">&#x412;&#x44B;&#x431;&#x440;&#x430;&#x442;&#x44C;</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="chart_1_deselect">
+                                <property name="label" translatable="yes">&#x421;&#x43D;&#x44F;&#x442;&#x44C; &#x432;&#x44B;&#x434;&#x435;&#x43B;&#x435;&#x43D;&#x438;&#x435;</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkButton" id="chart_1_reverse">
+                                <property name="label" translatable="yes">&#x420;&#x435;&#x432;&#x435;&#x440;&#x441;</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">2</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                     <child type="tab">
                       <object class="GtkLabel" id="label7">
@@ -933,10 +1049,11 @@
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkButton" id="button13">
-                        <property name="label" translatable="yes">button</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <property name="related_action">print_graphs</property>
+                        <property name="use_action_appearance">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
