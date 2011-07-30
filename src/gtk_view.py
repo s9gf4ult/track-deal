@@ -19,6 +19,7 @@ from positions_filter import positions_filter
 from position_adder_control import position_adder_control
 from points_control import points_control
 from report_importer_control import report_importer_control
+from chart_tab_controller import chart_tab_controller
 from common_methods import *
 
 
@@ -72,6 +73,8 @@ class gtk_view(common_view):
     points = None
     ## \ref report_importer_control.report_importer_control instance
     report_importer = None
+    ## \ref chart_tab_controller.chart_tab_controller
+    chart_tab = None
     
     def __init__(self, ):
         """initialize gtk view
@@ -91,6 +94,7 @@ class gtk_view(common_view):
         self.position_adder = position_adder_control(self)
         self.points = points_control(self)
         self.report_importer = report_importer_control(self)
+        self.chart_tab = chart_tab_controller(self)
     
     def run(self, ):
         """show main window and initialize all the necessary
@@ -105,6 +109,7 @@ class gtk_view(common_view):
         self.accounts.update()
         self.deals_tab.update()
         self.positions_tab.update()
+        self.chart_tab.update()
 
     def connected(self, ):
         """\retval True if model exist and connected

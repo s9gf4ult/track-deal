@@ -125,12 +125,6 @@
     <property name="short_label">&#x41E;&#x431;&#x43D;&#x43E;&#x432;&#x438;&#x442;&#x44C;</property>
     <property name="stock_id">gtk-refresh</property>
   </object>
-  <object class="GtkTreeStore" id="treestore1">
-    <columns>
-      <!-- column-name show -->
-      <column type="guchar"/>
-    </columns>
-  </object>
   <object class="GtkWindow" id="main_window">
     <property name="window_position">center</property>
     <property name="default_width">600</property>
@@ -182,6 +176,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">save_as</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -1052,7 +1047,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="related_action">print_graphs</property>
+                        <property name="related_action">print_charts</property>
                         <property name="use_action_appearance">True</property>
                       </object>
                       <packing>
@@ -1090,7 +1085,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkAction" id="print_graphs">
+  <object class="GtkAction" id="print_charts">
     <property name="label">&#x420;&#x438;&#x441;&#x43E;&#x432;&#x430;&#x442;&#x44C;</property>
     <property name="tooltip">&#x41E;&#x442;&#x43E;&#x431;&#x440;&#x430;&#x437;&#x438;&#x442;&#x44C; &#x433;&#x440;&#x430;&#x444;&#x438;&#x43A; &#x432; &#x43E;&#x442;&#x434;&#x435;&#x43B;&#x44C;&#x43D;&#x43E;&#x43C; &#x43E;&#x43A;&#x43D;&#x435;</property>
   </object>
