@@ -1,0 +1,4 @@
+src/*.pyc
+.ropeproject
+html
+tests/*.pyc
