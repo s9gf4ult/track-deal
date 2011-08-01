@@ -94,7 +94,7 @@ class chart_tab_controller(object):
         ax = fig.add_subplot(111)
         names = map(lambda a: a[0], print_values)
         lines  = map(lambda chart: ax.plot_date(map(lambda chd: chd[0], chart[1]),
-                                                map(lambda chy: chy[1], chart[1])), print_values)
+                                                map(lambda chy: chy[1], chart[1]), '-'), print_values)
         plt.figlegend(lines, names, 'upper left')
         
         majloc = AutoDateLocator()
