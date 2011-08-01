@@ -20,8 +20,7 @@ from position_adder_control import position_adder_control
 from points_control import points_control
 from report_importer_control import report_importer_control
 from chart_tab_controller import chart_tab_controller
-from common_methods import *
-
+from common_methods import show_and_print_error
 
 class gtk_view(common_view):
     """
@@ -126,8 +125,7 @@ class gtk_view(common_view):
                 self.model.disconnect()
                 self.model = None
             except Exception as e:
-                show_error(e.__str__(), self.builder.get_object("main_window"))
-                print(traceback.format_exc())
+                show_and_print_error(e, self.window.builder.get_object("main_window"))
                 return False
             else:
                 return True
