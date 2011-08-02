@@ -57,7 +57,34 @@ class chart_tab_controller(object):
             self.print_chart_1()
 
     def print_chart_0(self, ):
-        pass
+        cacc = self._parent.model.get_current_account()
+        if cacc == None:
+            return
+        positions_data = None
+        if self.chart0positions.get_value() == 'all':
+            positions_data = self._parent.model.list_positions_view_with_condition('account_id = ?', [cacc['id']], order_by = ['close_datetime']).fetchall()
+        elif self.chart0positions.get_value() == 'filtered':
+            self._parent.positions_filter.update_filter()
+            positions_data = self._parent.positions_filter.get_data(order_by = ['close_datetime']).fetchall()
+        retplot = []
+        for (what, what_name, field_aft, field_pl) in [(self.chart0net.get_active(), 'net', 'net_after', 'pl_net'),
+                                                       (self.chart0gross.get_active(), 'gross', 'gross_after', 'pl_gross')]:
+            if what:
+                data = []
+                if self.chart0positions.get_value() == 'all':
+                    data = map(lambda a: (a['close_datetime'], a[field_aft]), positions_data)
+                    data.insert(0, (positions_data[0]['close_datetime'], cacc['money_count']))
+                elif self.chart0positions.get_value() == 'filtered':
+                    data = []
+                    start = cacc['money_count']
+                    for ps in positions_data:
+                        start += ps[field_pl]
+                        data.append((ps['close_datetime'], start))
+                    data.insert(0, (positions_data[0]['close_datetime'], cacc['money_count']))
+                retplot.append((what_name, data))
+
+        self.matplot_print(retplot)
+        
 
     def print_chart_1(self, ):
         net = self.chart1net.get_active()
@@ -96,7 +123,7 @@ class chart_tab_controller(object):
         names = map(lambda a: a[0], print_values)
         lines  = map(lambda chart: ax.plot_date(map(lambda chd: chd[0], chart[1]),
                                                 map(lambda chy: chy[1], chart[1]), 'o-'), print_values)
-        plt.figlegend(lines, names, 'upper left')
+        fig.legend(lines, names, 'upper left')
         
         majloc = AutoDateLocator()
         majform = AutoDateFormatter(majloc)

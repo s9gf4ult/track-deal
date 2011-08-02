@@ -49,3 +49,10 @@ class matplot_figure(object):
         \param **kargs
         """
         return self.fig.autofmt_xdate(*args, **kargs)
+
+    def legend(self, *args, **kargs):
+        """\brief plot legend
+        \param *args
+        \param **kargs
+        """
+        return self.fig.legend(*args, **kargs)
