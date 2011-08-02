@@ -6,6 +6,7 @@ from select_control import select_control
 from common_methods import show_error
 import matplotlib.pyplot as plt
 from matplotlib.dates import AutoDateLocator, AutoDateFormatter
+from matplot_figure import matplot_figure as figure
 import gtk
 
 class chart_tab_controller(object):
@@ -90,7 +91,7 @@ class chart_tab_controller(object):
         """\brief print data by matplotlib and shw the figure
         \param print_values [(name - is a string, [(datetime, value)] - is a list of data to plot)] - list of charts to plot
         """
-        fig = plt.figure()
+        fig = figure()
         ax = fig.add_subplot(111)
         names = map(lambda a: a[0], print_values)
         lines  = map(lambda chart: ax.plot_date(map(lambda chd: chd[0], chart[1]),
