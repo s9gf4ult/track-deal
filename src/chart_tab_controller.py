@@ -26,6 +26,8 @@ class chart_tab_controller(object):
         self.chart0gross = shobject('chart_0_gross')
         self.chart0profit = shobject('chart_0_profit')
         self.chart0loss = shobject('chart_0_loss')
+        self.chart0cumulative_loss = shobject('chart_0_cumulative_loss')
+        self.chart0cumulative_profit = shobject('chart_0_cumulative_profit')
 
         self.chart1net = shobject('chart_1_net')
         self.chart1gross = shobject('chart_1_gross')
@@ -84,6 +86,32 @@ class chart_tab_controller(object):
                         data.append((ps['close_datetime'], start))
                     data.insert(0, (positions_data[0]['close_datetime'], cacc['money_count']))
                 retplot.append((what_name, data))
+
+        if self.chart0profit.get_active():
+            data = map(lambda a: (a['close_datetime'], a['pl_net']), filter(lambda c: c['pl_net'] >= 0, positions_data))
+            retplot.append(('profit', data))
+
+        if self.chart0loss.get_active():
+            data = map(lambda a: (a['close_datetime'], abs(a['pl_net'])), filter(lambda c: c['pl_net'] < 0, positions_data))
+            retplot.append(('loss', data))
+
+        if self.chart0cumulative_profit.get_active():
+            start = cacc['money_count']
+            data = []
+            for pst in positions_data:
+                if pst['pl_net'] >= 0:
+                    start += pst['pl_net']
+                    data.append((pst['close_datetime'], start))
+            retplot.append(('cum.profit', data))
+
+        if self.chart0cumulative_loss.get_active():
+            start = cacc ['money_count']
+            data = []
+            for pst in positions_data:
+                if pst['pl_net'] < 0:
+                    start += abs(pst['pl_net'])
+                    data.append((pst['close_datetime'], start))
+            retplot.append(('cum.loss', data))
 
         self.matplot_print(retplot)
         
