@@ -65,7 +65,9 @@ class chart_tab_controller(object):
             positions_data = self._parent.model.list_positions_view_with_condition('account_id = ?', [cacc['id']], order_by = ['close_datetime']).fetchall()
         elif self.chart0positions.get_value() == 'filtered':
             self._parent.positions_filter.update_filter()
-            positions_data = self._parent.positions_filter.get_data(order_by = ['close_datetime']).fetchall()
+            positions_data = self._parent.positions_filter.get_data(order_by = ['close_datetime'])
+        if len(positions_data) == 0:
+            return
         retplot = []
         for (what, what_name, field_aft, field_pl) in [(self.chart0net.get_active(), 'net', 'net_after', 'pl_net'),
                                                        (self.chart0gross.get_active(), 'gross', 'gross_after', 'pl_gross')]:
