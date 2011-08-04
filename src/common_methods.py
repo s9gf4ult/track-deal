@@ -36,6 +36,20 @@ def find_in_list(findfunc, flist):
             return x
     return None
 
+def format_number(value, max_after_comma = 2):
+    """\brief format any number to pretty string with `max_after_comma` digits after comma or less
+    \param value - number
+    \param max_after_comma - int
+    \return string
+    """
+    if value == round(value) and max_after_comma <> 0:
+        return str(int(value))
+    elif max_after_comma == 0:
+        return str(int(round(value)))
+    else:
+        return str(round(value, max_after_comma))
+
+
 def gethash(fhash, key):
     """
     \~russian
@@ -568,7 +582,7 @@ def any_to_timedelta(value):
     return datetime.timedelta(0, int(value))
 
 def format_abs_value(val):
-    return (val < 0 and "({0})" or "{0}").format(abs(val))
+    return (val < 0 and "({0})" or "{0}").format(format_number(abs(val)))
 
 
 def is_blank(value):

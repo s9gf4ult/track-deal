@@ -3,7 +3,7 @@
 from modifying_tab_control import modifying_tab_control
 from list_view_sort_control import list_view_sort_control
 import gtk
-from common_methods import *
+from common_methods import format_number, gethash, show_and_print_error, query_yes_no
 import sqlite3
 from account_edit_control import account_edit_control
 import gtk_view
@@ -26,7 +26,7 @@ class accounts_tab_controller(object):
         shorter("delete_account", self.delete_account_activate)
         shorter("modify_account", self.modify_account_activate)
         shorter("set_current_account", self.set_current_account_activate)
-        self.accounts_list = list_view_sort_control(self._parent.window.builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererSpin()), (u'Текущий счет', gtk.CellRendererSpin()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererSpin(), int)])
+        self.accounts_list = list_view_sort_control(self._parent.window.builder.get_object("accounts_view"), [(u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererText()), (u'Текущий счет', gtk.CellRendererText()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererText())])
         self.account_list = list_view_sort_control(self._parent.window.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
         self._parent.window.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
 
@@ -66,7 +66,7 @@ class accounts_tab_controller(object):
     def update_accounts_list(self):
         """update list of accounts"""
         if self._parent.connected():
-            self.accounts_list.update_rows(map(lambda a: (a["name"], a["first_money"], a["current_money"], a["money_name"], a["deals"]), self._parent.model.list_view_accounts(["name"])))
+            self.accounts_list.update_rows(map(lambda a: (a["name"], format_number(a["first_money"]), format_number(a["current_money"]), a["money_name"], format_number(a["deals"])), self._parent.model.list_view_accounts(["name"])))
         else:
             self.accounts_list.make_model()
             

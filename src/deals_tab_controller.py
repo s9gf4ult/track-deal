@@ -28,7 +28,7 @@ class deals_tab_controller(object):
                                                   (u'Цена', gtk.CellRendererText(), str, "price"),
                                                   (u'Количество', gtk.CellRendererSpin(), int, "count"),
                                                   (u'Объем', gtk.CellRendererText(), str, "volume"),
-                                                  (u'Комиссия', gtk.CellRendererSpin(), float, "commission"),
+                                                  (u'Комиссия', gtk.CellRendererText(), str, "commission"),
                                                   (u'Тэги', gtk.CellRendererText(), str, "user_attributes_formated")],
                                                  self_sorting = False,
                                                  sort_callback = self.sorted_callback)
@@ -168,6 +168,6 @@ class deals_tab_controller(object):
             self.deals_view.make_model() # clean list of deals
             return
         self._parent.deals_filter.prepare_filter()
-        self.deals_view.update_rows(map(lambda a: (a["deal_id"], a["date_formated"], a["time_formated"], a["paper_name"], a["direction_formated"], a["price_formated"], a["count"], a["volume_formated"], a["commission"], a["user_attributes_formated"]),  self._parent.deals_filter.get_data(self.sort_order)))
+        self.deals_view.update_rows(map(lambda a: (a["deal_id"], a["date_formated"], a["time_formated"], a["paper_name"], a["direction_formated"], a["price_formated"], a["count"], a["volume_formated"], format_number(a["commission"]), a["user_attributes_formated"]),  self._parent.deals_filter.get_data(self.sort_order)))
                 
         
