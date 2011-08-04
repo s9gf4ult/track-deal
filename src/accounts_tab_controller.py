@@ -126,7 +126,11 @@ class accounts_tab_controller(object):
                     ret = self._parent.account_edit.run()
                     if ret == gtk.RESPONSE_ACCEPT:
                         dd = self._parent.account_edit.get_data()
-                        self._parent.model.tachange_account(acc["id"], dd["name"], dd["money_name"], dd["money_count"], dd["comment"])
+                        self._parent.model.tachange_account(acc["id"],
+                                                            dd["name"],
+                                                            dd["money_name"],
+                                                            dd["money_count"],
+                                                            ('' if gethash(dd, 'comment') == None else dd['comment']))
                     self._parent.call_update_callback()
 
     def set_current_account(self):
