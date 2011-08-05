@@ -5,14 +5,14 @@
 import json
 from re import split
 import os
-import od_exception
+import od_exceptions
 from common_methods import gethash, is_null_or_empty
 
 class settings(object):
     """\brief settings saving class
     """
     _config_data = None
-    _default_cinfig_data = None
+    _default_cinfig_data = {'database' : {'path' : ''}}
     def __init__(self, ):
         """\brief constructor
         """
@@ -32,12 +32,14 @@ class settings(object):
             os.makedirs(config_dir)
         if not os.path.exists(self.config_file):
             self.make_default_config()
+        else:
+            self.read_config()
 
     def read_config(self, ):
         """\brief read config file into _config_data
         """
         with open(self.config_file) as f:
-            self._config_data = json.decode(f)
+            self._config_data = json.load(f)
 
     def make_default_config(self, ):
         """\brief create default config
@@ -48,8 +50,8 @@ class settings(object):
     def save_config(self, ):
         """\brief save current config state to file
         """
-        with open(self.config_file) as f:
-            json.dump(self._config_data, f, indent = 4):
+        with open(self.config_file, 'w') as f:
+            json.dump(self._config_data, f, indent = 4)
             
     def get_key(self, key_name):
         """\brief return value of the key
@@ -57,10 +59,11 @@ class settings(object):
         """
         val = self._config_data
         try:
-            for key in map(lambda a: a.strip(), split('.', key_name)):
+            for key in map(lambda a: a.strip(), split('\.', key_name)):
+                print(val)
                 val = val[key]
         except KeyError as e:
-            raise od_exception.od_exception_config_key_error('There is no such key in config "{0}"'.format(key_name))
+            raise od_exceptions.od_exception_config_key_error('There is no such key in config "{0}"'.format(key_name))
         return val
         
     def set_key(self, key_name, value):
@@ -69,9 +72,11 @@ class settings(object):
         \param value - value to set
         """
         val = self._config_data
-        keys = map(lambda a: a.strip(), re.split('.', key_value))
+        keys = map(lambda a: a.strip(), split('\.', key_name))
         for key in keys[:-1]:
             try:
+                if not isinstance(val[key], dict):
+                    val[key] = {}
                 val = val[key]
             except KeyError:
                 val[key] = {}
