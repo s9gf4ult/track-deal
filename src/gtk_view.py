@@ -22,6 +22,7 @@ from report_importer_control import report_importer_control
 from chart_tab_controller import chart_tab_controller
 from common_methods import show_and_print_error, is_null_or_empty
 from od_settings import settings
+from settings_dialog_controller import settings_dialog_controller
 
 class gtk_view(common_view):
     """
@@ -77,6 +78,8 @@ class gtk_view(common_view):
     chart_tab = None
     ## \ref od_settings.settings instance
     settings = None
+    ## \ref settings_dialog_controller.settings_dialog_controller
+    settings_dialog = None
     
     def __init__(self, ):
         """initialize gtk view
@@ -101,6 +104,7 @@ class gtk_view(common_view):
         self.points = points_control(self)
         self.report_importer = report_importer_control(self)
         self.chart_tab = chart_tab_controller(self)
+        self.settings_dialog = settings_dialog_controller(self)
         self.call_update_callback()
     
     def run(self, ):
@@ -163,8 +167,9 @@ class gtk_view(common_view):
     def quit(self, ):
         """quit from gtk main loop
         """
-        if self.connected():
-            cs = self.model.get_connection_string()
-            self.settings.set_key('database.path', ('' if is_null_or_empty(cs) else cs))
         self.settings.save_config()
         gtk.main_quit()
+
+
+
+

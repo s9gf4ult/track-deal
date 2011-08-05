@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 ## settings_dialog_controller ##
 from common_methods import make_builder
+import gtk
 
 class settings_dialog_controller(object):
     """\brief controller for settings dialog
@@ -39,9 +40,3 @@ class settings_dialog_controller(object):
         """\brief load settings from settings instance into dialog
         """
         raise NotImplementedError()
-
-
-
-                                      
-
-        

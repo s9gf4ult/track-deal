@@ -366,6 +366,14 @@
                         <property name="use_stock">True</property>
                       </object>
                     </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem21">
+                        <property name="visible">True</property>
+                        <property name="related_action">settings_dialog</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -1120,5 +1128,8 @@
   <object class="GtkAction" id="print_charts">
     <property name="label">&#x420;&#x438;&#x441;&#x43E;&#x432;&#x430;&#x442;&#x44C;</property>
     <property name="tooltip">&#x41E;&#x442;&#x43E;&#x431;&#x440;&#x430;&#x437;&#x438;&#x442;&#x44C; &#x433;&#x440;&#x430;&#x444;&#x438;&#x43A; &#x432; &#x43E;&#x442;&#x434;&#x435;&#x43B;&#x44C;&#x43D;&#x43E;&#x43C; &#x43E;&#x43A;&#x43D;&#x435;</property>
+  </object>
+  <object class="GtkAction" id="settings_dialog">
+    <property name="stock_id">gtk-preferences</property>
   </object>
 </interface>

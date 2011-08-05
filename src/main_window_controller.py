@@ -33,6 +33,7 @@ class main_window_controller(object):
         shorter("add_papers", "activate", self.add_papers_activate)
         shorter('edit_points', 'activate', self.edit_points_activate)
         shorter('edit_currencies', 'activate', self.edit_currencies_activate)
+        shorter('settings_dialog', 'activate', self.settings_dialog_activate)
 
     def edit_currencies_activate(self, action):
         """\brief edit currencies action handler
@@ -236,3 +237,7 @@ class main_window_controller(object):
             self._parent.model.recalculate_all_temporary()
             self._parent.call_update_callback()
         
+    def settings_dialog_activate(self, action):
+        ret = self._parent.settings_dialog.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self._parent.call_update_callback()
