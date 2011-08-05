@@ -108,6 +108,7 @@ class common_model(object):
         """
         raise NotImplementedError()
         
-
-
-
+    def get_connection_string(self, ):
+        """\brief return connection string
+        """
+        raise NotImplementedError()

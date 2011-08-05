@@ -417,7 +417,7 @@ class makes_insafe(object):
             assert(hasattr(args[0], self._attribute))
             try:
                 rtt = func(*args, **kargs)
-            except e:
+            except Exception as e:
                 raise e
             else:
                 setattr(args[0], self._attribute, True)

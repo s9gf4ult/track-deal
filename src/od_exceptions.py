@@ -7,6 +7,14 @@ class od_exception(Exception):
     """
     pass
 
+class od_exception_config_error(od_exception):
+    """\brief common config error
+    """
+
+class od_exception_config_key_error(od_exception_config_error):
+    """\brief getting key error
+    """
+
 class od_exception_report_error(od_exception):
     """\brief the common exception of imporing the report
     """

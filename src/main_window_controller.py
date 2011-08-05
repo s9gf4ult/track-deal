@@ -66,7 +66,7 @@ class main_window_controller(object):
         # if ch > 0:
         #     show_error(u'Перед сохранением нужно завершить транзакцию выполните Rollback или Commit', win)
         #     return
-        filename = self._parent.model._connection_string
+        filename = self._parent.model.get_connection_string()
         if filename == ":memory:":
             return
         dial = gtk.FileChooserDialog(title = u'Сохранить как', parent = win, action = gtk.FILE_CHOOSER_ACTION_SAVE, buttons = (gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
@@ -158,14 +158,22 @@ class main_window_controller(object):
 
 
     def quit_activate(self, action):
-        if self._parent.disconnect():
-            self._parent.quit()
+        self.quit()
 
-    def main_window_quit(self, window, evt):
+    def quit(self, ):
+        """\brief quit procedure activate
+        """
+        if self._parent.connected():
+            cs = self._parent.model.get_connection_string()
+            self._parent.settings.set_key('database.path', ('' if is_null_or_empty(cs) else cs))
         if self._parent.disconnect():
             self._parent.quit()
             return False
-        return True
+        else:
+            return True
+
+    def main_window_quit(self, window, evt):
+        return self.quit()
         
     def create_database_in_memory_activate(self, action):
         self.create_database_in_memory()
@@ -197,10 +205,10 @@ class main_window_controller(object):
         """update main window
         """
         if self._parent.connected():
-            if self._parent.model._connection_string == ":memory:":
+            if self._parent.model.get_connection_string() == ":memory:":
                 self.set_main_title(u'База данных в памяти')
             else:
-                self.set_main_title(self._parent.model._connection_string)
+                self.set_main_title(self._parent.model.get_connection_string())
         else:
             self.set_main_title("Open Deals")
             
@@ -228,4 +236,3 @@ class main_window_controller(object):
             self._parent.model.recalculate_all_temporary()
             self._parent.call_update_callback()
         
-

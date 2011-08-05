@@ -12,7 +12,8 @@ class settings(object):
     """\brief settings saving class
     """
     _config_data = None
-    _default_cinfig_data = {'database' : {'path' : ''}}
+    _default_cinfig_data = {'database' : {'path' : ''},
+                            'behavior' : {'load_last_database' : True}}
     def __init__(self, ):
         """\brief constructor
         """
@@ -60,7 +61,6 @@ class settings(object):
         val = self._config_data
         try:
             for key in map(lambda a: a.strip(), split('\.', key_name)):
-                print(val)
                 val = val[key]
         except KeyError as e:
             raise od_exceptions.od_exception_config_key_error('There is no such key in config "{0}"'.format(key_name))

@@ -37,6 +37,12 @@ class sqlite_model(common_model):
         """
         pass
 
+    def get_connection_string(self, ):
+        """\brief return path to the file with database
+        """
+        return self._connection_string
+
+
     @raise_db_opened
     def connect(self, connection_string):
         """connects to file or memory
@@ -1231,7 +1237,7 @@ class sqlite_model(common_model):
         return self._sqlite_connection.execute_select("select g.* from deal_groups g inner join deal_group_assign dg on dg.group_id = g.id inner join deals d on dg.deal_id = d.id  where d.account_id = ? and d.paper_id = ? group by g.id", [account_id, paper_id])
 
     
-    def __remake_groups__(self, account_id, paper_id, time_distance = 5, *args, **kargs):
+    def __remake_groups(self, account_id, paper_id, time_distance = 5, *args, **kargs):
         """
         \param account_id 
         \param paper_id 
@@ -1392,15 +1398,6 @@ class sqlite_model(common_model):
         deals = map(lambda a: (a,), (isinstance(deal_id, int) and [deal_id] or deal_id))
         self._sqlite_connection.executemany("delete from deal_group_assign where deal_id = ?", deals)
 
-
-    def __recalculate_deals_by_id__(self, deal_id, *args, **kargs):
-        """get account_id and paper_id from deal and pass to __recalculate_deals__
-        \param deal_id 
-        \param *args 
-        \param **kargs 
-        """
-        (aid, paid) = self._sqlite_connection.execute("select account_id, paper_id from deals where id = ?", [deal_id]).fetchone()
-        self.__recalculate_deals__(aid, paid)
 
     def split_deal(self, deal_id, count):
         """return tuple with 2 deal_id. One is the deal with `count` papers, second with remainder
