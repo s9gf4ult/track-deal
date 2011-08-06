@@ -152,6 +152,11 @@ class points_control(modifying_tab_control):
         \retval gtk.RESPONSE_CANCEL - if 'cancel' pressed
         \note this is the blocking "show" method, uses "run"
         """
+        try:
+            self.points_list.set_odd_color(self._parent.settings.get_key('interface.odd_color'))
+            self.points_list.set_even_color(self._parent.settings.get_key('interface.even_color'))
+        except od_exception_config_key_error:
+            pass
         if not self._parent.connected():
             return
         self.update_widget()

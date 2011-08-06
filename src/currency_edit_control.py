@@ -115,6 +115,11 @@ class currency_edit_control(object):
         \retval gtk.RESPONSE_ACCEPT - data has been saved
         \retval gtk.RESPONSE_CANCEL - cancel button was clicked
         """
+        try:
+            self.currency_list.set_odd_color(self._parent.settings.get_key('interface.odd_color'))
+            self.currency_list.set_even_color(self._parent.settings.get_key('interface.even_color'))
+        except od_exception_config_key_error:
+            pass
         self.reset_fields()
         self.load_currency()
         self._parent.model.start_transacted_action("edit some money objects")

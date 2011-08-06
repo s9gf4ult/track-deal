@@ -3,14 +3,28 @@
 from deals_filter_control import deals_filter_control
 import time
 from common_methods import *
+from od_exceptions import od_exception_config_key_error
 
 
 class deals_filter():
 
+    def set_colors(self, ):
+        """\brief set colors for list
+        """
+        try:
+            odd = self._parent.settings.get_key('interface.odd_color')
+            even = self._parent.settings.get_key('interface.even_color')
+            self.dialog.instruments.set_odd_color(odd)
+            self.dialog.accounts.set_odd_color(odd)
+            self.dialog.instruments.set_even_color(even)
+            self.dialog.accounts.set_even_color(even)
+        except od_exception_config_key_error:
+            pass
+
     def run(self):
+        self.set_colors()
         ret = self.dialog.run()
         return ret
-    
         
     def prepare_filter(self, ):
         """\brief prepare filter values getting if need from the database
@@ -32,6 +46,7 @@ class deals_filter():
     def __init__(self, parent):
         self._parent = parent
         self.dialog = deals_filter_control(self._parent)
+        self.set_colors()
         
 
     def get_conditions(self, ):

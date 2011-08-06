@@ -4,6 +4,7 @@ from list_view_sort_control import list_view_sort_control
 import gtk
 from common_methods import *
 import sources
+from od_exceptions import od_exception_config_key_error
 
 class deals_tab_controller(object):
     def __init__(self, parent):
@@ -164,6 +165,11 @@ class deals_tab_controller(object):
         self._parent.call_update_callback()
 
     def update(self):
+        try:
+            self.deals_view.set_odd_color(self._parent.settings.get_key('interface.odd_color'))
+            self.deals_view.set_even_color(self._parent.settings.get_key('interface.even_color'))
+        except od_exception_config_key_error:
+            pass
         if not self._parent.connected():
             self.deals_view.make_model() # clean list of deals
             return

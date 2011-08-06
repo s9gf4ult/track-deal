@@ -1,7 +1,7 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 import gtk
-from list_view_sort_control import *
+from list_view_sort_control import list_view_sort_control
 
 class check_control():
     """
@@ -10,7 +10,7 @@ class check_control():
     treeview and some buttons to select and deselect one or more elements displayed in treeview, first column will display checkbuttons to select or deselect each element
     """
     
-    def __init__(self, treeview, first_column_name, columns, reverse_button = None, reverse_all_button = None, select_button = None, select_all_button = None, deselect_button = None, deselect_all_button = None, list_view_control_class = list_view_sort_control):
+    def __init__(self, treeview, first_column_name, columns, reverse_button = None, reverse_all_button = None, select_button = None, select_all_button = None, deselect_button = None, deselect_all_button = None, list_view_control_class = list_view_sort_control, odd_color = '#FFFFFF', even_color = '#FFFFFF'):
         """
         \param treeview - gtk.TreeView instance
         \param first_column_name - str, name of column with checkbuttons
@@ -26,7 +26,7 @@ class check_control():
         c = gtk.CellRendererToggle()
         c.props.activatable = True
         c.connect("toggled", self.row_toggled)
-        self.list_control = list_view_control_class(treeview, [(first_column_name, c)] + columns)
+        self.list_control = list_view_control_class(treeview, [(first_column_name, c)] + columns, odd_color = odd_color, even_color = even_color)
         self.treeview = treeview
         self.treeview.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
         self.reverse_button = reverse_button
@@ -48,21 +48,32 @@ class check_control():
         if self.deselect_all_button:
             self.deselect_all_button.connect("clicked", self.all_button_clicked, self.unset_foreach)
 
-    def row_toggled(self, renderer, path):
-        it = self.treeview.get_model().get_iter(path)
-        val = self.treeview.get_model().get_value(it, 0)
-        self.treeview.get_model().set_value(it, 0, not val)
+    def set_odd_color(self, odd_color):
+        """\brief 
+        \param odd_color
+        """
+        self.list_control.set_odd_color(odd_color)
 
+    def set_even_color(self, even_color):
+        """\brief 
+        \param even_color
+        """
+        self.list_control.set_even_color(even_color)
+
+    def row_toggled(self, renderer, path):
+        row = self.list_control.get_row_by_path(path)
+        self.list_control.save_value_by_path(path, 0, not row[0])
+        
     def reverse_foreach(self, x, y, i):
-        m = self.treeview.get_model()
-        val = m.get_value(i, 0)
-        m.set_value(i, 0, not val)
+        m = self.list_control.get_model()
+        row = self.list_control.get_row_by_iter(i)
+        self.list_control.save_value_by_iter(i, 0, not row[0])
 
     def unset_foreach(self, x, u, i):
-        self.treeview.get_model().set_value(i, 0, False)
+        self.list_control.save_value_by_iter(i, 0, False)
 
     def set_foreach(self, x, y, i):
-        self.treeview.get_model().set_value(i, 0, True)
+        self.list_control.save_value_by_iter(i, 0, True)
         
     def selection_button_clicked(self, bt, callme):
         self.treeview.get_selection().selected_foreach(callme)
@@ -72,11 +83,7 @@ class check_control():
 
 
     def flush_list(self):
-        m = self.treeview.get_model()
-        it = m.get_iter_first()
-        while it:
-            m.remove(it)
-            it = m.get_iter_first()
+        self.list_control.make_model()
 
     def update_rows(self, rows, default_toggle = True):
         """
@@ -105,16 +112,8 @@ class check_control():
         \retval [] if no one row is selected
         \retval list of tuples (*data fields)
         """
-        def get_checked(model, path, it):
-            if model.get_value(it, 0):
-                p = []
-                l = model.get_n_columns()
-                for x in xrange(1, l):
-                    p.append(model.get_value(it, x))
-                return tuple(p)
-            else:
-                return None
-        return filter(lambda a: a != None, self.list_control._get_rows_with_filter(get_checked))
+        checked = self.list_control.get_rows()
+        return map(lambda a: a[1:], filter(lambda c: c[0], checked))
 
 
 if __name__ == "__main__":

@@ -27,6 +27,11 @@ class paper_adder(object):
         ## \ref list_view_sort_control.list_view_sort_control instance, represent list of papers
         self.list = list_view_sort_control(shobject("paper_adder_list"),
                                            [["id", int], ("Имя", gtk.CellRendererText()), ("Тип", gtk.CellRendererText())])
+        try:
+            self.list.set_odd_color(self._parent.settings.get_key('interface.odd_color'))
+            self.list.set_even_color(self._parent.settings.get_key('interface.even_color'))
+        except od_exception_config_key_error:
+            pass
         ## \ref combo_select_control.combo_select_control instance, accepts to select one of several types
         self.type = combo_select_control(shobject("paper_adder_type"),
                                          answers = [("stock", "Акция"), ("future", "Фьючерс"), ("option", "Опцион")])
@@ -55,6 +60,11 @@ class paper_adder(object):
         \retval gtk.RESPONSE_ACCEPT
         \retval gtk.RESPONSE_CANCEL
         """
+        try:
+            self.list.set_odd_color(self._parent.settings.get_key('interface.odd_color'))
+            self.list.set_even_color(self._parent.settings.get_key('interface.even_color'))
+        except od_exception_config_key_error:
+            pass
         if not self._parent.connected():
             return
         self._parent.model.start_transacted_action("Edit some papers")

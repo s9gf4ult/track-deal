@@ -7,7 +7,7 @@ from common_methods import format_number, gethash, show_and_print_error, query_y
 import sqlite3
 from account_edit_control import account_edit_control
 import gtk_view
-from od_exceptions import *
+from od_exceptions import od_exception_config_key_error
 
 class accounts_tab_controller(object):
     """
@@ -65,6 +65,11 @@ class accounts_tab_controller(object):
 
     def update_accounts_list(self):
         """update list of accounts"""
+        try:
+            self.accounts_list.set_odd_color(self._parent.settings.get_key('interface.odd_color'))
+            self.accounts_list.set_even_color(self._parent.settings.get_key('interface.even_color'))
+        except od_exception_config_key_error:
+            pass
         if self._parent.connected():
             self.accounts_list.update_rows(map(lambda a: (a["name"], format_number(a["first_money"]), format_number(a["current_money"]), a["money_name"], format_number(a["deals"])), self._parent.model.list_view_accounts(["name"])))
         else:

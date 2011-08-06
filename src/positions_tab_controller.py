@@ -6,6 +6,7 @@ import gtk
 from common_methods import *
 import gtk_view
 import sqlite3
+from od_exceptions import od_exception_config_key_error
 
 class positions_tab_controller(object):
     order_by = []
@@ -107,6 +108,11 @@ class positions_tab_controller(object):
     def update(self):
         """\brief updte list with positions
         """
+        try:
+            self.positions_list.set_odd_color(self._parent.settings.get_key('interface.odd_color'))
+            self.positions_list.set_even_color(self._parent.settings.get_key('interface.even_color'))
+        except od_exception_config_key_error:
+            pass
         if not self._parent.connected():
             self.positions_list.update_rows([])
             return

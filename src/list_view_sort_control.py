@@ -12,7 +12,7 @@ class list_view_sort_control:
     возможен обратный вызов на сортировку, чтобы обновить данные в модели так,
     как это требуется.
     """
-    def __init__(self, treeview, columns, self_sorting = True, sort_callback = None):
+    def __init__(self, treeview, columns, self_sorting = True, sort_callback = None, odd_color = '#FFFFFF', even_color = '#FFFFFF'):
         """
         \~english
         \param treeview instance of gtk.TreeView
@@ -40,6 +40,8 @@ class list_view_sort_control:
         \c column - gtk.TreeViewColumn на которую нажал пользователь\n
         \c order - gtk.SORT_ASCENDING или gtk.SORT_DESCENDING когда нужно отсортировать по возрастанию или по убыванию соответственно\n
         \c rest - остальные аргументы из соответствующего кортежа из \c columns
+        \param odd_color - str, цвет фона нечетных строк
+        \param even_color - str, цвет фона четных строк
         \note Если \c self_sorting положительна, то sort_callback может остаться Null
         """
         def get3ordefault(tpl, default):
@@ -57,12 +59,15 @@ class list_view_sort_control:
             else:
                 return None
         self.self_sorting = self_sorting
+        self._odd_color = odd_color
+        self._even_color = even_color
         self.sort_callback = sort_callback
         self.treeview = treeview
-        self.model_columns = []
+        self.model_columns = [str]
+        self._hiden_model_columns = len(self.model_columns)
         self.view_model_columns_map = {}
         view_columns_count = 0
-        model_columns_count = 0
+        model_columns_count = len(self.model_columns)
         for k in xrange(0, len(columns)):
             if isinstance(columns[k], tuple):
                 self.view_model_columns_map[view_columns_count] = model_columns_count
@@ -82,6 +87,7 @@ class list_view_sort_control:
                 elif isinstance(columns[k][1], gtk.CellRendererPixbuf):
                     prop["pixbuf"] = model_columns_count
                     self.model_columns.append(get3ordefault(columns[k], gtk.gdk.Pixbuf))
+                prop['cell_background'] = 0
                 c = gtk.TreeViewColumn(columns[k][0], columns[k][1], **prop)
                 c.set_clickable(True)
                 c.connect("clicked", self.column_clicked, view_columns_count, getparams(columns[k]))
@@ -92,7 +98,29 @@ class list_view_sort_control:
                 self.model_columns.append(columns[k][1])
                 model_columns_count += 1
         self.make_model()
-            
+
+    def set_odd_color(self, odd_color):
+        """\brief Setter for property odd_color
+        \param odd_color
+        """
+        self._odd_color = odd_color
+
+    def get_odd_color(self):
+        """\brief Getter for property odd_color
+        """
+        return self._odd_color
+
+    def set_even_color(self, even_color):
+        """\brief Setter for property even_color
+        \param even_color
+        """
+        self._even_color = even_color
+
+    def get_even_color(self):
+        """\brief Getter for property even_color
+        """
+        return self._even_color
+    
     def make_model(self):
         """\brief make new model and attach it to TreeView
         \note cat be used to just reset the list data
@@ -150,7 +178,10 @@ class list_view_sort_control:
         \note метод создает новую модель и привязывает к ней TreeView
         """
         m = self.get_new_store()
-        for row in rows:
+        for rx in xrange(0, len(rows)):
+            c = (self.get_even_color() if rx % 2 == 0 else self.get_odd_color())
+            row = [c]
+            row.extend(rows[rx])
             m.append(row)
         self.treeview.set_model(m)
 
@@ -164,7 +195,11 @@ class list_view_sort_control:
             self.make_model()
         m = self.get_model()
         self.treeview.set_model(None)
-        for row in rows:
+        cnt = self.rows_count(m)
+        for rx in xrange(0, len(rows)):
+            c = (self.get_even_color() if (rx + cnt) % 2 == 0 else self.get_odd_color())
+            row = [c]
+            row.extend(rows[rx])
             m.append(row)
         self.treeview.set_model(m)
 
@@ -174,7 +209,11 @@ class list_view_sort_control:
         \return gtk.TreeIter instance pointing to new row
         """
         m = self.get_model()
-        return m.append(row)
+        rx = self.rows_count()
+        c = (self.get_even_color() if rx % 2 == 0 else self.get_odd_color())
+        r = [c]
+        r.extend(row)
+        return m.append(r)
 
     def select_by_iter(self, iter):
         """\brief select tree element by tree iter
@@ -215,7 +254,7 @@ class list_view_sort_control:
             if it <> None:
                l = model.get_n_columns()
                ret = []
-               for x in xrange(0, l):
+               for x in xrange(self._hiden_model_columns, l):
                    ret.append(model.get_value(it, x))
                return ret
             return None
@@ -235,7 +274,7 @@ class list_view_sort_control:
             for path in paths:
                 r = []
                 it = model.get_iter(path)
-                for col in xrange(0, model.get_n_columns()):
+                for col in xrange(self._hiden_model_columns, model.get_n_columns()):
                     r.append(model.get_value(it, col))
                 ret.append(tuple(r))
         return ret
@@ -255,6 +294,22 @@ class list_view_sort_control:
         self.get_model().foreach(foreachfunc)
         return ret
 
+    def get_row_by_path(self, path):
+        """\brief return row by path
+        \param path path in model
+        """
+        return self.get_row_by_iter(self.get_model().get_iter(path))
+                                    
+    def get_row_by_iter(self, it):
+        """\brief return row by iter
+        \param it iter in model
+        """
+        row = []
+        m = self.get_model()
+        for col in xrange(self._hiden_model_columns, m.get_n_columns()):
+            row.append(m.get_value(it, col))
+        return tuple(row)
+
     def get_rows(self):
         """
         \~russian
@@ -264,7 +319,7 @@ class list_view_sort_control:
         def all_columns(model, path, it):
             l = model.get_n_columns()
             p = []
-            for x in xrange(0, l):
+            for x in xrange(self._hiden_model_columns, l):
                 p.append(model.get_value(it, x))
             return tuple(p)
         return self._get_rows_with_filter(all_columns)
@@ -279,15 +334,51 @@ class list_view_sort_control:
         if ls.get_mode() == gtk.SELECTION_SINGLE:
             (model, it) = ls.get_selected()
             if it <> None:
-                model.set_value(it, column_id, value)
-        
+                model.set_value(it, column_id + self._hiden_model_columns, value) # the first column is color
+
+    def save_value_by_iter(self, it, column_id, value):
+        """\brief save value to ro by iter
+        \param it
+        \param column_id id of column in model
+        \param value
+        """
+        if it <> None:
+            model = self.get_model()
+            model.set_value(it, column_id + self._hiden_model_columns, value) # the first column is color
+
+    def save_value_by_path(self, path, column_id, value):
+        """\brief save value to ro by iter
+        \param it
+        \param column_id id of column in model
+        \param value
+        """
+        if path <> None:
+            model = self.get_model()
+            it = model.get_iter(path)
+            model.set_value(it, column_id + self._hiden_model_columns, value) # the first column is color
+
+
+    def rows_count(self, model = None):
+        """\brief return count of rows
+        \param model to count rows or None if default
+        """
+        if model == None:
+            model = self.get_model()
+        c = 0
+        it = model.get_iter_first()
+        while it <> None:
+            c += 1
+            it = model.iter_next(it)
+        return c
+
+
 
 if __name__ == "__main__":
     w = gtk.Dialog()
     p = w.get_content_area()
     v = gtk.TreeView()
     p.pack_start(v)
-    con = list_view_sort_control(v, [("OK", gtk.CellRendererToggle()), ("Name", gtk.CellRendererText())])
+    con = list_view_sort_control(v, [("OK", gtk.CellRendererToggle()), ("Name", gtk.CellRendererText())], even_color = '#FFFFFF', odd_color = '#F0F0F0')
     con.update_rows([(True, "ijij"), (True, "isejfj"), (False, "jeifjjj2")])
     con.add_rows([(False, "False"), (True, "True"), (True, "is cool"), (False, "is sucks")])
     t = gtk.TextView()

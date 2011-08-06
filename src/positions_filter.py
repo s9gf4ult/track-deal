@@ -2,12 +2,28 @@
 # -*- coding:utf-8 -*-
 from positions_filter_control import *
 from common_methods import *
+from od_exceptions import od_exception_config_key_error
 
 class positions_filter:
     plus = []
+
+    def set_colors(self, ):
+        """\brief 
+        """
+        try:
+            odd = self._parent.settings.get_key('interface.odd_color')
+            even = self._parent.settings.get_key('interface.even_color')
+            self.dialog.check_instruments.set_odd_color(odd)
+            self.dialog.check_accounts.set_odd_color(odd)
+            self.dialog.check_instruments.set_even_color(even)
+            self.dialog.check_accounts.set_even_color(even)
+        except od_exception_config_key_error:
+            pass
+    
     def __init__(self, parent):
         self._parent = parent
         self.dialog = positions_filter_control(self._parent)
+        self.set_colors()
 
     def update_filter(self, ):
         """\brief update fields of the filter
@@ -49,6 +65,7 @@ class positions_filter:
         self.dialog.check_accounts.update_rows(map(lambda a: (a["id"], a["name"]), accs))
 
     def run(self):
+        self.set_colors()
         self.dialog.run()
 
     def get_data(self, order_by = []):
