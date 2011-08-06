@@ -167,6 +167,8 @@ class main_window_controller(object):
         if self._parent.connected():
             cs = self._parent.model.get_connection_string()
             self._parent.settings.set_key('database.path', ('' if is_null_or_empty(cs) else cs))
+        else:
+            self._parent.settings.set_key('database.path', '')
         if self._parent.disconnect():
             self._parent.quit()
             return False

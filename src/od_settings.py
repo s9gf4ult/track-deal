@@ -13,7 +13,9 @@ class settings(object):
     """
     _config_data = None
     _default_cinfig_data = {'database' : {'path' : ''},
-                            'behavior' : {'load_last_database' : True}}
+                            'behavior' : {'load_last_database' : True},
+                            'interface' : {'odd_color' : '#FFFFFF',
+                                           'even_color' : '#FFFFFF'}}
     def __init__(self, ):
         """\brief constructor
         """
