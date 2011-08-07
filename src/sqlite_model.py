@@ -362,6 +362,13 @@ class sqlite_model(common_model):
             except sqlite3.IntegrityError as e:
                 return od_exception_db_integrity_error(str(e))
 
+    @raise_db_closed
+    def list_papers_view(self, order_by = ['name']):
+        """\brief list papers joined with types
+        \param order_by
+        """
+        return self._sqlite_connection.execute_select('select p.id as id, p.name as name, p.type as type, p.class as class, p.stock as stock, p.full_name as full_name, t.name as type_name, t.comment as type_comment from papers p inner join paper_types t on p.type = t.id{0}'.format(order_by_print(order_by)))
+
     def remove_paper(self, type_or_id, name = None):
         """Removes one paper by type and name or many papers by id
         

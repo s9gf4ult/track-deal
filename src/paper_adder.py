@@ -6,6 +6,7 @@ import gtk_view
 from list_view_sort_control import list_view_sort_control
 from combo_control import combo_control
 from combo_select_control import combo_select_control
+from od_exceptions import od_exception_db_integrity_error
 import sqlite3
 import gtk
 from common_methods import *
@@ -33,9 +34,8 @@ class paper_adder(object):
         except od_exception_config_key_error:
             pass
         ## \ref combo_select_control.combo_select_control instance, accepts to select one of several types
-        self.type = combo_select_control(shobject("paper_adder_type"),
-                                         answers = [("stock", "Акция"), ("future", "Фьючерс"), ("option", "Опцион")])
-        ## \ref combo_control.combo_control instance 
+        self.type = combo_select_control(shobject("paper_adder_type"))
+        ## \ref combo_control.combo_control instance
         self.stock = combo_control(shobject("paper_adder_stock"))
         ## \ref combo_control.combo_control instance 
         self.class_field = combo_control(shobject("paper_adder_class"))
@@ -83,8 +83,10 @@ class paper_adder(object):
         if not self._parent.connected():
             return
 
-        papers = self._parent.model.list_papers(["name"])
-        self.list.update_rows(map(lambda a: (a["id"], a["name"], a["type"]), papers))
+        papers = self._parent.model.list_papers_view(["name"])
+        self.list.update_rows(map(lambda a: (a["id"], a["name"], a["type_name"]), papers))
+        types = self._parent.model.list_paper_types()
+        self.type.update_answers(map(lambda a: (a['id'], a['name']), types))
         self.flush_fields()
 
     def flush_fields(self, ):
@@ -113,10 +115,11 @@ class paper_adder(object):
                                                         stock = self.stock.get_value(),
                                                         class_name = self.class_field.get_value(),
                                                         full_name = self.full_name.get_text(self.full_name.get_start_iter(), self.full_name.get_end_iter()))
-            except sqlite3.IntegrityError:
+            except od_exception_db_integrity_error:
                 pass
             else:
-                self.list.add_row((paper, self.name.get_text(), self.type.get_value()))
+                t = self._parent.model.get_paper_type(self.type.get_value())
+                self.list.add_row((paper, self.name.get_text(), t['name']))
                 self.flush_fields()
 
     def check_fields_before_add(self, ):
@@ -173,11 +176,12 @@ class paper_adder(object):
                                                  "type" : self.type.get_value(),
                                                  "stock" : self.stock.get_value(),
                                                  "class" : self.class_field.get_value()})
-            except sqlite3.IntegrityError:
+            except od_exception_db_integrity_error: 
                 pass
             else:
                 self.list.save_value_in_selected(1, self.name.get_text())
-                self.list.save_value_in_selected(2, self.type.get_value())
+                t = self._parent.model.get_paper_type(self.type.get_value())
+                self.list.save_value_in_selected(2, t['name'])
 
 
     def list_cursor_changed(self, treeview):
