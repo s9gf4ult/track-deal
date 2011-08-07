@@ -34,7 +34,7 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model.dbinit()
         self.assertEqual(1, self.model._sqlite_connection.execute_select("select count(name) as count from sqlite_master where name = ? and type = 'table'", ('deals', )).fetchall()[0]["count"])
-        self.assertEqual(21, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_master where type = 'table'").fetchall()[0]["count"])
+        self.assertEqual(22, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_master where type = 'table'").fetchall()[0]["count"])
 
     def test_dbtemp(self, ):
         """tests dbtemp execution
@@ -645,7 +645,7 @@ class sqlite_model_test(unittest.TestCase):
         self.model.go_to_action(a[0]["id"])
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from accounts").fetchone()[0])
         self.assertEqual(rubles, self.model._sqlite_connection.execute("select id from moneys limit 1").fetchone()[0])
-        self.model.go_to_action(self.model._sqlite_connection.execute("select max(id) from hystory_steps").fetchone()[0])
+        self.model.go_to_action(self.model._sqlite_connection.execute("select max(id) from history_steps").fetchone()[0])
         self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + xcount,
                                self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0])
         self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0],

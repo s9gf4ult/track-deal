@@ -18,6 +18,13 @@ money_id integer not null,
 money_count float not null default 0,
 foreign key (money_id) references moneys(id) on delete cascade);
 
+CREATE TABLE account_in_out(
+id integer primary key not null,
+account_id integer not null,
+datetime datetime not null,
+money_count float not null,
+foreign key (account_id) references accounts(id) on delete cascade);
+
 CREATE TABLE papers(
 id integer primary key not null,
 type text not null,
@@ -136,7 +143,7 @@ CREATE TRIGGER _just_one_database_attributes BEFORE INSERT ON database_attribute
 DELETE FROM database_attributes where name = new.name;
 END;
 
-CREATE TABLE hystory_steps(
+CREATE TABLE history_steps(
 id integer primary key autoincrement not null, /*this will increase count of tables in 1*/
 autoname text,
 datetime datetime);
@@ -145,20 +152,20 @@ CREATE TABLE undo_queries(
 id integer primary key autoincrement not null,
 step_id integer,
 query text not null,
-foreign key (step_id) references hystory_steps(id) on delete cascade);
+foreign key (step_id) references history_steps(id) on delete cascade);
 
 CREATE TABLE redo_queries(
 id integer primary key autoincrement not null,
 step_id integer,
 query text not null,
-foreign key (step_id) references hystory_steps(id) on delete cascade);
+foreign key (step_id) references history_steps(id) on delete cascade);
 
-CREATE TABLE current_hystory_position(
+CREATE TABLE current_history_position(
 step_id integer not null,
-foreign key (step_id) references hystory_steps(id) on delete cascade);
+foreign key (step_id) references history_steps(id) on delete cascade);
 
-CREATE TRIGGER _just_one_hystorypos BEFORE INSERT ON current_hystory_position FOR EACH ROW BEGIN
-delete from current_hystory_position;
+CREATE TRIGGER _just_one_historypos BEFORE INSERT ON current_history_position FOR EACH ROW BEGIN
+delete from current_history_position;
 END;
 
 CREATE TABLE filter_redelts(

@@ -3,6 +3,7 @@
 ## gtk_view ##
 
 import gtk
+import sqlite3
 from common_view import common_view
 from main_window_controller import main_window_controller
 from sqlite_model import sqlite_model
@@ -85,13 +86,16 @@ class gtk_view(common_view):
         """initialize gtk view
         """
         self.settings = settings()
+        self.window = main_window_controller(self)
         if self.settings.get_key('behavior.load_last_database'):
             dbpath = self.settings.get_key('database.path')
-            if not (is_null_or_empty(dbpath) or dbpath == ':memory:'):
-                self.open_existing_sqlite(dbpath)
+            if not (is_null_or_empty(dbpath) or dbpath == ':memory:')
+                try:
+                    self.open_existing_sqlite(dbpath)
+                except sqlite3.OperationalError as e:
+                    show_and_print_error(e, self.window.builder.get_object('main_window'))
             else:
                 self.settings.set_key('database.path', '')
-        self.window = main_window_controller(self)
         self.currency = currency_edit_control(self)
         self.account_edit = account_edit_control(self)
         self.accounts = accounts_tab_controller(self)

@@ -1430,27 +1430,27 @@ class sqlite_model(common_model):
         Arguments:
         \param action_name 
         """
-        ab = self._sqlite_connection.execute("select count(h1.id) from hystory_steps h1, current_hystory_position ch where h1.id > ch.step_id").fetchone()[0]
+        ab = self._sqlite_connection.execute("select count(h1.id) from history_steps h1, current_history_position ch where h1.id > ch.step_id").fetchone()[0]
         if ab > 0:
             raise od_exception_action_cannot_create(ab)
-        aid = self._sqlite_connection.insert("hystory_steps", {"autoname" : action_name,
+        aid = self._sqlite_connection.insert("history_steps", {"autoname" : action_name,
                                                                "datetime" : datetime.now()})
-        self._sqlite_connection.insert("current_hystory_position", {"step_id" : aid})
+        self._sqlite_connection.insert("current_history_position", {"step_id" : aid})
         
     def end_action(self, ):
         """ends an action recording
         """
-        self._sqlite_connection.execute("delete from current_hystory_position")
+        self._sqlite_connection.execute("delete from current_history_position")
 
     def list_actions(self, order_by = ["id"]):
         """list all actions executed
         """
-        return self._sqlite_connection.execute_select_cond("hystory_steps", order_by = order_by)
+        return self._sqlite_connection.execute_select_cond("history_steps", order_by = order_by)
 
     def get_current_action(self, ):
         """return current action or None if no one set
         """
-        a = self._sqlite_connection.execute_select("select h.* from hystory_steps h inner join current_hystory_position c on c.step_id = h.id").fetchall()
+        a = self._sqlite_connection.execute_select("select h.* from history_steps h inner join current_history_position c on c.step_id = h.id").fetchall()
         if len(a) > 0:
             return a[0]
         else:
@@ -1461,12 +1461,12 @@ class sqlite_model(common_model):
         \param action_id id of action to set or None to delete current action
         """
         if action_id == None:
-            self._sqlite_connection.execute("delete from current_hystory_position")
+            self._sqlite_connection.execute("delete from current_history_position")
         else:
-            (g, ) = self._sqlite_connection.execute("select id from hystory_steps where id = ?", [action_id]).fetchone() or (None, )
+            (g, ) = self._sqlite_connection.execute("select id from history_steps where id = ?", [action_id]).fetchone() or (None, )
             if g == None:
                 raise od_exception_action_does_not_exists()
-            self._sqlite_connection.insert("current_hystory_position", {"step_id" : action_id})
+            self._sqlite_connection.insert("current_history_position", {"step_id" : action_id})
         
 
         
@@ -1604,12 +1604,12 @@ class sqlite_model(common_model):
         a = self.get_current_action()
         if a <> None and action_id == a["id"]:
             return
-        l = self._sqlite_connection.execute_select("select * from hystory_steps order by id desc limit 1").fetchall() # последнее действие
+        l = self._sqlite_connection.execute_select("select * from history_steps order by id desc limit 1").fetchall() # последнее действие
         if len(l) > 0:
             l = l[0]
         else:
             return                      # нет действий в базе - ничего не делаем
-        gac = self._sqlite_connection.execute_select("select * from hystory_steps where id = ?", [action_id]).fetchall()
+        gac = self._sqlite_connection.execute_select("select * from history_steps where id = ?", [action_id]).fetchall()
         if len(gac) == 0:
             raise od_exception_action_does_not_exists() # отсутствует такое действие в базе - выбрасываем исключение
         else:
@@ -1637,7 +1637,7 @@ class sqlite_model(common_model):
         """
         self.set_current_action()
         maked = None
-        for (action_id, ) in self._sqlite_connection.execute("select id from hystory_steps where id > ? and id <= ? order by id", [start_id, end_id]):
+        for (action_id, ) in self._sqlite_connection.execute("select id from history_steps where id > ? and id <= ? order by id", [start_id, end_id]):
             self._redo_action(action_id)
             maked = action_id
         if maked <> None:
@@ -1662,7 +1662,7 @@ class sqlite_model(common_model):
         """
         self.set_current_action()
         maked = None
-        for (action_id, ) in self._sqlite_connection.execute("select id from hystory_steps where id > ? and id <= ? order by id desc", [end_id, start_id]):
+        for (action_id, ) in self._sqlite_connection.execute("select id from history_steps where id > ? and id <= ? order by id desc", [end_id, start_id]):
             self._undo_action(action_id)
             maked = action_id
         if maked <> None:
@@ -1682,8 +1682,8 @@ class sqlite_model(common_model):
     def _clear_unassigned_undo_redo(self, ):
         """clear all undo / redo queries not assigned to any action
         """
-        self._sqlite_connection.execute("delete from undo_queries where id in (select id from undo_queries q where not exists(select h.* from hystory_steps h where h.id = q.step_id))")
-        self._sqlite_connection.execute("delete from redo_queries where id in (select id from redo_queries q where not exists(select h.* from hystory_steps h where h.id = q.step_id))")
+        self._sqlite_connection.execute("delete from undo_queries where id in (select id from undo_queries q where not exists(select h.* from history_steps h where h.id = q.step_id))")
+        self._sqlite_connection.execute("delete from redo_queries where id in (select id from redo_queries q where not exists(select h.* from history_steps h where h.id = q.step_id))")
 
     def recalculate_all_temporary(self, ):
         """recalculate all temporary tables in the database
