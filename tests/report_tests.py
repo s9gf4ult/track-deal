@@ -53,10 +53,12 @@ class import_report(unittest.TestCase):
         if self.report_type == 'open.ru':
             self.assertTrue(isinstance(self.source, sources.open_ru_report_source))
             if self.open_ru_report_type == 'stock':
-                self.assertEqual(set(['stock']), set(map(lambda a: a[0], self.model._sqlite_connection.execute('select distinct type from papers').fetchall())))
+                pt = self.model.get_paper_type('stock')
+                self.assertEqual(set([pt['id']]), set(map(lambda a: a[0], self.model._sqlite_connection.execute('select distinct type from papers').fetchall())))
                 print('stock or fut passed')
             elif self.open_ru_report_type == 'future':
-                self.assertEqual(set(['future']), set(map(lambda a: a[0], self.model._sqlite_connection.execute('select distinct type from papers').fetchall())))
+                pt = self.model.get_paper_type('future')
+                self.assertEqual(set([pt['id']]), set(map(lambda a: a[0], self.model._sqlite_connection.execute('select distinct type from papers').fetchall())))
                 print('stock or fut passed')
 
     def test_positions_count(self, ):
@@ -117,9 +119,6 @@ class import_report(unittest.TestCase):
             accs = self.model.list_view_accounts().fetchall()
             self.assertEqual(1, len(accs))
             self.assertAlmostEqual(ballance, accs[0]['current_money'])
-
-
-                             
                 
 
 class import_report1(import_report):

@@ -42,6 +42,66 @@ class sqlite_model(common_model):
         """
         return self._connection_string
 
+    def get_paper_type(self, name_or_id):
+        """\brief return paper_type object by name or id
+        \param name_or_id - int or str
+        """
+        if isinstance(name_or_id, basestring):
+            return self._sqlite_connection.execute_select('select * from paper_types where name = ?', [name_or_id]).fetchone()
+        elif isinstance(name_or_id, int):
+            return self._sqlite_connection.execute_select('select * from paper_types where id = ?', [name_or_id]).fetchone()
+        else:
+            raise od_exception_parameter_error('name_or_id must be int or str not {0}'.format(type(name_or_id)))
+
+    def create_paper_type(self, name, comment = ''):
+        """\brief create new paper type
+        \param name - str
+        \param comment - str
+        \return int - id of new paper type
+        \note view must use \ref tacreate_paper_type instead
+        """
+        try:
+            return self._sqlite_connection.insert('paper_types', {'name' : name,
+                                                                  'comment' : comment}).lastrowid
+        except sqlite3.IntegrityError as e:
+            raise od_exception_db_integrity_error(str(e))
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, name, *args, **kargs: u'create paper type {0}'.format(name))
+    @pass_to_method(create_paper_type)
+    def tacreate_paper_type(self, *args, **kargs):
+        """\brief wrapper around \ref create_paper_type
+        \param name - str
+        \param comment - str
+        """
+        pass
+
+
+    @remover_decorator('paper_types', {int: 'id', basestring : 'name'})
+    def remove_paper_type(self, id_or_name):
+        """\brief remove paper by name or by id
+        \param id_or_name
+        \note view must use \ref taremove_paper_type instead
+        """
+        pass
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, id_or_name, *args, **kargs: 'remove paper type {0}'.format(id_or_name))
+    @pass_to_method(remove_paper_type)
+    def taremove_paper_type(self, *args, **kargs):
+        """\brief wrapper around \ref remove_paper_type
+        \param id_or_name
+        """
+        pass
+
+    def list_paper_types(self, order_by = ['name']):
+        """\brief return iteration object to receive paper types
+        \param order_by
+        """
+        return self._sqlite_connection.execute_select('select * from paper_types{0}'.format(order_by_print(order_by)))
+
 
     @raise_db_opened
     def connect(self, connection_string):
@@ -246,17 +306,23 @@ class sqlite_model(common_model):
     def create_paper(self, type, name, stock = None, class_name = None, full_name = None):
         """creates new paper and returns it's id
         
-        \param type 
-        \param name 
-        \param stock 
-        \param class_name 
-        \param full_name 
+        \param type - int or str, if str - then type is name field of paper_types table else is id
+        \param name - str
+        \param stock - str
+        \param class_name - str
+        \param full_name - str
         """
-        return self._sqlite_connection.insert("papers", {"type" : type,
-                                                         "stock" : stock,
-                                                         "class" : class_name,
-                                                         "name" : name,
-                                                         "full_name" : full_name})
+        try:
+            t = self.get_paper_type(type)
+            if t == None:
+                raise od_exception_parameter_error('There is no such paper type {0}'.format(type))
+            return self._sqlite_connection.insert("papers", {"type" : t['id'],
+                                                             "stock" : stock,
+                                                             "class" : class_name,
+                                                             "name" : name,
+                                                             "full_name" : full_name})
+        except sqlite3.IntegrityError as e:
+            raise od_exception_db_integrity_error(str(e))
 
     @raise_db_closed
     @in_transaction
@@ -279,24 +345,42 @@ class sqlite_model(common_model):
         if there is no one returns None
         \param type_or_id 
         """
-        ret = None
-        if isinstance(type_or_id, basestring) and not is_null_or_empty(name):
-            ret = self._sqlite_connection.execute_select("select * from papers where type = ? and name = ?", [type_or_id, name]).fetchall()
-        elif isinstance(type_or_id, int):
-            ret = self._sqlite_connection.execute_select("select * from papers where id = ?", [type_or_id]).fetchall()
+        if name == None:
+            if isinstance(type_or_id, int):
+                try:
+                    return self._sqlite_connection.execute_select('select * from papers where id = ?', [type_or_id]).fetchone()
+                except sqlite3.IntegrityError as e:
+                    raise od_exception_db_integrity_error(str(e))
+            else:
+                raise od_exception_parameter_error('if name is None then type_or_id must be int not {0}'.format(type(type_or_id)))
         else:
-            raise od_exception("get_paper: wrong arguments")
-        return (len(ret) > 0 and ret[0] or None)
+            try:
+                t = self.get_paper_type(type_or_id)
+                if t == None:
+                    raise od_exception_parameter_error('there is not such paper_type {0}'.format(type_or_id))
+                return self._sqlite_connection.execute_select('select * from papers where type = ? and name = ?', [t['id'], name]).fetchone()
+            except sqlite3.IntegrityError as e:
+                return od_exception_db_integrity_error(str(e))
 
-    @remover_decorator("papers", {int : "id"})
     def remove_paper(self, type_or_id, name = None):
         """Removes one paper by type and name or many papers by id
         
         \param type_or_id 
         \param name 
         """
-        if isinstance(type_or_id, basestring) and isinstance(name, basestring) and not is_null_or_empty(name):
-            self._sqlite_connection.execute("delete from papers where type = ? and name = ?", [type_or_id, name])
+        if name == None:
+            if isinstance(type_or_id, int):
+                self._sqlite_connection.execute('delete from papers where id = ?', [type_or_id])
+            else:
+                raise od_exception_parameter_error('if name is None then type_or_id must be int not {0}'.format(type(type_or_id)))
+        else:
+            try:
+                t = self.get_paper_type(type_or_id)
+                if t == None:
+                    raise od_exception_parameter_error('There is no such paper type {0}'.format(type_or_id))
+                self._sqlite_connection.execute('delete from papers where type = ? and name = ?', [t['id'], name])
+            except sqlite3.IntegrityError as e:
+                raise od_exception_db_integrity_error(str(e))
 
     @raise_db_closed
     @in_transaction

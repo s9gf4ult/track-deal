@@ -7,6 +7,11 @@ class od_exception(Exception):
     """
     pass
 
+class od_exception_parameter_error(od_exception):
+    """\brief function parameter error
+    """
+    pass
+
 class od_exception_config_error(od_exception):
     """\brief common config error
     """
@@ -22,6 +27,11 @@ class od_exception_report_error(od_exception):
         
 class od_exception_db_error(od_exception):
     """\breif The common database exception in open deals
+    """
+    pass
+
+class od_exception_db_integrity_error(od_exception_db_error):
+    """\brief Integrity exception in database
     """
     pass
 

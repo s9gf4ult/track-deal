@@ -30,6 +30,11 @@ id integer primary key not null,
 name text not null,
 comment text);
 
+INSERT INTO paper_types(name) values ("stock"); --Акция
+INSERT INTO paper_types(name) values ("index"); --Индекс 
+INSERT INTO paper_types(name) values ("future"); --Фьючерс
+INSERT INTO paper_types(name) values ("option"); --Опцион
+
 CREATE TABLE papers(
 id integer primary key not null,
 type integer not null,

@@ -34,7 +34,7 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model.dbinit()
         self.assertEqual(1, self.model._sqlite_connection.execute_select("select count(name) as count from sqlite_master where name = ? and type = 'table'", ('deals', )).fetchall()[0]["count"])
-        self.assertEqual(22, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_master where type = 'table'").fetchall()[0]["count"])
+        self.assertEqual(23, self.model._sqlite_connection.execute_select("select count(*) as count from sqlite_master where type = 'table'").fetchall()[0]["count"])
 
     def test_dbtemp(self, ):
         """tests dbtemp execution
@@ -110,7 +110,8 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model.dbinit()
         self.model.dbtemp()
-        paid = self.model.create_paper(type = "stock", name = "something", class_name = "paperclass")
+        pt = self.model.get_paper_type('stock')
+        paid = self.model.create_paper(type = pt['id'], name = "something", class_name = "paperclass")
         pp = self.model.get_paper(paid)
         pid = pp["id"]
         self.assertTrue(pp.has_key("id"))
@@ -120,15 +121,15 @@ class sqlite_model_test(unittest.TestCase):
                 del pp[k]
             if pp.has_key(k) and pp[k] == None:
                 del pp[k]
-        self.assertEqual({"type" : "stock", "name" : "something", "class" : "paperclass"}, pp)
+        self.assertEqual({"type" : pt['id'], "name" : "something", "class" : "paperclass"}, pp)
         self.assertEqual(None, self.model.get_paper("stock", "adsfa"))
         self.assertEqual(pid, self.model.get_paper("stock", "something")["id"])
         self.model.remove_paper(pid)
         self.assertEqual(None, self.model.get_paper("stock", "something"))
-        self.model.create_paper("type", "name")
-        self.assertTrue(isinstance(self.model.get_paper("type", "name"), dict))
-        self.model.remove_paper("type", "name")
-        self.assertEqual(None, self.model.get_paper("type", "name"))
+        self.model.create_paper("stock", "name")
+        self.assertTrue(isinstance(self.model.get_paper("stock", "name"), dict))
+        self.model.remove_paper("stock", "name")
+        self.assertEqual(None, self.model.get_paper("stock", "name"))
         self.assertEqual([], self.model.list_papers().fetchall())
         
     def test_candles(self, ):
@@ -169,7 +170,7 @@ class sqlite_model_test(unittest.TestCase):
         self.model.dbinit()
         self.model.dbtemp()
         mid = self.model.create_money("RU")
-        paid = self.model.create_paper("type", "name")
+        paid = self.model.create_paper("stock", "name")
         ppid = self.model.create_point(paid, mid, 1000, 1)
         self.assertEqual(1000, self.model.get_point(paid, mid)["point"])
         self.assertEqual(1, self.model.get_point(ppid)["step"])
