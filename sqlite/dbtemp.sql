@@ -281,7 +281,8 @@ inner join papers pap on p.paper_id = pap.id;
                   ("deals" ("sha1" "manual_made" "parent_deal_id" "account_id" "position_id" "paper_id" "count" "direction" "points" "commission" "datetime"))
                   ("stored_deal_attributes" ("deal_id" "type" "value"))
                   ("user_deal_attributes" ("deal_id" "name" "value"))
-                  ("account_in_out" ("account_id" "datetime" "money_count"))))*/
+                  ("account_in_out" ("account_id" "datetime" "money_count"))
+                  ("paper_types" ("name" "comment"))))*/
 
 CREATE TEMPORARY TRIGGER _insert_moneys AFTER INSERT ON moneys BEGIN
 INSERT INTO undo_queries (step_id, query) values ((SELECT step_id from current_history_position limit 1), 'DELETE FROM moneys WHERE id = '||quote(new.id));
@@ -522,3 +523,18 @@ INSERT INTO undo_queries(step_id, query) values ((SELECT step_id from current_hi
 INSERT INTO redo_queries(step_id, query) values ((SELECT step_id from current_history_position limit 1), 'UPDATE account_in_out SET account_id = '||quote(new.account_id)||',datetime = '||quote(new.datetime)||',money_count = '||quote(new.money_count)||' WHERE id = '||quote(old.id));
 END;
 
+
+CREATE TEMPORARY TRIGGER _insert_paper_types AFTER INSERT ON paper_types BEGIN
+INSERT INTO undo_queries (step_id, query) values ((SELECT step_id from current_history_position limit 1), 'DELETE FROM paper_types WHERE id = '||quote(new.id));
+INSERT INTO redo_queries (step_id, query) values ((SELECT step_id from current_history_position limit 1), 'INSERT INTO paper_types(id, name, comment) VALUES ('||quote(new.id)||', '||quote(new.name)||', '||quote(new.comment)||')');
+END;
+
+CREATE TEMPORARY TRIGGER _delete_paper_types AFTER DELETE ON paper_types BEGIN
+INSERT INTO redo_queries (step_id, query) values ((SELECT step_id from current_history_position limit 1), 'DELETE FROM paper_types WHERE id = '||quote(old.id));
+INSERT INTO undo_queries (step_id, query) values ((SELECT step_id from current_history_position limit 1), 'INSERT INTO paper_types(id, name, comment) VALUES ('||quote(old.id)||', '||quote(old.name)||', '||quote(old.comment)||')');
+END;
+
+CREATE TEMPORARY TRIGGER _update_paper_types AFTER UPDATE ON paper_types BEGIN
+INSERT INTO undo_queries(step_id, query) values ((SELECT step_id from current_history_position limit 1), 'UPDATE paper_types SET name = '||quote(old.name)||',comment = '||quote(old.comment)||' WHERE id = '||quote(new.id));
+INSERT INTO redo_queries(step_id, query) values ((SELECT step_id from current_history_position limit 1), 'UPDATE paper_types SET name = '||quote(new.name)||',comment = '||quote(new.comment)||' WHERE id = '||quote(old.id));
+END;

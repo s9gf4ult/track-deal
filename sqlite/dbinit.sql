@@ -24,15 +24,21 @@ account_id integer not null,
 datetime datetime not null,
 money_count float not null,
 foreign key (account_id) references accounts(id) on delete cascade);
+        
+CREATE TABLE paper_types(
+id integer primary key not null,
+name text not null,
+comment text);
 
 CREATE TABLE papers(
 id integer primary key not null,
-type text not null,
+type integer not null,
 stock text,
 class text,
 name text not null,
 full_name text,
-unique(type, name));
+unique(type, name),
+foreign key (type) references paper_types(id) on delete cascade);
 
 CREATE TABLE points(
 id integer primary key not null,
