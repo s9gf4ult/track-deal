@@ -23,12 +23,14 @@ id integer primary key not null,
 account_id integer not null,
 datetime datetime not null,
 money_count float not null,
-foreign key (account_id) references accounts(id) on delete cascade);
+foreign key (account_id) references accounts(id) on delete cascade,
+unique(account_id, datetime));
         
 CREATE TABLE paper_types(
 id integer primary key not null,
 name text not null,
-comment text);
+comment text,
+unique(name));
 
 INSERT INTO paper_types(name) values ("stock"); --Акция
 INSERT INTO paper_types(name) values ("index"); --Индекс 
