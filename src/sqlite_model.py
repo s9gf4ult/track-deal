@@ -328,6 +328,8 @@ class sqlite_model(common_model):
                                                              "full_name" : full_name})
         except sqlite3.IntegrityError as e:
             raise od_exception_db_integrity_error(str(e))
+        except sqlite3.OperationalError as e:
+            raise od_exception_db_integrity_error(str(e))
 
     @raise_db_closed
     @in_transaction
@@ -2187,16 +2189,29 @@ class sqlite_model(common_model):
             return self._sqlite_connection.insert('account_in_out', {'account_id' : ac['id'],
                                                                      'datetime' : datetime,
                                                                      'money_count' : money_count,
-                                                                     'comment' : comment}).lastrowid
+                                                                     'comment' : comment})
         except sqlite3.IntegrityError as e:
             raise od_exception_db_integrity_error(str(e))
 
-    def get_account_in_out(self, id_or_account, datetime = None):
-        """\brief return object account_in_out by id or by account and datetime
-        \param id_or_account - int or str, id of account_in_out or account id or name
-        \param datetime - datetime instance or None
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, account, datetime, money_count, *args, **kargs: u'account {0} changed in {1} at {2}'.format(account, money_count, datetime))
+    @pass_to_method(create_account_in_out)
+    def tacreate_account_in_out(self, *args, **kargs):
+        """\brief wrapper around \ref create_account_in_out
+        \param account - int or str, id of account or name
+        \param datetime - datetime instance
+        \param money_count - float, count of money to increase account in (negative value to discard money from the account)
         """
-        if datetime == None:
+        pass
+
+
+    def get_account_in_out(self, id_or_account, dtm = None):
+        """\brief return object account_in_out by id or by account and dtm
+        \param id_or_account - int or str, id of account_in_out or account id or name
+        \param dtm - datetime instance or None
+        """
+        if dtm == None:
             if isinstance(id_or_account, int):
                 try:
                     return self._sqlite_connection.execute_select('select * from account_in_out where id = ?', [id_or_account]).fetchone()
@@ -2205,16 +2220,16 @@ class sqlite_model(common_model):
             else:
                 raise od_exception_parameter_error('id_or_account must be int not {0}'.format(type(id_or_account)))
         else:
-            if isinstance(datetime, datetime):
+            if isinstance(dtm, datetime):
                 acc = self.get_account(id_or_account)
                 if acc == None:
                     raise od_exception_parameter_error('There is no such account {0}'.format(id_or_account))
                 try:
-                    return self._sqlite_connection.execute_select('select * from account_in_out where account_id = ? and datetime = ?', [acc['id'], datetime]).fetchone()
+                    return self._sqlite_connection.execute_select('select * from account_in_out where account_id = ? and datetime = ?', [acc['id'], dtm]).fetchone()
                 except sqlite3.OperationalError as e:
                     raise od_exception_db_error(str(e))
             else:
-                raise od_exception_parameter_error('datetime must be "datetime" instance')
+                raise od_exception_parameter_error('dtm must be datetime instance')
                 
     def list_account_in_out(self, account = None, order_by = ['datetime']):
         """\brief list objects of in and out
@@ -2251,3 +2266,27 @@ class sqlite_model(common_model):
                     raise od_exception_db_error(str(e))
                 except sqlite3.IntegrityError as e:
                     raise od_exception_db_integrity_error(str(e))
+            else:
+                raise od_exception_parameter_error('datetime must be datetime instance not {0}'.format(type(datetime)))
+        else:
+            if isinstance(id_or_account):
+                try:
+                    self._sqlite_connection.execute('delete from account_in_out where id = ?', [id_or_account])
+                except sqlite3.OperationalError as e:
+                    raise od_exception_db_error(str(e))
+                except sqlite3.IntegrityError as e:
+                    raise od_exception_db_integrity_error(str(e))
+            else:
+                raise od_exception_parameter_error('first argument must be int, not {0}'.format(type(id_or_account)))
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, id_or_account, datetime = None: ('remove account in out id {0}'.format(id_or_account) if datetime == None else 'remove account in out from acc {0} in {1}'.format(id_or_account, datetime)))
+    @pass_to_method(remove_account_in_out)
+    def taremove_account_in_out(self, *args, **kargs):
+        """\brief wrapper around \ref remove_account_in_out
+        \param id_or_account - int or str, if datetime is None then id of object, else id or name of account
+        \param datetime - datetime instance or None
+        """
+        pass
+    

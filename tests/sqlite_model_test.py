@@ -793,6 +793,22 @@ class sqlite_model_test(unittest.TestCase):
         self.model.select_account(None)
         self.assertEqual(None, self.model.get_current_account())
 
-
+    def test_account_in_out_test(self, ):
+        """\brief test creation and deletion account in out objects
+        """
+        (mid, aid, paid) = self.deals_init()
+        ioi = self.model.tacreate_account_in_out(aid, datetime(2010, 10, 10), 1000)
+        ioi2 = self.model.tacreate_account_in_out(aid, datetime(2011, 10, 10), -10000)
+        self.assertEqual({'id' : ioi,
+                          'account_id' : aid,
+                          'datetime' : datetime(2010, 10, 10),
+                          'money_count' : 1000,
+                          'comment' : ''}, self.model.get_account_in_out(ioi))
+        self.assertEqual({'id' : ioi2,
+                          'account_id' : aid,
+                          'datetime' : datetime(2011, 10, 10),
+                          'money_count' : -10000,
+                          'comment' : ''}, self.model.get_account_in_out(aid, datetime(2010, 10, 10)))
+        
 if __name__ == '__main__':
     unittest.main()
