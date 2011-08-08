@@ -23,6 +23,7 @@ id integer primary key not null,
 account_id integer not null,
 datetime datetime not null,
 money_count float not null,
+comment text default '',
 foreign key (account_id) references accounts(id) on delete cascade,
 unique(account_id, datetime));
         
