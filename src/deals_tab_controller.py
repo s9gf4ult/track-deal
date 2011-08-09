@@ -56,18 +56,15 @@ class deals_tab_controller(object):
     def change_multiple_deals(self):
         if not self._parent.connected():
             return
-        d = self._parent.window.builder.get_object("deals_view")
-        (mod, paths) = d.get_selection().get_selected_rows()
-        if paths != None and len(paths) > 1:
-            dids = map(lambda it: mod.get_value(it, 0), map(lambda p: mod.get_iter(p), paths))
-            self._parent.deal_editor.update_editor()
-            ret = self._parent.deal_editor.run()
-            if ret == gtk.RESPONSE_ACCEPT:
-                dhash = self._parent.deal_editor.get_data()
-                if is_null_or_empty(dhash):
-                    return
-                self._parent.model.tachange_deals(dids, dhash)
-                self._parent.call_update_callback()
+        selected = self.deals_view.get_selected_rows()
+        self._parent.deal_editor.update_editor()
+        ret = self._parent.deal_editor.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            dhash = self._parent.deal_editor.get_data()
+            if is_null_or_empty(dhash):
+                return
+            self._parent.model.tachange_deals(map(lambda dl: dl[0], selected), dhash)
+            self._parent.call_update_callback()
             
     def change_one_deal(self):
         if not self._parent.connected():
@@ -81,7 +78,6 @@ class deals_tab_controller(object):
                 data = self._parent.deal_adder.get_data()
                 self._parent.model.tachange_deals(row[0][0], data)
                 self._parent.call_update_callback()
-            
         
     def delete_deals_activate(self, action):
         self.delete_deals()
@@ -92,19 +88,11 @@ class deals_tab_controller(object):
         """
         if not self._parent.connected():
             return
-        selected = self._parent.window.builder.get_object("deals_view").get_selection()
-        dial = gtk.MessageDialog(type=gtk.MESSAGE_QUESTION, buttons = gtk.BUTTONS_YES_NO, flags=gtk.DIALOG_MODAL, parent = self._parent.window.builder.get_object("main_window"))
-        dcount = selected.count_selected_rows()
-        if dcount == 0:
-            return
-        dial.props.text = u'Удалить {0} сделок ? В любом случае это действие можно сразу отменить'.format(dcount)
-        if dial.run() == gtk.RESPONSE_YES:
-            (model, it) = selected.get_selected_rows()
-            self._parent.model.taremove_deal(map(lambda pth: model.get_value(model.get_iter(pth), 0), it))
+        selected = self.deals_view.get_selected_rows()
+        if len(selected) > 0:
+            self._parent.model.taremove_deal(map(lambda dl: dl[0], selected))
             self._parent.call_update_callback()
-        dial.destroy()
-
-
+        
     def add_deal_activate(self, action):
         self.add_deal()
 

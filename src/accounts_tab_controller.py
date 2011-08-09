@@ -104,8 +104,8 @@ class accounts_tab_controller(object):
                     ret = query_yes_no("У счета есть сделки и/или позиции, удалить счет вместе с ними ?", self._parent.window.builder.get_object("main_window"))
                     if  ret <> gtk.RESPONSE_YES:
                         return
-                    self._parent.model.taremove_account(row[0])
-                    self._parent.call_update_callback()
+                self._parent.model.taremove_account(row[0])
+                self._parent.call_update_callback()
                 
 
     def modify_account_activate(self, action):

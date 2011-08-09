@@ -87,8 +87,10 @@ class gtk_view(common_view):
         self.settings = settings()
         if self.settings.get_key('behavior.load_last_database'):
             dbpath = self.settings.get_key('database.path')
-            if not is_null_or_empty(dbpath):
+            if not (is_null_or_empty(dbpath) or dbpath == ':memory:'):
                 self.open_existing_sqlite(dbpath)
+            else:
+                self.settings.set_key('database.path', '')
         self.window = main_window_controller(self)
         self.currency = currency_edit_control(self)
         self.account_edit = account_edit_control(self)
