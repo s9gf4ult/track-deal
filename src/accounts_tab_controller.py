@@ -71,7 +71,7 @@ class accounts_tab_controller(object):
         except od_exception_config_key_error:
             pass
         if self._parent.connected():
-            self.accounts_list.update_rows(map(lambda a: (a['account_id'], a["name"], format_number(a["first_money"]), format_number(a["current_money"]), a["money_name"], format_number(a["deals"])), self._parent.model.list_view_accounts(["name"])))
+            self.accounts_list.update_rows(map(lambda a: (a['account_id'], a["name"], format_number(a["first_money"]), format_number(a["current_money"]), a["money_name"], format_number(a["deals"])), self._parent.model.list_view_accounts(["name"]).fetchall()))
         else:
             self.accounts_list.make_model()
             
