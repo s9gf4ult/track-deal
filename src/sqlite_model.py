@@ -2176,10 +2176,10 @@ class sqlite_model(common_model):
             self.recalculate_all_temporary()
             self.commit_transacted_action()
             
-    def create_account_in_out(self, account, datetime, money_count, comment = ''):
+    def create_account_in_out(self, account, dtm, money_count, comment = ''):
         """\brief create new account in out object and return its id
         \param account - int or str, id of account or name
-        \param datetime - datetime instance
+        \param dtm - datetime instance
         \param money_count - float, count of money to increase account in (negative value to discard money from the account)
         """
         ac = self.get_account(account)
@@ -2187,7 +2187,7 @@ class sqlite_model(common_model):
             raise od_exception_parameter_error('There is no such account {0}'.format(account))
         try:
             return self._sqlite_connection.insert('account_in_out', {'account_id' : ac['id'],
-                                                                     'datetime' : datetime,
+                                                                     'datetime' : dtm,
                                                                      'money_count' : money_count,
                                                                      'comment' : comment})
         except sqlite3.IntegrityError as e:
@@ -2195,7 +2195,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda self, account, datetime, money_count, *args, **kargs: u'account {0} changed in {1} at {2}'.format(account, money_count, datetime))
+    @in_action(lambda self, account, dtm, money_count, *args, **kargs: u'account {0} changed in {1} at {2}'.format(account, money_count, dtm))
     @pass_to_method(create_account_in_out)
     def tacreate_account_in_out(self, *args, **kargs):
         """\brief wrapper around \ref create_account_in_out
@@ -2249,27 +2249,27 @@ class sqlite_model(common_model):
         except sqlite3.OperationalError as e:
             raise od_exception_db_error(str(e))
                 
-    def remove_account_in_out(self, id_or_account, datetime = None):
+    def remove_account_in_out(self, id_or_account, dtm = None):
         """\brief remove account in and out
-        \param id_or_account - int or str, if datetime is None then id of object, else id or name of account
-        \param datetime - datetime instance or None
+        \param id_or_account - int or str, if dtm is None then id of object, else id or name of account
+        \param dtm - datetime instance or None
         """
-        if datetime <> None:
-            if isinstance(datetime, datetime):
+        if dtm <> None:
+            if isinstance(dtm, datetime):
                 acc = self.get_account(id_or_account)
                 if acc == None:
                     raise od_exception_parameter_error('There is no such account {0}'.format(id_or_account))
                 try:
                     self._sqlite_connection.execute('delete from account_in_out where account_id = ? and datetime = ?',
-                                                    [acc['id'], datetime])
+                                                    [acc['id'], dtm])
                 except sqlite3.OperationalError as e:
                     raise od_exception_db_error(str(e))
                 except sqlite3.IntegrityError as e:
                     raise od_exception_db_integrity_error(str(e))
             else:
-                raise od_exception_parameter_error('datetime must be datetime instance not {0}'.format(type(datetime)))
+                raise od_exception_parameter_error('dtm must be datetime instance not {0}'.format(type(dtm)))
         else:
-            if isinstance(id_or_account):
+            if isinstance(id_or_account, int):
                 try:
                     self._sqlite_connection.execute('delete from account_in_out where id = ?', [id_or_account])
                 except sqlite3.OperationalError as e:
