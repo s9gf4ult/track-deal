@@ -25,6 +25,7 @@ from common_methods import show_and_print_error, is_null_or_empty
 from od_settings import settings
 from settings_dialog_controller import settings_dialog_controller
 import os
+from account_in_out_controller import account_in_out_controller
 
 class gtk_view(common_view):
     """
@@ -82,7 +83,8 @@ class gtk_view(common_view):
     settings = None
     ## \ref settings_dialog_controller.settings_dialog_controller
     settings_dialog = None
-    
+    ## \ref account_in_out_controller.account_in_out_controller instance
+    account_in_out = None
     def __init__(self, ):
         """initialize gtk view
         """
@@ -112,7 +114,9 @@ class gtk_view(common_view):
         self.report_importer = report_importer_control(self)
         self.chart_tab = chart_tab_controller(self)
         self.settings_dialog = settings_dialog_controller(self)
+        self.account_in_out = account_in_out_controller(self)
         self.call_update_callback()
+        
     
     def run(self, ):
         """show main window and initialize all the necessary

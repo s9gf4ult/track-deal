@@ -2192,6 +2192,8 @@ class sqlite_model(common_model):
                                                                      'comment' : comment})
         except sqlite3.IntegrityError as e:
             raise od_exception_db_integrity_error(str(e))
+        except sqlite3.OperationalError as e:
+            raise od_exception_db_error(str(e))
 
     @raise_db_closed
     @in_transaction
@@ -2289,4 +2291,10 @@ class sqlite_model(common_model):
         \param datetime - datetime instance or None
         """
         pass
-    
+        
+    def list_view_account_in_out(self, order_by = ['account_name', 'datetime']):
+        """\brief return fetch object to receive data of entry withdrawall money from accounts
+        \param order_by - list of strings to order by
+        """
+        q = 'select io.id as id, io.account_id as account_id, io.datetime as datetime, io.money_count as money_count, ac.name as account_name, m.name as money_name, m.id as money_id from account_in_out as io inner join accounts ac on io.account_id = ac.id inner join moneys m on ac.money_id = m.id{0}'.format(order_by_print(order_by))
+        return self._sqlite_connection.execute_select(q)

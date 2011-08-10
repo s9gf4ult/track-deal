@@ -34,6 +34,7 @@ class main_window_controller(object):
         shorter('edit_points', 'activate', self.edit_points_activate)
         shorter('edit_currencies', 'activate', self.edit_currencies_activate)
         shorter('settings_dialog', 'activate', self.settings_dialog_activate)
+        shorter('account_in_out', 'activate', self.account_in_out_activate)
 
     def edit_currencies_activate(self, action):
         """\brief edit currencies action handler
@@ -51,10 +52,6 @@ class main_window_controller(object):
         \param action
         """
         self._parent.points.run()
-
-
-    def call_points(self, action):
-        self.points.run()
 
     def save_as_activate(self, action):
         self.save_as()
@@ -78,7 +75,7 @@ class main_window_controller(object):
                 try:
                     shutil.copyfile(filename, dstfile)
                     self._parent.model.open_existing(dstfile)
-                    self.call_update_callback()
+                    self._parent.call_update_callback()
                 except Exception as e:
                     show_and_print_error(e, win)
         dial.destroy()
@@ -109,21 +106,6 @@ class main_window_controller(object):
                 show_and_print_error(e, win)
         diag.destroy()
         fl.destroy()
-
-    def transaction_commit_activate(self, action):
-        self.transaction_commit()
-
-    def transaction_commit(self):
-        if self._parent.model.connection:
-            self._parent.model.commit()
-
-    def transaction_rollback_activate(self, action):
-        self.transaction_rollback()
-
-    def transaction_rollback(self):
-        if self._parent.connected():
-            self._parent.model.rollback()
-            self.call_update_callback()
 
     def close_activate(self, action):
         self.close()
@@ -243,3 +225,14 @@ class main_window_controller(object):
         ret = self._parent.settings_dialog.run()
         if ret == gtk.RESPONSE_ACCEPT:
             self._parent.call_update_callback()
+
+    def account_in_out_activate(self, action):
+        """\brief account dialog caller
+        \param action
+        """
+        if self._parent.connected():
+            self._parent.account_in_out.update()
+            ret = self._parent.account_in_out.run()
+            if ret == gtk.RESPONSE_ACCEPT:
+                self._parent.call_update_callback()
+            
