@@ -98,6 +98,7 @@ class positions_tab_controller(object):
         cacc = self._parent.model.get_current_account()
         if cacc <> None:
             self._parent.model.tamake_positions_for_whole_account(cacc["id"])
+            self._parent.model.recalculate_all_temporary()
             self._parent.call_update_callback()
     
     def filter_activate(self, action):
