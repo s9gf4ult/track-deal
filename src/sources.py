@@ -132,6 +132,16 @@ class open_ru_report_source(common_source):
                                                               'stock' : a['board_name'].nodeValue,
                                                               'type' : 'stock'}),
                                        attributes)))
+            repo_deals = self.report.getElementsByTagName('repo_deal')
+            repo_attrs = None
+            if len(repo_deals) == 1:
+                repo = repo_deals[0].getElementsByTagName('item')
+                repo_attrs = map(lambda a: a.attributes, repo)
+                for repo1 in filter(lambda a: a['repo_part'].nodeValue == '1', repo_attrs):
+                    for repo2 in filter(lambda a: a['repo_part'].nodeValue == '2' and a['registration_code'].nodeValue == repo1['registration_code'].nodeValue, repo_attrs):
+                        repo2['deal_time'] = repo1['deal_time'].nodeValue
+                        repo2['broker_comm'] = '0'
+            
             for paper in self.papers: # fill each paper record with deal records
                 deals = map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'].nodeValue, a['security_name'].nodeValue, a['price'].nodeValue, a['quantity'].nodeValue, a['order_number'].nodeValue, a['deal_number'].nodeValue, a['deal_sign'].nodeValue, a['board_name'].nodeValue, a['broker_comm'].nodeValue, a['stock_comm'].nodeValue))).hexdigest(),
                                        'count' : math.trunc(float(a['quantity'].nodeValue)),
@@ -140,9 +150,29 @@ class open_ru_report_source(common_source):
                                        'commission' : float(a['broker_comm'].nodeValue) + float(a['stock_comm'].nodeValue),
                                        'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S')},
                             filter(lambda b: paper['name'] == b['security_name'].nodeValue and paper['stock'] == b['board_name'].nodeValue, attributes))
+                if repo_attrs != None:
+                    deals.extend(map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'].nodeValue,
+                                                                                            a['security_type'].nodeValue,
+                                                                                            a['security_name'].nodeValue,
+                                                                                            a['grn_code'].nodeValue,
+                                                                                            a['deal_price'].nodeValue,
+                                                                                            a['quantity'].nodeValue,
+                                                                                            a['registration_code'].nodeValue,
+                                                                                            'repo'))).hexdigest(),
+                                                'count' : math.trunc(float(a['quantity'].nodeValue)),
+                                                'direction' : math.trunc(float(a['exec_sign'].nodeValue)),
+                                                'points' : float(a['deal_price'].nodeValue),
+                                                'commission' : float(a['broker_comm'].nodeValue),
+                                                'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S'),
+                                                'user_attributes' : {'REPO' : None}},
+                                     filter(lambda b: b['security_name'].nodeValue == paper['name'], repo_attrs)))
+                                                
                 paper['deals'] = deals
         else:
             raise od_exception_report_error('This report is strange, dont know what type of report is it futures or stocks ?')
         
         
 classes = {u'Отчет брокерского дома "Открытие"' : open_ru_report_source} # this is global variable using to store name and class of importer
+
+
+
