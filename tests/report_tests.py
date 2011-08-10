@@ -119,6 +119,21 @@ class import_report(unittest.TestCase):
             accs = self.model.list_view_accounts().fetchall()
             self.assertEqual(1, len(accs))
             self.assertAlmostEqual(ballance, accs[0]['current_money'])
+
+    def test_open_ru_ballance_after_make_position(self, ):
+        """\brief test if make position does not change the ballance of account
+        """
+        (mid, aid) = self.make_money_and_account()
+        self.model.load_from_source(aid, self.source)
+        accs = self.model.list_view_accounts().fetchall()
+        self.assertEqual(1, len(accs))
+        before = accs[0]['current_money']
+        self.model.tamake_positions_for_whole_account(aid)
+        accs = self.model.list_view_accounts().fetchall()
+        after = accs[0]['current_money']
+        self.assertAlmostEqual(before, after)
+    
+
                 
 
 class import_report1(import_report):

@@ -24,6 +24,7 @@ from chart_tab_controller import chart_tab_controller
 from common_methods import show_and_print_error, is_null_or_empty
 from od_settings import settings
 from settings_dialog_controller import settings_dialog_controller
+import os
 
 class gtk_view(common_view):
     """
@@ -168,7 +169,8 @@ class gtk_view(common_view):
             if not self.disconnect():
                 return
         self.model = sqlite_model()
-        self.model.open_existing(filename)
+        if os.path.exists(filename):
+            self.model.open_existing(filename)
 
     def quit(self, ):
         """quit from gtk main loop
