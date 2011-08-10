@@ -357,6 +357,37 @@ class sqlite_model_test(unittest.TestCase):
         self.assertEqual(set(dls[:5]), set(map(lambda a: a[0], self.model._sqlite_connection.execute("select d.id from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ?", [gid2]).fetchall())))
         self.assertEqual(set(dls[5:]), set(map(lambda a: a[0], self.model._sqlite_connection.execute("select d.id from deals d inner join deal_group_assign dg on dg.deal_id = d.id where dg.group_id = ?", [gid1]).fetchall())))
 
+    def test_split_deal(self, ):
+        """\brief test one deal split rightness
+        """
+        (mid, aid, paid) = self.deals_init()
+        deal = {'paper_id' : paid,
+                'count' : random.randint(2, 200),
+                'direction' : (1 if random.random() > 0.5 else -1),
+                'commission' : random.random() * 100 + 1,
+                'points' : random.random() * 100 + 1,
+                'datetime' : datetime(2010, 10, 10)}
+        did = self.model.create_deal(aid, deal)
+        first = 0
+        while first == 0:
+            first = round(random.random() * deal['count'])
+        second = deal['count'] - first
+        (did1, did2) = self.model.split_deal(did, first)
+        deal1 = self.model.get_deal(did1)
+        deal2 = self.model.get_deal(did2)
+        self.assertEqual(deal['paper_id'], deal1['paper_id'])
+        self.assertEqual(deal['paper_id'], deal2['paper_id'])
+        self.assertEqual(first, deal1['count'])
+        self.assertEqual(second, deal2['count'])
+        self.assertEqual(deal['direction'], deal1['direction'])
+        self.assertEqual(deal['direction'], deal2['direction'])
+        self.assertAlmostEqual(deal['commission'], deal1['commission'] + deal2['commission'])
+        self.assertEqual(deal['points'], deal1['points'])
+        self.assertEqual(deal['points'], deal2['points'])
+        self.assertEqual(deal['datetime'], deal1['datetime'])
+        self.assertEqual(deal['datetime'], deal2['datetime'])
+        self.assertEqual(deal1['parent_deal_id'], did)
+        self.assertEqual(deal2['parent_deal_id'], did)
 
     def test_split_deals(self, ):
         """reduction test of splitting deals
@@ -732,7 +763,36 @@ class sqlite_model_test(unittest.TestCase):
         self.model.tamake_positions_for_whole_account(aid)
         (accm2, ) = self.model._sqlite_connection.execute('select net_after from positions_view order by close_datetime desc limit 1').fetchone()
         self.assertAlmostEqual(accm, accm2) # test if positions maked from deals are same again
-        
+
+    def test_paper_type(self, ):
+        """\brief creation, deletion lising of paper types
+        """
+        self.model.disconnect()
+        self.model.create_new(':memory:')
+        pt = self.model.get_paper_type('stock')
+        self.assertNotEqual(None, pt)
+        pts = self.model.list_paper_types().fetchall()
+        ptid = self.model.create_paper_type('some')
+        pts2 = self.model.list_paper_types().fetchall()
+        self.assertEqual(len(pts) + 1, len(pts2))
+        pt2 = self.model.get_paper_type(ptid)
+        self.assertEqual(pt2['name'], 'some')
+        self.model.remove_paper_type('option')
+        pts3 = self.model.list_paper_types().fetchall()
+        self.assertEqual(len(pts3), len(pts))
+
+    def select_account_get_current(self, ):
+        """\brief test account selection and deselection
+        """
+        (mid, aid, paid) = self.deals_init()
+        aid2 = self.model.create_account('name1', mid, 200)
+        aid3 = self.model.create_account('name2', mid, 3000)
+        self.assertEqual(aid, self.model.get_current_account()['id'])
+        self.model.select_account(aid2)
+        self.assertEqual(aid2, self.model.get_current_account()['id'])
+        self.model.select_account(None)
+        self.assertEqual(None, self.model.get_current_account())
+
 
 if __name__ == '__main__':
     unittest.main()

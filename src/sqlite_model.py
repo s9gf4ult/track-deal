@@ -13,6 +13,7 @@ from datetime import *
 import sqlite3
 import traceback
 import sys
+import os
 
 class sqlite_model(common_model):
     """
@@ -62,9 +63,11 @@ class sqlite_model(common_model):
         """
         try:
             return self._sqlite_connection.insert('paper_types', {'name' : name,
-                                                                  'comment' : comment}).lastrowid
+                                                                  'comment' : comment})
         except sqlite3.IntegrityError as e:
             raise od_exception_db_integrity_error(str(e))
+        except sqlite3.OperationalError as e:
+            raise od_exception_db_error(str(e))
 
     @raise_db_closed
     @in_transaction
@@ -141,9 +144,12 @@ class sqlite_model(common_model):
         Opens existing database from file
         \param filename 
         """
-        self.connect(filename)
-        self.dbtemp()
-        self.recalculate_all_temporary()
+        if os.path.exists(filename):
+            self.connect(filename)
+            self.dbtemp()
+            self.recalculate_all_temporary()
+        else:
+            raise od_exception('There is no such file {0}'.format(filename))
 
     @raise_db_opened
     def create_new(self, filename):
@@ -153,7 +159,6 @@ class sqlite_model(common_model):
         self.connect(filename)
         self.dbinit()
         self.dbtemp()
-
 
     @raise_db_closed
     def disconnect(self, ):
@@ -1503,10 +1508,13 @@ class sqlite_model(common_model):
             nd1 = copy(deal)
             del nd1["id"]
             remhash(nd1, 'sha1')
+            remhash(nd1, 'commission')
             nd1["parent_deal_id"] = deal["id"]
             nd2 = copy(nd1)
             nd1["count"] = count
             nd2["count"] = deal["count"] - count
+            nd1['commission'] = deal['commission'] / deal['count'] * nd1['count']
+            nd2['commission'] = deal['commission'] / deal['count'] * nd2['count']
             (pap, mon) = self._sqlite_connection.execute("select paper_ballance_before, net_before from deals_view where deal_id = ?", [deal_id]).fetchone()
             self.create_deal(deal['account_id'], [nd1, nd2], do_recalc = False)
             self._sqlite_connection.execute("delete from deals_view where deal_id = ?", [deal_id])
