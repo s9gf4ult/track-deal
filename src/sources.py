@@ -157,6 +157,7 @@ class open_ru_report_source(common_source):
                                                                                             a['grn_code'].nodeValue,
                                                                                             a['deal_price'].nodeValue,
                                                                                             a['exec_sign'].nodeValue,
+                                                                                            a['repo_part'].nodeValue,
                                                                                             a['quantity'].nodeValue,
                                                                                             'repo'))).hexdigest(),
                                                 'count' : math.trunc(float(a['quantity'].nodeValue)),
@@ -164,7 +165,7 @@ class open_ru_report_source(common_source):
                                                 'points' : float(a['deal_price'].nodeValue),
                                                 'commission' : float(a['broker_comm'].nodeValue),
                                                 'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S'),
-                                                'user_attributes' : {'REPO' : None}},
+                                                'user_attributes' : {'REPO' : a['repo_part'].nodeValue}},
                                      filter(lambda b: b['security_name'].nodeValue == paper['name'], repo_attrs)))
                                                 
                 paper['deals'] = deals

@@ -23,15 +23,13 @@ class attributes_control:
                 self.attributes.add_rows([(self.name_entry.get_text(), self.val_entry.get_text())])
 
     def del_clicked(self, bt):
-        (mod, it) = self.treeview.get_selection().get_selected()
-        if it != None:
-            mod.remove(it)
+        self.attributes.delete_selected()
 
     def cursor_changed(self, tw):
-        (mod, it) = self.treeview.get_selection().get_selected()
-        if it != None:
-            self.name_entry.set_text(mod.get_value(it, 0))
-            self.val_entry.set_text(mod.get_value(it, 1))
+        selected = self.attributes.get_selected_row()
+        if selected != None:
+            self.name_entry.set_text(selected[0])
+            self.val_entry.set_text(selected[1])
 
     def get_attributes(self):
         """
@@ -57,4 +55,5 @@ class attributes_control:
 
     def flush(self):
         self.attributes.update_rows([])
-    
+        self.name_entry.set_text('')
+        self.val_entry.set_text('')
