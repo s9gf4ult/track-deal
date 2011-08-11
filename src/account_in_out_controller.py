@@ -31,8 +31,10 @@ class account_in_out_controller(object):
         self.amount = shobject('amount')
         self.amount.set_digits(2)
         self.amount.get_adjustment().configure(0, -maxint, maxint, 1, 100, 0)
+        self.comment = shobject('comment').get_buffer()
         self.window = shobject('account_in_out')
         self.window.add_buttons(gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+        self.window.set_transient_for(self._parent.window.builder.get_object('main_window'))
         shobject('add').connect('clicked', self.add_clicked)
         shobject('delete').connect('clicked', self.delete_clicked)
         shobject('modify').connect('clicked', self.modify_clicked)
@@ -48,6 +50,7 @@ class account_in_out_controller(object):
             self.account.set_value(accio['account_id'])
             self.datetime.set_datetime(accio['datetime'])
             self.amount.set_value(accio['money_count'])
+            self.comment.set_text(accio['comment'])
             
     def add_clicked(self, button):
         """\brief 
@@ -57,7 +60,8 @@ class account_in_out_controller(object):
             try:
                 aid = self._parent.model.create_account_in_out(self.account.get_value(),
                                                                self.datetime.get_datetime(),
-                                                               self.amount.get_value())
+                                                               self.amount.get_value(),
+                                                               self.comment.get_text(self.comment.get_start_iter(), self.comment.get_end_iter()))
                 acc = self._parent.model.get_account(self.account.get_value())
                 self.list.add_row((aid, acc['name'], self.datetime.get_datetime().date().isoformat(), format_number(self.amount.get_value())))
             except od_exception_db_integrity_error:
@@ -86,7 +90,9 @@ class account_in_out_controller(object):
                     self._parent.model.change_account_in_out(sel[0],
                                                              self.account.get_value(),
                                                              self.datetime.get_datetime(),
-                                                             self.amount.get_value())
+                                                             self.amount.get_value(),
+                                                             self.comment.get_text(self.comment.get_start_iter(),
+                                                                                   self.comment.get_end_iter()))
                     acc = self._parent.model.get_account(self.account.get_value())
                     self.list.save_value_in_selected(1, acc['name'])
                     self.list.save_value_in_selected(2, self.datetime.get_datetime().date().isoformat())

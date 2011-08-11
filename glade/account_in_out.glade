@@ -4,6 +4,9 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkDialog" id="account_in_out">
     <property name="border_width">5</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="default_width">640</property>
+    <property name="default_height">480</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
@@ -218,6 +221,7 @@
                     </child>
                   </object>
                   <packing>
+                    <property name="expand">False</property>
                     <property name="position">2</property>
                   </packing>
                 </child>
@@ -233,6 +237,24 @@
                   </packing>
                 </child>
                 <child>
+                  <object class="GtkScrolledWindow" id="scrolledwindow2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hscrollbar_policy">automatic</property>
+                    <property name="vscrollbar_policy">automatic</property>
+                    <child>
+                      <object class="GtkTextView" id="comment">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="wrap_mode">word</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
                   <object class="GtkButton" id="add">
                     <property name="label">gtk-add</property>
                     <property name="visible">True</property>
@@ -242,7 +264,7 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -255,7 +277,7 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
                 <child>
@@ -268,7 +290,7 @@
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="position">6</property>
+                    <property name="position">7</property>
                   </packing>
                 </child>
               </object>
