@@ -95,10 +95,8 @@ class account_edit_control:
             
     def check_correctness(self):
         errs = []
-        if len(self.name.get_text()) <= 0:
+        if is_blank(self.name.get_text()):
             errs.append(u'Необходимо указать имя счета')
-        if self.first_money.get_value() <= 0:
-            errs.append(u'Нужно указать не нулевой начальный счет')
         vv = self.currency_combo.get_value()
         if is_null_or_empty(vv):
             errs.append(u'Нужно указать название валюты')
