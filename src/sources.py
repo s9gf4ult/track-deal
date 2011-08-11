@@ -156,6 +156,7 @@ class open_ru_report_source(common_source):
                                                                                             a['security_name'].nodeValue,
                                                                                             a['grn_code'].nodeValue,
                                                                                             a['deal_price'].nodeValue,
+                                                                                            a['exec_sign'].nodeValue,
                                                                                             a['quantity'].nodeValue,
                                                                                             'repo'))).hexdigest(),
                                                 'count' : math.trunc(float(a['quantity'].nodeValue)),
