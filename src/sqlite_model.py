@@ -1521,7 +1521,7 @@ class sqlite_model(common_model):
             self.create_deal(deal['account_id'], [nd1, nd2], do_recalc = False)
             self._sqlite_connection.execute("delete from deals_view where deal_id = ?", [deal_id])
             (d1, d2) = map(lambda a: a[0], self._sqlite_connection.execute("select id from deals where parent_deal_id = ?", [deal_id]))
-            self._calculate_deals_with_initial(self._sqlite_connection.execute_select("select * from deals where id = ? or id = ?", [d1, d2]), mon, {deal["paper_id"] : pap})
+            self._calculate_deals_with_initial(self._sqlite_connection.execute_select("select * from deals where id = ? or id = ? order by datetime", [d1, d2]), mon, {deal["paper_id"] : pap})
             
             return (d1, d2)
             
