@@ -138,7 +138,7 @@ class open_ru_report_source(common_source):
                 repo = repo_deals[0].getElementsByTagName('item')
                 repo_attrs = map(lambda a: a.attributes, repo)
                 for repo1 in filter(lambda a: a['repo_part'].nodeValue == '1', repo_attrs):
-                    for repo2 in filter(lambda a: a['repo_part'].nodeValue == '2' and a['registration_code'].nodeValue == repo1['registration_code'].nodeValue, repo_attrs):
+                    for repo2 in filter(lambda a: a['repo_part'].nodeValue == '2' and a['grn_code'].nodeValue == repo1['grn_code'].nodeValue, repo_attrs):
                         repo2['deal_time'] = repo1['deal_time'].nodeValue
                         repo2['broker_comm'] = '0'
             
@@ -157,7 +157,6 @@ class open_ru_report_source(common_source):
                                                                                             a['grn_code'].nodeValue,
                                                                                             a['deal_price'].nodeValue,
                                                                                             a['quantity'].nodeValue,
-                                                                                            a['registration_code'].nodeValue,
                                                                                             'repo'))).hexdigest(),
                                                 'count' : math.trunc(float(a['quantity'].nodeValue)),
                                                 'direction' : math.trunc(float(a['exec_sign'].nodeValue)),
