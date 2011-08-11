@@ -243,18 +243,39 @@ END;
 CREATE TEMPORARY VIEW account_ballance AS
 SELECT account_id, paper_id, paper_type, paper_class, paper_name, sum(direction * count) as count FROM deals_view GROUP BY account_id, paper_id;
 
+-- CREATE TEMPORARY VIEW accounts_view AS
+-- SELECT
+-- a.id as account_id,
+-- a.name as name,
+-- mm.name as money_name,
+-- a.money_count as first_money,
+-- (CASE WHEN ds.id THEN a.money_count + ds.profit ELSE a.money_count END) as current_money,
+-- (CASE WHEN ds.id THEN ds.deals ELSE 0 END) as deals,
+-- (CASE WHEN ps.id THEN ps.positions ELSE 0 END) as positions
+-- FROM accounts a INNER JOIN moneys mm ON a.money_id = mm.id
+-- LEFT JOIN (select account_id as id, count(id) as deals, sum(direction * volume) - sum(commission) as profit from deals_view group by account_id) ds ON ds.id = a.id
+-- LEFT JOIN (select account_id as id, count(id) as positions from positions_view group by account_id) ps ON ps.id = a.id;
 CREATE TEMPORARY VIEW accounts_view AS
 SELECT
 a.id as account_id,
 a.name as name,
 mm.name as money_name,
 a.money_count as first_money,
-(CASE WHEN ds.id THEN a.money_count + ds.profit ELSE a.money_count END) as current_money,
-(CASE WHEN ds.id THEN ds.deals ELSE 0 END) as deals,
-(CASE WHEN ps.id THEN ps.positions ELSE 0 END) as positions
-FROM accounts a INNER JOIN moneys mm ON a.money_id = mm.id
-LEFT JOIN (select account_id as id, count(id) as deals, sum(direction * volume) - sum(commission) as profit from deals_view group by account_id) ds ON ds.id = a.id
-LEFT JOIN (select account_id as id, count(id) as positions from positions_view group by account_id) ps ON ps.id = a.id;
+sum(v.current_money) as current_money,
+sum(v.deals) as deals,
+sum(v.positions) as positions
+FROM
+accounts a
+INNER JOIN moneys mm on a.money_id = mm.id
+LEFT JOIN (
+SELECT d.account_id as account_id, count(d.id) as deals, 0 as positions, sum(direction * volume) - sum(commission) as current_money FROM deals_view d GROUP BY d.account_id
+UNION
+SELECT p.account_id as account_id, 0 as deals, count(p.id) as positions, 0 as current_money FROM positions_view p GROUP BY p.account_id
+UNION
+SELECT aio.account_id as account_id, 0 as deals, 0 as positions, sum(aio.money_count) as current_money from account_in_out aio GROUP BY aio.account_id
+UNION
+SELECT aa.id as account_id, 0 as deals, 0 as positions, aa.money_count as current_money from accounts aa
+) v on v.account_id = a.id GROUP BY a.id;
 
 CREATE TEMPORARY VIEW points_view AS
 SELECT
