@@ -189,6 +189,7 @@ class open_ru_report_source(common_source):
                 nt = nontrade[0].getElementsByTagName('item')
                 nontrade_attrs = map(lambda a: a.attributes, nt)
                 self.nontrade_operations = map(lambda a: {'datetime' : datetime.datetime.strptime(a['operation_date'].nodeValue, '%Y-%m-%dT%H:%M:%S'),
+                                                          'sha1' : hashlib.sha1(reduce_by_string('', (a['operation_date'].nodeValue, a['amount'].nodeValue, a['comment'].nodeValue, a['ground'].nodeValue))).hexdigest(),
                                                           'money_count' : float(a['amount'].nodeValue),
                                                           'comment' : a['comment'].nodeValue},
                                                nontrade_attrs)

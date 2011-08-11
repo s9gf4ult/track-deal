@@ -2171,8 +2171,12 @@ class sqlite_model(common_model):
                     except sqlite3.IntegrityError:
                         pass
             if withdrawall != None:
-                pass
-                
+                for w in withdrawall:
+                    try:
+                        w['account_id'] = account_id
+                        self._sqlite_connection.insert('account_in_out', w)
+                    except sqlite3.IntegrityError:
+                        pass
         except Exception as e:
             self.rollback()
             sys.stderr.write(traceback.format_exc())
