@@ -2173,4 +2173,3 @@ class sqlite_model(common_model):
         else:
             self.recalculate_all_temporary()
             self.commit_transacted_action()
-            

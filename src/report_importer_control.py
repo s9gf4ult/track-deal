@@ -23,7 +23,7 @@ class report_importer_control:
     def update_importer(self, ):
         if not self._parent.connected():
             return
-        self.account.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_accounts(['name'])))
+        self.account.update_answers(map(lambda a: (a['id'], a['name']), self._parent.model.list_accounts(['name']).fetchall()))
         cacc = self._parent.model.get_current_account()
         if cacc <> None:
             self.account.set_value(cacc['id'])

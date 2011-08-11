@@ -33,7 +33,11 @@ class combo_select_control(value_returner_control):
         \param answers list of tuples like for \ref __init__
         \param none_answer - value to return when empty item is selected
         """
-        if answers == None or len(answers) <= 0:
+        if answers == None:
+            return
+        if len(answers) == 0:
+            m = gtk.ListStore(int, str)
+            self.combobox.set_model(m)
             return
         self.none_answer = none_answer
         val = self.get_value()
