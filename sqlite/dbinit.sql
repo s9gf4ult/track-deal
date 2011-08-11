@@ -20,12 +20,14 @@ foreign key (money_id) references moneys(id) on delete cascade);
 
 CREATE TABLE account_in_out(
 id integer primary key not null,
+sha1 text,
 account_id integer not null,
 datetime datetime not null,
 money_count float not null,
 comment text default '',
 foreign key (account_id) references accounts(id) on delete cascade,
-unique(account_id, datetime));
+unique(account_id, datetime),
+unique(sha1));
         
 CREATE TABLE paper_types(
 id integer primary key not null,
