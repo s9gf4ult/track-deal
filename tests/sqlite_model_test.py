@@ -803,11 +803,13 @@ class sqlite_model_test(unittest.TestCase):
                           'account_id' : aid,
                           'datetime' : datetime(2010, 10, 10),
                           'money_count' : 1000,
+                          'sha1' : None,
                           'comment' : ''}, self.model.get_account_in_out(ioi))
         self.assertEqual({'id' : ioi2,
                           'account_id' : aid,
                           'datetime' : datetime(2011, 10, 10),
                           'money_count' : -10000,
+                          'sha1' : None,
                           'comment' : ''}, self.model.get_account_in_out(aid, datetime(2011, 10, 10)))
         self.assertEqual(2, len(self.model.list_account_in_out().fetchall()))
         self.model.taremove_account_in_out(ioi)
@@ -815,6 +817,7 @@ class sqlite_model_test(unittest.TestCase):
                           'account_id' : aid,
                           'datetime' : datetime(2011, 10, 10),
                           'money_count' : -10000,
+                           'sha1' : None,
                           'comment' : ''}], self.model.list_account_in_out().fetchall())
         self.model.taremove_account_in_out(aid, datetime(2011, 10, 10))
         self.assertEqual(0, len(self.model.list_account_in_out().fetchall()))
