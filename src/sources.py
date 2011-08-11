@@ -27,6 +27,15 @@ class common_source(object):
         """
         raise NotImplementedError()
 
+    def receive_withdrawall(self, ):
+        """\brief get data about account withdrawall operations
+        \return list of hash tables with keys
+        \c datetime - datetime\n
+        \c money_count - float with amount of money to withdraw\n
+        \c comment - str, if exists
+        """
+        raise NotImplementedError()
+
     def receive(self, ):
         """\brief get data from report
         \return list of hashes with papers and deals
@@ -65,6 +74,8 @@ class open_ru_report_source(common_source):
     parse and return deals in hash form
     """
     xml = None
+    papers = None
+    nontrade_operations = None
     def __init__(self):
         pass
 
@@ -92,6 +103,11 @@ class open_ru_report_source(common_source):
 
     def receive(self):
         return copy(self.papers)
+
+    def receive_withdrawall(self, ):
+        """\brief receive withdrawall
+        """
+        return self.nontrade_operations
 
     def check_file(self):
         if not (self.xml.childNodes.length == 1 and self.xml.childNodes[0].nodeName == "report"):
@@ -167,13 +183,22 @@ class open_ru_report_source(common_source):
                                                 'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S'),
                                                 'user_attributes' : {'REPO' : a['repo_part'].nodeValue}},
                                      filter(lambda b: b['security_name'].nodeValue == paper['name'], repo_attrs)))
-                                                
                 paper['deals'] = deals
+            nontrade = self.report.getElementsByTagName('nontrade_money_operation')
+            if len(nontrade) == 1:
+                nt = nontrade[0].getElementsByTagName('item')
+                nontrade_attrs = map(lambda a: a.attributes, nt)
+                self.nontrade_operations = map(lambda a: {'datetime' : datetime.datetime.strptime(a['operation_date'].nodeValue, '%Y-%m-%dT%H:%M:%S'),
+                                                          'money_count' : float(a['amount'].nodeValue),
+                                                          'comment' : a['comment'].nodeValue},
+                                               nontrade_attrs)
         else:
             raise od_exception_report_error('This report is strange, dont know what type of report is it futures or stocks ?')
         
         
 classes = {u'Отчет брокерского дома "Открытие"' : open_ru_report_source} # this is global variable using to store name and class of importer
+
+
 
 
 

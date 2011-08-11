@@ -2151,6 +2151,7 @@ class sqlite_model(common_model):
         assert(isinstance(source, sources.common_source))
         action_name = source.get_action_name()
         papers = source.receive()
+        withdrawall = source.receive_withdrawall()
         self.start_transacted_action(action_name)
         acc = self.get_account(account_id)
         if acc == None:
@@ -2169,6 +2170,9 @@ class sqlite_model(common_model):
                         self.create_deal(acc['id'], deal, False)
                     except sqlite3.IntegrityError:
                         pass
+            if withdrawall != None:
+                pass
+                
         except Exception as e:
             self.rollback()
             sys.stderr.write(traceback.format_exc())
