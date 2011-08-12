@@ -28,7 +28,12 @@ class chart_tab_controller(object):
         self.chart0loss = shobject('chart_0_loss')
         self.chart0cumulative_loss = shobject('chart_0_cumulative_loss')
         self.chart0cumulative_profit = shobject('chart_0_cumulative_profit')
-
+        self.chart0use_withdraw = shobject('chart_0_use_withdraw')
+        self.chart0gno = shobject('chart_0_group_no')
+        self.chart0gday = shobject('chart_0_group_day')
+        self.chart0gweek = shobject('chart_0_group_week')
+        self.chart0gmonth = shobject('chart_0_group_month')
+        
         self.chart1net = shobject('chart_1_net')
         self.chart1gross = shobject('chart_1_gross')
         self.chart1list = check_control(shobject('chart_1_accounts'),
@@ -70,21 +75,31 @@ class chart_tab_controller(object):
             positions_data = self._parent.positions_filter.get_data(order_by = ['close_datetime'])
         if len(positions_data) == 0:
             return
+        withdraw_data = []
+        if self.chart0use_withdraw.get_active():
+            withdraw_data = filter(lambda a: a['account_id'] == cacc['id'], self._parent.model.list_account_in_out().fetchall())
+        
         retplot = []
-        for (what, what_name, field_aft, field_pl) in [(self.chart0net.get_active(), 'net', 'net_after', 'pl_net'),
-                                                       (self.chart0gross.get_active(), 'gross', 'gross_after', 'pl_gross')]:
+        for (what, what_name, field_pl) in [(self.chart0net.get_active(), 'net', 'pl_net'),
+                                            (self.chart0gross.get_active(), 'gross', 'pl_gross')]:
             if what:
                 data = []
-                if self.chart0positions.get_value() == 'all':
-                    data = map(lambda a: (a['close_datetime'], a[field_aft]), positions_data)
-                    data.insert(0, (positions_data[0]['close_datetime'], cacc['money_count']))
-                elif self.chart0positions.get_value() == 'filtered':
-                    data = []
-                    start = cacc['money_count']
-                    for ps in positions_data:
-                        start += ps[field_pl]
-                        data.append((ps['close_datetime'], start))
-                    data.insert(0, (positions_data[0]['close_datetime'], cacc['money_count']))
+                wdp = 0
+                psp = 0
+                value = cacc['money_count']
+                while psp < len(positions_data):
+                    wd = (withdraw_data[wdp] if len(withdraw_data) > wdp else None)
+                    ps = positions_data[psp]
+                    if wd != None and wd['datetime'] <= ps['close_datetime']:
+                        value += wd['money_count']
+                        data.append((wd['datetime'], value))
+                        wdp += 1
+                        continue
+                    else:
+                        value += ps[field_pl]
+                        data.append((ps['close_datetime'], value))
+                        psp += 1
+                        
                 retplot.append((what_name, data))
 
         if self.chart0profit.get_active():
