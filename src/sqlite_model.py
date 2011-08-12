@@ -1589,7 +1589,7 @@ class sqlite_model(common_model):
         # if pid == None:
         cur = self._sqlite_connection.execute_select("select * from positions order by close_datetime, open_datetime")
         net = self.get_account(aid)["money_count"]
-        self._calculate_positions_with_initial(cur, net, net)
+        self._calculate_positions_with_initial(cur, net, net, self._sqlite_connection.execute_select('select * from account_in_out where account_id = ? order by datetime', [aid]).fetchall())
         # else:
         #     cur = self._sqlite_connection.execute_select("select p.* from positions p, positions pp where pp.id = ? and p.close_datetime >= pp.close_datetime order by close_datetime, open_datetime",[pid])
         #     (net, gross) = self._sqlite_connection.execute("select net_after, gross_after from positions_view where position_id = ?", [pid]).fetchone() or (None, None)
@@ -1597,11 +1597,12 @@ class sqlite_model(common_model):
         #         return self.recalculate_positions(aid, paid)
         #     self._calculate_positions_with_initial(cur, net, gross)
 
-    def _calculate_positions_with_initial(self, cursor, net, gross):
+    def _calculate_positions_with_initial(self, cursor, net, gross, withdraws = []):
         """
         \param cursor 
         \param net  net start from
         \param gross  gross start from
+        \param withdraws of account to calculate net and gross of position
         """
         def do_the_work(post, netx, grossx):
             post["direction_formated"] = (post["direction"] > 0 and "S" or "L")
@@ -1670,22 +1671,23 @@ class sqlite_model(common_model):
         n = net
         g = gross
         ins = []
-        for pos in cursor:
-            posx = copy(pos)
-            del posx["id"]
-            posx["position_id"] = pos["id"]
-            (posx["money_id"], posx["money_name"]) = self._sqlite_connection.execute("select m.id, m.name from moneys m inner join accounts a on a.money_id = m.id inner join positions p on p.account_id = a.id where p.id = ?", [pos["id"]]).fetchone()
-            (posx["point"], posx["step"]) = self._sqlite_connection.execute("select point, step from points where money_id = ? and paper_id = ?", [posx["money_id"], posx["paper_id"]]).fetchone() or (1, 1)
-            (posx["paper_type"], posx["paper_stock"], posx["paper_class"], posx["paper_name"]) = self._sqlite_connection.execute("select type, stock, class, name from papers where id = ?", [posx["paper_id"]]).fetchone()
-            # if first:
-            #     common = {}
-            #     (paper_id, ) = self._sqlite_connection.execute("select paper_id from positions where id = ? limit 1", [pos["id"]]).fetchone()
-            #     (common["money_id"], common["money_name"]) = self._sqlite_connection.execute("select m.id, m.name from moneys m inner join accounts a on a.money_id = m.id where a.id = ? limit 1", [pos["account_id"]]).fetchone()
-            #     (common["point"], common["step"]) = self._sqlite_connection.execute("select point, step from points where money_id = ? and paper_id = ?", [common["money_id"], paper_id]).fetchone() or (1, 1)
-            #     (common["paper_type"], common["paper_stock"], common["paper_class"], common["paper_name"]) = self._sqlite_connection.execute("select type, stock, class, name from papers where id = ?", [paper_id]).fetchone()
-            # add_hash(posx, common)
-            (n, g) = do_the_work(posx, n, g)
-            ins.append(posx)
+        positions = cursor.fetchall()
+        while len(positions) > 0:
+            if len(withdraws) > 0 and withdraws[0]['datetime'] == min(withdraws[0]['datetime'], positions[0]['close_datetime']):
+                n += withdraws[0]['money_count']
+                g += withdraws[0]['money_count']
+                del withdraws[0]
+                continue
+            else:
+                posx = copy(positions[0])
+                del posx["id"]
+                posx["position_id"] = positions[0]["id"]
+                (posx["money_id"], posx["money_name"]) = self._sqlite_connection.execute("select m.id, m.name from moneys m inner join accounts a on a.money_id = m.id inner join positions p on p.account_id = a.id where p.id = ?", [positions[0]["id"]]).fetchone()
+                (posx["point"], posx["step"]) = self._sqlite_connection.execute("select point, step from points where money_id = ? and paper_id = ?", [posx["money_id"], posx["paper_id"]]).fetchone() or (1, 1)
+                (posx["paper_type"], posx["paper_stock"], posx["paper_class"], posx["paper_name"]) = self._sqlite_connection.execute("select type, stock, class, name from papers where id = ?", [posx["paper_id"]]).fetchone()
+                (n, g) = do_the_work(posx, n, g)
+                ins.append(posx)
+                del positions[0]
         if len(ins) > 0:
             self._sqlite_connection.insert("positions_view", ins)
             
