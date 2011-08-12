@@ -1,3 +1,6 @@
+#!/bin/env python
+# -*- coding: utf-8 -*-
+
 import sqlite_model
 import unittest
 import sqlite3
@@ -821,6 +824,64 @@ class sqlite_model_test(unittest.TestCase):
                           'comment' : ''}], self.model.list_account_in_out().fetchall())
         self.model.taremove_account_in_out(aid, datetime(2011, 10, 10))
         self.assertEqual(0, len(self.model.list_account_in_out().fetchall()))
+
+    def test_temporary_calculations(self, ):
+        """\brief test calculation deals and positions temporarry data with withdraw objects
+        """
+        def is_account_amount(amount):
+            accs = self.model.list_view_accounts().fetchall()
+            self.assertEqual(1, len(accs))
+            self.assertEqual(amount, accs[0]['current_money'])
+
+        def is_deal_net(deal_id, net_before, net_after):
+            d = self.model.list_deals_view_with_condition('deal_id = ?', [deal_id]).fetchall()
+            self.assertNotEqual([], d)
+            self.assertEqual(net_before, d[0]['net_before'])
+            self.assertEqual(net_after, d[0]['net_after'])
+            
+        self.model.disconnect()
+        self.model.create_new(':memory:')
+        mid = self.model.create_money('ru')
+        aid = self.model.create_account('test', mid, 0)
+        pid1 = self.model.create_paper('stock', 'sber')
+        pid2 = self.model.create_paper('stock', 'gazp')
+        is_account_amount(0)
+        self.model.create_account_in_out(aid, datetime(2010, 10, 10), 1000)
+        is_account_amount(1000)
+        did1 = self.model.create_deal(aid, {'paper_id' : pid1,
+                                            'count' : 10,
+                                            'points' : 100,
+                                            'direction' : -1,
+                                            'commission' : 2,
+                                            'datetime' : datetime(2010, 10, 11)})
+        is_account_amount(1000 - (10 * 100) - 2) # купили 10 по 100 значти должно быть 0
+        is_deal_net(did1, 1000, -2)
+        self.model.remove_deal(did1)
+        self.model.recalculate_all_temporary()
+        is_account_amount(1000)
+        did1 = self.model.create_deal(aid, {'paper_id' : pid1,
+                                            'count' : 10,
+                                            'points' : 100,
+                                            'direction' : -1,
+                                            'commission' : 2,
+                                            'datetime' : datetime(2010, 10, 9)})
+        is_account_amount(-2)
+        is_deal_net(did1, 0, -1002)
+        did2 = self.model.create_deal(aid, {'paper_id' : pid1,
+                                            'count' : 10,
+                                            'points' : 110,
+                                            'direction' : 1,
+                                            'commission' : 2,
+                                            'datetime' : datetime(2010, 10, 11)})
+        is_account_amount(-2 + (10 * 110) - 2)
+        is_deal_net(did2, -2, -2 + (10 * 110) - 2)
+        self.model.make_positions_for_whole_account(aid)
+        poss = self.model.list_positions_view_with_condition('account_id = ?', [aid]).fetchall()
+        self.assertEqual(1, len(poss))
+        poss[0]['net_before'] = 0
+        poss[0]['net_after'] = 100 - 4
+        poss[0]['gross_before'] = 0
+        poss[0]['gross_after'] = 100
         
 if __name__ == '__main__':
     unittest.main()
