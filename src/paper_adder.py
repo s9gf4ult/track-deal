@@ -69,11 +69,17 @@ class paper_adder(object):
             return
         self._parent.model.start_transacted_action("Edit some papers")
         self.window.show_all()
-        ret = self.window.run()
-        if ret == gtk.RESPONSE_ACCEPT:
-            self._parent.model.commit_transacted_action()
-        else:
+        try:
+            ret = self.window.run()
+            if ret == gtk.RESPONSE_ACCEPT:
+                self._parent.model.commit_transacted_action()
+            else:
+                self._parent.model.rollback()
+        except Exception as e:
             self._parent.model.rollback()
+            self.window.hide()
+            show_and_print_error(e, self._parent.window.builder.get_object('main_window'))
+                                 
         self.window.hide()
         return (ret == gtk.RESPONSE_ACCEPT and ret or gtk.RESPONSE_CANCEL)
         

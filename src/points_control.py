@@ -171,8 +171,6 @@ class points_control(modifying_tab_control):
             return gtk.RESPONSE_CANCEL
         if ret == gtk.RESPONSE_ACCEPT:
             self._parent.model.commit_transacted_action()
-            self._parent.model.recalculate_all_temporary()
-            self._parent.call_update_callback()
         else:
             self._parent.model.rollback()
         w.hide()

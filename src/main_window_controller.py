@@ -51,7 +51,10 @@ class main_window_controller(object):
         """\brief 
         \param action
         """
-        self._parent.points.run()
+        ret = self._parent.points.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self._parent.model.recalculate_all_temporary()
+            self._parent.call_update_callback()
 
     def save_as_activate(self, action):
         self.save_as()
@@ -234,5 +237,6 @@ class main_window_controller(object):
             self._parent.account_in_out.update()
             ret = self._parent.account_in_out.run()
             if ret == gtk.RESPONSE_ACCEPT:
+                self._parent.model.recalculate_all_temporary()
                 self._parent.call_update_callback()
             

@@ -123,12 +123,17 @@ class currency_edit_control(object):
         self.reset_fields()
         self.load_currency()
         self._parent.model.start_transacted_action("edit some money objects")
-        ret =  self.window.run()
-        self.window.hide()
-        if ret == gtk.RESPONSE_ACCEPT:
-            self._parent.model.commit_transacted_action()
-        else:
+        try:
+            ret =  self.window.run()
+            self.window.hide()
+            if ret == gtk.RESPONSE_ACCEPT:
+                self._parent.model.commit_transacted_action()
+            else:
+                self._parent.model.rollback()
+        except Exception as e:
             self._parent.model.rollback()
+            self.window.hide()
+            show_and_print_error(e, self._parent.window.builder.get_object('main_window'))
         return ret
 
 

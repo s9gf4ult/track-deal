@@ -1223,7 +1223,7 @@ class sqlite_model(common_model):
         # if deal_id == None:
         cur = self._sqlite_connection.execute_select("select d.* from deals d where d.account_id = ? and not exists(select dd.* from deals dd where dd.parent_deal_id = d.id) order by d.datetime", [account_id])
         (mc, ) = self._sqlite_connection.execute("select a.money_count from accounts a where a.id = ?", [account_id]).fetchone()
-        self._calculate_deals_with_initial(cur, mc, {})
+        self._calculate_deals_with_initial(cur, mc, {}, self._sqlite_connection.execute_select('select * from account_in_out where account_id = ? order by datetime', [account_id]).fetchall())
         # else:
         #     cur = self._sqlite_connection.execute_select("select d.* from deals d, deals dd where dd.id = ? and d.datetime >= dd.datetime and d.id >= dd.id and d.account_id = ? and not exists(select ddd.* from deals ddd where ddd.parent_deal_id = d.id) order by d.datetime, d.id", [deal_id, account_id])
         #     (mc, pbl) = self._sqlite_connection.execute("select dw.net_after, dw.paper_ballance_after from deals_view dw inner join deals d on dw.deal_id = d.id where d.id = ?", [deal_id]).fetchone() or (None, None)
@@ -1231,11 +1231,12 @@ class sqlite_model(common_model):
         #         return self.calculate_deals(account_id, paper_id)
         #     self._calculate_deals_with_initial(cur, mc, pbl)
                                      
-    def _calculate_deals_with_initial(self, cursor, money, paper_ballance):
+    def _calculate_deals_with_initial(self, cursor, money, paper_ballance, withdraws = []):
         """calculates deals given in cursor
         \param cursor 
         \param money  net before the deals returned by cursor
         \param paper_ballance hash table {paper id : ballance for paper}
+        \param withdraws - list of withdraw objects to walk on and use for net calculation in deals
         """
         def addition(h, m, p):
             h["datetime_formated"] = h["datetime"].isoformat()
@@ -1263,17 +1264,24 @@ class sqlite_model(common_model):
         inserts = []
         net = money
         bal = copy(paper_ballance)
-        for dd in cursor:
-            newdw = copy(dd)
-            del newdw["id"]
-            del newdw["sha1"]
-            del newdw["parent_deal_id"]
-            newdw["deal_id"] = dd["id"]
-            (newdw["paper_type"], newdw["paper_class"], newdw["paper_name"]) = self._sqlite_connection.execute("select p.type, p.class, p.name from papers p inner join deals d on d.paper_id = p.id where d.id = ?", [dd["id"]]).fetchone()
-            (newdw["money_name"], newdw["money_id"]) = self._sqlite_connection.execute("select m.name, m.id from moneys m inner join accounts a on a.money_id = m.id inner join deals d on d.account_id = a.id where d.id = ?", [dd["id"]]).fetchone()
-            (newdw["point"], newdw["step"]) = self._sqlite_connection.execute("select pn.point, pn.step from points pn inner join accounts a on a.money_id = pn.money_id inner join deals d on d.account_id = a.id and d.paper_id = pn.paper_id where d.id = ?", [dd["id"]]).fetchone() or (1, 1)
-            (net, bal[dd["paper_id"]]) = addition(newdw, net, (gethash(bal, dd["paper_id"]) <> None and gethash(bal, dd["paper_id"]) or 0))
-            inserts.append(newdw)
+        deals = cursor.fetchall()
+        while len(deals) > 0:
+            if len(withdraws) > 0 and withdraws[0]['datetime'] == min(withdraws[0]['datetime'], deals[0]['datetime']):
+                net += withdraws[0]['money_count']
+                del withdraws[0]
+                continue
+            else:
+                newdw = copy(deals[0])
+                del newdw["id"]
+                del newdw["sha1"]
+                del newdw["parent_deal_id"]
+                newdw["deal_id"] = deals[0]["id"]
+                (newdw["paper_type"], newdw["paper_class"], newdw["paper_name"]) = self._sqlite_connection.execute("select p.type, p.class, p.name from papers p inner join deals d on d.paper_id = p.id where d.id = ?", [deals[0]["id"]]).fetchone()
+                (newdw["money_name"], newdw["money_id"]) = self._sqlite_connection.execute("select m.name, m.id from moneys m inner join accounts a on a.money_id = m.id inner join deals d on d.account_id = a.id where d.id = ?", [deals[0]["id"]]).fetchone()
+                (newdw["point"], newdw["step"]) = self._sqlite_connection.execute("select pn.point, pn.step from points pn inner join accounts a on a.money_id = pn.money_id inner join deals d on d.account_id = a.id and d.paper_id = pn.paper_id where d.id = ?", [deals[0]["id"]]).fetchone() or (1, 1)
+                (net, bal[deals[0]["paper_id"]]) = addition(newdw, net, (gethash(bal, deals[0]["paper_id"]) <> None and gethash(bal, deals[0]["paper_id"]) or 0))
+                inserts.append(newdw)
+                del deals[0]
         if len(inserts) > 0:
             self._sqlite_connection.insert("deals_view", inserts)
 
@@ -2212,6 +2220,51 @@ class sqlite_model(common_model):
         \param account - int or str, id of account or name
         \param datetime - datetime instance
         \param money_count - float, count of money to increase account in (negative value to discard money from the account)
+        """
+        pass
+
+    def change_account_in_out(self, aioid, account = None, dtm = None, amount = None, comment = None):
+        """\brief change existing account_in_out object
+        \param aioid - int, an id of existing object
+        \param account - int or str, id of account or name
+        \param dtm - datetime instance
+        \param amount - float, amount of money to withdraw
+        \param comment - str, comment
+        """
+        setf = {}
+        if account != None:
+            acc = self.get_account(account)
+            if acc == None:
+                raise od_exception_parameter_error('There is no such account {0}'.format(account))
+            setf['account_id'] = acc['id']
+        if dtm != None:
+            assert(isinstance(dtm, datetime))
+            setf['datetime'] = dtm
+        if amount != None:
+            setf['money_count'] = amount
+        if comment != None:
+            assert(isinstance(comment, basestring))
+            setf['comment'] = comment
+        if len(setf) == 0:
+            return
+        try:
+            self._sqlite_connection.update('account_in_out', setf, 'id = ?', (aioid,))
+        except sqlite3.IntegrityError as e:
+            raise od_exception_db_integrity_error(str(e))
+        except sqlite3.OperationalError as e:
+            raise od_exception_db_error(str(e))
+
+    @raise_db_closed
+    @in_transaction
+    @in_action(lambda self, aioid, *args, **kargs: u'changed account_in_out object with id {0}'.format(adioid))
+    @pass_to_method(change_account_in_out)
+    def tachange_account_in_out(self, *args, **kargs):
+        """\brief wrapper for \ref change_account_in_out
+        \param aioid - int, an id of existing object
+        \param account - int or str, id of account or name
+        \param dtm - datetime instance
+        \param amount - float, amount of money to withdraw
+        \param comment - str, comment
         """
         pass
 
