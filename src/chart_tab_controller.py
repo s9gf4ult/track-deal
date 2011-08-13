@@ -226,8 +226,24 @@ class chart_tab_controller(object):
         \param data - list of tuples
         \return lit of tuples, grouped data
         """
-        raise NotImplementedError()
-
+        mindate = min(data, key = lambda a: a[0])[0].date()
+        maxdate = max(data, key = lambda a: a[0])[0].date()
+        week = (mindate - timedelta(days = mindate.weekday()))
+        weekend = week + timedelta(days = 6)
+        weekup = timedelta(days =7)
+        ret = []
+        while week <= maxdate:
+            thisweek = filter(lambda a: week <= a[0].date() <= weekend, data)
+            if len(thisweek) == 0:
+                week += weekup
+                weekend += weekup
+                continue
+            lastofweek = max(thisweek, key = lambda a: a[0])
+            ret.append((weekend, lastofweek))
+            week += weekup
+            weekend += weekup
+        return ret
+        
     def group_by_month(self, data):
         """\brief group data by month
         \param data
@@ -274,7 +290,23 @@ class chart_tab_controller(object):
         """\brief summ data of each week
         \param data
         """
-        raise NotImplementedError()
+        mindate = min(data, key = lambda a: a[0])[0].date()
+        maxdate = max(data, key = lambda a: a[0])[0].date()
+        week = (mindate - timedelta(days = mindate.weekday()))
+        weekend = week + timedelta(days = 6)
+        weekup = timedelta(days =7)
+        ret = []
+        while week <= maxdate:
+            thisweek = filter(lambda a: week <= a[0].date() <= weekend, data)
+            if len(thisweek) == 0:
+                week += weekup
+                weekend += weekup
+                continue
+            sumed = reduce(lambda a, b: a + b, map(lambda c: c[1], thisweek))
+            ret.append((weekend, sumed))
+            week += weekup
+            weekend += weekup
+        return ret
 
     def sum_group_by_month(self, data):
         """\brief summ data of each month
