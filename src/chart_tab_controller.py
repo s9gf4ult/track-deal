@@ -7,6 +7,7 @@ from common_methods import show_error
 import matplotlib.pyplot as plt
 from matplotlib.dates import AutoDateLocator, AutoDateFormatter
 from matplot_figure import matplot_figure as figure
+from datetime import datetime, timedelta, date
 import gtk
 
 class chart_tab_controller(object):
@@ -99,15 +100,17 @@ class chart_tab_controller(object):
                         value += ps[field_pl]
                         data.append((ps['close_datetime'], value))
                         psp += 1
-                        
+                data = self.group_if_need(data)
                 retplot.append((what_name, data))
 
         if self.chart0profit.get_active():
             data = map(lambda a: (a['close_datetime'], a['pl_net']), filter(lambda c: c['pl_net'] >= 0, positions_data))
+            data = self.sum_group_if_need(data)
             retplot.append(('profit', data))
 
         if self.chart0loss.get_active():
             data = map(lambda a: (a['close_datetime'], abs(a['pl_net'])), filter(lambda c: c['pl_net'] < 0, positions_data))
+            data = self.sum_group_if_need(data)
             retplot.append(('loss', data))
 
         if self.chart0cumulative_profit.get_active():
@@ -117,6 +120,7 @@ class chart_tab_controller(object):
                 if pst['pl_net'] >= 0:
                     start += pst['pl_net']
                     data.append((pst['close_datetime'], start))
+            data = self.group_if_need(data)
             retplot.append(('cum.profit', data))
 
         if self.chart0cumulative_loss.get_active():
@@ -126,6 +130,7 @@ class chart_tab_controller(object):
                 if pst['pl_net'] < 0:
                     start += abs(pst['pl_net'])
                     data.append((pst['close_datetime'], start))
+            data = self.group_if_need(data)
             retplot.append(('cum.loss', data))
 
         self.matplot_print(retplot)
@@ -163,6 +168,8 @@ class chart_tab_controller(object):
         """\brief print data by matplotlib and shw the figure
         \param print_values [(name - is a string, [(datetime, value)] - is a list of data to plot)] - list of charts to plot
         """
+        if len(print_values) ==0:
+            return
         fig = figure()
         ax = fig.add_subplot(111)
         names = map(lambda a: a[0], print_values)
@@ -178,3 +185,101 @@ class chart_tab_controller(object):
         ax.grid(True)
         fig.autofmt_xdate()
         fig.show()
+
+    def group_if_need(self, data):
+        """\brief return the last elements of each group if grouping needed
+        \param data list of tuples
+        \return lit of tuples, 
+        """
+        if self.chart0gday.get_active():
+            ret = self.group_by_day(data)
+        elif self.chart0gweek.get_active():
+            ret = self.group_by_week(data)
+        elif self.chart0gmonth.get_active():
+            ret = self.group_by_month(data)
+        else:
+            ret = data
+        return ret
+
+    def group_by_day(self, data):
+        """\brief group data by day
+        \param data list of tuples
+        \return lit of tuples, grouped data
+        """
+        mindate = min(data, key = lambda a: a[0])[0].date()
+        maxdate = max(data, key = lambda a: a[0])[0].date()
+        d1 = timedelta(days = 1)
+        crdate = mindate
+        ret = []
+        while crdate <= maxdate:
+            carc = filter(lambda a: a[0].date() == crdate, data)
+            if len(carc) == 0:
+                crdate += d1
+                continue
+            arc = max(carc, key = lambda b: b[0])
+            ret.append((crdate, arc[1]))
+            crdate += d1
+        return ret
+
+    def group_by_week(self, data):
+        """\brief group data by week
+        \param data - list of tuples
+        \return lit of tuples, grouped data
+        """
+        raise NotImplementedError()
+
+    def group_by_month(self, data):
+        """\brief group data by month
+        \param data
+        \return lit of tuples, grouped data
+        """
+        raise NotImplementedError()
+
+    def sum_group_if_need(self, data):
+        """\brief summ of data by grouping
+        \param data
+        \return lit of tuples, summarized data
+        """
+        ret = None
+        if self.chart0gday.get_active():
+            ret = self.sum_group_by_day(data)
+        elif self.chart0gweek.get_active():
+            ret = self.sum_group_by_week(data)
+        elif self.chart0gmonth.get_active():
+            ret = self.sum_group_by_month(data)
+        else:
+            ret = data
+        return ret
+
+    def sum_group_by_day(self, data):
+        """\brief summ data of each day and return
+        \param data
+        \return list of tuples, grouped and summarized data
+        """
+        mindate = min(data, key = lambda a: a[0])[0].date()
+        maxdate = max(data, key = lambda a: a[0])[0].date()
+        d1 = timedelta(days = 1)
+        crdate = mindate
+        ret = []
+        while crdate <= maxdate:
+            carc = filter(lambda a: a[0].date() == crdate, data)
+            if len(carc) == 0:
+                crdate += d1
+                continue
+            arc = reduce(lambda a, b: a+b, map(lambda c: c[1], carc))
+            ret.append((crdate, arc))
+        return ret
+
+    def sum_group_by_week(self, data):
+        """\brief summ data of each week
+        \param data
+        """
+        raise NotImplementedError()
+
+    def sum_group_by_month(self, data):
+        """\brief summ data of each month
+        \param data
+        """
+        raise NotImplementedError()
+
+    
