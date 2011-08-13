@@ -192,19 +192,31 @@ class chart_tab_controller(object):
         \return lit of tuples, 
         """
         if self.chart0gday.get_active():
-            ret = self.group_by_day(data)
+            ret = self.common_group_day(data, self._retlast)
         elif self.chart0gweek.get_active():
-            ret = self.group_by_week(data)
+            ret = self.common_group_week(data, self._retlast)
         elif self.chart0gmonth.get_active():
-            ret = self.group_by_month(data)
+            ret = self.common_group_month(data, self._retlast)
         else:
             ret = data
         return ret
 
-    def group_by_day(self, data):
-        """\brief group data by day
-        \param data list of tuples
-        \return lit of tuples, grouped data
+    def _retsum(self, data):
+        """\brief return sum of elements index 1
+        \param data
+        """
+        return reduce(lambda a, b: a + b, map(lambda c: c[1], data))
+
+    def _retlast(self, data):
+        """\brief return value (index 1) of maximum element by index 0
+        \param data
+        """
+        return max(data, key = lambda a: a[0])[1]
+
+    def common_group_day(self, data, group_function):
+        """\brief group data by days and return value of group_function as value of each day
+        \param data
+        \param group_function - finction of one argument (list) must return value of group
         """
         mindate = min(data, key = lambda a: a[0])[0].date()
         maxdate = max(data, key = lambda a: a[0])[0].date()
@@ -216,14 +228,15 @@ class chart_tab_controller(object):
             if len(carc) == 0:
                 crdate += d1
                 continue
-            arc = max(carc, key = lambda b: b[0])
-            ret.append((crdate, arc[1]))
+            arc = group_function(carc)
+            ret.append((crdate, arc))
             crdate += d1
         return ret
 
-    def group_by_week(self, data):
-        """\brief group data by week
+    def common_group_week(self, data, group_function):
+        """\brief same \ref common_group_day but for week
         \param data - list of tuples
+        \param group_function 
         \return lit of tuples, grouped data
         """
         mindate = min(data, key = lambda a: a[0])[0].date()
@@ -238,18 +251,44 @@ class chart_tab_controller(object):
                 week += weekup
                 weekend += weekup
                 continue
-            lastofweek = max(thisweek, key = lambda a: a[0])
-            ret.append((weekend, lastofweek))
+            ret.append((weekend, group_function(thisweek)))
             week += weekup
             weekend += weekup
         return ret
-        
-    def group_by_month(self, data):
-        """\brief group data by month
+
+    def _next_month(self, monthdate):
+        """\brief 
+        \param monthdate
+        """
+        ret = None
+        if monthdate.month == 12:
+            ret = date(monthdate.year + 1, 1, 1)
+        else:
+            ret = date(monthdate.year, monthdate.month + 1, 1)
+        return ret
+
+    def common_group_month(self, data, group_function):
+        """\brief same \ref common_group_day but for month
         \param data
+        \param group_function
         \return lit of tuples, grouped data
         """
-        raise NotImplementedError()
+        mindate = min(data, key = lambda a: a[0])[0].date()
+        maxdate = max(data, key = lambda a: a[0])[0].date()
+        month = date(mindate.year, mindate.month, 1)
+        d1 = timedelta(days = 1)
+        monthend = self._next_month(month) - d1
+        ret = []
+        while month <= maxdate:
+            flt = filter(lambda a: month <= a[0].date() <= monthend, data)
+            if len(flt) == 0:
+                month = self._next_month(month)
+                monthend = self._next_month(month) - d1
+                continue
+            ret.append((monthend, group_function(flt)))
+            month = self._next_month(month)
+            monthend = self._next_month(month) - d1
+        return ret
 
     def sum_group_if_need(self, data):
         """\brief summ of data by grouping
@@ -258,60 +297,11 @@ class chart_tab_controller(object):
         """
         ret = None
         if self.chart0gday.get_active():
-            ret = self.sum_group_by_day(data)
+            ret = self.common_group_day(data, self._retsum)
         elif self.chart0gweek.get_active():
-            ret = self.sum_group_by_week(data)
+            ret = self.common_group_week(data, self._retsum)
         elif self.chart0gmonth.get_active():
-            ret = self.sum_group_by_month(data)
+            ret = self.common_group_month(data, self._retsum)
         else:
             ret = data
         return ret
-
-    def sum_group_by_day(self, data):
-        """\brief summ data of each day and return
-        \param data
-        \return list of tuples, grouped and summarized data
-        """
-        mindate = min(data, key = lambda a: a[0])[0].date()
-        maxdate = max(data, key = lambda a: a[0])[0].date()
-        d1 = timedelta(days = 1)
-        crdate = mindate
-        ret = []
-        while crdate <= maxdate:
-            carc = filter(lambda a: a[0].date() == crdate, data)
-            if len(carc) == 0:
-                crdate += d1
-                continue
-            arc = reduce(lambda a, b: a+b, map(lambda c: c[1], carc))
-            ret.append((crdate, arc))
-        return ret
-
-    def sum_group_by_week(self, data):
-        """\brief summ data of each week
-        \param data
-        """
-        mindate = min(data, key = lambda a: a[0])[0].date()
-        maxdate = max(data, key = lambda a: a[0])[0].date()
-        week = (mindate - timedelta(days = mindate.weekday()))
-        weekend = week + timedelta(days = 6)
-        weekup = timedelta(days =7)
-        ret = []
-        while week <= maxdate:
-            thisweek = filter(lambda a: week <= a[0].date() <= weekend, data)
-            if len(thisweek) == 0:
-                week += weekup
-                weekend += weekup
-                continue
-            sumed = reduce(lambda a, b: a + b, map(lambda c: c[1], thisweek))
-            ret.append((weekend, sumed))
-            week += weekup
-            weekend += weekup
-        return ret
-
-    def sum_group_by_month(self, data):
-        """\brief summ data of each month
-        \param data
-        """
-        raise NotImplementedError()
-
-    
