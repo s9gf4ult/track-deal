@@ -34,7 +34,7 @@ class chart_window(object):
 
     def plot(self, data):
         """\brief plot data in the chart area
-        \param data - hash table {'name' : 'name for legend', 'color' : 'optional color string', 'data' : list of data}
+        \param data - \ref data_chart.data_chart instance
         """
         self.plotter.plot(data)
 
@@ -52,6 +52,19 @@ class chart_window(object):
         \param color_string str, mesh color string
         """
         self.mesh.set_color(color_string)
+        self.legend.set_color(color_string)
+
+    def set_legend_font(self, font):
+        """\brief set font for legend
+        \param font
+        """
+        self.legend.set_font(font)
+
+    def set_mesh_font(self, font):
+        """\brief set font for mesh text prints
+        \param font
+        """
+        self.mesh.set_font(font)
 
     def flush(self, ):
         """\brief delete all data before new plot

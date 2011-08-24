@@ -699,15 +699,3 @@ def draw_chart(context, rect, draw_area, chart):
     for dts in mapdraw_data[1:]:
         context.line_to(dts[0], dts[1])
     context.stroke()
-    
-def draw_plot_area(context, rect, draw_area):
-    """\brief draw mesh in context and return the part of context where the chart must be drawen
-    \param context
-    \param rect
-    \param draw_area
-    \return \ref context_rectangle.context_rectangle instance
-    """
-    context.set_source_rgb(1,1,1)
-    context.rectangle(rect.x, rect.y, rect.width, rect.height)
-    context.fill()
-    
