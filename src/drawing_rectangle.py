@@ -36,6 +36,18 @@ class drawing_rectangle(object):
         """
         return self._x_axis_type
 
+    def set_x_axis_type(self, x_axis_type):
+        """\brief Setter for property x_axis_type
+        \param x_axis_type - float or datetime or some else
+        """
+        self._x_axis_type = x_axis_type
+
+    def set_y_axis_type(self, y_axis_type):
+        """\brief Setter for property y_axis_type
+        \param y_axis_type - float or some else
+        """
+        self._y_axis_type = y_axis_type
+        
     def get_y_axis_type(self):
         """\brief Getter for property y_axis_type
         """
@@ -91,14 +103,8 @@ class drawing_rectangle(object):
         """
         oldx = self.get_lower_x_limit()
         oldxx = self.get_upper_x_limit()
-        try:
-            self.set_lower_x_limit(self.get_lower_x_limit() + x_shift)
-            self.set_upper_x_limit(self.get_upper_x_limit() + x_shift)
-        except Exception as e:
-            sys.stderr.write(traceback.format_exc())
-            self.set_lower_x_limit(oldx)
-            self.set_upper_x_limit(oldxx)
-            raise e
+        self.set_lower_x_limit(self.get_lower_x_limit() + x_shift)
+        self.set_upper_x_limit(self.get_upper_x_limit() + x_shift)
 
     def autoset_y_min_max(self, data_charts):
         """\brief automatically set lower_y_limit and upper_y_limit for printing the data

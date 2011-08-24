@@ -10,7 +10,7 @@ from common_methods import find_in_list
 class cairo_canva(gtk.DrawingArea):
     """\brief chart class to draw chart in window
     """
-    self._drawers = []
+    _drawers = []
     
     def __init__(self, *args, **kargs):
         """\brief 
@@ -111,6 +111,7 @@ if __name__ == '__main__':
             context.set_source_rgb(1, 0.2, 0.1)
             context.set_font_size(24)
             context.select_font_face('Terminus', )
+            context.set_font_size(20)
             text = u'This is printed in the center'
             bottom = u'This is printed in the bottom'
             top =u'This is printed in the top'

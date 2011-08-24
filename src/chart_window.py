@@ -9,6 +9,7 @@ from legend_plotter import legend_plotter
 from mesh_plotter import mesh_plotter
 from charts_plotter import charts_plotter
 from complex_plotter import complex_plotter
+from drawing_rectangle import drawing_rectangle
 
 class chart_window(object):
     """\brief chart window controller and creator
@@ -21,7 +22,9 @@ class chart_window(object):
         self.legend = legend_plotter()
         self.mesh = mesh_plotter()
         self.charts = charts_plotter()
-        self.plotter = complex_plotter(legend = self.legend,
+        self.rectangle = drawing_rectangle()
+        self.plotter = complex_plotter(self.rectangle,
+                                       legend = self.legend,
                                        mesh = self.mesh,
                                        charts = self.charts)
         self.chart_area.add_drawer(self.plotter)
@@ -38,8 +41,13 @@ class chart_window(object):
         """
         self.plotter.plot(data)
 
+    def autoscale(self, ):
+        """\brief scale rectangle when data already ploted
+        """
+        self.plotter.autoscale()
+
     def redraw(self, ):
-        self.plotter.draw()
+        self.plotter.redraw()
 
     def set_background_color(self, color_string):
         """\brief set color of background
