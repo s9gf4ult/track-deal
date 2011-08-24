@@ -4,6 +4,7 @@
 
 from common_drawer import common_drawer
 from od_exceptions import od_exception_parameter_error
+from copy import copy
 
 class complex_plotter(common_drawer):
     """\brief plotter which plot legend, mesh and charts
@@ -21,7 +22,20 @@ class complex_plotter(common_drawer):
         self._legend = legend
         self._mesh = mesh
         self._charts = charts
+        ## if true legend plot on top otherwise on the bottom
+        self._legend_on_top = True
 
+    def get_legend_on_top(self):
+        """\brief Getter for property legend_on_top
+        """
+        return self._legend_on_top
+
+    def set_legend_on_top(self, legend_on_top):
+        """\brief Setter for property legend_on_top
+        \param legend_on_top - bool
+        """
+        self._legend_on_top = legend_on_top
+        
     def plot(self, data):
         """\brief add data to the plot drawer
         \param data \ref data_chart.data_chart instance
@@ -62,12 +76,24 @@ class complex_plotter(common_drawer):
         self._draw(context, rectangle)
 
     def _draw(self, context, rectangle):
-        raise NotImplementedError()
+        legend_height = self._determine_legend_height(context, rectangle)
+        legend_rectangle = copy(rectangle)
+        mesh_rectangle = copy(rectangle)
+        if self._legend_on_top:
+            legend_rectangle.height = legend_height
+            mesh_rectangle.y += legend_height
+            mesh_rectangle.height -= legend_height
+        else:
+            legend_rectangle.y += legend_rectangle.height - legend_height
+            legend_rectangle.height = legend_height
+            mesh_rectangle.height -= legend_height
 
+        self._legend.draw(context, legend_rectangle)
+        self._mesh.draw(context, mesh_rectangle)
+        chart_rectangle = self._mesh.get_chart_area_rectangle()
+        self._charts.draw(context, chart_rectangle)
+                          
     def redraw(self, ):
         """\brief redraw with old context
         """
         self._draw(self._old_context, self._old_rectangle)
-
-
-    
