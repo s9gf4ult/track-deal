@@ -10,6 +10,8 @@ import re
 import sys
 import time
 import numpy
+import cairo
+import pango
 
 def show_error(message, parent):
     """
@@ -699,3 +701,41 @@ def draw_chart(context, rect, draw_area, chart):
     for dts in mapdraw_data[1:]:
         context.line_to(dts[0], dts[1])
     context.stroke()
+
+def describe_font_cairo(font):
+    """\brief return description of the font
+    \param font - string with font name
+    \return four elemts tuple (family, style, weight, size) for cairo context
+    """
+    fd = pango.FontDescription(font)
+    family = fd.get_family()
+    slant = style_pango_to_cairo(fd.get_style())
+    weight = weight_pango_to_cairo(fd.get_weight())
+    size = size_pango_to_cairo(fd.get_size())
+    return (family, slant, weight, size)
+    
+def style_pango_to_cairo(pango_style):
+    """\brief convert pango style to cairo style
+    \param pango_style
+    """
+    if pango_style == pango.STYLE_NORMAL:
+        return cairo.FONT_SLANT_NORMAL
+    elif pango_style == pango.STYLE_ITALIC:
+        return cairo.FONT_SLANT_ITALIC
+    elif pango_style == pango.STYLE_OBLIQUE:
+        return cairo.FONT_SLANT_OBLIQUE
+
+def weight_pango_to_cairo(pango_weight):
+    """\brief convert pango weight to cairo weight
+    \param pango_weight
+    """
+    if pango_weight <= pango.WEIGHT_NORMAL:
+        return cairo.FONT_WEIGHT_NORMAL
+    else:
+        return cairo.FONT_WEIGHT_BOLD
+
+def size_pango_to_cairo(pango_size):
+    """\brief return size for cairo context
+    \param pango_size
+    """
+    return pango_size / 1000    # FIXME dnt know why but pango size is in 1000 times bigger
