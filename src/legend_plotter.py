@@ -3,18 +3,14 @@
 ## legend_plotter ##
 
 from common_drawer import common_drawer
-from common_methods import describe_font_cairo
 from od_exceptions import od_exception
+from font_store import font_store
 from math import trunc
 import pango
 
-class legend_plotter(common_drawer):
+class legend_plotter(common_drawer, font_store):
     """\brief plot legend
     """
-    _family = None
-    _size = None
-    _slant = None
-    _weight = None
     ## color of the text
     _color = (0, 0, 0)                 
     ## list of tuples (text, color) where color is tuple of 3 floats
@@ -25,7 +21,7 @@ class legend_plotter(common_drawer):
         \param context - cairo context
         \param rectangle - cairo context rectangle to draw
         """
-        textheight = self._get_text_height(context)
+        textheight = self.get_text_height(context)
         colons, lines = self._get_colons_and_lines(context, textheight, rectangle.width)
         width = rectangle.width / colons
         for strindx in xrange(0, len(self._strings)):
@@ -59,12 +55,6 @@ class legend_plotter(common_drawer):
         """
         self._color = color
         
-    def set_font(self, font):
-        """\brief set font
-        \param font - str font description string
-        """
-        (self._family, self._slant, self._weight, self._size) = describe_font_cairo(font)
-
     def calculate_height(self, context, width):
         """\brief calculate height with given width
         \param context - cairo context
@@ -72,7 +62,7 @@ class legend_plotter(common_drawer):
         """
         if self._family == None:
             raise od_exception('you must specify font before calculating its height')
-        textheight = self._get_text_height(context)
+        textheight = self.get_text_height(context)
         colons, lines = self._get_colons_and_lines(context, textheight, width)
         return lines * textheight + ((lines - 1) * textheight / 3.) # lines + space between lines (1/3 of line height)
 
@@ -103,14 +93,6 @@ class legend_plotter(common_drawer):
             ret = max(ret, context.text_extents(string[0])[2])
         return ret
 
-    def _get_text_height(self, context):
-        """\brief return text height
-        \param context - cairo context
-        \return float - height of text
-        """
-        context.select_font_face(self._family, self._slant, self._weight)
-        context.set_font_size(self._size)
-        return context.font_extents()[2]
 
     def set_strings(self, strings):
         """\brief Setter for property strings

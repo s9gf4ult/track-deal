@@ -8,6 +8,8 @@ if __name__ == '__main__':
     import gtk_view
     import sys
     import application
+    import locale
+    locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
     a = application.application(gtk_view.gtk_view())
     if len(sys.argv) > 1:
         m = sqlite_model.sqlite_model()

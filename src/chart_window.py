@@ -19,6 +19,9 @@ class chart_window(object):
         self.window = gtk.Dialog(title = "График", buttons = (gtk.STOCK_CLOSE, gtk.RESPONSE_CANCEL))
         if self._parent != None:
             self.window.set_transient_for(self._parent.window.builder.get_object('main_window'))
+            self.window.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
+        else:
+            self.window.set_position(gtk.WIN_POS_CENTER)
         self.chart_area = cairo_canva()
         self.background = background_plotter()
         self.legend = legend_plotter()
@@ -32,6 +35,7 @@ class chart_window(object):
         self.chart_area.add_drawer(self.background)
         self.chart_area.add_drawer(self.plotter)
         self.window.get_content_area().pack_start(self.chart_area, True, True)
+        self.window.set_default_size(640, 480)
 
     def show(self, ):
         """\brief show chart window
@@ -110,7 +114,7 @@ if __name__ == '__main__':
     legends = ['every', 'hunter', 'whant', 'to know', 'where', 'pheasant', 'is sitting']
     data_charts = []
     for i in xrange(7):
-        data_charts.append(data_chart(zip(x, ys[i]), color = colors[i], legend = legends[i]))
+        data_charts.append(data_chart(zip(x, ys[i]), color = colors[i], legend = legends[i], line_width = 1.5))
 
     win.set_legend_font('Terminus 20')
     win.set_mesh_font('Terminus 20')
@@ -119,5 +123,6 @@ if __name__ == '__main__':
     for dd in data_charts:
         win.plot(dd)
     win.autoscale()
+    win.mesh.set_line_width(2)
     win.show()
     win.window.run()
