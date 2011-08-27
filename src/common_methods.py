@@ -652,12 +652,12 @@ def map_to_context_coordinates(drawing, context, data_list):
     """\brief map coordinates from data_list to context coordinates
     \param drawing \ref drawing_rectangle.drawing_rectangle instance
     \param context rectangle object with fields x, y, width and height
-    \param data_list
+    \param data_list - list of tuples of two elements
     \return list of tuples with 2 numeric elements
     """
     if len(data_list) == 0:
         return []
-    data = numpy.matrix(map(lambda a: ([time.mktime(a.timetuple()), a[1], 1] if isinstance(a[0], datetime.datetime) else [a[0], a[1], 1]), data_list)) # vectors which must be transformed
+    data = numpy.matrix(map(lambda a: ([time.mktime(a[0].timetuple()), a[1], 1] if isinstance(a[0], datetime.datetime) else [a[0], a[1], 1]), data_list)) # vectors which must be transformed
     x0 = drawing.get_lower_x_limit()
     x0 = (time.mktime(x0.timetuple()) if isinstance(x0, datetime.datetime) else x0)
     xx0 = drawing.get_upper_x_limit()

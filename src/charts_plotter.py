@@ -3,6 +3,7 @@
 ## charts_plotter ##
 
 from common_drawer import common_drawer
+from common_methods import draw_chart
 
 class charts_plotter(common_drawer):
     """\brief print just charts in selected rectangle
@@ -15,7 +16,8 @@ class charts_plotter(common_drawer):
         \param context - cairo context
         \param rectangle - cairo context rectangle
         """
-        print('drawing charts')
+        for chart in self._data_charts:
+            draw_chart(context, rectangle, self._chart_rectangle, chart)
 
     def set_data_charts(self, data_charts):
         """\brief Setter for property data_charts
@@ -27,5 +29,5 @@ class charts_plotter(common_drawer):
         """\brief Setter for property rectangle
         \param rectangle
         """
-        self._rectangle = rectangle
+        self._chart_rectangle = rectangle
         
