@@ -32,7 +32,7 @@ class legend_plotter(common_drawer):
            colon = strindx % colons
            line = trunc(strindx / colons)
            x = colon * width + rectangle.x
-           y = line * textheight * 4. / 3. # 4/3 is because of some additional space between lines in 1/3 of line height
+           y = line * textheight * 4. / 3. + rectangle.y # 4/3 is because of some additional space between lines in 1/3 of line height
            self._draw_legend_element(context, x, y, self._strings[strindx])
            
     def _draw_legend_element(self, context, x, y, element):

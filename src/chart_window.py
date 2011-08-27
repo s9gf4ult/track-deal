@@ -82,6 +82,17 @@ class chart_window(object):
         """
         self.plotter.flush()
 
+    def set_legend_on_top(self, legend_on_top):
+        """\brief if true legend rawing on top
+        \param legend_on_top
+        """
+        self.plotter.set_legend_on_top(legend_on_top)
+
+    def get_legend_on_top(self, ):
+        """\brief return true if legend drawing on top
+        """
+        return self.plotter.get_legend_on_top()
+
 if __name__ == '__main__':
     from datetime import datetime
     from random import random

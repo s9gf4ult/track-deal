@@ -92,7 +92,7 @@ class complex_plotter(common_drawer):
         legend_height = self._determine_legend_height(context, rectangle)
         legend_rectangle = copy_cairo_rectangle(rectangle)
         mesh_rectangle = copy_cairo_rectangle(rectangle)
-        if self._legend_on_top:
+        if self.get_legend_on_top():
             legend_rectangle.height = legend_height
             mesh_rectangle.y += legend_height
             mesh_rectangle.height -= legend_height
