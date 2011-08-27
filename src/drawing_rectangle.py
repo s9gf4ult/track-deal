@@ -57,25 +57,25 @@ class drawing_rectangle(object):
         """\brief Setter for property lower_x_limit
         \param lower_x_limit
         """
-        self._lower_x_limit = float(lower_x_limit)
+        self._lower_x_limit = lower_x_limit
 
     def set_upper_x_limit(self, upper_x_limit):
         """\brief Setter for property upper_x_limit
         \param upper_x_limit
         """
-        self._upper_x_limit = float(upper_x_limit)
+        self._upper_x_limit = upper_x_limit
 
     def set_lower_y_limit(self, lower_y_limit):
         """\brief Setter for property lower_y_limit
         \param lower_y_limit
         """
-        self._lower_y_limit = float(lower_y_limit)
+        self._lower_y_limit = lower_y_limit
 
     def set_upper_y_limit(self, upper_y_limit):
         """\brief Setter for property upper_y_limit
         \param upper_y_limit
         """
-        self._upper_y_limit = float(upper_y_limit)
+        self._upper_y_limit = upper_y_limit
         
     def get_lower_x_limit(self):
         """\brief Getter for property lower_x_limit
@@ -144,17 +144,13 @@ class drawing_rectangle(object):
         """
         if is_null_or_empty(data_charts):
             return
-        x_lower = 0
-        x_upper = 0
-        y_lower = 0
-        y_upper = 0
-        for data in data_charts:
-            rect = data.get_drawing_rectangle()
-            x_lower = min(x_lower, rect[0])
-            x_upper = max(x_upper, rect[1])
-            y_lower = min(y_lower, rect[2])
-            y_upper = max(y_upper, rect[3])
-
+        rectangles = map(lambda a: a.get_drawing_rectangle(), data_charts)
+        xx = map(lambda a: a[0], rectangles) + map(lambda a: a[1], rectangles)
+        yy = map(lambda a: a[2], rectangles) + map(lambda a: a[3], rectangles)
+        x_lower = min(xx)
+        x_upper = max(xx)
+        y_lower = min(yy)
+        y_upper = max(yy)
         self.set_lower_x_limit(x_lower)
         self.set_upper_x_limit(x_upper)
         self.set_lower_y_limit(y_lower)

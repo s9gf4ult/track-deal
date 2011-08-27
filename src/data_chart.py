@@ -3,10 +3,15 @@
 ## data_chart ##
 
 from copy import copy
+from od_exceptions import od_exception
 
 class data_chart(object):
     """\brief object keeping the data of chart
     """
+    _data_list = None
+    _legend = None
+    _color = None
+    _line_width = 1
     def __init__(self, data_list, color = (0, 0, 0), legend = '', line_width = 1):
         """
         \param data_list list of tuples with data (X axis data, Y axis data)
@@ -92,3 +97,18 @@ class data_chart(object):
         """
         return self._line_width
     
+    def get_x_axis_type(self, ):
+        """\brief return type of axis X
+        """
+        if len(self._data_list) == 0:
+            raise od_exception(u'you must specify some data to get X type')
+        return type(self._data_list[0][0])
+
+    def get_y_axis_type(self, ):
+        """\brief return type of Y axis
+        """
+        if len(self._data_list) == 0:
+            raise od_exception(u'you must specify some data to get Y type')
+        t = type(self._data_list[0][1])
+        return (float if t == int or t == float else t)
+

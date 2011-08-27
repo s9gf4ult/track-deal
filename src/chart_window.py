@@ -16,7 +16,9 @@ class chart_window(object):
     """
     def __init__(self, parent):
         self._parent = parent
-        self.window = gtk.Dialog(title = "График", parent = self._parent.window.builder.get_object('main_window'), buttons = (gtk.STOCK_CLOSE, gtk.RESPONSE_CANCEL))
+        self.window = gtk.Dialog(title = "График", buttons = (gtk.STOCK_CLOSE, gtk.RESPONSE_CANCEL))
+        if self._parent != None:
+            self.window.set_transient_for(self._parent.window.builder.get_object('main_window'))
         self.chart_area = cairo_canva()
         self.background = background_plotter()
         self.legend = legend_plotter()
@@ -78,3 +80,32 @@ class chart_window(object):
         """\brief delete all data before new plot
         """
         self.plotter.flush()
+
+if __name__ == '__main__':
+    from datetime import datetime
+    from random import random
+    from data_chart import data_chart
+    win = chart_window(None)
+    x = [datetime(2010, 10, 10), datetime(2010,10, 11), datetime(2010, 10, 12)]
+    ys = []
+    colors = []
+    for i in xrange(7):
+        pk = []
+        for j in xrange(3):
+            pk.append(random())
+        ys.append(pk)
+        colors.append((random(), random(), random()))
+    legends = ['every', 'hunter', 'whant', 'to know', 'where', 'pheasant', 'is sitting']
+    data_charts = []
+    for i in xrange(7):
+        data_charts.append(data_chart(zip(x, ys[i]), color = colors[i], legend = legends[i]))
+
+    win.set_legend_font('Terminus 20')
+    win.set_mesh_font('Terminus 20')
+    win.set_background_color((0, 0, 0))
+    win.set_mesh_color((1, 1, 1))
+    for dd in data_charts:
+        win.plot(dd)
+    win.autoscale()
+    win.show()
+    gtk.main()

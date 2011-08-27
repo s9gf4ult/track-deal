@@ -21,7 +21,9 @@ class complex_plotter(common_drawer):
         self._rectangle = rectangle
         self._legend = legend
         self._mesh = mesh
+        self._mesh.set_rectangle(self._rectangle)
         self._charts = charts
+        self._charts.set_rectangle(self._rectangle)
         ## if true legend plot on top otherwise on the bottom
         self._legend_on_top = True
 
@@ -42,7 +44,7 @@ class complex_plotter(common_drawer):
         """
         if len(self._data_charts) == 0:
             self._data_charts.append(data)
-            self._rectangle.set_x_axis_type(data.get_x_exis_type())
+            self._rectangle.set_x_axis_type(data.get_x_axis_type())
             self._rectangle.set_y_axis_type(data.get_y_axis_type())
         else:
             xa = data.get_x_axis_type()
@@ -75,7 +77,17 @@ class complex_plotter(common_drawer):
         self._old_rectangle = rectangle
         self._draw(context, rectangle)
 
+    def _determine_legend_height(self, context, rectangle):
+        """\brief determine height of legend
+        \param context - cairo context
+        \param rectangle - cairo rectangle
+        \return float - height of legend in cairo context
+        """
+        return self._legend.calculate_height(context, rectangle.width)
+
     def _draw(self, context, rectangle):
+        self._legend.set_strings(map(lambda a: (a.get_legend(), a.get_color()), self._data_charts))
+        self._charts.set_data_charts(self._data_charts)
         legend_height = self._determine_legend_height(context, rectangle)
         legend_rectangle = copy(rectangle)
         mesh_rectangle = copy(rectangle)

@@ -15,4 +15,17 @@ class charts_plotter(common_drawer):
         \param context - cairo context
         \param rectangle - cairo context rectangle
         """
-        raise NotImplementedError()
+        print('drawing charts')
+
+    def set_data_charts(self, data_charts):
+        """\brief Setter for property data_charts
+        \param data_charts - list of \ref data_chart.data_chart instances
+        """
+        self._data_charts = data_charts
+
+    def set_rectangle(self, rectangle):
+        """\brief Setter for property rectangle
+        \param rectangle
+        """
+        self._rectangle = rectangle
+        
