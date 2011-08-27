@@ -4,7 +4,7 @@
 
 from common_drawer import common_drawer
 from od_exceptions import od_exception_parameter_error
-from copy import copy
+from cairo_rectangle import copy_cairo_rectangle
 
 class complex_plotter(common_drawer):
     """\brief plotter which plot legend, mesh and charts
@@ -14,6 +14,7 @@ class complex_plotter(common_drawer):
     def __init__(self, rectangle, legend = None, mesh = None, charts = None):
         """\brief constructor
         \param rectangle - \ref drawing_rectangle.drawing_rectangle instance
+        \param background - \ref background_plotter.background_plotter instance
         \param legend - legend plotter object
         \param mesh - mesh plotter object
         \param charts - charts drawer
@@ -89,8 +90,8 @@ class complex_plotter(common_drawer):
         self._legend.set_strings(map(lambda a: (a.get_legend(), a.get_color()), self._data_charts))
         self._charts.set_data_charts(self._data_charts)
         legend_height = self._determine_legend_height(context, rectangle)
-        legend_rectangle = copy(rectangle)
-        mesh_rectangle = copy(rectangle)
+        legend_rectangle = copy_cairo_rectangle(rectangle)
+        mesh_rectangle = copy_cairo_rectangle(rectangle)
         if self._legend_on_top:
             legend_rectangle.height = legend_height
             mesh_rectangle.y += legend_height

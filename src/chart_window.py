@@ -29,6 +29,7 @@ class chart_window(object):
                                        legend = self.legend,
                                        mesh = self.mesh,
                                        charts = self.charts)
+        self.chart_area.add_drawer(self.background)
         self.chart_area.add_drawer(self.plotter)
         self.window.get_content_area().pack_start(self.chart_area, True, True)
 
@@ -108,4 +109,4 @@ if __name__ == '__main__':
         win.plot(dd)
     win.autoscale()
     win.show()
-    gtk.main()
+    win.window.run()
