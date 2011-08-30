@@ -739,3 +739,34 @@ def size_pango_to_cairo(pango_size):
     \param pango_size
     """
     return pango_size / 1000    # FIXME dnt know why but pango size is in 1000 times bigger
+
+def months_range(lower, upper):
+    """\brief return count complete months between two dates
+    \param lower
+    \param upper
+    """
+    if lower > upper:
+        lower, upper = upper, lower
+    if upper.month > lower.month:
+        return upper.month - lower.month - 1 + (12 * years_range(lower, upper))
+    else:
+        (12 - lower.month) + (upper.month - 1) + (12 * years_range(lower, upper))
+                                                                 
+def years_range(lower, upper):
+    """\brief return count of complete years between two dates
+    \param lower - lower date
+    \param upper - uppe date
+    """
+    if lower > upper:
+        lower, upper = upper, lower
+    years = upper.year - lower.year
+    if years == 0:
+        return 0
+    if upper.month < lower.month:
+        years -= 1
+    elif upper.month == lower.month and upper.day < lower.day:
+        years -= 1
+    return years
+        
+    
+        
