@@ -3,7 +3,7 @@
 ## complex_plotter ##
 
 from common_drawer import common_drawer
-from od_exceptions import od_exception_parameter_error
+from od_exceptions import od_exception_parameter_error, od_exception
 from cairo_rectangle import copy_cairo_rectangle
 
 class complex_plotter(common_drawer):
@@ -109,4 +109,6 @@ class complex_plotter(common_drawer):
     def redraw(self, ):
         """\brief redraw with old context
         """
+        if self._old_context == None or self._old_rectangle == None:
+            raise od_exception(u'draw must be called before redraw at least 1 time')
         self._draw(self._old_context, self._old_rectangle)

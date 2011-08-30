@@ -35,10 +35,13 @@ class mesh_plotter(common_drawer, font_store):
             self._chart_area_rectangle = cairo_rectangle(rectangle.x, rectangle.y, chartwidth, chartheight)
             y_numbers_coordinates = self._map_y_numbers_to_context(self._chart_area_rectangle, self._rectangle, draw_numbers)
             self._draw_vertical_colon_numbers(context, rectangle.x + chartwidth + self._line_width, y_numbers_coordinates, draw_numbers)
-            self._draw_horizontal_dashes(context, rectangle.x, rectangle.x + chartwidth, y_numbers_coordinates) # draw dash lines in the chart area
-
-            
             context.set_source_rgb(*self._color)
+            context.set_line_width(self._line_width * 0.5)
+            context.set_dash([3, 7])
+            self._draw_horizontal_lines(context, rectangle.x, rectangle.x + chartwidth, y_numbers_coordinates) # draw dash lines in the chart area
+            context.stroke()
+            context.set_dash([1,0])
+            # draw rectangle and two horizontal lines at bottom of the chart
             context.set_line_width(self._line_width)
             context.rectangle(rectangle.x, rectangle.y, chartwidth, rectangle.height)
             line1y = rectangle.y + chartheight
@@ -47,11 +50,68 @@ class mesh_plotter(common_drawer, font_store):
             context.line_to(rectangle.x + chartwidth, line1y)
             context.move_to(rectangle.x, line2y)
             context.line_to(rectangle.x + chartwidth, line2y)
-
             context.stroke()
+            # draw dates at bottom of the chart and vertical dash lines
+            (small_coords, big_coords) = self._draw_horizontal_dates(context, rectangle.x, chartwidth, line1y + self._line_width, line2y + self._line_width, self._rectangle.get_lower_x_limit(), self._rectangle.get_upper_x_limit()) # draw dates and return X coordinates of vertical lines in context coorinate system
+            # draw vertical small lines
+            context.set_line_width(self._line_width)
+            context.set_source_rgb(self._color)
+            self._draw_vertical_lines(context, line1y, line2y, small_coords)
+            # draw vertical big lines
+            self._draw_vertical_lines(context, line2y, rectangle.y + rectangle.height, big_coords)
+            context.stroke()
+            # draw vertical dashes
+            context.set_source_rgb(*self._color)
+            context.set_line_width(self._line_width * 0.5)
+            context.set_dash([3, 7])
+            self._draw_vertical_lines(context, rectangle.y, line1y, small_coords)
+            context.stroke()
+            
             
         else:
             raise NotImplementedError()
+
+    def _draw_horizontal_dates(self, context, left_x, width, small_y, big_y, lower_data_x, upper_data_x):
+        """\brief draw small and big dates along X axis in coordinates small_y and big_y, mapping coorinates from lower_data_x and upper_data_x to context coordinate system
+        \param context - cairo context
+        \param left_x - left X of date line in cairo context coordinate
+        \param width - width of date line of cairo context
+        \param small_y - Y coordinate of small dates line
+        \param big_y - Y coordinate of big dates line
+        \param lower_data_x - lower date limit
+        \param upper_data_x - upper date limit
+        """
+        max60 = self._get_60_max(context) # max width of text from 0 to 59 (to draw seconds)
+        date_range = upper_data_x - lower_data_x
+        date_range = date_range.seconds + (date_range.days * 24 * 60 * 60) # seconds between lower_data_x and upper_data_x
+        if date_range <= trunc(width / max60): # we can draw all seconds 
+            return self._draw_horizontal_seconds(context, left_x, width, small_y, big_y, lower_data_x, upper_data_x)
+        max_time_width = self._get_max_time_width(context) # max width of time string (e.g. 12:34)
+        if trunc(date_range / 60) <= trunc(width / max_time_width): # we can draw time up to minutes
+            return self._draw_horizontal_minutes(context, left_x, width, small_y, big_y, lower_data_x, upper_data_x)
+        if trunc(date_range / (60 * 5)) <= trunc(width / max_time_width): # we can draw time up to 5 minute ranges
+            return self._draw_horizontal_five_minutes(context, left_x, width, small_y, big_y, lower_data_x, upper_data_x)
+        if trunc(date_range / (60 * 10)) <= trunc(width / max_time_width):
+            return self._draw_horizontal_ten_minutes(context, left_x, width, small_y, big_y, lower_data_x, upper_data_x)
+        if trunc(date_range / (60 * 20)) <= trunc(width / max_time_width):
+            return self._draw_horizontal_twenty_minutes(context, left_x, width, small_y, big_y, lower_data_x, upper_data_x)
+        if trunc(date_range / (60 * 30)) <= trunc(width / max_time_width):
+            return self._draw_horizontal_half_hour(context, left_x, width, small_y, big_y, lower_data_x, upper_data_x)
+        if trunc(date_range / (60 * 60)) <= trunc(width / max_time_width):
+            return self._draw_horizontal_hour(context, left_x, width, small_y, big_y, lower_data_x, upper_data_x)
+
+
+    def _draw_vertical_lines(self, context, y1, y2, xx):
+        """\brief draw vertical lines from (xx[0], y1) to (xx[0], y2) and so on for every element in xx
+        \param context - cairo context
+        \param y1 - top Y coordinate
+        \param y2 - bottom Y coordinate
+        \param xx - list of X coordinates
+        """
+        for xc in xx:
+            context.move_to(xc, y1)
+            context.line_to(xc, y2)
+
 
     def _generate_numbers(self, low_limit, up_limit, maxnumbers):
         """\brief generate list of number can be drawed between limits
@@ -139,23 +199,16 @@ class mesh_plotter(common_drawer, font_store):
             context.move_to(left_x, y_cord - (fextent[2] / 2.) + fextent[0])
             context.show_text(format_number(nmb, 6))
 
-    def _draw_horizontal_dashes(self, context, left_x, right_x, y_coordinates):
+    def _draw_horizontal_lines(self, context, left_x, right_x, y_coordinates):
         """\brief 
         \param context
         \param left_x
         \param right_x
         \param y_coordinates
         """
-        context.set_source_rgb(*self._color)
-        context.set_line_width(0.5)
-        context.set_dash([3, 7])
         for yy in y_coordinates:
             context.move_to(left_x, yy)
             context.line_to(right_x, yy)
-        context.stroke()
-        context.set_dash([1,0])
-            
-
 
     def _get_max_number_width(self, context, numbers):
         """\brief return width of numbers colon
