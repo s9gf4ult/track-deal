@@ -15,7 +15,15 @@ class settings(object):
     _default_cinfig_data = {'database' : {'path' : ''},
                             'behavior' : {'load_last_database' : True},
                             'interface' : {'odd_color' : '#FFFFFF',
-                                           'even_color' : '#FFFFFF'}}
+                                           'even_color' : '#FFFFFF'},
+                            'chart' : {'legend': {'position' : 'bottom',
+                                                  'font' : 'Sans 14',
+                                                  'color' : '#FFFFFF'},
+                                       'mesh' : {'line_width' : 1.5,
+                                                 'color' : '#FFFFFF',
+                                                 'font' : {'name' : 'Sans 14',
+                                                           'color' : '#FFFFFF'}},
+                                       'background' : {'color' : '#FFFFFF'}}}
     def __init__(self, ):
         """\brief constructor
         """
