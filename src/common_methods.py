@@ -785,6 +785,6 @@ def get_next_month_date(data):
     \param data
     """
     if data.month < 12:
-        return datetime.datetime(data.year, data.month + 1, data.day, data.hour, data.minute, data.second)
+        return datetime.datetime(data.year, data.month + 1, data.day)
     else:
-        return datetime.datetime(data.year + 1, 1, data.day, data.hour, data.minute, data.second)
+        return datetime.datetime(data.year + 1, 1, data.day)
