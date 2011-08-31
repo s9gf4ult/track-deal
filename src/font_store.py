@@ -31,4 +31,10 @@ class font_store(object):
         context.select_font_face(self._family, self._slant, self._weight)
         context.set_font_size(self._size)
         return context.font_extents()
-        
+
+    def chose_current_font(self, context):
+        """\brief 
+        \param context - cairo context
+        """
+        context.select_font_face(self._family, self._slant, self._weight)
+        context.set_font_size(self._size)

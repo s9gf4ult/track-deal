@@ -768,5 +768,11 @@ def years_range(lower, upper):
         years -= 1
     return years
         
-    
-        
+def get_next_month_date(data):
+    """\brief 
+    \param data
+    """
+    if data.month < 12:
+        return datetime.datetime(data.year, data.month + 1, data.day, data.hour, data.minute, data.second)
+    else:
+        return datetime.datetime(data.year + 1, 1, data.day, data.hour, data.minute, data.second)

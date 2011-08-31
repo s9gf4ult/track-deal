@@ -6,7 +6,7 @@ from common_drawer import common_drawer
 from od_exceptions import od_exception, od_exception_parameter_error
 from cairo_rectangle import cairo_rectangle
 from font_store import font_store
-from common_methods import format_number, map_to_context_coordinates, months_range, years_range
+from common_methods import format_number, map_to_context_coordinates, months_range, years_range, get_next_month_date
 from drawing_rectangle import drawing_rectangle
 from datetime import datetime
 from time import mktime
@@ -122,6 +122,126 @@ class mesh_plotter(common_drawer, font_store):
             return self._draw_horizontal_year(context, cairo_rectangle, small_y, big_y)
         return ([], [])
 
+    def _draw_horizontal_day(self, context, cairo_rectangle, small_y, big_y):
+        """\brief in small time line draw day number in big draw year and month
+        \param context
+        \param cairo_rectangle
+        \param small_y
+        \param big_y
+        """
+        lower = self._rectangle.get_lower_x_limit()
+        upper = self._rectangle.get_upper_x_limit()
+        days = self._generate_times(lower, upper, 24 * 60 * 60)
+        months = self._generate_months(lower, upper)
+        day_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, days)
+        self._draw_horizontal_text_elements(context, small_y, day_coords, map(lambda a: a.strftime('%d'), days), cairo_rectangle.x + cairo_rectangle.width)
+        if len(months) == 0:
+            month_coords = []
+            monthstext = unicode(lower.strftime('%Y %B'))
+            self.chose_current_font(context)
+            context.set_source_rgb(*self._color)
+            txtnt = context.text_extents(monthstext)
+            fextent = context.font_extents()
+            if cairo_rectangle.width >= txtnt[2]:
+                context.move_to(cairo_rectangle.x + ((cairo_rectangle.width - txtnt[2]) / 2.),
+                                big_y + fextent[0])
+                context.show_text(monthstext)
+        else:
+            month_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, months)
+            self._draw_horizontal_text_elements(context, big_y, month_coords, map(lambda a: a.strftime('%Y %B'), months), cairo_rectangle.x + cairo_rectangle.width)
+        return (day_coords, month_coords)
+            
+    def _generate_months(self, lower, upper):
+        """\brief return datetime of each month begin date
+        \param lower
+        \param upper
+        """
+        ret = []
+        if lower.day == 1:
+            ret.append(lower)
+        lower = datetime(lower.year, lower.month, 1, lower.hour, lower.minute, lower.second)
+        lower = get_next_month_date(lower)
+        while lower <= upper:
+            ret.append(lower)
+            lower = get_next_month_date(lower)
+        return ret
+
+    def _draw_horizontal_month (self, context, cairo_rectangle, small_y, big_y):
+        """\brief 
+        \param context
+        \param cairo_rectangle
+        \param small_y
+        \param big_y
+        """
+        return self._draw_horizontal_common_month(context, cairo_rectangle, small_y, big_y, lambda a: a.strftime('%B'))
+
+    def _draw_horizontal_month_digit(self, context, cairo_rectangle, small_y, big_y):
+        """\brief 
+        \param context
+        \param cairo_rectangle
+        \param small_y
+        \param big_y
+        """
+        return self._draw_horizontal_common_month(context, cairo_rectangle, small_y, big_y, lambda a: a.strftime('%m'))
+
+    def _generate_years(self, lower, upper):
+        """\brief 
+        \param lower
+        \param upper
+        """
+        ret = []
+        if lower.month == 1 and lower.day == 1:
+            ret.append(lower)
+        lower = datetime(lower.year + 1, 1, 1)
+        while lower <= upper:
+            ret.append(lower)
+            lower = datetime(lower.year + 1, 1, 1)
+            
+    def _draw_horizontal_year(self, context, cairo_rectangle, small_y, big_y):
+        """\brief 
+        \param context
+        \param cairo_rectangle
+        \param small_y
+        \param big_y
+        """
+        lower = self._rectangle.get_lower_x_limit()
+        upper = self._rectangle.get_upper_x_limit()
+        years = self._generate_years(lower, upper)
+        year_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, years)
+        self._draw_horizontal_text_elements(context, small_y, year_coords, years, cairo_rectangle.x + cairo_rectangle.width)
+        return (year_coords, [])
+
+    def _draw_horizontal_common_month(self, context, cairo_rectangle, small_y, big_y, month_mapper):
+        """\brief draw months as full name word
+        \param context
+        \param cairo_rectangle
+        \param smal_y
+        \param big_y
+        """
+        lower = self._rectangle.get_lower_x_limit()
+        upper = self._rectangle.get_upper_x_limit()
+        months = self._generate_months(lower, upper)
+        years = self._generate_years(lower, upper)
+        month_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, months)
+        self._draw_horizontal_text_elements(context, small_y, month_coords, map(lambda a: month_mapper(a), months), cairo_rectangle.x + cairo_rectangle.width)
+        if len(years) == 0:
+            year_coords = []
+            yeartext = unicode(lower.strftime('%Y'))
+            self.chose_current_font(context)
+            context.set_source_rgb(*self._color)
+            textent = context.text_extents(yeartext)
+            fextent = context.font_extents()
+            if cairo_rectangle.width >= textent[2]:
+                context.move_to(cairo_rectangle.x + ((cairo_rectangle.width - textent[2]) / 2.),
+                                big_y + fextent[0])
+                context.show_text(yeartext)
+        else:
+            year_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, years)
+            self._draw_horizontal_text_elements(context, big_y, year_coords, map(lambda a: a.strftime('%Y'), years), cairo_rectangle.x + cairo_rectangle.width)
+        return (month_coords, year_coords)
+                
+
+            
     def _draw_horizontal_seconds(self, context, cairo_rectangle, small_y, big_y):
         """\brief draw seconds in small time lint and time in big time
         \param context
@@ -245,11 +365,12 @@ class mesh_plotter(common_drawer, font_store):
             day_coords = []
             daystring = lower.strftime('%Y %B %d')
             context.set_source_rgb(*self._color)
-            context.select_font_face(self._family, self._slant, self._weight)
+            self.chose_current_font(context)
             textent = context.text_extents(daystring)
+            fextent = context.font_extents()
             if cairo_rectangle.width > textent[2]: # if text can be placed in width
                 context.move_to(cairo_rectangle.x + ((cairo_rectangle.width - textent[2]) / 2),
-                                small_y)
+                                big_y + fextent[0])
                 context.show_text(daystring)
         else:
             day_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, days)
@@ -313,7 +434,7 @@ class mesh_plotter(common_drawer, font_store):
         \param max_x
         """
         context.set_source_rgb(*self._color)
-        context.select_font_face(self._family, self._slant, self._weight)
+        self.chose_current_font(context)
         tent = context.font_extents()
         for (x, tt) in zip(xx, data):
             tx = context.text_extents(tt)
