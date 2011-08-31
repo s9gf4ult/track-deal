@@ -31,8 +31,12 @@ class mesh_plotter(common_drawer, font_store):
         if issubclass(self._rectangle.get_x_axis_type(), datetime):
             chartheight = rectangle.height - (2 * fextent[2]) - (4 * self._line_width) # height of the chart area
             numbers = trunc(chartheight / fextent[2]) # the max count of numbers can be displayed in vertical colon (y label)
-            draw_numbers = self._generate_numbers(self._rectangle.get_lower_y_limit(), self._rectangle.get_upper_y_limit(), numbers) # generated numbers to draw
-            chartwidth = rectangle.width - self._get_max_number_width(context, draw_numbers) - self._line_width * 2 # width of the chart area
+            if numbers > 0:
+                draw_numbers = self._generate_numbers(self._rectangle.get_lower_y_limit(), self._rectangle.get_upper_y_limit(), numbers) # generated numbers to draw
+                chartwidth = rectangle.width - self._get_max_number_width(context, draw_numbers) - self._line_width * 2 # width of the chart area
+            else:
+                draw_numbers = []
+                chartwidth = rectangle.width
             self._chart_area_rectangle = cairo_rectangle(rectangle.x, rectangle.y, chartwidth, chartheight)
             y_numbers_coordinates = self._map_y_numbers_to_context(self._chart_area_rectangle, self._rectangle, draw_numbers)
             self._draw_vertical_colon_numbers(context, rectangle.x + chartwidth + self._line_width, y_numbers_coordinates, draw_numbers)
@@ -52,11 +56,13 @@ class mesh_plotter(common_drawer, font_store):
             context.move_to(rectangle.x, line2y)
             context.line_to(rectangle.x + chartwidth, line2y)
             context.stroke()
+            context.set_dash([1,0])
             # draw dates at bottom of the chart and vertical dash lines
-            (small_coords, big_coords) = self._draw_horizontal_dates(context, rectangle, line1y + self._line_width, line2y + self._line_width) # draw dates and return X coordinates of vertical lines in context coorinate system
+            (small_coords, big_coords) = self._draw_horizontal_dates(context, self._chart_area_rectangle, line1y + self._line_width, line2y + self._line_width) # draw dates and return X coordinates of vertical lines in context coorinate system
             # draw vertical small lines
+            context.stroke()
             context.set_line_width(self._line_width)
-            context.set_source_rgb(self._color)
+            context.set_source_rgb(*self._color)
             self._draw_vertical_lines(context, line1y, line2y, small_coords)
             # draw vertical big lines
             self._draw_vertical_lines(context, line2y, rectangle.y + rectangle.height, big_coords)
@@ -67,6 +73,7 @@ class mesh_plotter(common_drawer, font_store):
             context.set_dash([3, 7])
             self._draw_vertical_lines(context, rectangle.y, line1y, small_coords)
             context.stroke()
+            context.set_dash([1,0])
             
             
         else:
@@ -394,14 +401,16 @@ class mesh_plotter(common_drawer, font_store):
         \param up_time
         \param timeframe - time frame in seconds
         """
-        ltime = mktime(low_time.timetuple())
-        utime = mktime(up_time.timetuple())
+        nulltime = datetime(1970, 1, 2, 0, 0)
+        nulldiff = mktime(nulltime.timetuple()) - 3600
+        ltime = mktime(low_time.timetuple()) - nulldiff
+        utime = mktime(up_time.timetuple()) - nulldiff
         ret = []
         current = trunc(ltime / timeframe) * timeframe
         if current != ltime:
             current += timeframe
         while current <= utime:
-            ret.append(datetime.fromtimestamp(current))
+            ret.append(datetime.fromtimestamp(current + nulldiff))
             current += timeframe
         return ret
 
@@ -439,7 +448,7 @@ class mesh_plotter(common_drawer, font_store):
         for (x, tt) in zip(xx, data):
             tx = context.text_extents(tt)
             if not (x + tx[2] > max_x):
-                context.move_to(x, y + tent[0])
+                context.move_to(x + self._line_width, y + tent[0])
                 context.show_text(tt)
         
     def _draw_horizontal_times(self, context, y, xx, data, max_x):
