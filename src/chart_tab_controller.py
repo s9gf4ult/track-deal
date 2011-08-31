@@ -4,9 +4,6 @@
 from check_control import check_control
 from select_control import select_control
 from common_methods import show_error
-import matplotlib.pyplot as plt
-from matplotlib.dates import AutoDateLocator, AutoDateFormatter
-from matplot_figure import matplot_figure as figure
 from datetime import datetime, timedelta, date
 import gtk
 
@@ -133,7 +130,7 @@ class chart_tab_controller(object):
             data = self.group_if_need(data)
             retplot.append(('cum.loss', data))
 
-        self.matplot_print(retplot)
+        self.print_charts_x(retplot)
         
 
     def print_chart_1(self, ):
@@ -162,29 +159,13 @@ class chart_tab_controller(object):
                     data.insert(0, (positions_data[0]['close_datetime'], acc['money_count']))
                     retprint.append((name, data))
                     
-        self.matplot_print(retprint)
+        self.print_charts_x(retprint)
             
-    def matplot_print(self, print_values):
+    def print_charts_x(self, print_values):
         """\brief print data by matplotlib and shw the figure
         \param print_values [(name - is a string, [(datetime, value)] - is a list of data to plot)] - list of charts to plot
         """
-        if len(print_values) ==0:
-            return
-        fig = figure()
-        ax = fig.add_subplot(111)
-        names = map(lambda a: a[0], print_values)
-        lines  = map(lambda chart: ax.plot_date(map(lambda chd: chd[0], chart[1]),
-                                                map(lambda chy: chy[1], chart[1]), 'o-'), print_values)
-        fig.legend(lines, names, 'upper left')
-        
-        majloc = AutoDateLocator()
-        majform = AutoDateFormatter(majloc)
-        ax.xaxis.set_major_locator(majloc)
-        ax.xaxis.set_major_formatter(majform)
-        ax.autoscale_view()
-        ax.grid(True)
-        fig.autofmt_xdate()
-        fig.show()
+        raise NotImplementedError()
 
     def group_if_need(self, data):
         """\brief return the last elements of each group if grouping needed
