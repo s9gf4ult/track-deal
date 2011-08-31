@@ -3,7 +3,9 @@
 ## chart_tab_controller ##
 from check_control import check_control
 from select_control import select_control
-from common_methods import show_error
+from common_methods import show_error, color_string_to_tuple
+from chart_window import chart_window
+from data_chart import data_chart
 from datetime import datetime, timedelta, date
 import gtk
 
@@ -165,7 +167,28 @@ class chart_tab_controller(object):
         """\brief print data by matplotlib and shw the figure
         \param print_values [(name - is a string, [(datetime, value)] - is a list of data to plot)] - list of charts to plot
         """
-        raise NotImplementedError()
+        if len(print_values) == 0:
+            return
+        colors = map(color_string_to_tuple, ['#FF0000', '#00FF00', '#0000FF', '#00EBFF', '#FF00D9', '#F2FF00', '#FF6E00', '#8B00FF']) # the most bright colors
+        curocol = 0
+        w = chart_window(self._parent)
+        charts = []
+        for name, data_list in print_values:
+            charts.append(data_chart(data_list, legend = name, color = colors[curocol], line_width = 1))
+            curocol += 1
+            if curocol >= len(colors):
+                curocol = 0
+        settings = self._parent.settings
+        w.set_background_color(color_string_to_tuple(settings.get_key('chart.background.color')))
+        w.set_legend_on_top(settings.get_key('chart.legend.position') == 'top')
+        w.set_mesh_font(settings.get_key('chart.mesh.font.name'))
+        w.set_legend_font(settings.get_key('chart.legend.font'))
+        w.set_legend_color(color_string_to_tuple(settings.get_key('chart.legend.color')))
+        w.set_mesh_color(color_string_to_tuple(settings.get_key('chart.mesh.color')))
+        w.set_mesh_line_width(settings.get_key('chart.mesh.line_width'))
+        for ch in charts:
+            w.plot(ch)
+        w.show()
 
     def group_if_need(self, data):
         """\brief return the last elements of each group if grouping needed

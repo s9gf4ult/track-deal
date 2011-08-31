@@ -30,7 +30,7 @@ class settings_dialog_controller(object):
         self.line_width = shobject('line_width')
         self.line_color = shobject('line_color')
         self.mesh_font = shobject('mesh_font')
-        self.mesh_font_color = shobject('mesh_font_color')
+        #self.mesh_font_color = shobject('mesh_font_color')
         self.back_ground_color = shobject('background_color')
         self.line_width.set_digits(2)
         self.line_width.get_adjustment().set_all(lower = 0, upper = sys.maxint, step_increment = 0.1, page_increment = 1)
@@ -61,7 +61,7 @@ class settings_dialog_controller(object):
                            ('chart.mesh.line_width', self.line_width.get_value()),
                            ('chart.mesh.color', self.line_color.get_color().to_string()),
                            ('chart.mesh.font.name', self.mesh_font.get_font_name()),
-                           ('chart.mesh.font.color', self.mesh_font_color.get_color().to_string()),
+                       #    ('chart.mesh.font.color', self.mesh_font_color.get_color().to_string()),
                            ('chart.background.color', self.back_ground_color.get_color().to_string())]:
             self._parent.settings.set_key(key, value)
 
@@ -117,10 +117,10 @@ class settings_dialog_controller(object):
         except od_exception_config_key_error:
             pass
 
-        try:
-            self.mesh_font_color.set_color(gtk.gdk.Color(self._parent.settings.get_key('chart.mesh.font.color')))
-        except od_exception_config_key_error:
-            self.mesh_font_color.set_color(gtk.gdk.Color('#FFFFFF'))
+        # try:
+        #     self.mesh_font_color.set_color(gtk.gdk.Color(self._parent.settings.get_key('chart.mesh.font.color')))
+        # except od_exception_config_key_error:
+        #     self.mesh_font_color.set_color(gtk.gdk.Color('#FFFFFF'))
 
         try:
             self.back_ground_color.set_color(gtk.gdk.Color(self._parent.settings.get_key('chart.background.color')))

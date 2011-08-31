@@ -62,18 +62,30 @@ class chart_window(object):
         """
         self.background.set_color(color_string)
 
+    def set_mesh_line_width(self, line_width):
+        """\brief 
+        \param line_width - float
+        """
+        self.mesh.set_line_width(line_width)
+        
     def set_mesh_color(self, color_string):
         """\brief set color of the mesh
         \param color_string str, mesh color string
         """
         self.mesh.set_color(color_string)
-        self.legend.set_color(color_string)
 
     def set_legend_font(self, font):
         """\brief set font for legend
         \param font
         """
         self.legend.set_font(font)
+
+    def set_legend_color(self, color):
+        """\brief 
+        \param color - str, representing color
+        """
+        self.legend.set_color(color)
+
 
     def set_mesh_font(self, font):
         """\brief set font for mesh text prints

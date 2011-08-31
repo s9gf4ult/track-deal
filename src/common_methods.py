@@ -725,6 +725,18 @@ def style_pango_to_cairo(pango_style):
     elif pango_style == pango.STYLE_OBLIQUE:
         return cairo.FONT_SLANT_OBLIQUE
 
+def gtk_color_to_tuple(color):
+    """\brief 
+    \param color
+    """
+    return (color.red_float, color.green_float, color.blue_float)
+
+def color_string_to_tuple(color_string):
+    """\brief 
+    \param color_string
+    """
+    return gtk_color_to_tuple(gtk.gdk.Color(color_string))
+
 def weight_pango_to_cairo(pango_weight):
     """\brief convert pango weight to cairo weight
     \param pango_weight

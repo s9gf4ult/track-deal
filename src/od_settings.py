@@ -21,8 +21,7 @@ class settings(object):
                                                   'color' : '#FFFFFF'},
                                        'mesh' : {'line_width' : 1.5,
                                                  'color' : '#FFFFFF',
-                                                 'font' : {'name' : 'Sans 14',
-                                                           'color' : '#FFFFFF'}},
+                                                 'font' : {'name' : 'Sans 14'}},
                                        'background' : {'color' : '#FFFFFF'}}}
     def __init__(self, ):
         """\brief constructor
