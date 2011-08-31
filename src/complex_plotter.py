@@ -19,6 +19,7 @@ class complex_plotter(common_drawer):
         \param mesh - mesh plotter object
         \param charts - charts drawer
         """
+        self._data_charts = []
         self._rectangle = rectangle
         self._legend = legend
         self._mesh = mesh

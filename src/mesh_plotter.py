@@ -203,6 +203,7 @@ class mesh_plotter(common_drawer, font_store):
         while lower <= upper:
             ret.append(lower)
             lower = datetime(lower.year + 1, 1, 1)
+        return ret
             
     def _draw_horizontal_year(self, context, cairo_rectangle, small_y, big_y):
         """\brief 

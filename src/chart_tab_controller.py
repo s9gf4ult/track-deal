@@ -188,7 +188,10 @@ class chart_tab_controller(object):
         w.set_mesh_line_width(settings.get_key('chart.mesh.line_width'))
         for ch in charts:
             w.plot(ch)
+        w.autoscale()
         w.show()
+        w.window.run()
+        w.window.destroy()
 
     def group_if_need(self, data):
         """\brief return the last elements of each group if grouping needed
