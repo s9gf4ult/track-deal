@@ -761,12 +761,16 @@ def months_range(lower, upper):
     """
     if lower > upper:
         lower, upper = upper, lower
-    if upper.month > lower.month:
-        return upper.month - lower.month - (0 if lower.day == 1 else 1) + (12 * years_range(lower, upper))
-    elif upper.month < lower.month:
-        return (12 - lower.month) + (upper.month - 1) + (12 * years_range(lower, upper))
+
+    if lower.year == upper.year:
+        if lower.month == upper.month:
+            return 0
+        return upper.month - lower.month - (0 if lower.day == 1 else 1)
     else:
-        return 0
+        toend = 12 - lower.month + (1 if lower.day == 1 else 0)
+        frombeg = upper.month - 1
+        middleyear = upper.year - lower.year - 1
+        return toend + frombeg + (12 * middleyear)
                                                                  
 def years_range(lower, upper):
     """\brief return count of complete years between two dates
