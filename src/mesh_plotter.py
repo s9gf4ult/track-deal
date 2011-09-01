@@ -15,11 +15,13 @@ from math import trunc
 class mesh_plotter(common_drawer, font_store):
     """\brief draw mesh and rullers
     """
-    _color = (0, 0, 0)
-    ## instance of \ref drawing_rectangle.drawing_rectangle
-    _rectangle = None
-    _chart_area_rectangle = None
-    _line_width = 1
+    def __init__(self, ):
+        super(mesh_plotter, self).__init__()
+        _color = (0, 0, 0)
+        _rectangle = None
+        _chart_area_rectangle = None
+        _line_width = 1
+        
     def draw(self, context, rectangle):
         """\brief draw the mesh
         \param context - cairo context

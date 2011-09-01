@@ -7,7 +7,10 @@ from common_drawer import common_drawer
 class background_plotter(common_drawer):
     """\brief print rectangle with one color
     """
-    _color = (0, 0, 0)
+    def __init__(self, ):
+        super(background_plotter, self).__init__()
+        _color = (0, 0, 0)
+        
     def set_color(self, color):
         """\brief set background color
         \param color - tuple of three float numbers from 0 to 1

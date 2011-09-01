@@ -11,11 +11,11 @@ import pango
 class legend_plotter(common_drawer, font_store):
     """\brief plot legend
     """
-    ## color of the text
-    _color = (0, 0, 0)                 
-    ## list of tuples (text, color) where color is tuple of 3 floats
-    # color determines the color of small scuare left of the text
-    _strings = []
+    def __init__(self, ):
+        super(legend_plotter, self).__init__()
+        _color = (0, 0, 0)                 
+        _strings = []
+        
     def draw(self, context, rectangle):
         """\brief draw legend of cairo context
         \param context - cairo context

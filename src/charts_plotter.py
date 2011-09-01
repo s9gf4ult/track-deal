@@ -8,8 +8,10 @@ from common_methods import draw_chart
 class charts_plotter(common_drawer):
     """\brief print just charts in selected rectangle
     """
-    _data_charts = []
-    _chart_rectangle = None
+    def __init(self, ):
+        super(charts_plotter, self).__init__()
+        _data_charts = []
+        _chart_rectangle = None
 
     def draw(self, context, rectangle):
         """\brief draw charts

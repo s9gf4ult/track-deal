@@ -7,10 +7,13 @@ from common_methods import describe_font_cairo
 class font_store(object):
     """\brief font storer
     """
-    _family = None
-    _size = None
-    _slant = None
-    _weight = None
+    def __init__(self, ):
+        """\brief 
+        """
+        _family = None
+        _size = None
+        _slant = None
+        _weight = None
 
     def get_text_height(self, context):
         """\brief return text height

@@ -9,8 +9,6 @@ from cairo_rectangle import copy_cairo_rectangle
 class complex_plotter(common_drawer):
     """\brief plotter which plot legend, mesh and charts
     """
-    _data_charts = []
-    
     def __init__(self, rectangle, legend = None, mesh = None, charts = None):
         """\brief constructor
         \param rectangle - \ref drawing_rectangle.drawing_rectangle instance
@@ -19,6 +17,7 @@ class complex_plotter(common_drawer):
         \param mesh - mesh plotter object
         \param charts - charts drawer
         """
+        super(complex_plotter, self).__init__()
         self._data_charts = []
         self._rectangle = rectangle
         self._legend = legend
