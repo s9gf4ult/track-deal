@@ -9,7 +9,7 @@ class background_plotter(common_drawer):
     """
     def __init__(self, ):
         super(background_plotter, self).__init__()
-        _color = (0, 0, 0)
+        self._color = (0, 0, 0)
         
     def set_color(self, color):
         """\brief set background color

@@ -13,8 +13,8 @@ class legend_plotter(common_drawer, font_store):
     """
     def __init__(self, ):
         super(legend_plotter, self).__init__()
-        _color = (0, 0, 0)                 
-        _strings = []
+        self._color = (0, 0, 0)                 
+        self._strings = []
         
     def draw(self, context, rectangle):
         """\brief draw legend of cairo context

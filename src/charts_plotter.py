@@ -10,8 +10,8 @@ class charts_plotter(common_drawer):
     """
     def __init(self, ):
         super(charts_plotter, self).__init__()
-        _data_charts = []
-        _chart_rectangle = None
+        self._data_charts = []
+        self._chart_rectangle = None
 
     def draw(self, context, rectangle):
         """\brief draw charts

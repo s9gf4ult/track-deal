@@ -10,10 +10,10 @@ class font_store(object):
     def __init__(self, ):
         """\brief 
         """
-        _family = None
-        _size = None
-        _slant = None
-        _weight = None
+        self._family = None
+        self._size = None
+        self._slant = None
+        self._weight = None
 
     def get_text_height(self, context):
         """\brief return text height
