@@ -493,7 +493,7 @@ class mesh_plotter(common_drawer, font_store):
         \param context
         """
         monthnames  = map(lambda a: unicode(datetime(2000, a, 1).strftime('%B')), xrange(1, 13)) # names of the month
-        context.select_font_face(self._family, self._slant, self._weight)
+        self.chose_current_font(context)
         return max(map(lambda a: context.text_extents(a)[2], monthnames)) + (2 * self._line_width)
         
     def _get_max_time_width(self, context):
