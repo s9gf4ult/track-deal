@@ -8,10 +8,6 @@ from od_exceptions import od_exception
 class data_chart(object):
     """\brief object keeping the data of chart
     """
-    _data_list = None
-    _legend = None
-    _color = None
-    _line_width = 1
     def __init__(self, data_list, color = (0, 0, 0), legend = '', line_width = 1):
         """
         \param data_list list of tuples with data (X axis data, Y axis data)

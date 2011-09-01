@@ -10,8 +10,6 @@ class common_view(object):
     \~english
     abstract class for view
     """
-    _model = None
-    
     def __init__(self):
         """
         """

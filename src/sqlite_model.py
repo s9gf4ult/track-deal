@@ -21,22 +21,11 @@ class sqlite_model(common_model):
     \~russian
     \todo сделать склейку сделок в случае удаления поз
     """
-    ##############
-    # Attributes #
-    ##############
-    ## file name or :memory:
-    _connection_string = None
-    ## \ref sconnection.sconnection instance
-    _sqlite_connection = None
-    
-    ###########
-    # Methods #
-    ###########
-    
     def __init__(self, ):
         """new instance of sqlite_model
         """
-        pass
+        self._connection_string = None
+        self._sqlite_connection = None
 
     def get_connection_string(self, ):
         """\brief return path to the file with database

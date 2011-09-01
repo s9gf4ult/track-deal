@@ -11,21 +11,22 @@ from common_methods import gethash, is_null_or_empty
 class settings(object):
     """\brief settings saving class
     """
-    _config_data = None
-    _default_cinfig_data = {'database' : {'path' : ''},
-                            'behavior' : {'load_last_database' : True},
-                            'interface' : {'odd_color' : '#FFFFFF',
-                                           'even_color' : '#FFFFFF'},
-                            'chart' : {'legend': {'position' : 'bottom',
-                                                  'font' : 'Sans 14',
-                                                  'color' : '#FFFFFF'},
-                                       'mesh' : {'line_width' : 1.5,
-                                                 'color' : '#FFFFFF',
-                                                 'font' : {'name' : 'Sans 14'}},
-                                       'background' : {'color' : '#FFFFFF'}}}
     def __init__(self, ):
         """\brief constructor
         """
+        self._config_data = None
+        self._default_cinfig_data = {'database' : {'path' : ''},
+                                     'behavior' : {'load_last_database' : True},
+                                     'interface' : {'odd_color' : '#FFFFFF',
+                                                    'even_color' : '#FFFFFF'},
+                                     'chart' : {'legend': {'position' : 'bottom',
+                                                           'font' : 'Sans 14',
+                                                           'color' : '#FFFFFF'},
+                                                'mesh' : {'line_width' : 1.5,
+                                                          'color' : '#FFFFFF',
+                                                          'font' : {'name' : 'Sans 14'}},
+                                                'background' : {'color' : '#FFFFFF'}}}
+        
         if os.name == 'posix':
             config_dir = None
             if not is_null_or_empty(gethash(os.environ, 'OD_CONFIG_DIR')):

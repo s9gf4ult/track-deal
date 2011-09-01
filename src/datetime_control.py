@@ -14,8 +14,6 @@ class datetime_control(value_returner_control):
     """
     \brief control to set and get datetime
     """
-    __do_react__ = True
-    value = datetime.datetime.now()
     def __init__(self, calendar, time_control, checkbutton = None, year = None, month = None, day = None, update_callback = None):
         """
         \param calendar - gtk.Calendar instance
@@ -27,6 +25,8 @@ class datetime_control(value_returner_control):
         \param update_callback - no parameter function to call when date or time is changed
         \note any of \c checkbutton, \c year, \c month or \c day widgets may be empty.
         """
+        self.__do_react__ = True
+        self.value = datetime.datetime.now()
         self.calendar = calendar
         self.year = year
         self.month = month

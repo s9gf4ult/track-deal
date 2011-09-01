@@ -470,7 +470,9 @@ class string_reduce(object):
     \~russian
     \brief SQlite агрегатор, разделяет запятой все объекты и возвращает строку
     """
-    _ret = ""
+    def __init__(self, ):
+        self._ret = ""
+        
     def step(self, argument):
         """
         \param argument 

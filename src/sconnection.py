@@ -12,9 +12,6 @@ class scon_cursor(object):
     \brief cursor to iterate on sqltie query result.
     Iteration will return hash tables with key = field name and value = value
     """
-    _query = None
-    _connection = None
-    _arguments = None
 
     def fetchall(self, ):
         """fetch all hash tables
@@ -55,9 +52,6 @@ class scon_cursor(object):
 class scon_iter(object):
     """iterator returning hashes on query results
     """
-    _cursor = None
-    _names = []
-    _iter = None
     
     def __init__(self, cursor):
         """

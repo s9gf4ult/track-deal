@@ -10,11 +10,11 @@ from common_methods import find_in_list
 class cairo_canva(gtk.DrawingArea):
     """\brief chart class to draw chart in window
     """
-    _drawers = []
     
     def __init__(self, *args, **kargs):
         """\brief 
         """
+        self._drawers = []
         gtk.DrawingArea.__init__(self, *args, **kargs)
         self.connect('expose-event', self.expose)
 

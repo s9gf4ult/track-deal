@@ -7,12 +7,10 @@ from sources import common_source
 class common_model(object):
     """abstract model class
     """
-    _update_callback = None
     
     def __init__(self, ):
         """not implemented model constructor
         """
-        
         raise NotImplementedError()
 
     def connect(self, connect_string):
