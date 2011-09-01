@@ -34,60 +34,10 @@ class gtk_view(common_view):
     \~english
     Open deals Gtk view class (gtk interface for open-deals)
     """
-    ## \brief \ref main_window_controller.main_window_controller instance.
-    # \~russian
-    # \par
-    # Экземпляр контрола главного окна. Хранится сдесь для вызова метода обновления виджетов
-    # которыми управляет контрол \ref main_window_controller.main_window_controller
-    window = None
-    
-    ## \brief instance of implementor of \ref common_model.common_model
-    model = None
-    
-    ## \brief instance of \ref currency_edit_control.currency_edit_control
-    ## \~russian
-    ## Экземпляр диалога для редактирования валют \ref currency_edit_control.currency_edit_control
-    currency = None
-    
-    ## \brief instance of \ref accounts_tab_controller.accounts_tab_controller
-    # \~russian
-    # Экземпляр контрола для таба со счетами. (Обработка событий нажатия кнопок и управление
-    # списками на этой вкладке)
-    accounts = None
-    ## \brief instance of \ref account_edit_control.account_edit_control
-    # \~russian \par Контрол формы редактирования счета
-    account_edit = None
-    ## \brief instance of \ref deals_tab_controller.deals_tab_controller
-    deals_tab = None
-    ## \brief instance of \ref deal_adder_control.deal_adder_control
-    deal_adder = None
-    ## \brief instance of \ref deal_editor_control.deal_editor_control
-    deal_editor = None
-    ## \brief \ref deals_filter.deals_filter instance
-    deals_filter = None
-    ## \ref paper_adder.paper_adder instance
-    paper_adder = None
-    ## \ref positions_tab_controller.positions_tab_controller instance
-    positions_tab = None
-    ## \ref positions_filter.positions_filter instance
-    positions_filter = None
-    ## \ref position_adder_control.position_adder_control instance
-    position_adder = None
-    ## \ref points_control.points_control instance
-    points = None
-    ## \ref report_importer_control.report_importer_control instance
-    report_importer = None
-    ## \ref chart_tab_controller.chart_tab_controller
-    chart_tab = None
-    ## \ref od_settings.settings instance
-    settings = None
-    ## \ref settings_dialog_controller.settings_dialog_controller
-    settings_dialog = None
-    ## \ref account_in_out_controller.account_in_out_controller instance
-    account_in_out = None
     def __init__(self, ):
         """initialize gtk view
         """
+        self.model = None
         self.settings = settings()
         self.window = main_window_controller(self)
         if self.settings.get_key('behavior.load_last_database'):

@@ -11,15 +11,6 @@ class currency_edit_control(object):
     """\~russian
     \brief Контрол для редактирования списка известных валют
     """
-
-    ## gtk.TextBuffer instance with full name
-    full_name = None
-
-    ## gtk.Entry instance with name
-    name = None
-
-    ## gtk.Dialog instance
-    window = None
     
     def __init__(self, parent):
         """

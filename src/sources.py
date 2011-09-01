@@ -73,11 +73,10 @@ class open_ru_report_source(common_source):
     \brief open.ru report parser
     parse and return deals in hash form
     """
-    xml = None
-    papers = None
-    nontrade_operations = None
     def __init__(self):
-        pass
+        self.xml = None
+        self.papers = None
+        self.nontrade_operations = None
 
     def close(self, ):
         """\brief clear fields of the object
@@ -198,8 +197,3 @@ class open_ru_report_source(common_source):
         
         
 classes = {u'Отчет брокерского дома "Открытие"' : open_ru_report_source} # this is global variable using to store name and class of importer
-
-
-
-
-

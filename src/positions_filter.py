@@ -5,7 +5,6 @@ from common_methods import *
 from od_exceptions import od_exception_config_key_error
 
 class positions_filter:
-    plus = []
 
     def set_colors(self, ):
         """\brief 
@@ -24,6 +23,7 @@ class positions_filter:
         self._parent = parent
         self.dialog = positions_filter_control(self._parent)
         self.set_colors()
+        self.plus = []
 
     def update_filter(self, ):
         """\brief update fields of the filter

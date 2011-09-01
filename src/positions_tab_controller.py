@@ -9,11 +9,12 @@ import sqlite3
 from od_exceptions import od_exception_config_key_error
 
 class positions_tab_controller(object):
-    order_by = []
+    
     def __init__(self, parent):
         """
         \param parent \ref gtk_view.gtk_view instance as parent
         """
+        self.order_by = []
         assert(isinstance(parent, gtk_view.gtk_view))
         self._parent = parent
         def shorter(name, action, *method):

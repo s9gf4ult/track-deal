@@ -390,4 +390,3 @@ if __name__ == "__main__":
     p.pack_start(b, False)
     w.show_all()
     w.run()
-    
