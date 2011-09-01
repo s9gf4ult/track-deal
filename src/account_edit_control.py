@@ -11,17 +11,6 @@ class account_edit_control:
     \~russian
     \brief Контрол формы редактирования счета
     """
-    ## name gtk.Entry
-    name = None
-    ## top window Gtk.Dialog instance
-    window = None
-    ## combo_control.combo_control instance with currency available to select
-    # \todo replace with \ref combo_select_control.combo_select_control because more suitable
-    currency_combo = None
-    ## gtk.SpinButton instance with initial money amount
-    first_money = None
-    ## gtk.TextView instance with comment
-    comment = None
 
     def set_comment(self, text):
         """\brief set comment field
@@ -49,6 +38,7 @@ class account_edit_control:
 
     
     def __init__(self, parent):
+
         self._parent = parent
         self.builder = make_builder('glade/account_edit.glade')
         def shobject(name):
