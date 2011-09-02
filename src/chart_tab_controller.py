@@ -158,7 +158,7 @@ class chart_tab_controller(object):
                 if what:
                     name = u'{0} {1}'.format(accname, what_name)
                     data = map(lambda a: (a['close_datetime'], a[field_name]), positions_data)
-                    data.insert(0, (positions_data[0]['close_datetime'], acc['money_count']))
+                    #data.insert(0, (positions_data[0]['close_datetime'], acc['money_count']))
                     retprint.append((name, data))
                     
         self.print_charts_x(retprint)
@@ -236,7 +236,7 @@ class chart_tab_controller(object):
                 crdate += d1
                 continue
             arc = group_function(carc)
-            ret.append((crdate, arc))
+            ret.append((datetime(crdate.year, crdate.month, crdate.day, 12, 0) , arc))
             crdate += d1
         return ret
 
@@ -258,7 +258,7 @@ class chart_tab_controller(object):
                 week += weekup
                 weekend += weekup
                 continue
-            ret.append((weekend, group_function(thisweek)))
+            ret.append((datetime(weekend.year, weekend.month, weekend.day, 23, 59), group_function(thisweek)))
             week += weekup
             weekend += weekup
         return ret
@@ -292,7 +292,7 @@ class chart_tab_controller(object):
                 month = self._next_month(month)
                 monthend = self._next_month(month) - d1
                 continue
-            ret.append((monthend, group_function(flt)))
+            ret.append((datetime(monthend.year, monthend.month, monthend.day, 23, 59), group_function(flt)))
             month = self._next_month(month)
             monthend = self._next_month(month) - d1
         return ret
