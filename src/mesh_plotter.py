@@ -167,8 +167,8 @@ class mesh_plotter(common_drawer, font_store):
         """
         ret = []
         if lower.day == 1:
-            ret.append(lower)
-        lower = datetime(lower.year, lower.month, 1, lower.hour, lower.minute, lower.second)
+            ret.append(datetime(lower.year, lower.month, 1))
+        lower = datetime(lower.year, lower.month, 1)
         lower = get_next_month_date(lower)
         while lower <= upper:
             ret.append(lower)
