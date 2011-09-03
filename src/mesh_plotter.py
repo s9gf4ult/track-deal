@@ -4,11 +4,11 @@
 
 from common_drawer import common_drawer
 from od_exceptions import od_exception, od_exception_parameter_error
-from cairo_rectangle import cairo_rectangle
+from cairo_rectangle import cairo_rectangle, copy_cairo_rectangle
 from font_store import font_store
 from common_methods import format_number, map_to_context_coordinates, months_range, years_range, get_next_month_date
 from drawing_rectangle import drawing_rectangle
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import mktime
 from math import trunc
 
@@ -27,6 +27,9 @@ class mesh_plotter(common_drawer, font_store):
         \param context - cairo context
         \param rectangle - cairo context rectangle
         """
+        if self._rectangle.get_lower_x_limit() == self._rectangle.get_upper_x_limit() or self._rectangle.get_lower_y_limit() == self._rectangle.get_upper_y_limit():
+            self._chart_area_rectangle = copy_cairo_rectangle(rectangle)
+            return
         fextent = self.get_font_extent(context)
         if self._rectangle == None:
             raise od_exception('you must specify rectangle before drawing')
@@ -140,7 +143,7 @@ class mesh_plotter(common_drawer, font_store):
         """
         lower = self._rectangle.get_lower_x_limit()
         upper = self._rectangle.get_upper_x_limit()
-        days = self._generate_times(lower, upper, 24 * 60 * 60)
+        days = self._generate_days(lower, upper)
         months = self._generate_months(lower, upper)
         day_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, days)
         self._draw_horizontal_text_elements(context, small_y, day_coords, map(lambda a: a.strftime('%d'), days), cairo_rectangle.x + cairo_rectangle.width)
@@ -159,6 +162,21 @@ class mesh_plotter(common_drawer, font_store):
             month_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, months)
             self._draw_horizontal_text_elements(context, big_y, month_coords, map(lambda a: a.strftime('%Y %B'), months), cairo_rectangle.x + cairo_rectangle.width)
         return (day_coords, month_coords)
+
+    def _generate_days(self, lower, upper):
+        """\brief 
+        \param lower
+        \param upper
+        """
+        upday = timedelta(days = 1)
+        ret = []
+        if lower.hour == 0 and lower.minute == 0 and lower.second == 0:
+            ret.append(lower)
+        cre = datetime(lower.year, lower.month, lower.day + 1)
+        while cre <= upper:
+            ret.append(cre)
+            cre += upday
+        return ret
             
     def _generate_months(self, lower, upper):
         """\brief return datetime of each month begin date
@@ -368,7 +386,7 @@ class mesh_plotter(common_drawer, font_store):
         """
         lower, upper = self._rectangle.get_lower_x_limit(), self._rectangle.get_upper_x_limit()
         minutes = self._generate_times(lower, upper, 60 * multiplier)
-        days = self._generate_times(lower, upper, 24 * 3600)
+        days = self._generate_days(lower, upper)
         min_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, minutes)
         self._draw_horizontal_times(context, small_y, min_coords, minutes, cairo_rectangle.x + cairo_rectangle.width)
         if len(days) == 0:
