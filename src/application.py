@@ -15,13 +15,12 @@ class application(object):
         assert(isinstance(view, common_view))
         self._view = view
 
-    def start(self, model = None):
+    def start(self, filename = None):
         """starts the application
         \param model posible model to open with view
         """
-        if model:
-            assert(isinstance(model, common_model))
-            self._view.set_model(model)
+        if filename != None:
+            self._view.open_existing_sqlite(filename)
         self._view.run()
         self.exit()
 

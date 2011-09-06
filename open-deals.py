@@ -5,8 +5,12 @@
 
 if __name__ == '__main__':
     import sys
-    sys.path.append('src')      # if we are starting this from the project directory
     import os
+    scname = sys.argv[0]
+    runpath = os.path.realpath(os.path.dirname(scname))
+    sys.path.append(os.path.join(runpath, 'src'))      # if we are starting this from the project directory
+    if os.name == 'posix':
+        os.chdir(runpath)
     import sqlite_model
     import gtk_view
     import application
@@ -15,8 +19,6 @@ if __name__ == '__main__':
         locale.setlocale(locale.LC_ALL, locale.getdefaultlocale())
     a = application.application(gtk_view.gtk_view())
     if len(sys.argv) > 1:
-        m = sqlite_model.sqlite_model()
-        m.open_existing(sys.argv[1])
-        a.start(m)
+        a.start(sys.argv[1])
     else:
         a.start()
