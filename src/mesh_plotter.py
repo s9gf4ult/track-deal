@@ -236,7 +236,7 @@ class mesh_plotter(common_drawer, font_store):
         upper = self._rectangle.get_upper_x_limit()
         years = self._generate_years(lower, upper)
         year_coords = self._map_x_numbers_to_context(cairo_rectangle, self._rectangle, years)
-        self._draw_horizontal_text_elements(context, small_y, year_coords, years, cairo_rectangle.x + cairo_rectangle.width)
+        self._draw_horizontal_text_elements(context, small_y, year_coords, map(lambda a: a.strftime('%Y'), years), cairo_rectangle.x + cairo_rectangle.width)
         return (year_coords, [])
 
     def _draw_horizontal_common_month(self, context, cairo_rectangle, small_y, big_y, month_mapper):

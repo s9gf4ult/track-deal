@@ -27,7 +27,7 @@ class settings(object):
                                                           'font' : {'name' : 'Sans 14'}},
                                                 'background' : {'color' : '#FFFFFF'}}}
         
-        if os.name == 'posix':
+        if os.name in ['posix', 'nt']: # there is HOME environment under windoze in 2.7 python at least
             config_dir = None
             if not is_null_or_empty(gethash(os.environ, 'OD_CONFIG_DIR')):
                 config_dir = os.environ['OD_CONFIG_DIR']
@@ -36,7 +36,7 @@ class settings(object):
                     config_dir = os.path.join(os.environ['HOME'], '.open-deals') # this is default config directory
                 else:
                     raise EnvironmentError('There is not HOME environment specified')
-        elif os.name == 'nt':
+        else:
             raise NotImplementedError('There is no code for windoze yet')
         self.config_file = os.path.join(config_dir, 'open-deals.cfg')
         if not os.path.exists(config_dir):
