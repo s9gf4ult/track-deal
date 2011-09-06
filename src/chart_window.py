@@ -48,10 +48,13 @@ class chart_window(object):
         """
         self.plotter.plot(data)
 
-    def autoscale(self, ):
+    def autoscale(self, top_indent = 0, bottom_indent = 0):
         """\brief scale rectangle when data already ploted
+        \param top_indent float, top chart indent in percents
+        \param bottom_indent float, bottom chart indent in percents
         """
         self.plotter.autoscale()
+        self.rectangle.indent(top_indent, bottom_indent)
 
     def redraw(self, ):
         self.plotter.redraw()

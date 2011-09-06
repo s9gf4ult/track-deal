@@ -188,7 +188,7 @@ class chart_tab_controller(object):
         w.set_mesh_line_width(settings.get_key('chart.mesh.line_width'))
         for ch in charts:
             w.plot(ch)
-        w.autoscale()
+        w.autoscale(5, 5)
         w.show()
         w.window.run()
         w.window.destroy()

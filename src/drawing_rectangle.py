@@ -162,3 +162,14 @@ class drawing_rectangle(object):
         \return list of tuples (x, y)
         """
         return filter(lambda a: self.get_lower_x_limit() <= a[0] <= self.get_upper_x_limit(), chart.get_data_list())
+
+    def indent(self, top, bottom):
+        """\brief add some space to the top and bottom area
+        \param top float, percents of initial height
+        \param bottom float, percents of initial height
+        """
+        selftop, selfbottom = self.get_upper_y_limit(), self.get_lower_y_limit()
+        height = selftop - selfbottom
+        topadd, botadd = (height * top / 100.), (height * bottom / 100.)
+        self.set_upper_y_limit(selftop + topadd)
+        self.set_lower_y_limit(selfbottom - botadd)
