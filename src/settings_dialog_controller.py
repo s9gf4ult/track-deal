@@ -34,6 +34,12 @@ class settings_dialog_controller(object):
         self.back_ground_color = shobject('background_color')
         self.line_width.set_digits(2)
         self.line_width.get_adjustment().set_all(lower = 0, upper = sys.maxint, step_increment = 0.1, page_increment = 1)
+        self.top_indent = shobject('top_indent')
+        self.top_indent.get_adjustment().set_all(lower = 0, upper = 45, step_increment = 0.1, page_increment = 1)
+        self.top_indent.set_digits(1)
+        self.bottom_indent = shobject('bottom_indent')
+        self.bottom_indent.get_adjustment().set_all(lower = 0, upper = 45, step_increment = 0.1, page_increment = 1)
+        self.bottom_indent.set_digits(1)
         
         self.load_last_database = shobject('load_last_database')
 
@@ -62,7 +68,9 @@ class settings_dialog_controller(object):
                            ('chart.mesh.color', self.line_color.get_color().to_string()),
                            ('chart.mesh.font.name', self.mesh_font.get_font_name()),
                        #    ('chart.mesh.font.color', self.mesh_font_color.get_color().to_string()),
-                           ('chart.background.color', self.back_ground_color.get_color().to_string())]:
+                           ('chart.background.color', self.back_ground_color.get_color().to_string()),
+                           ('chart.top_indent', self.top_indent.get_value()),
+                           ('chart.bottom_indent', self.bottom_indent.get_value())]:
             self._parent.settings.set_key(key, value)
 
     def load_settings(self, ):
@@ -126,3 +134,13 @@ class settings_dialog_controller(object):
             self.back_ground_color.set_color(gtk.gdk.Color(self._parent.settings.get_key('chart.background.color')))
         except od_exception_config_key_error:
             self.back_ground_color.set_color(gtk.gdk.Color('#000000'))
+
+        try:
+            self.top_indent.set_value(self._parent.settings.get_key('chart.top_indent'))
+        except od_exception_config_key_error:
+            self.top_indent.set_value(5)
+
+        try:
+            self.bottom_indent.set_value(self._parent.settings.get_key('chart.bottom_indent'))
+        except od_exception_config_key_error:
+            self.bottom_indent.set_value(5)

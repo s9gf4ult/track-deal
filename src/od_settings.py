@@ -25,7 +25,9 @@ class settings(object):
                                                 'mesh' : {'line_width' : 1.5,
                                                           'color' : '#FFFFFF',
                                                           'font' : {'name' : 'Sans 14'}},
-                                                'background' : {'color' : '#FFFFFF'}}}
+                                                'background' : {'color' : '#FFFFFF'},
+                                                'top_indent' : 5,
+                                                'bottom_indent' : 5}}
         
         if os.name in ['posix', 'nt']: # there is HOME environment under windoze in 2.7 python at least
             if os.name == 'nt':
