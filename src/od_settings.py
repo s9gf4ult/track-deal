@@ -28,6 +28,8 @@ class settings(object):
                                                 'background' : {'color' : '#FFFFFF'}}}
         
         if os.name in ['posix', 'nt']: # there is HOME environment under windoze in 2.7 python at least
+            if os.name == 'nt':
+                os.environ['HOME'] = os.path.join(os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
             config_dir = None
             if not is_null_or_empty(gethash(os.environ, 'OD_CONFIG_DIR')):
                 config_dir = os.environ['OD_CONFIG_DIR']

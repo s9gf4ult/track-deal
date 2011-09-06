@@ -4,10 +4,11 @@
 
 
 if __name__ == '__main__':
+    import sys
+    sys.path.append('src')      # if we are starting this from the project directory
+    import os
     import sqlite_model
     import gtk_view
-    import sys
-    import os
     import application
     import locale
     if os.name == 'posix':

@@ -3,6 +3,7 @@
 import traceback
 import shutil
 import gtk
+import os
 from modifying_tab_control import modifying_tab_control
 from common_methods import *
 
@@ -128,7 +129,8 @@ class main_window_controller(object):
             diag.add_button(gtk.STOCK_OPEN, gtk.RESPONSE_ACCEPT)
             fl = gtk.FileFilter()
             fl.add_mime_type('application/x-sqlite3')
-            diag.set_filter(fl)
+            if os.name == 'posix':
+                diag.set_filter(fl)
             if diag.run() == gtk.RESPONSE_ACCEPT:
                 try:
                     self._parent.open_existing_sqlite(diag.get_filename())
