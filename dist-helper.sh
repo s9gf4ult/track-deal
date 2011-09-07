@@ -37,11 +37,11 @@ make_distdirectory () {
 }
 
 dist_pack () {
-    tar -cjvf $1.tar.bz2 $1
+    tar -cjvf $1.tar.bz2 $1 || die "Tar executed with errors"
 }
 
 windist_pack () {
-    7za a -mx=9 $1.zip $1
+    7za a -mx=9 $1.zip $1 || die "7za executed with errors or there is no 7zip installed"
 }
 
 make_dist () {
@@ -52,6 +52,7 @@ make_dist () {
     elif [[ "windist" = $1 ]];then
         windist_pack $distdirname
     fi
+    rm -rf $distdirname
 }
     
 
