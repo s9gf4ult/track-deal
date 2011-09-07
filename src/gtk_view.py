@@ -32,7 +32,7 @@ class gtk_view(common_view):
     \~russian
     Класс для рисования интерфейса на Gtk создает контролы и хранит их.
     \~english
-    Open deals Gtk view class (gtk interface for open-deals)
+    Track Deals Gtk view class (gtk interface for track-deals)
     """
     def __init__(self, ):
         """initialize gtk view

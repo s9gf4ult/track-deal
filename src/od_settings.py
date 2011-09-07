@@ -33,16 +33,16 @@ class settings(object):
             if os.name == 'nt':
                 os.environ['HOME'] = os.path.join(os.environ['HOMEDRIVE'], os.environ['HOMEPATH'])
             config_dir = None
-            if not is_null_or_empty(gethash(os.environ, 'OD_CONFIG_DIR')):
-                config_dir = os.environ['OD_CONFIG_DIR']
+            if not is_null_or_empty(gethash(os.environ, 'TD_CONFIG_DIR')):
+                config_dir = os.environ['TD_CONFIG_DIR']
             else:
                 if not is_null_or_empty(gethash(os.environ, 'HOME')):
-                    config_dir = os.path.join(os.environ['HOME'], '.open-deals') # this is default config directory
+                    config_dir = os.path.join(os.environ['HOME'], '.track-deals') # this is default config directory
                 else:
                     raise EnvironmentError('There is not HOME environment specified')
         else:
             raise NotImplementedError('There is no code for windoze yet')
-        self.config_file = os.path.join(config_dir, 'open-deals.cfg')
+        self.config_file = os.path.join(config_dir, 'gtk-view.cfg')
         if not os.path.exists(config_dir):
             os.makedirs(config_dir)
         if not os.path.exists(self.config_file):

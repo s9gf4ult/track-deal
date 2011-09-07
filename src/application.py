@@ -5,7 +5,7 @@ from common_model import common_model
 from common_view import common_view
 
 class application(object):
-    """Open deals application class
+    """Track Deal application class
     """
     
     def __init__(self, view):

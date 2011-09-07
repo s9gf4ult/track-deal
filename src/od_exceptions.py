@@ -3,7 +3,7 @@
 ## od_exceptions ##
 
 class od_exception(Exception):
-    """\brief The common exception of open deals
+    """\brief The common exception of track deal
     """
     pass
 
@@ -26,7 +26,7 @@ class od_exception_report_error(od_exception):
     pass
         
 class od_exception_db_error(od_exception):
-    """\breif The common database exception in open deals
+    """\breif The common database exception in track deal
     """
     pass
 

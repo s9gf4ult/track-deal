@@ -200,7 +200,7 @@ class main_window_controller(object):
             else:
                 self.set_main_title(self._parent.model.get_connection_string())
         else:
-            self.set_main_title("Open Deals")
+            self.set_main_title("Track Deal")
             
     def run(self, ):
         """show main window
