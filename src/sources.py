@@ -166,22 +166,25 @@ class open_ru_report_source(common_source):
                                        'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S')},
                             filter(lambda b: paper['name'] == b['security_name'].nodeValue and paper['stock'] == b['board_name'].nodeValue, attributes))
                 if repo_attrs != None:
-                    deals.extend(map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'].nodeValue,
-                                                                                            a['security_type'].nodeValue,
-                                                                                            a['security_name'].nodeValue,
-                                                                                            a['grn_code'].nodeValue,
-                                                                                            a['deal_price'].nodeValue,
-                                                                                            a['exec_sign'].nodeValue,
-                                                                                            a['repo_part'].nodeValue,
-                                                                                            a['quantity'].nodeValue,
-                                                                                            'repo'))).hexdigest(),
-                                                'count' : math.trunc(float(a['quantity'].nodeValue)),
-                                                'direction' : math.trunc(float(a['exec_sign'].nodeValue)),
-                                                'points' : float(a['deal_price'].nodeValue),
-                                                'commission' : float(a['broker_comm'].nodeValue),
-                                                'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S'),
-                                                'user_attributes' : {'REPO' : a['repo_part'].nodeValue}},
-                                     filter(lambda b: b['security_name'].nodeValue == paper['name'], repo_attrs)))
+                    try:
+                        deals.extend(map(lambda a: {'sha1' : hashlib.sha1(reduce_by_string('', (a['deal_time'].nodeValue,
+                                                                                                a['security_type'].nodeValue,
+                                                                                                a['security_name'].nodeValue,
+                                                                                                a['grn_code'].nodeValue,
+                                                                                                a['deal_price'].nodeValue,
+                                                                                                a['exec_sign'].nodeValue,
+                                                                                                a['repo_part'].nodeValue,
+                                                                                                a['quantity'].nodeValue,
+                                                                                                'repo'))).hexdigest(),
+                                                    'count' : math.trunc(float(a['quantity'].nodeValue)),
+                                                    'direction' : math.trunc(float(a['exec_sign'].nodeValue)),
+                                                    'points' : float(a['deal_price'].nodeValue),
+                                                    'commission' : float(a['broker_comm'].nodeValue),
+                                                    'datetime' : datetime.datetime.strptime(a['deal_time'].nodeValue, '%Y-%m-%dT%H:%M:%S'),
+                                                    'user_attributes' : {'REPO' : a['repo_part'].nodeValue}},
+                                         filter(lambda b: b['security_name'].nodeValue == paper['name'], repo_attrs)))
+                    except Exception:
+                        pass    # FIXME! we must do something here
                 paper['deals'] = deals
             nontrade = self.report.getElementsByTagName('nontrade_money_operation')
             if len(nontrade) == 1:

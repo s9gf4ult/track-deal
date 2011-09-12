@@ -64,9 +64,11 @@ class report_importer_control:
         report = self.get_report_type()
         acc_id = self.get_account_id()
         source = report()
-        source.open(name)
-        self._parent.model.load_from_source(acc_id, source)
-
+        try:
+            source.open(name)
+            self._parent.model.load_from_source(acc_id, source)
+        except Exception as e:
+            show_and_print_error(e, self.builder.get_object('report_importer'))
 
     def check_correctness(self):
         errs = []

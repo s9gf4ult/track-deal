@@ -166,7 +166,9 @@ def show_and_print_error(error, window):
     \param error объект ошибки
     \param window родительское окно для диалога
     """
-    show_error(error.__str__(), window)
+    ret = 'Error Type:{0}\n'.format(type(error).__name__)
+    ret += 'Message:{0}'.format(str(error))
+    show_error(ret, window)
     sys.stderr.write(traceback.format_exc())
 
 def no_reaction(func):
