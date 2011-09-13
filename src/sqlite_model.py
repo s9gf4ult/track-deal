@@ -1683,7 +1683,6 @@ class sqlite_model(common_model):
 
     def recalculate_positions(self, aid, position_id = None):
         """
-        Arguments:
         \param aid  account id
         \param position_id  id of position recalculate from
         \todo make position_id be realy usable argument
@@ -1698,7 +1697,6 @@ class sqlite_model(common_model):
 
     def go_to_action(self, action_id):
         """roll back or forward to the action
-        Arguments:
         \param action_id 
         """
         a = self.get_current_action()
