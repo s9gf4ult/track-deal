@@ -60,12 +60,7 @@ class od_exception_action_cannot_create(od_exception_action_error):
     """
     \brief must be raised when trying create new action and the current state not in the end of actions list
     """
-    def __init__(self, actions_above):
-        """
-        \param actions_above 
-        """
-        super(od_exception_action_cannot_create, self).__init__()
-        self.__actions_above__ = actions_above
+    pass
 
 class od_exception_action_does_not_exists(od_exception_action_error):
     pass

@@ -1530,7 +1530,7 @@ class sqlite_model(common_model):
         """
         ab = self._sqlite_connection.execute("select count(h1.id) from history_steps h1, current_history_position ch where h1.id > ch.step_id").fetchone()[0]
         if ab > 0:
-            raise od_exception_action_cannot_create(ab)
+            raise od_exception_action_cannot_create(u'There is {0} actions above in the history, you can not do any actions while you are not in head of history'.format(ab))
         aid = self._sqlite_connection.insert("history_steps", {"autoname" : action_name,
                                                                "datetime" : datetime.now()})
         self._sqlite_connection.insert("current_history_position", {"step_id" : aid})
@@ -1563,7 +1563,7 @@ class sqlite_model(common_model):
         else:
             (g, ) = self._sqlite_connection.execute("select id from history_steps where id = ?", [action_id]).fetchone() or (None, )
             if g == None:
-                raise od_exception_action_does_not_exists()
+                raise od_exception_action_does_not_exists("action with id {0} does not exists".format(action_id))
             self._sqlite_connection.insert("current_history_position", {"step_id" : action_id})
         
 
