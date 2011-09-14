@@ -638,6 +638,7 @@ class sqlite_model_test(unittest.TestCase):
         yenacc = self.model.tacreate_account("test account with yens", yens, 9000)
         dollac = self.model.tacreate_account("test account with dollars US", dollars, 100500)
         self.assertTrue(ruacc <> yenacc <> dollac <> None)
+        self.assertEqual(6, len(self.model.list_actions().fetchall()))
         sber = self.model.tacreate_paper("stock", "SBRF", 'MICEX')
         gaz = self.model.tacreate_paper("stock", "GAZP", 'MICEX')
         self.assertEqual(8, len(self.model.list_actions().fetchall()))
@@ -677,10 +678,10 @@ class sqlite_model_test(unittest.TestCase):
                                self.model.get_account(ruacc)["money_count"] + xcount)
         a = self.model.list_actions().fetchall()
         self.assertEqual(10, len(a))
-        self.model.go_to_action(a[0]["id"])
+        self.model.tago_to_action(a[1]["id"])
         self.assertEqual(0, self.model._sqlite_connection.execute("select count(*) from accounts").fetchone()[0])
         self.assertEqual(rubles, self.model._sqlite_connection.execute("select id from moneys limit 1").fetchone()[0])
-        self.model.go_to_action(self.model._sqlite_connection.execute("select max(id) from history_steps").fetchone()[0])
+        self.model.tago_to_head()
         self.assertAlmostEqual(self.model.get_account(ruacc)["money_count"] + xcount,
                                self.model._sqlite_connection.execute("select net_after from deals_view where account_id = ? and paper_id = ? order by datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0])
         self.assertAlmostEqual(self.model._sqlite_connection.execute("select net_after from positions_view where account_id = ? and paper_id = ? order by close_datetime desc, open_datetime desc, id desc limit 1", [ruacc, sber]).fetchone()[0],
@@ -882,6 +883,60 @@ class sqlite_model_test(unittest.TestCase):
         poss[0]['net_after'] = 100 - 4
         poss[0]['gross_before'] = 0
         poss[0]['gross_after'] = 100
+
+    def test_actions(self, ):
+        """\brief testo action functions to rollback and continue work
+        """
+        self.model.disconnect()
+        self.model.create_new(":memory:")
+        m = self.model.tacreate_money('ru') # ACTION 1
+        acnt = self.model.tacreate_account('acname', m, 0) # ACTION 2
+        acts = self.model.list_actions().fetchall()
+        self.assertEqual(2, len(acts))
+        self.assertEqual(1, len(self.model.list_accounts().fetchall()))
+        self.model.tago_to_action(acts[-1]['id'])
+        self.assertEqual(0, len(self.model.list_accounts().fetchall()))
+        self.assertEqual(1, len(self.model.list_moneys().fetchall()))
+        self.assertRaises(od_exception_action_cannot_create, self.model.tacreate_account, 'some', m, 0)
+        self.model.tago_to_action(acts[0]['id'])
+        self.assertEqual(0, len(self.model.list_moneys().fetchall()))
+        self.model.tago_to_action(acts[-1]['id'])
+        self.assertEqual(0, len(self.model.list_accounts().fetchall()))
+        self.assertEqual(1, len(self.model.list_moneys().fetchall()))
+        self.model.tago_to_head()
+        self.assertEqual(1, len(self.model.list_moneys().fetchall()))
+        self.assertEqual(1, len(self.model.list_accounts().fetchall()))
+
+        paid = self.model.tacreate_paper('stock', 'stock1', 'fjfj') # ACTION 3
+        self.model.tacreate_deal(acnt, {'paper_id' : paid,
+                                        'count' : 10,
+                                        'direction' : -1,
+                                        'points' : 100,
+                                        'commission' : 1,
+                                        'datetime' : datetime(2010, 10, 10)}) # ACTION 4
+        self.model.tacreate_deal(acnt, {'paper_id' : paid,
+                                        'count' : 10,
+                                        'direction' : 1,
+                                        'points' : 100,
+                                        'commission' : 1,
+                                        'datetime' : datetime(2010, 10, 11)}) # ACTION 5
+        self.model.tamake_positions_for_whole_account(acnt) # ACTION 6
+        acts = self.model.list_actions().fetchall()
+        self.assertEqual(2, len(self.model.list_deals().fetchall()))
+        self.model.tago_to_action(acts[-3]['id'])
+        self.assertEqual(0, len(self.model.list_deals().fetchall()))
+        for x in xrange(0, 10):
+            self.model.tago_to_action(random.choice(acts)['id'])
+        self.assertRaises(od_exception_action_cannot_create, self.model.tacreate_deal, acnt, {'paper_id' : paid,
+                                                                                              'count' : 17,
+                                                                                              'direction' : -1,
+                                                                                              'points' : 105,
+                                                                                              'commission' : 1,
+                                                                                              'datetime' : datetime(2010, 10, 15)})
+        self.model.tago_to_head()
+        self.assertRaises(od_exception_action_does_not_exists, self.model.tago_to_action, max(map(lambda a: a['id'], acts)) + 1)
+        self.assertRaises(od_exception_action_does_not_exists, self.model.tago_to_action, -1)
+        
         
 if __name__ == '__main__':
     unittest.main()

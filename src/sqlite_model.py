@@ -1525,10 +1525,9 @@ class sqlite_model(common_model):
 
     def start_action(self, action_name):
         """starts new action with an action name
-        Arguments:
         \param action_name 
         """
-        ab = self._sqlite_connection.execute("select count(h1.id) from history_steps h1, current_history_position ch where h1.id > ch.step_id").fetchone()[0]
+        ab = self._sqlite_connection.execute("select count(h1.id) from history_steps h1, current_history_position ch where h1.id >= ch.step_id").fetchone()[0]
         if ab > 0:
             raise od_exception_action_cannot_create(u'There is {0} actions above in the history, you can not do any actions while you are not in head of history'.format(ab))
         aid = self._sqlite_connection.insert("history_steps", {"autoname" : action_name,
@@ -1538,15 +1537,19 @@ class sqlite_model(common_model):
     def end_action(self, ):
         """ends an action recording
         """
-        self._sqlite_connection.execute("delete from current_history_position")
+        if self._sqlite_connection.execute("select count(h1.id) from history_steps h1, current_history_position ch where h1.id >= ch.step_id").fetchone()[0] > 0:
+            self.set_current_action()
+        else:
+            raise od_exception_action_does_not_exists('Can not finish action which is not started')
 
     def list_actions(self, order_by = ["id"]):
         """list all actions executed
+        \return list of hash tables [{'id', 'autoname', 'datetime'}]
         """
         return self._sqlite_connection.execute_select_cond("history_steps", order_by = order_by)
 
     def get_current_action(self, ):
-        """return current action or None if no one set
+        """return current action id or None if no one set
         """
         a = self._sqlite_connection.execute_select("select h.* from history_steps h inner join current_history_position c on c.step_id = h.id").fetchall()
         if len(a) > 0:
@@ -1570,7 +1573,6 @@ class sqlite_model(common_model):
         
     def calculate_positions(self, aid, pid = None):
         """
-        Arguments:
         \param aid 
         \param paid 
         \param pid 
@@ -1695,30 +1697,74 @@ class sqlite_model(common_model):
         #     self._sqlite_connection.execute("delete from positions_view where id in (select pv.id from positions_view pv inner join positions p on pv.position_id = p.id, positions pp where pp.id = ? and ((p.account_id = ? and p.paper_id = ?) or (pv.account_id = ? and pv.paper_id = ?)) and p.close_datetime >= pp.close_datetime)", [position_id, aid, paid, aid, paid])
         #     self.calculate_positions(aid, paid, position_id)
 
-    def go_to_action(self, action_id):
-        """roll back or forward to the action
-        \param action_id 
+    def go_to_action(self, action_id, do_recalc = True):
+        """roll back or forward to the action_id and set this action as current, current action is an action which is the
+        first after last applied action, so current action is not applied now yet.
+        This means if current action is the first action in history list, then no one action is applied yet,
+        and if current action is the second in list, then first action is applied
+        \param action_id
+        \note view part of the program must use \ref tago_to_action transacted wrapper insted
         """
-        a = self.get_current_action()
+        a = self.get_current_action() # текущее щействие (которое еще не накачено)
         if a <> None and action_id == a["id"]:
-            return
-        l = self._sqlite_connection.execute_select("select * from history_steps order by id desc limit 1").fetchall() # последнее действие
-        if len(l) > 0:
-            l = l[0]
-        else:
-            return                      # нет действий в базе - ничего не делаем
+            return                      # We are in current atcion already
+        (l, ) = self._sqlite_connection.execute_select("select max(id) from history_steps").fetchone() # последнее действие
+        if l == None:
+            return                      # There is no actions to go
         gac = self._sqlite_connection.execute_select("select * from history_steps where id = ?", [action_id]).fetchall()
         if len(gac) == 0:
-            raise od_exception_action_does_not_exists() # отсутствует такое действие в базе - выбрасываем исключение
+            raise od_exception_action_does_not_exists("There is no action with id {0}".format(action_id)) # отсутствует такое действие в базе - выбрасываем исключение
         else:
             gac = gac[0]
-        if a == None or a["id"] == l["id"]:
-            a = l
-        if a["id"] < action_id <= l["id"]: # нужно сделать redo
-            self._redo_to_action(a["id"], gac["id"])
-        elif action_id < a["id"] <= l["id"]: # делаем undo
-            self._undo_to_action(a["id"], gac["id"])
+        if a == None:                   # we are in the head
+            self._undo_to_action(None, action_id)
+        else:
+            if a["id"] < action_id <= l: # нужно сделать redo текущего действия + тех что после него до action_id
+                self._redo_to_action(a["id"], action_id)
+            elif action_id < a["id"] <= l: # делаем undo действий перед текущим действием + action_id
+                self._undo_to_action(a["id"], action_id)
+            else:
+                raise Exception('Unexpected error due go_to_action')
+        if do_recalc:
+            self.recalculate_all_temporary()
+
+    @raise_db_closed
+    @in_transaction
+    @pass_to_method(go_to_action)
+    def tago_to_action(self, action_id, do_recalc = True):
+        """\brief transacted wrapper for \ref go_to_action
+        \param action_id
+        \param do_recalc
+        """
+        pass
+
+
+    def go_to_head(self, ):
+        """\brief apply all not applyed actions and set current action to None
+        \note the view must use \ref tago_to_head transacted wrapper instead
+        """
+        cac = self.get_current_action() # current action hash table
+        if cac == None:
+            return              # we are in the head already
+        # print(">>>>>>>>>>GO TO HEAD FROM ACTION {0}".format(cac['id']))
+        (maxacid, ) = self._sqlite_connection.execute('select max(id) from history_steps').fetchone()
+        if maxacid == None:
+            return              # There is no actions in history
+        if cac['id'] < maxacid:       # go to last action
+            self.go_to_action(maxacid, False)
+        self.set_current_action()
+        self._redo_action(maxacid) # we are in the last action but we need redo it
+        self._clear_unassigned_undo_redo()
+        self.set_current_action()
         self.recalculate_all_temporary()
+
+    @raise_db_closed
+    @in_transaction
+    @pass_to_method(go_to_head)
+    def tago_to_head(self, ):
+        """\brief transacted wrapper for \ref go_to_head
+        """
+        pass
 
     def clear_temporary_tables(self, ):
         """execute `delete` operator for all temporary tables
@@ -1728,23 +1774,20 @@ class sqlite_model(common_model):
 
             
     def _redo_to_action(self, start_id, end_id):
-        """redo all actions from the first action after the `start_id` to the `end_id` including
-        Arguments:
+        """redo all actions from the first action after and including the `start_id` to the `end_id` excluding
         \param start_id 
         \param end_id 
         """
+        # print(">>>>>>>>>>> GOING TO REDO FROM {0} TO {1}".format(start_id, end_id))
         self.set_current_action()
-        maked = None
-        for (action_id, ) in self._sqlite_connection.execute("select id from history_steps where id > ? and id <= ? order by id", [start_id, end_id]):
+        for (action_id, ) in self._sqlite_connection.execute("select id from history_steps where id >= ? and id < ? order by id", [start_id, end_id]):
             self._redo_action(action_id)
-            maked = action_id
-        if maked <> None:
-            self.set_current_action(maked)
+        self.set_current_action(end_id)
         self._clear_unassigned_undo_redo()
+        # print("<<<<<<<<<< REDOING FINISHED")
 
     def _redo_action(self, action_id):
         """executes all queries for this action in direct order
-        Arguments:
         \param action_id id of action execute queries from
         """
         # print("========== REDOING action {0} ===========".format(action_id))
@@ -1753,26 +1796,28 @@ class sqlite_model(common_model):
           #  print("REDO:: {0}".format(q))
 
     def _undo_to_action(self, start_id, end_id):
-        """undo all actions from `start_id` to the first action after `end_id` including in reverse order
-        Arguments:
-        \param start_id 
+        """undo all actions from `start_id` excluding to the `end_id` including in reverse order
+        \param start_id int, action id, if this is None then undo from the head
         \param end_id 
         """
+        # print(">>>>>>>> GO TO UNDO FROM ACTION {0} TO {1}".format(start_id, end_id))
         self.set_current_action()
-        maked = None
-        for (action_id, ) in self._sqlite_connection.execute("select id from history_steps where id > ? and id <= ? order by id desc", [end_id, start_id]):
+        forlist = None
+        if start_id == None:
+            forlist = self._sqlite_connection.execute('select id from history_steps where id >= ? order by id desc', [end_id]).fetchall()
+        else:
+            forlist = self._sqlite_connection.execute("select id from history_steps where id >= ? and id < ? order by id desc", [end_id, start_id]).fetchall()
+        for (action_id, ) in forlist:
             self._undo_action(action_id)
-            maked = action_id
-        if maked <> None:
-            self.set_current_action(end_id)
+        self.set_current_action(end_id)
         self._clear_unassigned_undo_redo()
+        # print("<<<<<<<< UNDOING FINISHED")
 
     def _undo_action(self, action_id):
         """execute queries assigned to action in reverse order
-        Arguments:
         \param action_id 
         """
-    #    print("============= UNDOING action {0} ==============".format(action_id))
+        # print("============= UNDOING action {0} ==============".format(action_id))
         for (q, ) in self._sqlite_connection.execute("select query from undo_queries where step_id = ? order by id desc", [action_id]):
             self._sqlite_connection.execute(q)
      #       print("UNDO: {0}".format(q))
@@ -1833,7 +1878,6 @@ class sqlite_model(common_model):
         """
         self._sqlite_connection.execute("delete from moneys where id not in ({0})".format(reduce_by_string(", ", id_list)))
 
-
     @raise_db_closed
     @in_transaction
     @in_action(lambda self, id_list: "delete {0} money objects".format(len(id_list)))
@@ -1843,9 +1887,6 @@ class sqlite_model(common_model):
         \param id_list list of id's
         """
         pass
-
-        
-
 
     def list_view_accounts(self, order_by = []):
         """\brief list the output of accounts_view

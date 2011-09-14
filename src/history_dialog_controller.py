@@ -49,7 +49,7 @@ class history_dialog_controller(object):
         """\brief rollback to selected activated
         \param action
         """
-        self.rollback_to_selected()
+        self.rollback_selected()
 
     def tree_row_activated(self, treeview, path, view_column):
         """\brief double click on tree view
@@ -57,9 +57,9 @@ class history_dialog_controller(object):
         \param path
         \param view_column
         """
-        self.rollback_to_selected()
+        self.rollback_selected()
 
-    def rollback_to_selected(self, ):
+    def rollback_selected(self, ):
         """\brief rollback to selected action
         """
         sel = self.history.get_selected_row()
