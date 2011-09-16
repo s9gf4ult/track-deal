@@ -936,6 +936,15 @@ class sqlite_model_test(unittest.TestCase):
         self.model.tago_to_head()
         self.assertRaises(od_exception_action_does_not_exists, self.model.tago_to_action, max(map(lambda a: a['id'], acts)) + 1)
         self.assertRaises(od_exception_action_does_not_exists, self.model.tago_to_action, -1)
+        self.assertEqual(6, len(self.model.list_actions().fetchall()))
+        self.assertGreater(len(self.model.list_positions().fetchall()), 0)
+        self.model.taremove_action(acts[5]['id'])
+        self.assertEqual(0, len(self.model.list_positions().fetchall()))
+        self.assertEqual(2, len(self.model.list_deals().fetchall()))
+        self.model.taremove_action(acts[4]['id'])
+        self.assertEqual(1, len(self.model.list_deals().fetchall()))
+        self.model.taremove_action(acts[1]['id'])
+        self.assertEqual(0, len(self.model.list_accounts().fetchall()))
         
         
 if __name__ == '__main__':

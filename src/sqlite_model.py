@@ -1766,6 +1766,51 @@ class sqlite_model(common_model):
         """
         pass
 
+    def remove_action(self, action_id):
+        """\brief remove selected action and all actions above it
+        \param action_id int, id of existing action
+        """
+        self.go_to_action(action_id)
+        for (aid, ) in self._sqlite_connection.execute('select id from history_steps where id >= ? order by id desc', [action_id]).fetchall():
+            self._remove_this_action(aid)
+
+    @raise_db_closed
+    @in_transaction
+    @pass_to_method(remove_action)
+    def taremove_action (self, *args, **kargs):
+        """\brief wrapper for \ref remove_action
+        \param action_id int, id of existing action
+        """
+        pass
+
+    def _remove_this_action(self, action_id):
+        """\brief remove one action and all undo and redo queries assigned to it
+        \param action_id
+        """
+        self._sqlite_connection.execute('delete from history_steps where id = ?', [action_id]) # undo and redo queries deleted by constraints
+
+    def get_action_stats(self, action_id):
+        """\brief return info about action
+        \param action_id int, id of existing action
+        \return hash table with keys\n
+        current : True or False,
+        actions_above : int, how much actions above given action including self,
+        queries_above : int, how much queries between this action and head
+        """
+        current = False
+        actions = 0
+        queries = 0
+        cac = self.get_current_action()
+        if cac != None and cac ['id'] == action_id:
+            current = True
+        if self._sqlite_connection.execute('select count(id) from history_steps where id = ?', [action_id]).fetchone()[0] != 1:
+            raise od_exception_action_does_not_exists('There is no action with id {0}'.format(action_id))
+        (actions, ) = self._sqlite_connection.execute('select count(id) from history_steps where id >= ?', [action_id]).fetchone()
+        (queries, ) = self._sqlite_connection.execute('select count(q.id) from redo_queries q inner join history_steps h on q.step_id = h.id where h.id >= ?', [action_id]).fetchone()
+        return {'current' : current,
+                'actions_above' : actions,
+                'queries_above' : queries}
+
     def clear_temporary_tables(self, ):
         """execute `delete` operator for all temporary tables
         """
