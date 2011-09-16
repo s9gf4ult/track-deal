@@ -4,6 +4,8 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkDialog" id="history_dialog">
     <property name="border_width">5</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
