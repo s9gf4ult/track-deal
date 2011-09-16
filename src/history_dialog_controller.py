@@ -76,9 +76,9 @@ class history_dialog_controller(object):
         """
         try:
             self._parent.model.tago_to_head()
+            self.update()
         except Exception as e:
             show_and_print_error(e, self.window)
-            self.update()
 
     def head_selected(self, ):
         """\brief remove selected action and all above it
