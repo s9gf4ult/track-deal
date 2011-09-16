@@ -36,6 +36,17 @@ class main_window_controller(object):
         shorter('edit_currencies', 'activate', self.edit_currencies_activate)
         shorter('settings_dialog', 'activate', self.settings_dialog_activate)
         shorter('account_in_out', 'activate', self.account_in_out_activate)
+        shorter('history_dialog', 'activate', self.history_dialog_activate)
+
+    def history_dialog_activate(self, action):
+        """\brief history dialog activated
+        \param action
+        """
+        if not self._parent.connected():
+            return
+        self._parent.history_dialog.run()
+        self._parent.call_update_callback()
+
 
     def edit_currencies_activate(self, action):
         """\brief edit currencies action handler

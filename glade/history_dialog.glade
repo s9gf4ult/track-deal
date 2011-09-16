@@ -35,6 +35,8 @@
             <child>
               <object class="GtkHButtonBox" id="hbuttonbox1">
                 <property name="visible">True</property>
+                <property name="spacing">20</property>
+                <property name="layout_style">spread</property>
                 <child>
                   <object class="GtkButton" id="button1">
                     <property name="visible">True</property>

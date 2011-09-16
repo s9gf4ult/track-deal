@@ -24,6 +24,7 @@ from chart_tab_controller import chart_tab_controller
 from common_methods import show_and_print_error, is_null_or_empty
 from od_settings import settings
 from settings_dialog_controller import settings_dialog_controller
+from history_dialog_controller import history_dialog_controller
 import os
 from account_in_out_controller import account_in_out_controller
 
@@ -66,6 +67,7 @@ class gtk_view(common_view):
         self.settings_dialog = settings_dialog_controller(self)
         self.account_in_out = account_in_out_controller(self)
         self.call_update_callback()
+        self.history_dialog = history_dialog_controller(self)
         
     
     def run(self, ):

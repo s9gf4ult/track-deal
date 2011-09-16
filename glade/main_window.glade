@@ -376,6 +376,14 @@
                       </object>
                     </child>
                     <child>
+                      <object class="GtkImageMenuItem" id="imagemenuitem23">
+                        <property name="visible">True</property>
+                        <property name="related_action">history_dialog</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
                       <object class="GtkImageMenuItem" id="imagemenuitem21">
                         <property name="visible">True</property>
                         <property name="related_action">settings_dialog</property>
@@ -1260,5 +1268,9 @@
   </object>
   <object class="GtkAction" id="account_in_out">
     <property name="label">&#x412;&#x432;&#x43E;&#x434; &#x432;&#x44B;&#x432;&#x43E;&#x434; &#x441;&#x440;&#x435;&#x434;&#x441;&#x442;&#x432;</property>
+  </object>
+  <object class="GtkAction" id="history_dialog">
+    <property name="label">&#x418;&#x441;&#x442;&#x43E;&#x440;&#x438;&#x44F; &#x431;&#x430;&#x437;&#x44B; &#x434;&#x430;&#x43D;&#x43D;&#x44B;&#x445;</property>
+    <property name="short_label">&#x418;&#x441;&#x442;&#x43E;&#x440;&#x438;&#x44F; &#x431;&#x430;&#x437;&#x44B; &#x434;&#x430;&#x43D;&#x43D;&#x44B;&#x445;</property>
   </object>
 </interface>
