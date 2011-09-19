@@ -26,7 +26,7 @@ class accounts_tab_controller(object):
         shorter("delete_account", self.delete_account_activate)
         shorter("modify_account", self.modify_account_activate)
         shorter("set_current_account", self.set_current_account_activate)
-        self.accounts_list = list_view_sort_control(self._parent.window.builder.get_object("accounts_view"), [['id', int], (u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererText()), (u'Текущий счет', gtk.CellRendererText()), (u'Валюта', gtk.CellRendererText()), (u'Количество', gtk.CellRendererText())])
+        self.accounts_list = list_view_sort_control(self._parent.window.builder.get_object("accounts_view"), [['id', int], (u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererText()), (u'Текущий счет', gtk.CellRendererText()), (u'Валюта', gtk.CellRendererText())])
         self.account_list = list_view_sort_control(self._parent.window.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
         self._parent.window.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
 
@@ -61,7 +61,11 @@ class accounts_tab_controller(object):
         """update list of properties and statistics of selected account
         \todo need implementation
         """
-        pass
+        cacc = self._parent.model.get_current_account()
+        if cacc == None:
+            return
+        stats = self._parent.model.list_account_statistics(cacc['id']).fetchall()
+        self.account_list.update_rows(map(lambda a: (a['parameter_name'], a['value']), stats))
 
     def update_accounts_list(self):
         """update list of accounts"""
@@ -71,7 +75,7 @@ class accounts_tab_controller(object):
         except od_exception_config_key_error:
             pass
         if self._parent.connected():
-            self.accounts_list.update_rows(map(lambda a: (a['account_id'], a["name"], format_number(a["first_money"]), format_number(a["current_money"]), a["money_name"], format_number(a["deals"])), self._parent.model.list_view_accounts(["name"]).fetchall()))
+            self.accounts_list.update_rows(map(lambda a: (a['account_id'], a["name"], format_number(a["first_money"]), format_number(a["current_money"]), a["money_name"]), self._parent.model.list_view_accounts(["name"]).fetchall()))
         else:
             self.accounts_list.make_model()
             

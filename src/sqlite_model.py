@@ -768,7 +768,7 @@ class sqlite_model(common_model):
         elif (isinstance(aid_or_name, (int, long))):
             return self._sqlite_connection.execute_select("select * from accounts where id = ?", [aid_or_name]).fetchone()
         else:
-            raise od_exception()
+            raise od_exception_parameter_error('aid_or_name must be string or integer')
 
             
     def create_deal(self, account_id, deal, do_recalc = True):
@@ -1879,8 +1879,60 @@ class sqlite_model(common_model):
         for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals"):
             self.recalculate_deals(aid)
             self.recalculate_positions(aid)
+            self.recalculate_statistics(aid)
 
-    
+    def list_account_statistics(self, aid, sort_by = ['parameter_name']):
+        """\brief return iterator object returning statistics of given account
+        \param aid int or str, if int, then it is id of account, if it is string then this is account name
+        \param sort_by - list of order by params
+        """
+        account = self.get_account(aid)
+        if account == None:
+            raise od_exception_parameter_error('There is no such account {0}'.format(aid))
+        return self._sqlite_connection.execute_select('select * from account_statistics where account_id = ?{0}'.format(order_by_print(sort_by)), [account['id']])
+
+    def recalculate_statistics(self, aid):
+        """\brief recalculate temporary table with statistics of given account
+        \param aid - int or str, account id or name
+        """
+        account = self.get_account(aid)
+        if account == None:
+            raise od_exception_parameter_error('There is no such account {0}'.format(aid))
+        self._delete_statistics(account['id'])
+        self._calculate_statistics(account['id'])
+
+    def _delete_statistics(self, aid):
+        """\brief delete statistics for given account
+        \param aid - int, account id
+        """
+        self._sqlite_connection.execute('delete from account_statistics where account_id = ?', [aid])
+
+    def _add_statistic_parameter(self, aid, name, value, comment = ''):
+        """\brief 
+        \param aid int, account id
+        \param name str, name of the value
+        \param value string or number, value itself
+        \param comment str, unnecessary comment
+        """
+        ins = {'account_id' : aid,
+               'parameter_name' : name,
+               'parameter_comment' : comment,
+               'value' : value}
+        try:
+            ret = self._sqlite_connection.insert('account_statistics', ins)
+            return ret
+        except sqlite3.IntegrityError as e:
+            raise od_exception_db_integrity_error(str(e))
+        except sqlite3.InternalError as e:
+            raise od_exception_db_error(str(e))
+
+    def _calculate_statistics(self, aid):
+        """\brief calculate all statistic information for given account
+        \param aid - int, id of account
+        """
+        (deals, ) = self._sqlite_connection.execute('select count(*) from deals where account_id = ?', [aid]).fetchone()
+        self._add_statistic_parameter(aid, u'Количество сделок', deals)
+        
     def set_current_account(self, id_or_name):
         """\brief set given account as current
         \param id_or_name id or name or None to remove current account property
