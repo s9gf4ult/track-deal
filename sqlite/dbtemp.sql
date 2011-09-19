@@ -196,7 +196,7 @@ CREATE TEMPORARY TABLE account_statistics(
 id integer primary key not null,
 account_id integer not null,
 parameter_name text not null,
-parameter_comment text,
+parameter_comment text default '',
 value,
 unique(account_id, parameter_name));
 
