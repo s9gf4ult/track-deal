@@ -58,16 +58,17 @@ class sqlite_model(common_model):
         except sqlite3.OperationalError as e:
             raise od_exception_db_error(str(e))
 
-    @raise_db_closed
-    @in_transaction
-    @in_action(lambda self, name, *args, **kargs: u'create paper type {0}'.format(name))
-    @pass_to_method(create_paper_type)
+    # пример есиользования декораторов
+    @raise_db_closed                    # поднять исключение если нет коннекта к базе
+    @in_transaction                     # метод выполняется в транзакции, если возникает ошибка, транзакция откатывается а исключение поднимается выше
+    @in_action(lambda self, name, *args, **kargs: u'create paper type {0}'.format(name)) # запросы выполненные внутри метода будут записаны в "действие", lambda - функция преобразовывающая параметры метода в строку - название действия
+    @pass_to_method(create_paper_type)  # передаем все параметры в казанный метод и возвращаем значение которое он вернул
     def tacreate_paper_type(self, *args, **kargs):
         """\brief wrapper around \ref create_paper_type
         \param name - str
         \param comment - str
         """
-        pass
+        pass                            # тут можно выполнить чтонибудь еще
 
 
     @remover_decorator('paper_types', {int: 'id', basestring : 'name'})
