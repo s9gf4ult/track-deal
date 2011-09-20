@@ -1931,8 +1931,18 @@ class sqlite_model(common_model):
         """\brief calculate all statistic information for given account
         \param aid - int, id of account
         """
-        (deals, ) = self._sqlite_connection.execute('select count(*) from deals where account_id = ?', [aid]).fetchone()
-        self._add_statistic_parameter(aid, u'Количество сделок', deals)
+        for query, name in [('select count(*) from deals where account_id = ? and parent_deal_id is null', 'Количество сделок'),
+                            ('select count(*) from positions where account_id = ?', 'Количество позиций'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net >= 0', 'Количество прибыльных поз.'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net < 0', u'Количество убыточных поз.'),
+                            ('select sum(pl_net) from positions_view where account_id = ? and pl_net >= 0', u'Сумма прибыли по позициям'),
+                            ('select ( -sum(pl_net)) from positions_view where account_id = ? and pl_net < 0', u'Сумма просадки по позициям'),
+                            ('select sum(commission) from deals where account_id = ? and parent_deal_id is null', u'Отданная коммиссиия'),
+                            ('select sum(pl_net) / count(id) from positions_view where account_id = ? and pl_net >= 0', u'Средняя прибыль на позицию'),
+                            ('select sum( -pl_net) / count(id) from positions_view where account_id = ? and pl_net < 0', u'Средняя просадка на позицию')]:
+            (val, ) = self._sqlite_connection.execute(query, [aid]).fetchone()
+            self._add_statistic_parameter(aid, name, val)
+        
         
     def set_current_account(self, id_or_name):
         """\brief set given account as current
