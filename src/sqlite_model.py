@@ -14,6 +14,7 @@ import sqlite3
 import traceback
 import sys
 import os
+from math import trunc
 
 class sqlite_model(common_model):
     """
@@ -1939,9 +1940,28 @@ class sqlite_model(common_model):
                             ('select ( -sum(pl_net)) from positions_view where account_id = ? and pl_net < 0', u'Сумма просадки по позициям'),
                             ('select sum(commission) from deals where account_id = ? and parent_deal_id is null', u'Отданная коммиссиия'),
                             ('select sum(pl_net) / count(id) from positions_view where account_id = ? and pl_net >= 0', u'Средняя прибыль на позицию'),
-                            ('select sum( -pl_net) / count(id) from positions_view where account_id = ? and pl_net < 0', u'Средняя просадка на позицию')]:
+                            ('select sum( -pl_net) / count(id) from positions_view where account_id = ? and pl_net < 0', u'Средняя просадка на позицию'),
+                            ('select sum(pl_net) / count(id) from positions_view where account_id = ?', u'Средняя позиция'),
+                            ('select max(pl_net) from positions_view where account_id = ? and pl_net >= 0', u'Максимальная прибыльная прозиция'),
+                            ('select ( -min(pl_net)) from positions_view where account_id = ? and pl_net < 0', u'Максимальная убыточная позиция'),
+                            ('select sum(volume) from deals_view where account_id = ?', u'Объем по сделкам'),
+                            ('select sum(open_volume) + sum(close_volume) from positions_view where account_id = ? and pl_net >= 0', u'Обем по прибыльным позициям'),
+                            ('select sum(open_volume) + sum(close_volume) from positions_view where account_id = ? and pl_net < 0', u'Объем по убыточным позициям'),
+                            
+                            ('select sum(money_count) from account_in_out where account_id = ?', u'Ввод средств на счет'),
+                            ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) >= 0)', u'Количество прибыльных дней'),
+                            ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) < 0)', u'Количество убыточных дней'),
+                            ]:
             (val, ) = self._sqlite_connection.execute(query, [aid]).fetchone()
-            self._add_statistic_parameter(aid, name, val)
+            if val != None:
+                self._add_statistic_parameter(aid, name, val)
+        (secs, ) = self._sqlite_connection.execute('select max(datetime) - min(datetime) from deals').fetchone()
+        if secs != None:
+            days = trunc(secs / (24 * 60 * 60))
+            self._add_statistic_parameter(aid, u'Количество дней торговли', days)
+            (active_days, ) = self._sqlite_connection.execute('select count(*) from (select distinct date from deals_view)').fetchone()
+            if active_days != None:
+                self._add_statistic_parameter(aid, u'Количество дней без активности', days - active_days)
         
         
     def set_current_account(self, id_or_name):
