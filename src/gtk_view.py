@@ -66,8 +66,9 @@ class gtk_view(common_view):
         self.chart_tab = chart_tab_controller(self)
         self.settings_dialog = settings_dialog_controller(self)
         self.account_in_out = account_in_out_controller(self)
-        self.call_update_callback()
         self.history_dialog = history_dialog_controller(self)
+
+        self.call_update_callback()
         
     
     def run(self, ):
