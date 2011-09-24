@@ -61,6 +61,8 @@ class accounts_tab_controller(object):
         """update list of properties and statistics of selected account
         \todo need implementation
         """
+        if not self._parent.connected():
+            return
         cacc = self._parent.model.get_current_account()
         if cacc == None:
             return
