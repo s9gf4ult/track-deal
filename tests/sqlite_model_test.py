@@ -858,7 +858,6 @@ class sqlite_model_test(unittest.TestCase):
         is_account_amount(1000 - (10 * 100) - 2) # купили 10 по 100 значти должно быть 0
         is_deal_net(did1, 1000, -2)
         self.model.remove_deal(did1)
-        self.model.recalculate_all_temporary()
         is_account_amount(1000)
         did1 = self.model.create_deal(aid, {'paper_id' : pid1,
                                             'count' : 10,

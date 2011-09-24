@@ -56,7 +56,6 @@ class main_window_controller(object):
             return
         ret = self._parent.currency.run()
         if ret == gtk.RESPONSE_ACCEPT:
-            self._parent.model.recalculate_all_temporary()
             self._parent.call_update_callback()
 
     def edit_points_activate(self, action):
@@ -65,7 +64,6 @@ class main_window_controller(object):
         """
         ret = self._parent.points.run()
         if ret == gtk.RESPONSE_ACCEPT:
-            self._parent.model.recalculate_all_temporary()
             self._parent.call_update_callback()
 
     def save_as_activate(self, action):
@@ -234,7 +232,6 @@ class main_window_controller(object):
         self._parent.paper_adder.update_adder()
         ret = self._parent.paper_adder.run()
         if ret == gtk.RESPONSE_ACCEPT:
-            self._parent.model.recalculate_all_temporary()
             self._parent.call_update_callback()
         
     def settings_dialog_activate(self, action):
@@ -250,6 +247,5 @@ class main_window_controller(object):
             self._parent.account_in_out.update()
             ret = self._parent.account_in_out.run()
             if ret == gtk.RESPONSE_ACCEPT:
-                self._parent.model.recalculate_all_temporary()
                 self._parent.call_update_callback()
             

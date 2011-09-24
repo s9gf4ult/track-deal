@@ -72,13 +72,14 @@ class sqlite_model(common_model):
         pass                            # тут можно выполнить чтонибудь еще
 
 
-    @remover_decorator('paper_types', {int: 'id', basestring : 'name'})
     def remove_paper_type(self, id_or_name):
         """\brief remove paper by name or by id
         \param id_or_name
         \note view must use \ref taremove_paper_type instead
         """
-        pass
+        pt = self.get_paper_type(id_or_name)
+        self._sqlite_connection.execute('delete from paper_types where id = ?', [pt['id']])
+        self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -376,6 +377,7 @@ class sqlite_model(common_model):
         if name == None:
             if isinstance(type_or_id, int):
                 self._sqlite_connection.execute('delete from papers where id = ?', [type_or_id])
+                self.recalculate_all_temporary()
             else:
                 raise od_exception_parameter_error('if name is None then type_or_id must be int not {0}'.format(type(type_or_id)))
         else:
@@ -384,6 +386,7 @@ class sqlite_model(common_model):
                 if t == None:
                     raise od_exception_parameter_error('There is no such paper type {0}'.format(type_or_id))
                 self._sqlite_connection.execute('delete from papers where type = ? and name = ?', [t['id'], name])
+                self.recalculate_all_temporary()
             except sqlite3.IntegrityError as e:
                 raise od_exception_db_integrity_error(str(e))
 
@@ -422,10 +425,7 @@ class sqlite_model(common_model):
             if self._sqlite_connection.execute("select count(*) from papers where id = ?", [paper_id]).fetchone()[0] > 0:
                 remhash(fields, "id")
                 self._sqlite_connection.update("papers", fields, 'id = ?', (paper_id, ))
-                for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals where paper_id = ?", [paper_id]):
-                    self.recalculate_deals(aid)
-                for (aid, ) in self._sqlite_connection.execute("select distinct account_id from positions where paper_id = ?", [paper_id]):
-                    self.recalculate_positions(aid)
+                self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -532,13 +532,14 @@ class sqlite_model(common_model):
         
         return (len(ret) > 0 and ret[0] or None)
 
-    @remover_decorator("moneys", {int : "id", basestring : "name"})
     def remove_money(self, name_or_id):
         """Removes money by name or by id
         \param name_or_id
         \note assigned accounts will be removed automatically by constraint
         """
-        pass
+        m = self.get_money(name_or_id)
+        self._sqlite_connection.execute('delete from moneys where id = ?', [m['id']])
+        self.recalculate_all_temporary()
 
     def assigned_to_money_accounts(self, name_or_id):
         """\brief return count fo accounts assigned to money
@@ -631,16 +632,12 @@ class sqlite_model(common_model):
         """
         if money_id != None:
             self._sqlite_connection.execute("delete from points where paper_id = ? and money_id = ?", [id_or_paper_id, money_id])
-            for (aid, ) in self._sqlite_connection.execute("select id from accounts where money_id = ?", [money_id]):
-                self.recalculate_deals(aid)
-                self.recalculate_positions(aid)
+            self.recalculate_all_temporary()
         else:
             self._sqlite_connection.execute("delete from points where id = ?", [id_or_paper_id])
             (paid, ) = self._sqlite_connection.execute("select paper_id from points where id = ?", [id_or_paper_id]).fetchone() or (None, )
-            if paid <> None:
-                for (aid, ) in self._sqlite_connection.execute("select a.id from accounts a inner join points p on p.money_id = a.money_id where p.id = ?", [id_or_paper_id]):
-                    self.recalculate_deals(aid)
-                    self.recalculate_positions(aid)
+            if paid != None:
+                self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -714,8 +711,7 @@ class sqlite_model(common_model):
             self._sqlite_connection.update("accounts", sets, "id = ?", (aid, ))
 
         if money_id_or_name <> None or money_count <> None:
-            self.recalculate_deals(aid)
-            self.recalculate_positions(aid)
+            self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -736,7 +732,6 @@ class sqlite_model(common_model):
         """
         return self._sqlite_connection.execute_select_cond("accounts", order_by = order_by)
 
-    @remover_decorator("accounts", {int : "id", basestring : "name"})
     def remove_account(self, name_or_id):
         """Removes account by name or by id and set current account to None deleted current
         \param name_or_id 
@@ -746,6 +741,8 @@ class sqlite_model(common_model):
         if acc <> None and cacc <> None:
             if acc["id"] == cacc["id"]:
                 self.set_current_account(None)
+        self._sqlite_connection.execute('delete from accounts where id = ?', [acc['id']])
+        self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -867,9 +864,9 @@ class sqlite_model(common_model):
         """
         x = map(lambda a: (a, ), (isinstance(deal_id, int) and [deal_id] or deal_id))
         self._sqlite_connection.executemany("delete from deals where id = ?", x)
-        self._sqlite_connection.executemany("delete from deals_view where deal_id = ?", x)
         self.fix_groups()
         self.fix_positions()
+        self.recalculate_all_temporary()
 
     def fix_groups(self, ):
         """\brief fixes broken groups by deleting
@@ -1364,7 +1361,8 @@ class sqlite_model(common_model):
             raise od_exception("account_id_or_name must be int or str")
         
         for (paper, ) in self._sqlite_connection.execute('select distinct paper_id from deals where account_id = ?', [aid]):
-            self.make_positions(aid, paper, time_distance)
+            self.make_positions(aid, paper, time_distance, False)
+        self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -1377,7 +1375,7 @@ class sqlite_model(common_model):
         """
         pass
 
-    def make_positions(self, account_id, paper_id, time_distance = 5):
+    def make_positions(self, account_id, paper_id, time_distance = 5, recalc = True):
         """automatically makes positions
         \param account_id 
         \param paper_id 
@@ -1400,7 +1398,9 @@ class sqlite_model(common_model):
             return True
         while go_on():
             pass
-        self._create_position_raw(hashes)
+        self._create_position_raw(hashes, False)
+        if recalc:
+            self.recalculate_all_temporary()
 
         
     @raise_db_closed
@@ -1422,8 +1422,7 @@ class sqlite_model(common_model):
         """
         pids = (isinstance(pid, (int, long)) and [pid] or pid)
         self._sqlite_connection.executemany('delete from positions where id = ?', map(lambda a: (a,), pids))
-        for (acc, ) in self._sqlite_connection.execute('select id from accounts'):
-            self.recalculate_positions(acc)
+        self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -1775,6 +1774,7 @@ class sqlite_model(common_model):
         self.go_to_action(action_id)
         for (aid, ) in self._sqlite_connection.execute('select id from history_steps where id >= ? order by id desc', [action_id]).fetchall():
             self._remove_this_action(aid)
+        self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -1878,10 +1878,13 @@ class sqlite_model(common_model):
     def recalculate_all_temporary(self, ):
         """recalculate all temporary tables in the database
         """
+        self._sqlite_connection.execute('delete from deals_view')
+        self._sqlite_connection.execute('delete from positions_view')
+        self._sqlite_connection.execute('delete from account_statistics')
         for (aid, ) in self._sqlite_connection.execute("select distinct account_id from deals"):
-            self.recalculate_deals(aid)
-            self.recalculate_positions(aid)
-            self.recalculate_statistics(aid)
+            self.calculate_deals(aid)
+            self.calculate_positions(aid)
+            self._calculate_statistics(aid)
 
     def list_account_statistics(self, aid, sort_by = ['parameter_name']):
         """\brief return iterator object returning statistics of given account
@@ -2038,6 +2041,7 @@ class sqlite_model(common_model):
 
         money = self.get_money(id_or_name)
         self._sqlite_connection.update("moneys", sets, "id = ?", (money["id"], ))
+        self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
@@ -2125,7 +2129,6 @@ class sqlite_model(common_model):
                                                                     
         self.fix_groups()
         self.fix_positions()
-        self.recalculate_all_temporary()
         if do_recalc:
             self.recalculate_all_temporary()
         
@@ -2284,6 +2287,7 @@ class sqlite_model(common_model):
                 flds[name] = val
         if len(flds) > 0:
             self._sqlite_connection.update('points', flds, 'id = ?', (point_id, ))
+            self.recalculate_all_temporary()
             
     @raise_db_closed
     @in_transaction
@@ -2407,6 +2411,7 @@ class sqlite_model(common_model):
             return
         try:
             self._sqlite_connection.update('account_in_out', setf, 'id = ?', (aioid,))
+            self.recalculate_all_temporary()
         except sqlite3.IntegrityError as e:
             raise od_exception_db_integrity_error(str(e))
         except sqlite3.OperationalError as e:
@@ -2483,6 +2488,7 @@ class sqlite_model(common_model):
                 try:
                     self._sqlite_connection.execute('delete from account_in_out where account_id = ? and datetime = ?',
                                                     [acc['id'], dtm])
+                    self.recalculate_all_temporary()
                 except sqlite3.OperationalError as e:
                     raise od_exception_db_error(str(e))
                 except sqlite3.IntegrityError as e:
@@ -2493,6 +2499,7 @@ class sqlite_model(common_model):
             if isinstance(id_or_account, int):
                 try:
                     self._sqlite_connection.execute('delete from account_in_out where id = ?', [id_or_account])
+                    self.recalculate_all_temporary()
                 except sqlite3.OperationalError as e:
                     raise od_exception_db_error(str(e))
                 except sqlite3.IntegrityError as e:

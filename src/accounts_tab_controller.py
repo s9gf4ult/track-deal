@@ -59,7 +59,6 @@ class accounts_tab_controller(object):
 
     def update_account_list(self):
         """update list of properties and statistics of selected account
-        \todo need implementation
         """
         if not self._parent.connected():
             return
