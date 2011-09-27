@@ -944,6 +944,42 @@ class sqlite_model_test(unittest.TestCase):
         self.assertEqual(1, len(self.model.list_deals().fetchall()))
         self.model.taremove_action(acts[1]['id'])
         self.assertEqual(0, len(self.model.list_accounts().fetchall()))
+
+    def test_remove_position_merge_leaves(self, ):
+        """\brief test mergin the deals after positions delete
+        """
+        (mid, aid, paid) = self.deals_init()
+        d1 = self.model.tacreate_deal(aid, {'paper_id' : paid,
+                                            'count' : 10,
+                                            'direction' : -1,
+                                            'points' : 10,
+                                            'datetime' : datetime(2010, 10, 10)})
+        d2 = self.model.tacreate_deal(aid, {'paper_id' : paid,
+                                            'count' : 4,
+                                            'direction' : 1,
+                                            'points' : 11,
+                                            'datetime' : datetime(2010, 10, 10, 2, 0)})
+        self.assertEqual(2, len(self.model.list_deals_view_with_condition(None, []).fetchall()))
+        print('first list')
+        self.model.tamake_positions_for_whole_account(aid)
+        self.assertEqual(1, len(self.model.list_positions().fetchall()))
+        self.assertEqual(3, len(self.model.list_deals_view_with_condition(None, []).fetchall()))
+        print('second list')
+        d3 = self.model.tacreate_deal(aid, {'paper_id' : paid,
+                                            'count' : 4,
+                                            'direction' : 1,
+                                            'points' : 11.5,
+                                            'datetime' : datetime(2010, 10, 10, 3, 0)})
+        self.assertEqual(4, len(self.model.list_deals_view_with_condition(None, []).fetchall()))
+        print('third list')
+        self.model.tamake_positions_for_whole_account(aid)
+        self.assertEqual(5, len(self.model.list_deals_view_with_condition(None, []).fetchall()))
+        ps = self.model.list_positions().fetchall()
+        print('before remove')
+        self.model.taremove_position(map(lambda a: a['id'], ps))
+        print('removed')
+        self.assertEqual(3, len(self.model.list_deals_view_with_condition(None, []).fetchall()))
+        print('end')
         
         
 if __name__ == '__main__':

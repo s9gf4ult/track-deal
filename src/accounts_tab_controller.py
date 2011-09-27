@@ -64,6 +64,7 @@ class accounts_tab_controller(object):
             return
         cacc = self._parent.model.get_current_account()
         if cacc == None:
+            self.account_list.update_rows([])
             return
         stats = self._parent.model.list_account_statistics(cacc['id']).fetchall()
         self.account_list.update_rows(map(lambda a: (a['parameter_name'], (format_number(a['value']) if isinstance(a['value'], (int, float)) else a['value'])), stats))
