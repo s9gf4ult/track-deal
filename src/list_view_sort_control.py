@@ -141,7 +141,7 @@ class list_view_sort_control:
                 if self.sort_callback != None:
                     self.sort_callback(column, order, params)
             else:
-                self.treeview.get_model().set_sort_column_id(col_id, order)
+                self.treeview.get_model().set_sort_column_id(col_id + 1, order)
             column.set_sort_indicator(True)
             column.set_sort_order(order)
         else:
