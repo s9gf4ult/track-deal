@@ -1415,6 +1415,19 @@ class sqlite_model(common_model):
         """
         pass
 
+    def _merge_deals_leaves(self, ):
+        """\brief delete child deals if their field "position_id" is null
+        """
+        def do_it():
+            (cnt, ) = self._sqlite_connection.execute('select count(d1.id) from deals d1 where d1.parent_deal_id is not null and d1.position_id is null and not exists(select d2.id from deals d2 where d2.parent_deal_id = d1.id)').fetchone() # find deals which is not a root deal, not assigned to any position and has no child deals
+            if cnt == 0:
+                return False
+            self._sqlite_connection.execute('delete from deals where id in (select d1.id from deals d1 where d1.parent_deal_id is not null and d1.position_id is null and not exists(select d2.id from deals d2 where d2.parent_deal_id = d1.id))')
+            return True
+
+        while do_it():
+            pass
+
     def remove_position(self, pid):
         """\brief remove one or more positions
         \param pid - int or list of ints, position id one or more
@@ -1422,6 +1435,7 @@ class sqlite_model(common_model):
         """
         pids = (isinstance(pid, (int, long)) and [pid] or pid)
         self._sqlite_connection.executemany('delete from positions where id = ?', map(lambda a: (a,), pids))
+        self._merge_deals_leaves()
         self.recalculate_all_temporary()
 
     @raise_db_closed
@@ -2193,7 +2207,7 @@ class sqlite_model(common_model):
                     
     def list_deals_view_with_condition(self, condition, condargs,  order_by = []):
         """\brief return iteration object to receive elements from deals_view
-        \param condition - str, part of query after `where` keywork
+        \param condition - str or None, part of query after `where` keywork
         \param condargs - list of arguments for query
         \param order_by - list of strings
         """
