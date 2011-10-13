@@ -5,7 +5,7 @@ import shutil
 import gtk
 import os
 from modifying_tab_control import modifying_tab_control
-from common_methods import *
+from common_methods import show_and_print_error,show_error,make_builder,is_null_or_empty
 
 class main_window_controller(object):
     """
@@ -144,8 +144,7 @@ class main_window_controller(object):
                 try:
                     self._parent.open_existing_sqlite(diag.get_filename())
                 except Exception as e:
-                    show_error(e.__str__(), self.builder.get_object("main_window"))
-                    print(traceback.format_exc())
+                    show_and_print_error(e, self.builder.get_object('main_window'))
             diag.destroy()
             fl.destroy()
             self._parent.call_update_callback()
