@@ -103,11 +103,11 @@ class deal_adder_control:
                               (self.instrument.set_value, "paper_id"),
                               (self.price.set_value, "points"),
                               (self.count.set_value, "count"),
-                              (self.commission.set_value, "commission"),
-                              (self.attributes.set_attributes, "user_attributes")]:
+                              (self.commission.set_value, "commission")]:
             m = gethash(d, key)
             if m != None:
                 setter(m)
+        self.attributes.set_attributes((d['user_attributes'] if d.has_key('user_attributes') else None))
 
     def flush_attributes(self):
         self.attributes.flush()

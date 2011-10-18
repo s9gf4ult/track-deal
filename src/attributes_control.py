@@ -44,8 +44,11 @@ class attributes_control:
             
     def set_attributes(self, attributes):
         """
-        \param attributes has table {key : value}
+        \param attributes has table {key : value} or None
         """
+        if attributes == None:
+            self.flush()
+            return
         u = []
         x = attributes.keys()
         x.sort()
