@@ -156,6 +156,7 @@ class deal_adder_control:
         self.price.set_value(0)
         self.commission.set_value(0)
         self.direction.set_value(-1)
+        self.flush_attributes()
 
     def update_adder(self, ):
         """\brief update posible values for account and instrument widget

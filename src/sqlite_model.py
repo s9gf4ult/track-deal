@@ -1960,7 +1960,7 @@ class sqlite_model(common_model):
                 self._add_statistic_parameter(aid, name, val)
         (secs, ) = self._sqlite_connection.execute('select max(datetime) - min(datetime) from deals').fetchone()
         if secs != None:
-            days = trunc(secs / (24 * 60 * 60))
+            days = round(secs / (24 * 60 * 60) + 0.5) 
             self._add_statistic_parameter(aid, u'Количество дней торговли', days)
             (active_days, ) = self._sqlite_connection.execute('select count(*) from (select distinct date from deals_view)').fetchone()
             if active_days != None:
