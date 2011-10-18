@@ -15,12 +15,11 @@ def iter_loaders():
         if is_pkg:
             ldr = loader.find_module(name)
             m = ldr.load_module(name)
-            dn = os.path.dirname(m.__file__)
-            iconpath = os.path.join(dn, 'icon.png')
+            f = m.get_icon_filename()
             icon = None
-            if os.path.isfile(iconpath):
-                icon = gtk.gdk.pixbuf_new_from_file(iconpath)
-            yield (name, icon, m.get_dialog_class())
+            if f != None:
+                icon = gtk.gdk.pixbuf_new_from_file(f)
+            yield (m.get_loader_name(), icon, m.get_dialog_class())
                 
 
                 

@@ -11,9 +11,11 @@ def get_dialog_class():
 def get_icon_filename():
     """\brief return string with full path to icon
     """
-    return None
+    import os.path as path
+    curpath = path.dirname(__file__)
+    return path.join(curpath, 'icon.png')
 
-def get_name():
+def get_loader_name():
     """\brief return string with name of loader
     """
     return u'Отчет брокера "Открытие"'
