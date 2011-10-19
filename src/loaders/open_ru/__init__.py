@@ -1,12 +1,14 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
+from open_ru_loader_dialog import open_ru_loader_dialog
+
 def get_dialog_class():
     """
     \brief return the class representing dialog to run
     when importing the data from some stuff
     """
-    return None
+    return open_ru_loader_dialog
 
 def get_icon_filename():
     """\brief return string with full path to icon

@@ -5,12 +5,14 @@ import gtk
 from common_methods import *
 import sources
 from od_exceptions import od_exception_config_key_error
+from loader_dialog import loader_dialog
 
 class deals_tab_controller(object):
     def __init__(self, parent):
         self._parent = parent
         def shorter(objname, signal, method):
             self._parent.window.builder.get_object(objname).connect(signal, method)
+        self.loader_dialog = loader_dialog(self._parent)
         shorter("call_filter", "activate", self.call_filter_activate)
         shorter("delete_deals", "activate", self.delete_deals_activate)
         shorter("add_deal", "activate", self.add_deal_activate)
@@ -120,11 +122,9 @@ class deals_tab_controller(object):
     def deals_load_open_ru_activate(self, action):
         if not self._parent.connected():
             return
-        self._parent.report_importer.update_importer()
-        ret = self._parent.report_importer.run()
+        ret = self.loader_dialog.run()
         if ret == gtk.RESPONSE_ACCEPT:
             self._parent.call_update_callback()
-                
 
     def sorted_callback(self, column, order, params):
         if params != None:
