@@ -3,13 +3,15 @@
 ## open_ru_loader_dialog ##
 
 import gtk, os
+from combo_select_control import combo_select_control
+from common_methods import show_error
 
 class open_ru_loader_dialog(object):
     """\brief 
     """
     def __init__(self, parent):
         """\brief 
-        \param parent
+        \param parent - loader_dialog class instance
         """
         self._parent = parent
         self.builder = gtk.Builder()
@@ -30,16 +32,29 @@ class open_ru_loader_dialog(object):
         self.repo = self.builder.get_object('load_repo')
         self.accounts = self.builder.get_object('load_accounts')
         self.account = self.builder.get_object('account')
+        self.account_control = combo_select_control(self.account)
 
     def run(self, ):
         """\brief run dialog, load data if necessary and hide window
         """
+        if not self._parent._parent.connected():
+            return
+        self.prepare_dialog()
         self.window.show_all()
         ret = self.window.run()
         if ret == gtk.RESPONSE_ACCEPT:
-            self.load_data()
+            if not self.load_data():
+                ret = gtk.RESPONSE_CANCEL
         self.window.hide()
         return ret
+
+    def prepare_dialog(self, ):
+        """\brief fill all necessary fields in dialog before show
+        """
+        model = self._parent._parent.get_model()
+        self.account_control.update_answers([(ac['id'], ac['name']) for ac in model.list_accounts().fetchall()])
+        if model.get_current_account() != None:
+            self.account_control.set_value(model.get_current_account()['id'])
 
     def destroy(self, ):
         """\brief destroy dialog
@@ -54,4 +69,8 @@ class open_ru_loader_dialog(object):
     def load_data(self, ):
         """\brief load data into selected account
         """
-        return None
+        account = self.account_control.get_value()
+        if account == None:
+            show_error(u'You need to select account to load data into', self.window)
+            return False
+        return True

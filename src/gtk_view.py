@@ -70,7 +70,12 @@ class gtk_view(common_view):
 
         self.call_update_callback()
         
-    
+    def get_model(self, ):
+        """\brief return current using model
+        """
+        return self.model
+
+        
     def run(self, ):
         """show main window and initialize all the necessary
         """

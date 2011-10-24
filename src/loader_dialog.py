@@ -10,10 +10,11 @@ class loader_dialog(object):
     """
     def __init__(self, parent):
         """\brief constructor
+        \param parent - gtk_view class instance
         """
-        self.parent = parent
+        self._parent = parent
         self.window = gtk.Dialog(flags=gtk.DIALOG_MODAL)
-        self.window.set_transient_for(self.parent.window.builder.get_object('main_window'))
+        self.window.set_transient_for(self._parent.window.builder.get_object('main_window'))
         self.window.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
         self.buttons = []
         for (name, icon, dialog_class) in loaders.iter_loaders():

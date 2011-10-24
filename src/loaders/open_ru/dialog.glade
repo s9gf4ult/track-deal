@@ -4,6 +4,8 @@
   <!-- interface-naming-policy project-wide -->
   <object class="GtkFileChooserDialog" id="dialog">
     <property name="border_width">5</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
     <property name="type_hint">normal</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
@@ -45,6 +47,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -60,6 +63,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
