@@ -4,7 +4,9 @@
 
 import gtk, os
 from combo_select_control import combo_select_control
-from common_methods import show_error
+from common_methods import show_error, show_and_print_error
+from loaders.open_ru.open_ru_loader import open_ru_loader
+from loaders.open_ru.open_ru_source import open_ru_source
 
 class open_ru_loader_dialog(object):
     """\brief 
@@ -73,4 +75,14 @@ class open_ru_loader_dialog(object):
         if account == None:
             show_error(u'You need to select account to load data into', self.window)
             return False
-        return True
+        loader = open_ru_loader()
+        try:
+            loader.load(self._parent._parent.get_model(),
+                        open_ru_source(self.window.get_filename(),
+                                       self.account_control.get_value(), # account id
+                                       self.repo.get_active(), # load repo deals
+                                       self.accounts.get_active())) # load account IO
+            return True
+        except Exception as e:
+            show_and_print_error(e, self.window)
+            return False
