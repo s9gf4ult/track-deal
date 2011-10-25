@@ -1,4 +1,10 @@
 src/*.pyc
+src/loaders/*.pyc
+src/loaders/*/*.pyc
+src/*.py~
+src/loaders/*.py~
+src/loaders/*/*.py~
 .ropeproject
 html
 tests/*.pyc
+tests/*.py~
