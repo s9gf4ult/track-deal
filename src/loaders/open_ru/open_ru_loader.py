@@ -7,6 +7,7 @@ import sys
 from xml.dom import minidom
 from common_methods import reduce_by_string
 import hashlib
+from datetime import datetime
 
 class open_ru_loader(common_loader):
     """\brief loader for open.ru
@@ -74,14 +75,15 @@ class open_ru_loader(common_loader):
     def get_forts_deals(self, domparsed):
         """\brief return list of deals for forts report type
         \param domparsed
-        list of \ref report_deal objects
+        \return list of \ref report_deal objects
         """
         report = domparsed.getElementsByTagName('report')[0]
         deals = report.getElementsByTagName('common_deal')[0].getElementsByTagName('item')
         report_deals = []
         for deal in deals:
             d = report_deal()
-            d.set_stock_name(deal.getAttribute('security_symb'))
+            d.set_market_name('FORTS')
+            d.set_stock_name(deal.getAttribute('security_name'))
             d.set_dtm(deal.getAttribute('deal_date'))
             d.set_points(deal.getAttribute('price'))
             d.set_count(deal.getAttribute('quantity'))
@@ -96,12 +98,141 @@ class open_ru_loader(common_loader):
                                                            'deal_number',
                                                            'deal_sign']])).hexdigest())
             report_deal.append(d)
+        atl = report.getElementsByTagName('account_totally_line')[0]
+        atl_items = atl.getElementsByTagName('item')
+        broker = find_in_list(lambda a: a.getAttribute(u'total_description') == u'Вознаграждение Брокера', atl_items)
+        board = find_in_list(lambda a: a.getAttribute(u'total_description') == u'Биржевой сбор', atl_items)
+        brcomm = (0 if broker == None else float(atl_items[broker].getAttribute('total_value')))
+        boardcomm = (0 if board == None else float(atl_items[board].getAttribute('total_value')))
+        summcomm = brcomm + boardcomm # summary commission from the report
+        specific_comm = summcomm / sum([abs(d.get_volume()) for d in report_deals])
+        for deal in report_deals:
+            deal.set_commission(specific_comm * abs(deal.get_volume())) # set commission to the deal
+        return report_deals
+
+    def get_micex_deals(self, domparsed):
+        """\brief get deals from micex report
+        \param domparsed
+        \return list of \ref report_deal class instances
+        """
+        report = domparsed.getElementsByTagName('report')[0]
+        deals = report.getElementsByTagName('common_deal')[0].getElementsByTagName('item')
+        report_deals = []
+        for deal in report_deals:
+            d = report_deal()
+            d.set_market_name('MICEX')
+            d.set_stock_name(deal.getAttribute('security_name'))
+            d.set_dtm(deal.getAttribute('deal_time'))
+            d.set_count(deal.getAttribute('quantity'))
+            d.set_points(deal.getAttribute('price'))
+            d.set_direction(deal.getAttribute('direction'))
+            d.set_sha1(hashlib.sha1(reduce_by_string('', [deal.getAttribute(attrname) for attrname in
+                                                          ['deal_time',
+                                                           'security_name',
+                                                           'price',
+                                                           'quantity',
+                                                           'order_number',
+                                                           'deal_number',
+                                                           'deal_sign',
+                                                           'board_name',
+                                                           'broker_comm',
+                                                           'stock_comm']])).hexdigest())
+            report_deals.append(d)
+        return report_deals
+
+    def get_account_ios(self, source):
+        """\brief return list of account in out 
+        \param source \ref open_ru_source instance
+        \return list of \ref account_io
+        """
+        parsed = minidom.parse(source.get_filename())
+        nontr = parsed.getElementsByTagName('report')[0].getElementsByTagName('nontrade_money_operation')[0]
+        items = nontr.getElementsByTagName('item')
+        ret = []
+        for it in itmes:
+            aio = account_io()
+            aio.set_dtm(it.getAttribute('operation_date'))
+            aio.set_value(it.getAttribute('amount'))
+            aio.set_comment(it.getAttribute('comment'))
+            aio.set_sha1(hashlib.sha1(reduce_by_string('',[it.getAttribute(attrname) for attrname in
+                                                           ['operation_date',
+                                                            'amount',
+                                                            'comment',
+                                                            'ground']])).hexdigest())
+            ret.append(it)
+        return ret
+
+    def get_repo_deals(self, source):
+        """\brief get repo deals from micex report
+        \param source
+        \return list of \ref report_deal instances
+        """
+        parsed = minidom.parse(source.get_filename())
+        repdeal = parsed.getElementsByTagName('report')[0].getElementsByTagName('repo_deal')[0]
+        items = repdeal.getElementsByTagName('item')
+        report_type = self.get_report_type(parsed)
+        if report_type not in ['micex', 'forts']:
+            raise Exception('report type must be micex or forts')
+        ret = []
+        for item in items:
+            d = report_deal()
+            d.set_market_name(('FORTS' if report_type == 'forts' else 'MICEX'))
+            d.set_stock_name(item.getAttribute('security_name'))
+            try:
+                d.set_dtm(item.getAttribute('deal_time'))
+            except:
+                d.set_dtm(item.getAttribute('deal_date'))
+            
+                
+        # self._market_name = None
+        # self._stock_name = None
+        # self._dtm = None
+        # self._points = None
+        # self._count = None
+        # self._direction = None
+        # self._commission = None
+        # self._dbid = None
+        # self._attributes = {}
+        # self._user_attributes = {}
+        # self._sha1 = None
+
         
+        
+
+    def get_papers(self, deals):
+        """\brief get papers from deals
+        \param deals
+        \return list of report_paper objects
+        """
+        pass
+
+    def append_papers(self, model, papers):
+        """\brief 
+        \param model
+        \param papers list of \ref report_paper
+        """
+        pass
+
+    def append_deals(self, model, deals):
+        """\brief 
+        \param model
+        \param deals list of \ref report_deal
+        """
+        pass
+
+    def append_account_io(self, model, account_ios):
+        """\brief 
+        \param model
+        \param account_ios - list of \ref account_io
+        """
+        pass
+
 
 class report_deal(object):
     """\brief 
     """
     def __init__(self, ):
+        self._market_name = None
         self._stock_name = None
         self._dtm = None
         self._points = None
@@ -109,15 +240,37 @@ class report_deal(object):
         self._direction = None
         self._commission = None
         self._dbid = None
-        self._attributes = None
+        self._attributes = {}
+        self._user_attributes = {}
         self._sha1 = None
+
+    def set_market_name(self, market_name):
+        """\brief Setter for property market_name
+        \param market_name
+        """
+        self._market_name = unicode(market_name)
+        if len(self._market_name) == 0:
+            raise Exception('market_name must not be empty')
+
+    def get_market_name(self):
+        """\brief Getter for property market_name
+        """
+        return self._market_name
+        
+    def get_volume(self, ):
+        """\brief calculate volume
+        \retval float - volume of the deal
+        """
+        return self.get_direction() * self.get_count() * self.get_points()
     
     def set_stock_name(self, stock_name):
         """\brief Setter for property stock_name
         \param stock_name
         """
         assert(isinstance(stock_name, basestring))
-        self._stock_name = stock_name
+        self._stock_name = unicode(stock_name)
+        if len(self._stock_name) == 0:
+            raise Exception('stock_name must not be empty')
 
     def get_stock_name(self):
         """\brief Getter for property stock_name
@@ -178,6 +331,8 @@ class report_deal(object):
         \param commission
         """
         self._commission = float(commission)
+        if self._commission < 0:
+            raise Exception('commission must be >= 0')
 
     def get_commission(self):
         """\brief Getter for property commission
@@ -189,6 +344,8 @@ class report_deal(object):
         \param dbid
         """
         self._dbid = dbid
+        if self._dbid == None:
+            raise Exception('dbid must not be None')
 
     def get_dbid(self):
         """\brief Getter for property dbid
@@ -206,6 +363,18 @@ class report_deal(object):
         """\brief Getter for property attributes
         """
         return self._attributes
+
+    def set_user_attributes(self, user_attributes):
+        """\brief Setter for property user_attributes
+        \param user_attributes
+        """
+        assert(isinstance(user_attributes, dict))
+        self._user_attributes = user_attributes
+
+    def get_user_attributes(self):
+        """\brief Getter for property user_attributes
+        """
+        return self._user_attributes
 
     def set_sha1(self, sha1):
         """\brief Setter for property sha1
@@ -258,3 +427,44 @@ class report_paper(object):
         """\brief Getter for property dbid
         """
         return self._dbid
+
+class account_io(object):
+    """\brief account io object
+    """
+    def set_dtm(self, dtm):
+        """\brief Setter for property dtm
+        \param dtm
+        """
+        if isinstance(dtm, datetime):
+            self._dtm = dtm
+        elif isinstance(dtm, basestring):
+            self._dtm = datetime.strptime(dtm, '%Y-%m-%dT%H:%M:%S')
+        else:
+            raise Exception('dtm must be datetime or string')
+
+    def get_dtm(self):
+        """\brief Getter for property dtm
+        """
+        return self._dtm
+
+    def set_value(self, value):
+        """\brief Setter for property value
+        \param value
+        """
+        self._value = float(value)
+        
+    def get_value(self):
+        """\brief Getter for property value
+        """
+        return self._value
+
+    def set_comment(self, comment):
+        """\brief Setter for property comment
+        \param comment
+        """
+        self._comment = unicode(comment)
+        
+    def get_comment(self):
+        """\brief Getter for property comment
+        """
+        return self._comment
