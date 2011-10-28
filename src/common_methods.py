@@ -171,6 +171,12 @@ def show_and_print_error(error, window):
     show_error(ret, window)
     sys.stderr.write(traceback.format_exc())
 
+def print_error(error):
+    """\brief 
+    \param error
+    """
+    sys.stderr.write(traceback.format_exc())
+    
 def no_reaction(func):
     """\~english \brief decorator
 
@@ -798,3 +804,28 @@ def get_next_month_date(data):
         return datetime.datetime(data.year, data.month + 1, data.day)
     else:
         return datetime.datetime(data.year + 1, 1, data.day)
+
+class replace_exception(object):
+    """\brief Decorator who catching one and throwing another exception
+    """
+    def __init__(self, catching, throwing, print_error = False):
+        """\brief 
+        \param catching - exception to catch
+        \param throwing - exception to throw
+        """
+        self._catching = catching
+        self._throwing = throwing
+        self._print_error = print_error
+        
+    def __call__(self, method):
+        """\brief return recorated method
+        \param method method to decorate
+        """
+        def ret(*args, **kargs):
+            try:
+                return method(*args, **kargs)
+            except self._catching as e:
+                if self._print_error:
+                    print_error(e)
+                raise self._throwing(str(e))
+        return ret

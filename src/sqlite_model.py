@@ -6,7 +6,7 @@ from common_model import common_model
 from common_view import common_view
 from sconnection import sconnection
 import sources
-from common_methods import raise_db_closed, raise_db_opened, remover_decorator, in_transaction, in_action, pass_to_method, reduce_by_string, remhash, gethash, any_to_datetime, format_abs_value, order_by_print, is_null_or_empty
+from common_methods import raise_db_closed, raise_db_opened, remover_decorator, in_transaction, in_action, pass_to_method, reduce_by_string, remhash, gethash, any_to_datetime, format_abs_value, order_by_print, is_null_or_empty, replace_exception
 from od_exceptions import od_exception_report_error, od_exception_parameter_error, od_exception_db_integrity_error, od_exception_action_cannot_create, od_exception_action_does_not_exists, od_exception_db_error, od_exception
 from copy import copy
 from datetime import datetime, date, timedelta
@@ -36,6 +36,7 @@ class sqlite_model(common_model):
     def get_paper_type(self, name_or_id):
         """\brief return paper_type object by name or id
         \param name_or_id - int or str
+        \return dictionary with paper type properties
         """
         if isinstance(name_or_id, basestring):
             return self._sqlite_connection.execute_select('select * from paper_types where name = ?', [name_or_id]).fetchone()
@@ -44,6 +45,8 @@ class sqlite_model(common_model):
         else:
             raise od_exception_parameter_error('name_or_id must be int or str not {0}'.format(type(name_or_id)))
 
+    @replace_exception(sqlite3.OperationalError, od_exception_db_error)
+    @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
     def create_paper_type(self, name, comment = ''):
         """\brief create new paper type
         \param name - str
@@ -51,13 +54,8 @@ class sqlite_model(common_model):
         \return int - id of new paper type
         \note view must use \ref tacreate_paper_type instead
         """
-        try:
-            return self._sqlite_connection.insert('paper_types', {'name' : name,
-                                                                  'comment' : comment})
-        except sqlite3.IntegrityError as e:
-            raise od_exception_db_integrity_error(str(e))
-        except sqlite3.OperationalError as e:
-            raise od_exception_db_error(str(e))
+        return self._sqlite_connection.insert('paper_types', {'name' : name,
+                                                              'comment' : comment})
 
     # пример есиользования декораторов
     @raise_db_closed                    # поднять исключение если нет коннекта к базе
@@ -300,6 +298,8 @@ class sqlite_model(common_model):
         """
         return map(lambda a: a[0], self._sqlite_connection.execute("select name from database_attributes"))
     
+    @replace_exception(sqlite3.OperationalError, od_exception_db_error)
+    @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
     def create_paper(self, type, name, stock = None, class_name = None, full_name = None):
         """creates new paper and returns it's id
         
@@ -309,19 +309,14 @@ class sqlite_model(common_model):
         \param class_name - str
         \param full_name - str
         """
-        try:
-            t = self.get_paper_type(type)
-            if t == None:
-                raise od_exception_parameter_error('There is no such paper type {0}'.format(type))
-            return self._sqlite_connection.insert("papers", {"type" : t['id'],
-                                                             "stock" : stock,
-                                                             "class" : class_name,
-                                                             "name" : name,
-                                                             "full_name" : full_name})
-        except sqlite3.IntegrityError as e:
-            raise od_exception_db_integrity_error(str(e))
-        except sqlite3.OperationalError as e:
-            raise od_exception_db_integrity_error(str(e))
+        t = self.get_paper_type(type)
+        if t == None:
+            raise od_exception_parameter_error('There is no such paper type {0}'.format(type))
+        return self._sqlite_connection.insert("papers", {"type" : t['id'],
+                                                         "stock" : stock,
+                                                         "class" : class_name,
+                                                         "name" : name,
+                                                         "full_name" : full_name})
 
     @raise_db_closed
     @in_transaction
@@ -342,7 +337,9 @@ class sqlite_model(common_model):
     def get_paper(self, type_or_id, name = None):
         """returns paper by name or by id
         if there is no one returns None
-        \param type_or_id 
+        \param type_or_id
+        \param name
+        \return dictionary with paper properties
         """
         if name == None:
             if isinstance(type_or_id, int):
@@ -438,7 +435,8 @@ class sqlite_model(common_model):
         """
         pass
 
-
+    @replace_exception(sqlite3.OperationalError, od_exception_db_error)
+    @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
     def create_candles(self, paper_id, candles):
         """Creates one or several candles of paper `paper_id`
         \param paper_id 
@@ -574,6 +572,8 @@ class sqlite_model(common_model):
         q = "select * from moneys{0}".format((len(order_by) > 0 and " order by {0}".format(reduce_by_string(", ", order_by))  or ""))
         return self._sqlite_connection.execute_select(q)
     
+    @replace_exception(sqlite3.OperationalError, od_exception_db_error)
+    @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
     def create_point(self, paper_id, money_id, point, step):
         """Creates point explanation and return it's id
         \param paper_id 
@@ -650,9 +650,8 @@ class sqlite_model(common_model):
         """
         pass
 
-
-
-
+    @replace_exception(sqlite3.OperationalError, od_exception_db_error)
+    @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
     def create_account(self, name, money_id_or_name, money_count, comment = None):
         """Creates a new account
         \param name 
@@ -663,7 +662,7 @@ class sqlite_model(common_model):
         if isinstance(money_id_or_name, basestring):
             mid = gethash(self.get_money(money_id_or_name), "id")
             if mid == None:
-                raise od_exception("There is no such money {0}".format(money_id_or_name))
+                raise od_exception_parameter_error("There is no such money {0}".format(money_id_or_name))
         else:
             mid = money_id_or_name
         aid = self._sqlite_connection.insert("accounts", {"name" : name, "comments" : comment, "money_id" : mid, "money_count" : money_count})
@@ -769,7 +768,8 @@ class sqlite_model(common_model):
         else:
             raise od_exception_parameter_error('aid_or_name must be string or integer')
 
-            
+    @replace_exception(sqlite3.OperationalError, od_exception_db_error)
+    @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
     def create_deal(self, account_id, deal, do_recalc = True):
         """creates one or more deal with attributes, return id of last created
         \param account_id 
@@ -784,13 +784,17 @@ class sqlite_model(common_model):
         direction - (-1) means BY, 1 means SELL\n
         points - price in points\n
         commission - summarized commission\n
-        datetime - datetime.datetime instance
+        datetime - datetime.datetime instance\n
+        user_attributes - dict of with user-created attributes\n
+        stored_attributes - dict with special attributes\n
         \param do_recalc if True recalculation of temporarry tables will be executed
         \return int - deal id
         \note \ref tacreate_deal must be used instead by the view
         """
         did = None
         deals = (isinstance(deal, dict) and [deal] or deal)
+        if len(deals) == 0:
+            raise Exception('There is no one deal to add')
         paper_deal = None
         for dd in deals:
             dd = copy(dd)
@@ -815,7 +819,7 @@ class sqlite_model(common_model):
             if do_recalc:
                 if paper_deal == None or (paper_deal[1] > dd["datetime"]) or (paper_deal[1] == dd["datetime"] and paper_deal[0] > did):
                     paper_deal = (did, dd["datetime"])
-        if do_recalc:
+        if do_recalc and paper_deal != None:
             self.recalculate_deals(account_id, paper_deal[0])
         return did
 
@@ -2367,25 +2371,26 @@ class sqlite_model(common_model):
         else:
             self.recalculate_all_temporary()
             self.commit_transacted_action()
-            
-    def create_account_in_out(self, account, dtm, money_count, comment = ''):
+
+    @replace_exception(sqlite3.OperationalError, od_exception_db_error)
+    @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
+    def create_account_in_out(self, account, dtm, money_count, comment = '', do_recalc = True):
         """\brief create new account in out object and return its id
         \param account - int or str, id of account or name
         \param dtm - datetime instance
         \param money_count - float, count of money to increase account in (negative value to discard money from the account)
+        \param comment - string with comment
+        \param do_recalc - bool if True recalculate temporary tables after addition of new account IO operation
         """
         ac = self.get_account(account)
         if ac == None:
             raise od_exception_parameter_error('There is no such account {0}'.format(account))
-        try:
-            return self._sqlite_connection.insert('account_in_out', {'account_id' : ac['id'],
-                                                                     'datetime' : dtm,
-                                                                     'money_count' : money_count,
-                                                                     'comment' : comment})
-        except sqlite3.IntegrityError as e:
-            raise od_exception_db_integrity_error(str(e))
-        except sqlite3.OperationalError as e:
-            raise od_exception_db_error(str(e))
+        return self._sqlite_connection.insert('account_in_out', {'account_id' : ac['id'],
+                                                                 'datetime' : dtm,
+                                                                 'money_count' : float(money_count),
+                                                                 'comment' : comment})
+        if do_recalc == True:
+            self.recalculate_all_temporary()
 
     @raise_db_closed
     @in_transaction
