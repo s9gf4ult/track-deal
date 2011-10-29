@@ -2,19 +2,22 @@
 # -*- coding: utf-8 -*-
 ## sqlite_model ##
 
+from common_methods import raise_db_closed, raise_db_opened, remover_decorator, \
+    in_transaction, in_action, pass_to_method, reduce_by_string, remhash, gethash, \
+    any_to_datetime, format_abs_value, order_by_print, is_null_or_empty, \
+    replace_exception
 from common_model import common_model
-from common_view import common_view
-from sconnection import sconnection
-import sources
-from common_methods import raise_db_closed, raise_db_opened, remover_decorator, in_transaction, in_action, pass_to_method, reduce_by_string, remhash, gethash, any_to_datetime, format_abs_value, order_by_print, is_null_or_empty, replace_exception
-from od_exceptions import od_exception_report_error, od_exception_parameter_error, od_exception_db_integrity_error, od_exception_action_cannot_create, od_exception_action_does_not_exists, od_exception_db_error, od_exception
 from copy import copy
-from datetime import datetime, date, timedelta
-import sqlite3
-import traceback
-import sys
+from datetime import datetime, timedelta
+from od_exceptions import od_exception_parameter_error, \
+    od_exception_db_integrity_error, od_exception_action_cannot_create, \
+    od_exception_action_does_not_exists, od_exception_db_error, od_exception
+from sconnection import sconnection
 import os
-from math import trunc
+import sources
+import sqlite3
+import sys
+import traceback
 
 class sqlite_model(common_model):
     """
@@ -200,7 +203,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda self, parameters: "add parameters {0}".format(reduce_by_string(", ", paramters.keys())))
+    @in_action(lambda self, parameters: "add parameters {0}".format(reduce_by_string(", ", parameters.keys())))
     @pass_to_method(add_global_data)
     def taadd_global_data(self, paramters):
         """
@@ -256,11 +259,9 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda self, paramters, *args, **kargs: "add database attributes {0}".format(reduce_by_string(", ", parameter.keys())))
+    @in_action(lambda self, parameters, *args, **kargs: "add database attributes {0}".format(reduce_by_string(", ", parameters.keys())))
     @pass_to_method(add_database_attributes)
-    def taadd_database_attributes(self, paramters):
-        """
-        """
+    def taadd_database_attributes(self, parameters):
         pass
 
     def get_database_attribute(self, name):
@@ -300,18 +301,18 @@ class sqlite_model(common_model):
     
     @replace_exception(sqlite3.OperationalError, od_exception_db_error)
     @replace_exception(sqlite3.IntegrityError, od_exception_db_integrity_error)
-    def create_paper(self, type, name, stock = None, class_name = None, full_name = None):
+    def create_paper(self, paper_type, name, stock = None, class_name = None, full_name = None):
         """creates new paper and returns it's id
         
-        \param type - int or str, if str - then type is name field of paper_types table else is id
+        \param paper_type - int or str, if str - then paper_type is name field of paper_types table else is id
         \param name - str
         \param stock - str
         \param class_name - str
         \param full_name - str
         """
-        t = self.get_paper_type(type)
+        t = self.get_paper_type(paper_type)
         if t == None:
-            raise od_exception_parameter_error('There is no such paper type {0}'.format(type))
+            raise od_exception_parameter_error('There is no such paper type {0}'.format(paper_type))
         return self._sqlite_connection.insert("papers", {"type" : t['id'],
                                                          "stock" : stock,
                                                          "class" : class_name,
@@ -320,7 +321,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda self, type, name, *args, **kargs: "create paper type {0}, name {1}".format(type, name))
+    @in_action(lambda self, paper_type, name, *args, **kargs: "create paper type {0}, name {1}".format(paper_type, name))
     @pass_to_method(create_paper)
     def tacreate_paper(self, *args, **kargs):
         """
@@ -1465,10 +1466,10 @@ class sqlite_model(common_model):
         if c1 == c2:
             return (gid1, gid2)
         elif c1 > c2:
-            (g, gg) = self.split_group(gid1, c2)
+            (g, gg) = self.split_group(gid1, c2) #@UnusedVariable
             return (g, gid2)
         else:
-            (g, gg) = self.split_group(gid2, c1)
+            (g, gg) = self.split_group(gid2, c1) #@UnusedVariable
             return (gid1, g)
 
     # def __recalculate_deals_by_group_id__(self, gid, *args, **kargs):
@@ -1818,8 +1819,6 @@ class sqlite_model(common_model):
         queries_above : int, how much queries between this action and head
         """
         current = False
-        actions = 0
-        queries = 0
         cac = self.get_current_action()
         if cac != None and cac ['id'] == action_id:
             current = True
@@ -1858,7 +1857,7 @@ class sqlite_model(common_model):
         # print("========== REDOING action {0} ===========".format(action_id))
         for (q, ) in self._sqlite_connection.execute("select query from redo_queries where step_id = ? order by id", [action_id]):
             self._sqlite_connection.execute(q)
-          #  print("REDO:: {0}".format(q))
+            #  print("REDO:: {0}".format(q))
 
     def _undo_to_action(self, start_id, end_id):
         """undo all actions from `start_id` excluding to the `end_id` including in reverse order
@@ -1885,7 +1884,7 @@ class sqlite_model(common_model):
         # print("============= UNDOING action {0} ==============".format(action_id))
         for (q, ) in self._sqlite_connection.execute("select query from undo_queries where step_id = ? order by id desc", [action_id]):
             self._sqlite_connection.execute(q)
-     #       print("UNDO: {0}".format(q))
+            #       print("UNDO: {0}".format(q))
 
     def _clear_unassigned_undo_redo(self, ):
         """clear all undo / redo queries not assigned to any action
@@ -2365,7 +2364,7 @@ class sqlite_model(common_model):
                         self._sqlite_connection.insert('account_in_out', w)
                     except sqlite3.IntegrityError:
                         pass
-        except Exception as e:
+        except Exception:
             self.rollback()
             sys.stderr.write(traceback.format_exc())
         else:
@@ -2438,7 +2437,7 @@ class sqlite_model(common_model):
 
     @raise_db_closed
     @in_transaction
-    @in_action(lambda self, aioid, *args, **kargs: u'changed account_in_out object with id {0}'.format(adioid))
+    @in_action(lambda self, aioid, *args, **kargs: u'changed account_in_out object with id {0}'.format(aioid))
     @pass_to_method(change_account_in_out)
     def tachange_account_in_out(self, *args, **kargs):
         """\brief wrapper for \ref change_account_in_out

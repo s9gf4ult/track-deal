@@ -1,15 +1,15 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
+from copy import copy
+from od_exceptions import od_exception_action_cannot_create, \
+    od_exception_action_does_not_exists
+from datetime import datetime, timedelta
+import os
+import random
+import sqlite3
 import sqlite_model
 import unittest
-import sqlite3
-import random
-import os
-from common_methods import *
-from datetime import *
-import random
-from copy import copy
 
 class sqlite_model_test(unittest.TestCase):
     """
@@ -17,14 +17,6 @@ class sqlite_model_test(unittest.TestCase):
     Attributes:
     
     """
-    ##############
-    # Attributes #
-    ##############
-    
-    
-    ###########
-    # Methods #
-    ###########
     
     def setUp(self, ):
         """
@@ -114,7 +106,7 @@ class sqlite_model_test(unittest.TestCase):
         self.model.dbinit()
         self.model.dbtemp()
         pt = self.model.get_paper_type('stock')
-        paid = self.model.create_paper(type = pt['id'], name = "something", class_name = "paperclass")
+        paid = self.model.create_paper(paper_type = pt['id'], name = "something", class_name = "paperclass")
         pp = self.model.get_paper(paid)
         pid = pp["id"]
         self.assertTrue(pp.has_key("id"))
@@ -158,7 +150,7 @@ class sqlite_model_test(unittest.TestCase):
         """
         self.model.dbinit()
         self.model.dbtemp()
-        mid = self.model.create_money("RU", "rubles")
+        self.model.create_money("RU", "rubles")
         self.assertEqual(1, len(self.model.list_moneys(["name"]).fetchall()))
         self.model.remove_money("RU")
         self.assertEqual(0, len(self.model.list_moneys().fetchall()))
@@ -194,7 +186,7 @@ class sqlite_model_test(unittest.TestCase):
         self.model.dbinit()
         self.model.dbtemp()
         mid = self.model.create_money("RU")
-        aid = self.model.create_account("ac1", mid, 100)
+        self.model.create_account("ac1", mid, 100)
         self.assertEqual(1, len(self.model.list_accounts(["name"]).fetchall()))
         self.model.remove_account("ac1")
         self.assertEqual(0, len(self.model.list_accounts().fetchall()))
@@ -204,7 +196,7 @@ class sqlite_model_test(unittest.TestCase):
     def test_deals(self, ):
         """test deals
         """
-        (mid, aid, paid) = self.deals_init()
+        (mid, aid, paid) = self.deals_init() #@UnusedVariable
         did = self.model.create_deal(aid, {"paper_id" : paid, "count" : 10, "direction" : -1, "points" : 200, "commission" : 0.1, "datetime" : datetime(2010, 10, 10)})
         self.assertEqual(1, len(self.model.list_deals(aid).fetchall()))
         self.model.remove_deal(did)
@@ -218,7 +210,7 @@ class sqlite_model_test(unittest.TestCase):
     def test_positions(self, ):
         """
         """
-        (mid, aid, paid) = self.deals_init()
+        (mid, aid, paid) = self.deals_init() #@UnusedVariable
         di1 = self.model.create_deal(aid, {"paper_id" : paid,
                                            "count" : 10,
                                            "direction" : -1,
@@ -231,7 +223,7 @@ class sqlite_model_test(unittest.TestCase):
                                            "datetime" : 150})
         gid1 = self.model.create_group(di1)
         gid2 = self.model.create_group(di2)
-        pid = self.model.create_position(gid1, gid2)
+        self.model.create_position(gid1, gid2)
         self.assertEqual(1, len(self.model.list_positions(aid).fetchall()))
         for (field, value) in [("count", 9),
                                ("direction", -1),
@@ -298,11 +290,11 @@ class sqlite_model_test(unittest.TestCase):
     def test_groups(self, ):
         """special test of group making
         """
-        (mid, aid, paid) = self.deals_init()
+        (mid, aid, paid) = self.deals_init() #@UnusedVariable
         dd = datetime(2010, 10, 10)
         dds = []
         for direc in [-1, -1, 1, -1]:
-            for x in xrange(0, 5):
+            for x in xrange(0, 5): #@UnusedVariable
                 dds.append({"paper_id" : paid,
                             "points" : 100,
                             "commission" : 1,
@@ -317,7 +309,7 @@ class sqlite_model_test(unittest.TestCase):
         self.assertEqual(4, self.model._sqlite_connection.execute("select count(*) from deal_groups").fetchone()[0])
         dd += timedelta(1)
         dds = []
-        for x in xrange(0, 10):
+        for x in xrange(0, 10): #@UnusedVariable
             dds.append({"paper_id" : paid,
                         "points" : 200,
                         "commission" : 2,
@@ -343,10 +335,10 @@ class sqlite_model_test(unittest.TestCase):
     def test_group_replacement(self, ):
         """test that when you create new group with deals assigned to other group, they automatically disconnect from old group
         """
-        (mid, aid, paid) = self.deals_init()
+        (mid, aid, paid) = self.deals_init() #@UnusedVariable
         dls = []
         d = datetime(2010, 10, 10)
-        for x in xrange(0, 10):
+        for x in xrange(0, 10): #@UnusedVariable
             dls.append(self.model.create_deal(aid, {"paper_id" : paid,
                                                     "datetime" : d,
                                                     "count" : 10,
