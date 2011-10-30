@@ -1,17 +1,18 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import gtk
 from math import trunc
-import traceback
-from od_exceptions import *
+from od_exceptions import od_exception, od_exception_db_closed, \
+    od_exception_db_opened
+import cairo
 import datetime
+import gtk
+import numpy
+import pango
 import re
 import sys
 import time
-import numpy
-import cairo
-import pango
+import traceback
 
 def show_error(message, parent):
     """
@@ -170,7 +171,7 @@ def show_and_print_error(error, window):
     ret += 'Message:{0}'.format(str(error))
     show_error(ret, window)
     sys.stderr.write(traceback.format_exc())
-
+    
 def print_error(error):
     """\brief 
     \param error

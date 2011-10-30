@@ -3,14 +3,14 @@
 ## open_ru_loader ##
 
 from common_loader import common_loader
-import sys
-from xml.dom import minidom
 from common_methods import reduce_by_string, print_error, find_in_list
-import hashlib
 from datetime import datetime
 from hashed_dict import hashed_dict
 from math import trunc
 from od_exceptions import od_exception_db_integrity_error, od_exception
+from xml.dom import minidom
+import hashlib
+import sys
 
 class open_ru_loader(common_loader):
     """\brief loader for open.ru
@@ -404,7 +404,6 @@ class report_deal(hashed_dict):
         \param commission
         """
         if float(commission) < 0:
-            print(' >>>>>>> commission is {0}'.format(commission))
             raise od_exception('commission must be >= 0')
         self._commission = float(commission)
         self['commission'] = self._commission
