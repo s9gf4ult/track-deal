@@ -1,11 +1,12 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
+from common_methods import is_null_or_empty, show_error, format_number
 from list_view_sort_control import list_view_sort_control
-import gtk
-from common_methods import *
-import sources
-from od_exceptions import od_exception_config_key_error
 from loader_dialog import loader_dialog
+from od_exceptions import od_exception_config_key_error
+import gtk
+import sources
+import traceback
 
 class deals_tab_controller(object):
     def __init__(self, parent):

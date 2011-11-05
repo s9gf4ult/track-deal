@@ -1,13 +1,11 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from modifying_tab_control import modifying_tab_control
+from common_methods import format_number, gethash, show_and_print_error, \
+    query_yes_no
 from list_view_sort_control import list_view_sort_control
-import gtk
-from common_methods import format_number, gethash, show_and_print_error, query_yes_no
-import sqlite3
-from account_edit_control import account_edit_control
-import gtk_view
 from od_exceptions import od_exception_config_key_error
+import gtk
+import gtk_view
 
 class accounts_tab_controller(object):
     """

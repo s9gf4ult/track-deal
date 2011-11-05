@@ -1,10 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-import traceback
 import shutil
 import gtk
 import os
-from modifying_tab_control import modifying_tab_control
 from common_methods import show_and_print_error,show_error,make_builder,is_null_or_empty
 
 class main_window_controller(object):
@@ -156,7 +154,7 @@ class main_window_controller(object):
     def quit_activate(self, action):
         self.quit()
 
-    def quit(self, ):
+    def quit(self, ): #@ReservedAssignment
         """\brief quit procedure activate
         """
         if self._parent.connected():
