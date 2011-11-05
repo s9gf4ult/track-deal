@@ -2,31 +2,31 @@
 # -*- coding: utf-8 -*-
 ## gtk_view ##
 
-import gtk
-import sqlite3
-from common_view import common_view
-from main_window_controller import main_window_controller
-from sqlite_model import sqlite_model
-from accounts_tab_controller import accounts_tab_controller
 from account_edit_control import account_edit_control
+from account_in_out_controller import account_in_out_controller
+from accounts_tab_controller import accounts_tab_controller
+from chart_tab_controller import chart_tab_controller
+from common_methods import show_and_print_error, is_null_or_empty
+from common_view import common_view
 from currency_edit_control import currency_edit_control
-from deals_tab_controller import deals_tab_controller
 from deal_adder_control import deal_adder_control
 from deal_editor_control import deal_editor_control
 from deals_filter import deals_filter
-from paper_adder import paper_adder
-from positions_tab_controller import positions_tab_controller
-from positions_filter import positions_filter
-from position_adder_control import position_adder_control
-from points_control import points_control
-from report_importer_control import report_importer_control
-from chart_tab_controller import chart_tab_controller
-from common_methods import show_and_print_error, is_null_or_empty
-from od_settings import settings
-from settings_dialog_controller import settings_dialog_controller
+from deals_tab_controller import deals_tab_controller
 from history_dialog_controller import history_dialog_controller
+from main_window_controller import main_window_controller
+from od_settings import settings
+from paper_adder import paper_adder
+from points_control import points_control
+from position_adder_control import position_adder_control
+from positions_filter import positions_filter
+from positions_tab_controller import positions_tab_controller
+from report_importer_control import report_importer_control
+from settings_dialog_controller import settings_dialog_controller
+from sqlite_model import sqlite_model
+import gtk
 import os
-from account_in_out_controller import account_in_out_controller
+import sqlite3
 
 class gtk_view(common_view):
     """

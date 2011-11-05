@@ -1,19 +1,27 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-from datetime_control import *
-from combo_control import *
+from attributes_control import attributes_control
+from combo_select_control import combo_select_control
+from common_methods import make_builder, gethash, show_error, is_null_or_empty
+from datetime_control import datetime_control
 from number_range_control import number_control
-from time_control import *
-from select_control import *
-from combo_select_control import *
-from common_methods import *
-from attributes_control import *
+from select_control import select_control
+from time_control import time_control
+import gtk
 import gtk_view
 import sys
+
 
 class deal_adder_control:
     """\brief control for dialog for adding or editing one deal
     """
+
+    def edit_clicked(self, button):
+        self._parent.paper_adder.update_adder()
+        ret = self._parent.paper_adder.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self.update_adder()
+    
     def __init__(self, parent):
         """
         \param parent \ref gtk_view.gtk_view instance
@@ -48,6 +56,8 @@ class deal_adder_control:
         self.commission.set_lower_limit(0)
         self.commission.set_upper_limit(sys.float_info.max)
         self.attributes = attributes_control(shorter("attributes"), shorter("attr_name"), shorter("attr_val"), shorter("attr_add"), shorter("attr_del"))
+        self.edit_instruments = shorter("edit_instruments")
+        self.edit_instruments.connect("clicked", self.edit_clicked)
 
     def run(self):
         """

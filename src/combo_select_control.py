@@ -1,9 +1,9 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import gtk
-from common_methods import *
+from common_methods import find_in_list, find_in_model
 from hide_control import value_returner_control
+import gtk
 
 class combo_select_control(value_returner_control):
     """
@@ -11,9 +11,9 @@ class combo_select_control(value_returner_control):
 
     Uses combobox to display string and when this string is selected assigned value can be returned
     """
-    def __init__(self, combobox, answers = None, none_answer = None, checkbutton = None):
+    def __init__(self, combobox, answers = None, none_answer = None, checkbutton = None, use_completion = True):
         """
-        \param combobox gtk.ComboBox instance
+        \param combobox gtk.ComboBox instance or gtk.ComboBoxEntry, if second then use_completion can be used
         \param answers list of tuples (value, string), string will be displayed in combobox, value will be returned by \ref get_value
         \param none_answer - value for returning if empty item is selected
         \param checkbutton - gtk.ToggleButton instance
@@ -21,9 +21,11 @@ class combo_select_control(value_returner_control):
         self.checkbutton = checkbutton
         self.combobox = combobox
         self.none_answer = none_answer
-        c = gtk.CellRendererText()
-        self.combobox.pack_start(c)
-        self.combobox.add_attribute(c, "text", 1)
+        if not (use_completion and isinstance(combobox.get_child(), gtk.Entry)):
+            c = gtk.CellRendererText()
+            self.combobox.pack_start(c)
+            self.combobox.add_attribute(c, "text", 1)
+        self.use_completion = use_completion
         if answers != None:
             self.update_answers(answers, none_answer)
 
@@ -38,15 +40,25 @@ class combo_select_control(value_returner_control):
         if len(answers) == 0:
             m = gtk.ListStore(int, str)
             self.combobox.set_model(m)
+            if self.use_completion and isinstance(self.combobox.get_child(), gtk.Entry):
+                self.combobox.get_child().set_completion(None)
             return
         self.none_answer = none_answer
         val = self.get_value()
-        m = gtk.ListStore(isinstance(answers[0][0], basestring) and str or answers[0][0].__class__, str)
+        m = gtk.ListStore(isinstance(answers[0][0], basestring) and str or type(answers[0][0]), str)
         for a in answers:
             m.append(a)
         if none_answer != None:
             m.append((none_answer, ""))
         self.combobox.set_model(m)
+        if self.use_completion and isinstance(self.combobox.get_child(), gtk.Entry):
+            ent = self.combobox.get_child()
+            completion = gtk.EntryCompletion()
+            completion.set_model(m)
+            completion.set_text_column(1)
+            completion.set_inline_completion(True)
+            ent.set_completion(completion)
+            self.combobox.set_entry_text_column(1)
         if val != None:
             fnd = find_in_list(lambda a: a[0] == val, answers)
             if fnd != None:
@@ -76,11 +88,19 @@ class combo_select_control(value_returner_control):
         """
         if self.combobox.get_model() == None:
             return None
-        it = self.combobox.get_active_iter()
-        if it != None:
-            val = self.combobox.get_model().get_value(it, 0)
-            return self.return_value(val)
-        return self.return_value(self.none_answer)
+        if isinstance(self.combobox.get_child(), gtk.Entry): # we have entry in combobox
+            val = self.combobox.get_active_text()
+            model = self.combobox.get_model()
+            fit = find_in_model(model, lambda mod, itt: mod.get_value(itt, 1) == val)
+            if fit == None:
+                return self.return_value(self.none_answer)
+            return self.return_value(model.get_value(fit, 0))
+        else: # we have not entry in combobox
+            it = self.combobox.get_active_iter()
+            if it != None:
+                val = self.combobox.get_model().get_value(it, 0)
+                return self.return_value(val)
+            return self.return_value(self.none_answer)
 
 if __name__ == "__main__":
     w = gtk.Dialog()

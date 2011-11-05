@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 ## paper_adder ##
 
-import gtk_view
-from list_view_sort_control import list_view_sort_control
 from combo_control import combo_control
 from combo_select_control import combo_select_control
-from od_exceptions import od_exception_db_integrity_error
-import sqlite3
+from common_methods import make_builder, show_and_print_error, is_blank, \
+    is_null_or_empty, query_yes_no
+from list_view_sort_control import list_view_sort_control
+from od_exceptions import od_exception_db_integrity_error, \
+    od_exception_config_key_error
 import gtk
-from common_methods import *
+import gtk_view
+import sqlite3
 
 class paper_adder(object):
     """\brief control for dialog adding and editing papers manually
