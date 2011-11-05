@@ -1302,13 +1302,14 @@ class sqlite_model(common_model):
 
 
     def make_groups(self, account_id, paper_id, time_distance = 5):
-        """
+        """make create groups of all deals in account and paper with time distance
+        given in parameters. Excep deals with stored attribute db.no_position is set to 1
         \param account_id 
         \param paper_id 
         \param time_distance max time difference between deals in one group
         """
         gid = None
-        for dd in self._sqlite_connection.execute_select("select d.* from deals d inner join deals_view dd on dd.deal_id = d.id where d.position_id is null and d.account_id = ? and d.paper_id = ? order by d.datetime", [account_id, paper_id]):
+        for dd in self._sqlite_connection.execute_select("select d.* from deals d inner join deals_view dd on dd.deal_id = d.id where d.position_id is null and not exists(select att.* from stored_deal_attributes att where att.deal_id = d.id and att.type = 'db.no_position' and att.value = 1) and d.account_id = ? and d.paper_id = ? order by d.datetime", [account_id, paper_id]):
             if gid == None:
                 gid = self.create_group(dd["id"])
             else:
@@ -1385,6 +1386,7 @@ class sqlite_model(common_model):
         \param account_id 
         \param paper_id 
         \param time_distance  time distance for make_groups
+        \param recalc - if True then recalculate temporary tables
         """
         self.remake_groups(account_id, paper_id, time_distance)
         hashes = []
