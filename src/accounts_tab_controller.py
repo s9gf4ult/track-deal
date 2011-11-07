@@ -28,7 +28,21 @@ statistics_names = ['deals_count',
                     'profit_long_positions_count',
                     'profit_short_positions_count',
                     'loss_long_positions_count',
-                    'loss_short_positions_count']
+                    'loss_short_positions_count',
+                    'long_positions_count',
+                    'short_positions_count',
+                    'long_max_profit',
+                    'long_max_loss',
+                    'long_volume',
+                    'short_max_profit',
+                    'short_max_loss',
+                    'short_volume',
+                    'long_profit_average',
+                    'long_loss_average',
+                    'short_profit_average',
+                    'short_loss_average',
+                    'long_plnet_average',
+                    'short_plnet_average']
                 
 
 class accounts_tab_controller(object):
