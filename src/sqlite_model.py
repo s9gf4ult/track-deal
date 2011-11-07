@@ -1996,6 +1996,15 @@ class sqlite_model(common_model):
                             #('select sum(money_count) from account_in_out where account_id = ?', u'Ввод средств на счет'),
                             ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) >= 0)', u'profit_days_count'),
                             ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) < 0)', u'loss_days_count'),
+                            ('select max(pos_count) from (select sum(pl_net) as pl_net, count(id) as pos_count from positions_view where account_id = ? group by close_date) where pl_net >= 0', 'profit_day_max_positions_count'), 
+                            ('select avg(pos_count) from (select sum(pl_net) as pl_net, count(id) as pos_count from positions_view where account_id = ? group by close_date) where pl_net >= 0', 'profit_day_average_positions_count'), 
+                            ('select max(pos_count) from (select sum(pl_net) as pl_net, count(id) as pos_count from positions_view where account_id = ? group by close_date) where pl_net < 0', 'loss_day_max_positions_count'), 
+                            ('select avg(pos_count) from (select sum(pl_net) as pl_net, count(id) as pos_count from positions_view where account_id = ? group by close_date) where pl_net < 0', 'loss_day_average_positions_count'), 
+                            ('select max(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date) where pl_net >= 0', 'profit_day_max_profit'),
+                            ('select avg(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date) where pl_net >= 0', 'profit_day_average'),
+                            ('select -min(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date) where pl_net < 0', 'loss_day_max_loss'),
+                            ('select -avg(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date) where pl_net < 0', 'loss_day_average'),
+                            
                             ]:
             (val, ) = self._sqlite_connection.execute(query, [aid]).fetchone()
             if val != None:
