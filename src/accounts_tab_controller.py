@@ -7,6 +7,30 @@ from od_exceptions import od_exception_config_key_error
 import gtk
 import gtk_view
 
+statistics_names = ['deals_count',
+                    'profit_positions_count',
+                    'positions_count',
+                    'loss_positions_count',
+                    'profit_positions_profit',
+                    'loss_positions_loss',
+                    'commission',
+                    'profit_average',
+                    'loss_average',
+                    'profit_max_position',
+                    'loss_max_position',
+                    'volume',
+                    'profit_positions_volume',
+                    'loss_positions_volume',
+                    'profit_days_count',
+                    'loss_days_count',
+                    'days_count',
+                    'inactive_days_count',
+                    'profit_long_positions_count',
+                    'profit_short_positions_count',
+                    'loss_long_positions_count',
+                    'loss_short_positions_count']
+                
+
 class accounts_tab_controller(object):
     """
     \~russian
@@ -25,8 +49,8 @@ class accounts_tab_controller(object):
         shorter("modify_account", self.modify_account_activate)
         shorter("set_current_account", self.set_current_account_activate)
         self.accounts_list = list_view_sort_control(self._parent.window.builder.get_object("accounts_view"), [['id', int], (u'Имя', gtk.CellRendererText()), (u'Начальный счет', gtk.CellRendererText()), (u'Текущий счет', gtk.CellRendererText()), (u'Валюта', gtk.CellRendererText())])
-        self.account_list = list_view_sort_control(self._parent.window.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
-        self._parent.window.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
+#        self.account_list = list_view_sort_control(self._parent.window.builder.get_object("account_view"), [(u'Свойство', gtk.CellRendererText()), (u'Значение', gtk.CellRendererText())])
+#        self._parent.window.builder.get_object("accounts_view").connect("row-activated", self.accounts_view_row_activated)
 
     def accounts_view_row_activated(self, tw, path, col):
         """
@@ -40,10 +64,36 @@ class accounts_tab_controller(object):
         self.set_current_account()
         self._parent.call_update_callback()
 
+
+    def flush_statistics(self):
+        for name in statistics_names:
+            obj = self._parent.window.builder.get_object(name)
+            obj.set_text('0')
+    
+    
+    def update_statistics(self):
+        if not self._parent.connected():
+            return
+        cac = self._parent.get_model().get_current_account()
+        if cac == None:
+            self.flush_statistics()
+            return
+        stats = self._parent.get_model().list_account_statistics(cac['id']).fetchall() 
+        statsh = {}
+        for val in stats:
+            statsh[val['parameter_name']] = val['value']
+        for name in statistics_names:
+            if statsh.has_key(name):
+                obj = self._parent.window.builder.get_object(name)
+                obj.set_text(format_number(statsh[name]))
+            else:
+                self._parent.window.builder.get_object(name).set_text('None')
+    
+    
     def update(self):
         self.update_accounts_list()
         self.update_account_label()
-        self.update_account_list()
+        self.update_statistics()
 
     def update_account_label(self):
         if self._parent.connected():

@@ -1909,6 +1909,12 @@ class sqlite_model(common_model):
         """\brief return iterator object returning statistics of given account
         \param aid int or str, if int, then it is id of account, if it is string then this is account name
         \param sort_by - list of order by params
+        \return hash table with fields:\n
+        id\n
+        account id\n
+        parameter_name\n
+        parameter_comment\n
+        value
         """
         account = self.get_account(aid)
         if account == None:
@@ -1954,25 +1960,28 @@ class sqlite_model(common_model):
         """\brief calculate all statistic information for given account
         \param aid - int, id of account
         """
-        for query, name in [('select count(*) from deals where account_id = ? and parent_deal_id is null', 'Количество сделок'),
-                            ('select count(*) from positions where account_id = ?', 'Количество позиций'),
-                            ('select count(*) from positions_view where account_id = ? and pl_net >= 0', 'Количество прибыльных поз.'),
-                            ('select count(*) from positions_view where account_id = ? and pl_net < 0', u'Количество убыточных поз.'),
-                            ('select sum(pl_net) from positions_view where account_id = ? and pl_net >= 0', u'Сумма прибыли по позициям'),
-                            ('select ( -sum(pl_net)) from positions_view where account_id = ? and pl_net < 0', u'Сумма просадки по позициям'),
-                            ('select sum(commission) from deals where account_id = ? and parent_deal_id is null', u'Отданная коммиссиия'),
-                            ('select sum(pl_net) / count(id) from positions_view where account_id = ? and pl_net >= 0', u'Средняя прибыль на позицию'),
-                            ('select sum( -pl_net) / count(id) from positions_view where account_id = ? and pl_net < 0', u'Средняя просадка на позицию'),
-                            ('select sum(pl_net) / count(id) from positions_view where account_id = ?', u'Средняя позиция'),
-                            ('select max(pl_net) from positions_view where account_id = ? and pl_net >= 0', u'Максимальная прибыльная прозиция'),
-                            ('select ( -min(pl_net)) from positions_view where account_id = ? and pl_net < 0', u'Максимальная убыточная позиция'),
-                            ('select sum(volume) from deals_view where account_id = ?', u'Объем по сделкам'),
-                            ('select sum(open_volume) + sum(close_volume) from positions_view where account_id = ? and pl_net >= 0', u'Обем по прибыльным позициям'),
-                            ('select sum(open_volume) + sum(close_volume) from positions_view where account_id = ? and pl_net < 0', u'Объем по убыточным позициям'),
-                            
-                            ('select sum(money_count) from account_in_out where account_id = ?', u'Ввод средств на счет'),
-                            ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) >= 0)', u'Количество прибыльных дней'),
-                            ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) < 0)', u'Количество убыточных дней'),
+        for query, name in [('select count(*) from deals where account_id = ? and parent_deal_id is null', 'deals_count'),
+                            ('select count(*) from positions where account_id = ?', 'positions_count'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net >= 0', 'profit_positions_count'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net < 0', u'loss_positions_count'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net >= 0 and direction = -1', 'profit_long_positions_count'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net >= 0 and direction = 1', 'profit_short_positions_count'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net < 0 and direction = -1', 'loss_long_positions_count'),
+                            ('select count(*) from positions_view where account_id = ? and pl_net < 0 and direction = 1','loss_short_positions_count'), 
+                            ('select sum(pl_net) from positions_view where account_id = ? and pl_net >= 0', u'profit_positions_profit'),
+                            ('select ( -sum(pl_net)) from positions_view where account_id = ? and pl_net < 0', u'loss_positions_loss'),
+                            ('select sum(commission) from deals where account_id = ? and parent_deal_id is null', u'commission'),
+                            ('select sum(pl_net) / count(id) from positions_view where account_id = ? and pl_net >= 0', u'profit_average'),
+                            ('select sum( -pl_net) / count(id) from positions_view where account_id = ? and pl_net < 0', u'loss_average'),
+                            #('select sum(pl_net) / count(id) from positions_view where account_id = ?', u'Средняя позиция'),
+                            ('select max(pl_net) from positions_view where account_id = ? and pl_net >= 0', u'profit_max_position'),
+                            ('select ( -min(pl_net)) from positions_view where account_id = ? and pl_net < 0', u'loss_max_position'),
+                            ('select sum(volume) from deals_view where account_id = ?', u'volume'),
+                            ('select sum(open_volume) + sum(close_volume) from positions_view where account_id = ? and pl_net >= 0', u'profit_positions_volume'),
+                            ('select sum(open_volume) + sum(close_volume) from positions_view where account_id = ? and pl_net < 0', u'loss_positions_volume'),
+                            #('select sum(money_count) from account_in_out where account_id = ?', u'Ввод средств на счет'),
+                            ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) >= 0)', u'profit_days_count'),
+                            ('select count(close_date) from (select close_date from positions_view where account_id = ? group by close_date having sum(pl_net) < 0)', u'loss_days_count'),
                             ]:
             (val, ) = self._sqlite_connection.execute(query, [aid]).fetchone()
             if val != None:
@@ -1980,10 +1989,10 @@ class sqlite_model(common_model):
         (secs, ) = self._sqlite_connection.execute('select max(datetime) - min(datetime) from deals').fetchone()
         if secs != None:
             days = round(secs / (24 * 60 * 60) + 0.5) 
-            self._add_statistic_parameter(aid, u'Количество дней торговли', days)
+            self._add_statistic_parameter(aid, u'days_count', days)
             (active_days, ) = self._sqlite_connection.execute('select count(*) from (select distinct date from deals_view)').fetchone()
             if active_days != None:
-                self._add_statistic_parameter(aid, u'Количество дней без активности', days - active_days)
+                self._add_statistic_parameter(aid, u'inactive_days_count', days - active_days)
         
         
     def set_current_account(self, id_or_name):
