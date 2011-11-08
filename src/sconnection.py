@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 ## sconnection ##
 
-import sqlite3
-from common_methods import *
+from common_methods import any_to_datetime, any_to_date, any_to_time, \
+    any_to_timedelta, argument_value, string_reduce, gethash, reduce_by_string, \
+    is_null_or_empty, format_select_part, format_where_part, order_by_print
 import datetime
+import sqlite3
 import time
 
 class scon_cursor(object):
@@ -28,7 +30,7 @@ class scon_cursor(object):
         try:
             cur = self.__iter__()
             ret = cur.next()
-        except StopIteration as e:
+        except StopIteration:
             ret = None
         return ret
 
@@ -69,10 +71,6 @@ class scon_iter(object):
         for x in xrange(0, len(self._names)):
             ret[self._names[x]] = nextval[x]
         return ret
-
-        
-
-
         
 
 

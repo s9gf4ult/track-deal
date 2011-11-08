@@ -1,7 +1,6 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import gtk
 import datetime
 from hide_control import value_returner_control
 

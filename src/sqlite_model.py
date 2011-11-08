@@ -2004,16 +2004,15 @@ class sqlite_model(common_model):
                             ('select avg(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date) where pl_net >= 0', 'profit_day_average'),
                             ('select -min(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date) where pl_net < 0', 'loss_day_max_loss'),
                             ('select -avg(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date) where pl_net < 0', 'loss_day_average'),
-                            
+                            ('select avg(pl_net) from (select sum(pl_net) as pl_net from positions_view where account_id = ? group by close_date)', 'day_average')
                             ]:
             (val, ) = self._sqlite_connection.execute(query, [aid]).fetchone()
             if val != None:
                 self._add_statistic_parameter(aid, name, val)
-        (secs, ) = self._sqlite_connection.execute('select max(datetime) - min(datetime) from deals').fetchone()
-        if secs != None:
-            days = round(secs / (24 * 60 * 60) + 0.5) 
+        (days, ) = self._sqlite_connection.execute('select count(*) from (select distinct close_date from positions_view where account_id = ?)', [aid]).fetchone()
+        if days != None:
             self._add_statistic_parameter(aid, u'days_count', days)
-            (active_days, ) = self._sqlite_connection.execute('select count(*) from (select distinct date from deals_view)').fetchone()
+            (active_days, ) = self._sqlite_connection.execute('select count(*) from (select distinct date from deals_view where account_id = ?)', [aid]).fetchone()
             if active_days != None:
                 self._add_statistic_parameter(aid, u'inactive_days_count', days - active_days)
         

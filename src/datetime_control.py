@@ -1,13 +1,10 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-import gtk
-import datetime
-import time
+
+from common_methods import no_reaction
 from hide_control import value_returner_control
+import datetime
 import sys
-from common_methods import *
-
-
             
 
 class datetime_control(value_returner_control):
@@ -189,7 +186,8 @@ class datetime_control(value_returner_control):
         self._restore_from_value()
 
 if __name__ == "__main__":
-    from time_control import *
+    from time_control import time_control
+    import gtk
     w = gtk.Dialog()
     p = w.get_content_area()
     cdt = gtk.CheckButton("all")

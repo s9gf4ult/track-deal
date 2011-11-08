@@ -215,11 +215,11 @@ class list_view_sort_control:
         r.extend(row)
         return m.append(r)
 
-    def select_by_iter(self, iter):
-        """\brief select tree element by tree iter
-        \param iter gtk.TreeIter instance
+    def select_by_iter(self, it):
+        """\brief select tree element by tree it
+        \param it gtk.TreeIter instance
         """
-        path = self.get_model().get_path(iter)
+        path = self.get_model().get_path(it)
         self.select_by_path(path)
 
     def select_by_path(self, path):
@@ -252,11 +252,11 @@ class list_view_sort_control:
         if sl.get_mode() == gtk.SELECTION_SINGLE:
             (model, it) = sl.get_selected()
             if it <> None:
-               l = model.get_n_columns()
-               ret = []
-               for x in xrange(self._hiden_model_columns, l):
-                   ret.append(model.get_value(it, x))
-               return ret
+                l = model.get_n_columns()
+                ret = []
+                for x in xrange(self._hiden_model_columns, l):
+                    ret.append(model.get_value(it, x))
+                return ret
             return None
 
     def get_selected_rows(self, ):

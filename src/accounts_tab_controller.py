@@ -50,7 +50,8 @@ statistics_names = ['deals_count',
                     'profit_day_max_profit',
                     'profit_day_average',
                     'loss_day_max_loss',
-                    'loss_day_average']
+                    'loss_day_average',
+                    'day_average']
                 
 
 class accounts_tab_controller(object):

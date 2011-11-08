@@ -1,10 +1,10 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
-
+from combo_control import combo_control
+from common_methods import make_builder, is_blank, is_null_or_empty, show_error
 import gtk
 import sys
-from combo_control import combo_control
-from common_methods import *
+
 
 class account_edit_control:
     """
