@@ -1,18 +1,27 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
+from combo_select_control import combo_select_control
+from common_methods import make_builder, is_null_or_empty, show_error
+from datetime_control import datetime_control
+from datetime_start_end_control import datetime_start_end_control
+from hide_control import hide_control
+from number_range_control import number_control, number_range_control
+from select_control import select_control
+from time_control import time_control
 import gtk
 import sys
-from common_methods import *
-from hide_control import hide_control
-from datetime_start_end_control import *
-from datetime_control import *
-from time_control import *
-from number_range_control import *
-from combo_select_control import combo_select_control
-from select_control import *
 
 class position_adder_control:
+    
+    def edit_instruments_clicked(self, button):
+        if not self._parent.get_model().connected():
+            return
+        self._parent.paper_adder.update_adder()
+        ret = self._parent.paper_adder.run()
+        if ret == gtk.RESPONSE_ACCEPT:
+            self.update_instruments()
+    
     def __init__(self, parent):
         self._parent = parent
         self.builder = make_builder('glade/padder.glade')
@@ -52,6 +61,7 @@ class position_adder_control:
         self.count =  number_control(shorter("padder_count"))
         self.count.set_lower_limit(0)
         self.count.set_upper_limit(sys.maxint)
+        shorter("edit_instruments").connect("clicked", self.edit_instruments_clicked)
 
     def get_data(self, ):
         """\brief return data to insert into model
