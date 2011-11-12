@@ -1,8 +1,8 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 
-import re
 from od_exceptions import od_exception_parameter_error
+import re
 
 class regexp_entry_control(object):
 
@@ -18,6 +18,8 @@ class regexp_entry_control(object):
         return True
     
     def stop_emission(self, entry, new_text, signal_name):
+        if not self._emission_stopping:
+            return
         expression = re.compile(self.get_regexp())
         if not (expression.match(new_text) and self.post_match_hook(entry, new_text)): 
             entry.stop_emission(signal_name)
@@ -31,12 +33,13 @@ class regexp_entry_control(object):
         pos = entry.get_position()
         self.stop_emission(entry, x[:pos] + new_text + x[pos:], 'insert-text')
 
-    def __init__(self, entry, regexp = '^\d{0,4}-\d{0,2}-\d{0,2}$', initial = '0000-00-00'):
+    def __init__(self, entry, regexp = '^\d{0,4}-\d{0,2}-\d{0,2}$', initial = '0001-01-01'):
         if not re.match(regexp, initial):
-            raise od_exception_parameter_error('initial value must match regexp')
+            raise od_exception_parameter_error('value {0} does not match regexp {1}'.format(initial, regexp))
+        self._emission_stopping = True
         self.entry = entry
         self.set_regexp(regexp)
-        self.entry.set_text('0000-00-00')
+        self.entry.set_text(initial)
         self.entry.connect('delete-text', self.text_deleted)
         self.entry.connect('insert-text', self.text_inserted)
         
