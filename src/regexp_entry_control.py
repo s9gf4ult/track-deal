@@ -17,9 +17,15 @@ class regexp_entry_control(object):
         '''
         return True
     
+
+    def pre_stop_emission_hook(self, entry, new_text, signal_name):
+        pass
+    
+    
     def stop_emission(self, entry, new_text, signal_name):
         if not self._emission_stopping:
             return
+        self.pre_stop_emission_hook(entry, new_text, signal_name)
         expression = re.compile(self.get_regexp())
         if not (expression.match(new_text) and self.post_match_hook(entry, new_text)): 
             entry.stop_emission(signal_name)
